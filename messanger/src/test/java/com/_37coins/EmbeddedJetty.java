@@ -31,9 +31,9 @@ public class EmbeddedJetty {
 
         bb.addFilter(GuiceFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
 
-        ServletHolder holder = bb.addServlet(ServletContainer.class, "/*");
+        ServletHolder holder = bb.addServlet(ServletContainer.class, "/test/*");
 
-        bb.addServlet(holder, "/*");
+        bb.addServlet(holder, "/bla/*");
         bb.setContextPath("/");
         bb.setWar(setInitParam(holder));
 

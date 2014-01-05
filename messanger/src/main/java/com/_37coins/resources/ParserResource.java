@@ -209,10 +209,6 @@ public class ParserResource {
 		w.setFeeAccount(data.getGwCn());
 		//check that transaction amount is > fee 
 		//(otherwise tx history gets screwed up)
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
-        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
 		if (w.getAmount().compareTo(w.getFee())<=0){
 			data.setAction(Action.BELOW_FEE);
 			try {

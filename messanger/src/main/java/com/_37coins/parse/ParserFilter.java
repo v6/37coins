@@ -27,7 +27,10 @@ import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -98,7 +101,11 @@ public class ParserFilter implements Filter {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.setContentType("application/json");
 			os = httpResponse.getOutputStream();
-			new ObjectMapper().writeValue(os, dsl);
+			ObjectMapper mapper = new ObjectMapper();
+	        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
+	        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
+			mapper.writeValue(os, dsl);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally{
