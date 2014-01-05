@@ -9,6 +9,7 @@ import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.restnucleus.log.SLF4JTypeListener;
 
 import com._37coins.envaya.QueueClient;
+import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
@@ -39,6 +40,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            	filter("/envayasms/*").through(DirectoryFilter.class);
 	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
+	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
 	            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
 	            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());

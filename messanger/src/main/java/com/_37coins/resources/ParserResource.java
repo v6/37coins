@@ -1,6 +1,10 @@
 package com._37coins.resources;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale.Builder;
 
 import javax.inject.Inject;
 import javax.naming.NameNotFoundException;
@@ -22,8 +26,21 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.joda.money.CurrencyUnit;
+
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
+import com._37coins.web.PriceTick;
+import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
@@ -36,6 +53,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Path(ParserResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -45,9 +65,12 @@ public class ParserResource {
 	final private List<DataSet> responseList;
 	final private InitialLdapContext ctx;
 	final private ObjectMapper mapper;
+	final private Cache cache;
 	
 	@SuppressWarnings("unchecked")
-	@Inject public ParserResource(ServletRequest request) {
+	@Inject public ParserResource(ServletRequest request,
+			Cache cache) {
+		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet ds = (DataSet)httpReq.getAttribute("create");
@@ -233,6 +256,100 @@ public class ParserResource {
 	@POST
 	@Path("/WithdrawalConf")
 	public Response withdrawalConf(){
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Buy")
+	public Response buy(){
+		DataSet data = responseList.get(0);
+		PhoneNumber pn = data.getTo().getPhoneNumber();
+		if (null!=pn){
+			Element e = cache.get("market"+pn.getCountryCode());
+			if (null!=e){
+				List<Seller> sellers = (List<Seller>)e.getObjectValue();
+				data.setPayload(sellers);
+			}
+		}
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Sell")
+	public Response sell(){
+		DataSet data = responseList.get(0);
+		PhoneNumber pn = data.getTo().getPhoneNumber();
+		if (null!=pn){
+			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+			String mobile = phoneUtil.format(pn, PhoneNumberFormat.NATIONAL);
+			Element e = cache.get("market"+pn.getCountryCode());
+			List<Seller> sellers = null;
+			if (null!=e){
+				sellers = (List<Seller>)e.getObjectValue();
+			}else{
+				sellers = new ArrayList<Seller>();
+			}
+			boolean found = false;
+			for (Seller seller: sellers){
+				if (seller.getMobile().equalsIgnoreCase(mobile))
+					found = true;
+			}
+			if (found){
+				responseList.clear();
+			}else{
+				sellers.add(new Seller().setMobile(mobile).setPrice((float)data.getPayload()));
+				cache.put(new Element("market"+pn.getCountryCode(),sellers));
+			}
+		}
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Price")
+	public Response getPrice(){
+		DataSet data = responseList.get(0);
+		PhoneNumber pn = data.getTo().getPhoneNumber();
+		if (null!=pn){
+			List<String> currencies = Arrays.asList(new String[] { "AUD","BRL","CAD","CHF","CNY","CZK","EUR","GBP","ILS","JPY","NOK","NZD","PLN","RUB","SEK","SGD","USD","ZAR" });
+			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+			String cc = phoneUtil.getRegionCodeForCountryCode(pn.getCountryCode());
+			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(cc).build());
+			if (!currencies.contains(cu.getCode())){
+				cu = CurrencyUnit.of("USD");
+			}
+			Element e = cache.get("price"+cu.getCode());
+			if (null==e){
+				PriceTick temp = null;
+				try{
+					HttpClient client = HttpClientBuilder.create().build();
+					HttpGet someHttpGet = new HttpGet("http://api.bitcoinaverage.com/ticker/global/"+cu.getCode());
+					URI uri = new URIBuilder(someHttpGet.getURI()).build();
+					HttpRequestBase request = new HttpGet(uri);
+					HttpResponse response = client.execute(request);
+					temp = new ObjectMapper().readValue(response.getEntity().getContent(), PriceTick.class);
+				}catch(Exception ex){
+					ex.printStackTrace();
+					return null;
+				}
+				e = new Element("price"+cu.getCode(), temp);
+				cache.put(e);
+			}
+			PriceTick pt = (PriceTick)e.getObjectValue();
+			pt.setCurCode(cu.getCode());
+			data.setPayload(pt);
+		}
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {

@@ -1,8 +1,6 @@
 package com._37coins;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +27,8 @@ import com._37coins.persistence.dto.Account;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.ParserResource;
+import com._37coins.web.PriceTick;
+import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -243,6 +243,97 @@ public class RestTest {
 		Assert.assertEquals("821012345678", rv.get(0).getCn());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
+		//get price
+		r = given()
+			.formParam("from", "+821012345678")
+			.formParam("gateway", "+821027423984")
+			.formParam("message", "preis")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
+		PriceTick pt = (PriceTick)rv.get(0).getPayload();
+		Assert.assertEquals("USD", pt.getCurCode());
+		Assert.assertNotNull(pt.getLast());
+		//get price
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "preis")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",2, rv.size());
+		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
+		pt = (PriceTick)rv.get(0).getPayload();
+		Assert.assertEquals("EUR", pt.getCurCode());
+		Assert.assertNotNull(pt.getLast());
+		//test overuse
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "preis")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.OVERUSE, rv.get(0).getAction());
+		//test silence
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "preis")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",0, rv.size());
+		//test buy, no offer
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "buy")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Buy");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.BUY, rv.get(0).getAction());
+		//test sell
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "sell 1.0")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Sell");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.SELL, rv.get(0).getAction());
+		//test buy
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "buy")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Buy");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.BUY, rv.get(0).getAction());
+		List<Seller> sellers = (List<Seller>)rv.get(0).getPayload();
+		Assert.assertEquals("0160 1234567",sellers.get(0).getMobile());
 		//get btc address
 		r = given()
 			.formParam("from", "+821012345678")
@@ -371,7 +462,7 @@ public class RestTest {
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals(Locale.GERMANY, rv.get(1).getLocale());
-		Assert.assertEquals("+491027423984", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("+491602742398", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("491087654321", rv.get(1).getCn());
 		//request money, existing user
 		r = given()

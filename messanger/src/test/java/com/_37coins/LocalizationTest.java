@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com._37coins.bcJsonRpc.pojo.Transaction;
+import com._37coins.web.PriceTick;
+import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
@@ -183,6 +185,41 @@ public class LocalizationTest {
 		System.out.println(s);
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void testPrice() throws IOException, TemplateException {
+		rsp.setAction(Action.PRICE)
+			.setLocale(new Locale("en"))
+			.setPayload(new PriceTick().setLast(new BigDecimal("1000.01")).setCurCode("EUR"));
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void testBuy() throws IOException, TemplateException {
+		List<Seller> sellers = new ArrayList<>();
+		sellers.add(new Seller().setMobile("0160 83572040").setPrice(1.0f));
+		sellers.add(new Seller().setMobile("0160 83572041").setPrice(1.1f));
+		sellers.add(new Seller().setMobile("0160 83572042").setPrice(1.2f));
+		sellers.add(new Seller().setMobile("0160 83572043").setPrice(1.3f));
+		sellers.add(new Seller().setMobile("0160 83572044").setPrice(1.4f));
+		rsp.setAction(Action.BUY)
+			.setLocale(new Locale("en"))
+			.setPayload(sellers);
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void testSell() throws IOException, TemplateException {
+		rsp.setAction(Action.SELL)
+			.setLocale(new Locale("de"));
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 

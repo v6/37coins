@@ -30,7 +30,10 @@ import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 
 @Singleton
 public class InterpreterFilter implements Filter {
@@ -149,7 +152,11 @@ public class InterpreterFilter implements Filter {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.setContentType("application/json");
 			os = httpResponse.getOutputStream();
-			new ObjectMapper().writeValue(os, dsl);
+			ObjectMapper mapper = new ObjectMapper();
+	        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
+	        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
+			mapper.writeValue(os, dsl);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally{

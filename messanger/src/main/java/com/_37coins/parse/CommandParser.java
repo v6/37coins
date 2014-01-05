@@ -23,7 +23,10 @@ public class CommandParser {
 	public static final List<Action> reqCmdList = Arrays.asList(
 			Action.BALANCE,
 			Action.DEPOSIT_REQ,
-			Action.HELP, 
+			Action.HELP,
+			Action.PRICE,
+			Action.BUY,
+			Action.SELL,
 			Action.TRANSACTION, 
 			Action.WITHDRAWAL_CONF, 
 			Action.WITHDRAWAL_REQ, 

@@ -1,0 +1,2 @@
+<#setting locale=locale>
+1 BTC = ${payload.last} ${payload.curCode} 

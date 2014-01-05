@@ -27,6 +27,9 @@ public class DataSet {
 		GW_BALANCE("GwBal"), // request the balance
 		HELP("Help"), 
 		TRANSACTION("Transactions"),
+		PRICE("Price"),
+		BUY("Buy"),
+		SELL("Sell"),
 		//RESPONSES
 		SIGNUP("Signup"), // create a new account
 		RESET("Reset"), // gateway reset password
@@ -38,6 +41,7 @@ public class DataSet {
 		INSUFISSIENT_FUNDS("InsufficientFunds"),
 		BELOW_FEE("BelowFee"), 
 		TIMEOUT("Timeout"),
+		OVERUSE("Overuse"),
 		TX_FAILED("TransactionFailed"),
 		TX_CANCELED("TransactionCanceled");
 
