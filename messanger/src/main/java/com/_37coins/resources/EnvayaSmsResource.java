@@ -45,6 +45,7 @@ import com._37coins.persistence.dto.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.MessageAddress;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
@@ -114,6 +115,7 @@ public class EnvayaSmsResource {
 				throw new WebApplicationException("signature missmatch",
 						javax.ws.rs.core.Response.Status.UNAUTHORIZED);
 			}
+			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 			switch (params.getFirst("action")) {
 				case "status":
 					log.info("id " + params.get("id"));
@@ -121,7 +123,6 @@ public class EnvayaSmsResource {
 					log.info("error " + params.get("error"));
 					break;
 				case "test":
-					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 					try{
 						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
 						if (!pn.hasCountryCode())
@@ -135,10 +136,15 @@ public class EnvayaSmsResource {
 					break;
 				case "incoming":
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
-						log.warn("received message from: " + params.getFirst("from"));
-						log.warn("received from gateway: " + params.getFirst("phone_number"));
-						log.warn("received: " + params.getFirst("message"));
-						parserClient.start(params.getFirst("from"), params.getFirst("phone_number"), params.getFirst("message"), localPort,
+						String from = params.getFirst("from");
+						String gateway = params.getFirst("phone_number");
+						String message = params.getFirst("message");
+						PhoneNumber pn = phoneUtil.parse(gateway, "ZZ");
+						if (pn.getCountryCode()==1){
+							from = fixAmerica(from, gateway,message);
+							message = fixAmerica(message);
+						}
+						parserClient.start(from, gateway, message, localPort,
 						new ParserAction() {
 							@Override
 							public void handleWithdrawal(DataSet data) {
@@ -179,11 +185,37 @@ public class EnvayaSmsResource {
 					}
 				break;
 			}
-		}catch(NamingException | NoSuchAlgorithmException | UnsupportedEncodingException e){
+		}catch(NamingException | NoSuchAlgorithmException | UnsupportedEncodingException | NumberParseException e){
 			e.printStackTrace();
 		}
 		rv.put("events", new ArrayList<String>());
 		return rv;
+	}
+	
+	/*
+	 * get the proxied number
+	 * 
+	 * TODO: fix this crappy code
+	 */
+	static public String fixAmerica(String from, String gateway, String message){
+		if (message.substring(0, 2).equalsIgnoreCase("+1") &&
+				message.contains(" - ")){
+			return message.split(" - ")[0];
+		}
+		return from;
+	}
+	
+	/*
+	 * get the cleaned number
+	 * 
+	 * TODO: fix this crappy code
+	 */
+	static public String fixAmerica(String message){
+		if (message.substring(0, 2).equalsIgnoreCase("+1") &&
+				message.contains(" - ")){
+			return message.substring(message.indexOf(" - ")+3, message.length());
+		}
+		return message;
 	}
 	
 	public static String calculateSignature(String url, MultivaluedMap<String,String> paramMap, String pw) throws NoSuchAlgorithmException, UnsupportedEncodingException{
