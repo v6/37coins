@@ -133,7 +133,6 @@ public class InterpreterFilter implements Filter {
 					.setCn(responseData.getCn())
 					.setLocale(responseData.getLocale())
 					.setService(responseData.getService());
-				responseList.add(create);
 				httpReq.setAttribute("create", create);
 			}catch(NamingException e1){
 				e1.printStackTrace();
