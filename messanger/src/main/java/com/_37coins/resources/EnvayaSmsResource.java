@@ -49,6 +49,9 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.inject.Injector;
 
 import freemarker.template.TemplateException;
@@ -117,11 +120,23 @@ public class EnvayaSmsResource {
 					log.info("status " + params.get("status"));
 					log.info("error " + params.get("error"));
 					break;
+				case "test":
+					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+					try{
+						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
+						if (!pn.hasCountryCode())
+							throw new NumberParseException(NumberParseException.ErrorType.INVALID_COUNTRY_CODE,"");
+					}catch(NumberParseException e){
+						throw new WebApplicationException("phone not valid",
+								javax.ws.rs.core.Response.Status.BAD_REQUEST);
+					}
 				case "amqp_started":
 					log.info("consumerTag " + params.get("consumer_tag"));
 					break;
 				case "incoming":
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
+						log.warn("received message from: " + params.getFirst("from"));
+						log.warn("received from gateway: " + params.getFirst("phone_number"));
 						parserClient.start(params.getFirst("from"), params.getFirst("phone_number"), params.getFirst("message"), localPort,
 						new ParserAction() {
 							@Override
