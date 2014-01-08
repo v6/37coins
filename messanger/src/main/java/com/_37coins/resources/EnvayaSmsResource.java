@@ -137,6 +137,7 @@ public class EnvayaSmsResource {
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
 						log.warn("received message from: " + params.getFirst("from"));
 						log.warn("received from gateway: " + params.getFirst("phone_number"));
+						log.warn("received: " + params.getFirst("message"));
 						parserClient.start(params.getFirst("from"), params.getFirst("phone_number"), params.getFirst("message"), localPort,
 						new ParserAction() {
 							@Override
