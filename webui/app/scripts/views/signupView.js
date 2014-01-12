@@ -56,7 +56,9 @@ function( Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha) {
 			        rules: {
 			            email: {
 							required: true,
-							email: true
+							email: true,
+							onkeyup: false,
+							remote: window.opt.basePath + '/account/check'
 			            },
 			            password1: {
 			                minlength: 6,
@@ -67,6 +69,11 @@ function( Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha) {
 			                equalTo: 'input[name="password1"]'
 			            }
 			        },
+			        messages: {
+						email: {
+							remote: 'Email already taken or not valid.'
+						}
+					},
 			        highlight: function(element) {
 			            $(element).closest('.form-group').addClass('has-error');
 			        },

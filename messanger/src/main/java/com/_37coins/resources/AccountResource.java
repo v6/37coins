@@ -92,24 +92,34 @@ public class AccountResource {
 	 */
 	@GET
 	@Path("/check")
-	public void checkEmail(@QueryParam("email") String email){
+	public String checkEmail(@QueryParam("email") String email){
 		//check it's a valid email
 		if (!AccountPolicy.isValidEmail(email)){
-			throw new WebApplicationException("email not valid", Response.Status.BAD_REQUEST);
+			return "false"; //email not valid
 		}
 		//how to avoid account fishing?
 		Element e = cache.get(getRemoteAddress());
 		if (e!=null){
 			if (e.getHitCount()>50){
-				throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
+				return "false"; //to many requests
 			}
 		}
 		//check it's not taken already
-		try {
-			BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+email+"))", ctx).getAttributes();
+		try{
+			ctx.setRequestControls(null);
+			SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setTimeLimit(1);
+			NamingEnumeration<?> namingEnum = null;
+			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+email+"))", searchControls);
+			if (namingEnum.hasMore()){
+				return "false";//email used
+			}
 		} catch (IllegalStateException | NamingException e1) {
-			throw new WebApplicationException("email used", Response.Status.CONFLICT);
+			e1.printStackTrace();
+			return "false";//ldap error
 		}
+		return "true";
 	}
 	
 	/**
@@ -128,6 +138,21 @@ public class AccountResource {
 		if (null==accountRequest.getEmail() || !AccountPolicy.isValidEmail(accountRequest.getEmail())){
 			log.debug("send a valid email plz :D");
 			throw new WebApplicationException("send a valid email plz :D", Response.Status.EXPECTATION_FAILED);
+		}
+		//check it's not taken already
+		try{
+			ctx.setRequestControls(null);
+			SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setTimeLimit(1);
+			NamingEnumeration<?> namingEnum = null;
+			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+accountRequest.getEmail()+"))", searchControls);
+			if (namingEnum.hasMore()){
+				throw new WebApplicationException("email taken already.", Response.Status.CONFLICT);
+			}
+		} catch (IllegalStateException | NamingException e1) {
+			e1.printStackTrace();
+			throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		if (accountPolicy.isEmailMxLookup()){
 			//check db for active email with same domain
