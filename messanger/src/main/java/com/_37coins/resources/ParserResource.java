@@ -269,25 +269,6 @@ public class ParserResource {
 		DataSet data = responseList.get(0);
 		PhoneNumber pn = data.getTo().getPhoneNumber();
 		if (null!=pn){
-			Element e = cache.get("market"+pn.getCountryCode());
-			if (null!=e){
-				List<Seller> sellers = (List<Seller>)e.getObjectValue();
-				data.setPayload(sellers);
-			}
-		}
-		try {
-			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-		} catch (JsonProcessingException e) {
-			return null;
-		}
-	}
-	
-	@POST
-	@Path("/Sell")
-	public Response sell(){
-		DataSet data = responseList.get(0);
-		PhoneNumber pn = data.getTo().getPhoneNumber();
-		if (null!=pn){
 			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 			String mobile = phoneUtil.format(pn, PhoneNumberFormat.NATIONAL);
 			Element e = cache.get("market"+pn.getCountryCode());
@@ -307,6 +288,25 @@ public class ParserResource {
 			}else{
 				sellers.add(new Seller().setMobile(mobile).setPrice((float)data.getPayload()));
 				cache.put(new Element("market"+pn.getCountryCode(),sellers));
+			}
+		}
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Sell")
+	public Response sell(){
+		DataSet data = responseList.get(0);
+		PhoneNumber pn = data.getTo().getPhoneNumber();
+		if (null!=pn){
+			Element e = cache.get("market"+pn.getCountryCode());
+			if (null!=e){
+				List<Seller> sellers = (List<Seller>)e.getObjectValue();
+				data.setPayload(sellers);
 			}
 		}
 		try {
