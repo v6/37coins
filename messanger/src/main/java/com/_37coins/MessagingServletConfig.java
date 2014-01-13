@@ -67,6 +67,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String basePath;
 	public static String srvcPath;
 	public static String queueUri;
+	public static String amqpUser;
+	public static String amqpPassword;
+	public static String amqpHost;
 	public static String plivoKey;
 	public static String plivoSecret;
 	public static String resPath;
@@ -98,6 +101,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		basePath = System.getProperty("basePath");
 		srvcPath = System.getProperty("srvcPath");
 		queueUri = System.getProperty("queueUri");
+		amqpUser = System.getProperty("amqpUser");
+		amqpPassword = System.getProperty("amqpPassword");
+		amqpHost = System.getProperty("amqpHost");
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");

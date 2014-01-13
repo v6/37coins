@@ -1,6 +1,7 @@
 package com._37coins.resources;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Locale.Builder;
 import java.util.Set;
@@ -24,8 +25,21 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import com._37coins.MessagingServletConfig;
 import com._37coins.web.GatewayUser;
+import com._37coins.web.Queue;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -65,6 +79,7 @@ public class DataResource {
 			while (namingEnum.hasMore()){
 				Attributes atts = ((SearchResult) namingEnum.next()).getAttributes();
 				String mobile = (atts.get("mobile")!=null)?(String)atts.get("mobile").get():null;
+				String cn = (String)atts.get("cn").get();
 				BigDecimal fee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()):null;
 				if (null!=mobile && null!=fee){
 					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
@@ -73,7 +88,8 @@ public class DataResource {
 					GatewayUser gu = new GatewayUser()
 						.setMobile(PhoneNumberUtil.getInstance().format(pn,PhoneNumberFormat.E164))
 						.setFee(fee)
-						.setLocale(new Builder().setRegion(cc).build());
+						.setLocale(new Builder().setRegion(cc).build())
+						.setId(cn);
 					rv.add(gu);
 				}
 			}
@@ -86,8 +102,28 @@ public class DataResource {
 					namingEnum.close();
 				} catch (NamingException e1) {}
 		}
-		cache.put(new Element("gateways", rv));
-		return rv;
+		
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope(MessagingServletConfig.amqpHost, 15672),
+                new UsernamePasswordCredentials(MessagingServletConfig.amqpUser, MessagingServletConfig.amqpPassword));
+		HttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credsProvider).build();
+		Set<GatewayUser> active = new HashSet<GatewayUser>();
+		for(GatewayUser gu: rv){
+			try{
+				HttpGet someHttpGet = new HttpGet("http://"+MessagingServletConfig.amqpHost+":15672/api/queues/%2f/"+gu.getId());
+				URI uri = new URIBuilder(someHttpGet.getURI()).build();
+				HttpRequestBase request = new HttpGet(uri);
+				HttpResponse response = client.execute(request);
+				if (new ObjectMapper().readValue(response.getEntity().getContent(),Queue.class).getConsumers()>0){
+					active.add(gu);
+				}
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}
+		}
+		cache.put(new Element("gateways", active));
+		return active;
 	}
 
 }
