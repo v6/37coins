@@ -1,12 +1,13 @@
 package com._37coins.resources;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.naming.AuthenticationException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
 import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -83,7 +84,7 @@ public class PlivoResource {
 			@PathParam("workflowId") String workflowId,
 			@PathParam("locale") String locale){
 		Response rv = null;
-		DataSet ds = new DataSet().setLocale(new Locale(locale));
+		DataSet ds = new DataSet().setLocaleString(locale);
 		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
 		String pw = null;
 		try{
@@ -97,13 +98,13 @@ public class PlivoResource {
 			//only check pin
 			try {
 				rv = new Response()
-					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)))
+					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
 					.add(new GetDigits()
 						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+cn+"/"+workflowId+"/"+locale)
 						.setNumDigits(NUM_DIGIT)
 						.setRedirect(true)
 						.setSpeak(new Speak()
-							.setText(msgFactory.getText("VoiceEnter",ds))));
+							.setText(msgFactory.getText("VoiceEnter",ds)).setLanguage(locale)));
 			} catch (IOException | TemplateException e) {
 				e.printStackTrace();
 			}
@@ -111,14 +112,14 @@ public class PlivoResource {
 			//create a new pin
 			try {
 				rv = new Response()
-					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)+ msgFactory.getText("VoiceSetup",ds)))
+					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)+ msgFactory.getText("VoiceSetup",ds)).setLanguage(locale))
 					.add(new Wait())
 					.add(new GetDigits()
 						.setAction(MessagingServletConfig.basePath+ "/plivo/create/"+cn+"/"+workflowId+"/"+locale)
 						.setNumDigits(NUM_DIGIT)
 						.setRedirect(true)
 						.setSpeak(new Speak()
-							.setText(msgFactory.getText("VoiceCreate",ds))));
+							.setText(msgFactory.getText("VoiceCreate",ds)).setLanguage(locale)));
 			} catch (IOException | TemplateException e) {
 				e.printStackTrace();
 			}
@@ -169,7 +170,7 @@ public class PlivoResource {
 			try {
 				callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
 				rv = new Response()
-				.add(new Speak().setText(callText))
+				.add(new Speak().setText(callText).setLanguage(locale))
 				.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+dn+"/"+workflowId+"/"+locale));
 			} catch (IOException | TemplateException e) {
 				e.printStackTrace();
@@ -224,6 +225,10 @@ public class PlivoResource {
         try{
 	        if (digits!=null && prev != null && Integer.parseInt(digits)==Integer.parseInt(prev)){
 	        	//set password
+	        	Attributes toModify = new BasicAttributes();
+	        	toModify.put("userPassword", digits);
+	        	ctx.modifyAttributes("cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+	        	//continue transaction
 				Element e = cache.get(workflowId);
 				Transaction tx = (Transaction) e.getObjectValue();
 				tx.setState(State.CONFIRMED);
@@ -239,14 +244,14 @@ public class PlivoResource {
         	try{
 	        	cache.remove(workflowId);
 				rv = new Response()
-					.add(new Speak().setText(msgFactory.getText("VoiceMisMatch",ds)))
+					.add(new Speak().setText(msgFactory.getText("VoiceMisMatch",ds)).setLanguage(locale))
 					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
 	        	e.printStackTrace();
 			} catch (IOException | TemplateException e1) {
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
-        } catch (IOException | TemplateException e) {
+        } catch (IOException | TemplateException| NamingException e) {
         	e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -264,12 +269,8 @@ public class PlivoResource {
 		for (char c : code.toCharArray()){
 			spokenCode+=c+", ";
 		}
-		Locale l = Locale.US;
-		if (locale.contains("de")){
-			l = new Locale("de", "DE");
-		}
 		DataSet ds = new DataSet()
-			.setLocale(l)
+			.setLocaleString(locale)
 			.setPayload(spokenCode);
 		try {
 			String text = msgFactory.getText("VoiceRegister",ds);

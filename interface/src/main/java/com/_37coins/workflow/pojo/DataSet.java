@@ -213,6 +213,7 @@ public class DataSet {
 		return this;
 	}
 
+	@JsonIgnore
 	public ResourceBundleModel getResBundle() {
 		return resBundle;
 	}

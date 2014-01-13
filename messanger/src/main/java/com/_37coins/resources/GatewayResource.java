@@ -2,6 +2,7 @@ package com._37coins.resources;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -41,6 +42,8 @@ import net.sf.ehcache.Element;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import com._37coins.BasicAccessAuthFilter;
+import com._37coins.MessageFactory;
+import com._37coins.MessagingActivitiesImpl;
 import com._37coins.MessagingServletConfig;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.GatewayUser;
@@ -68,14 +71,17 @@ public class GatewayResource {
 	final private InitialLdapContext ctx;
 	final private Cache cache;
 	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
+	final private MessageFactory messageFactory;
 	private final MailServiceClient mailClient;
 	
 	@Inject public GatewayResource(ServletRequest request, 
 			Cache cache, MailServiceClient mailClient,
-			NonTxWorkflowClientExternalFactoryImpl nonTxFactory) {
+			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
+			MessageFactory messageFactory) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.nonTxFactory = nonTxFactory;
+		this.messageFactory = messageFactory;
 		this.mailClient = mailClient;
 		this.cache = cache;
 	}
@@ -151,14 +157,15 @@ public class GatewayResource {
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 			    params.put("from", "+4971150888362");
 			    params.put("to", phoneUtil.format(pn, PhoneNumberFormat.E164));
-			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/register/"+code+"/"+gu.getLocale());
+			    String l = MessagingActivitiesImpl.supportedByPlivo(messageFactory.getLocale(new DataSet().setLocale(gu.getLocale())));
+			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/register/"+code+"/"+l);
 			    params.put("time_limit", "55");
 			    Call response = restAPI.makeCall(params);
 			    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
 			    	throw new PlivoException(response.message);
 			    }
 			    System.out.println("code: "+code);
-			} catch (NumberParseException | IllegalStateException | NamingException | PlivoException e) {
+			} catch (NumberParseException | IllegalStateException | NamingException | PlivoException | MalformedURLException e) {
 				e.printStackTrace();
 				throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 			}

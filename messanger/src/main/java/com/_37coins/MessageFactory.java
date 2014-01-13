@@ -10,6 +10,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
@@ -68,6 +69,11 @@ public class MessageFactory {
 			rb = ResourceBundle.getBundle(rsp.getService(),rsp.getLocale(),loader);
 			rsp.setResBundle(new ResourceBundleModel(rb, new BeansWrapper()));
 		}
+	}
+	
+	public Locale getLocale(DataSet rsp) throws MalformedURLException{
+		prepare(rsp);
+		return rb.getLocale();
 	}
 
 	public String constructHtml(DataSet rsp)
