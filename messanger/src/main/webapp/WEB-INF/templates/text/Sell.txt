@@ -1,2 +1,8 @@
 <#setting locale=locale>
-${resBundle.Sell}
+<#if payload?has_content>
+<#list payload?sort_by("price")?chunk(4)?first as t>
+${t.mobile} ${t.price}  
+</#list> 
+<#else>
+no offers in your country.
+</#if>

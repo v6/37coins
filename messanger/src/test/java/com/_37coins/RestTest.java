@@ -296,23 +296,11 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",0, rv.size());
-		//test buy, no offer
+		//test sell, no offer
 		r = given()
 			.formParam("from", "+491601234567")
 			.formParam("gateway", "+491602742398")
-			.formParam("message", "buy")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Buy");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.BUY, rv.get(0).getAction());
-		//test sell
-		r = given()
-			.formParam("from", "+491601234567")
-			.formParam("gateway", "+491602742398")
-			.formParam("message", "sell 1.0")
+			.formParam("message", "sell")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -324,7 +312,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+491601234567")
 			.formParam("gateway", "+491602742398")
-			.formParam("message", "buy")
+			.formParam("message", "buy 1.0")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -332,6 +320,18 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.BUY, rv.get(0).getAction());
+		//test sell
+		r = given()
+			.formParam("from", "+491601234567")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "sell")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Sell");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.SELL, rv.get(0).getAction());
 		List<Seller> sellers = (List<Seller>)rv.get(0).getPayload();
 		Assert.assertEquals("0160 1234567",sellers.get(0).getMobile());
 		//get btc address

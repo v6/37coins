@@ -192,7 +192,8 @@ public class ParserFilter implements Filter {
 		if (data.getAction() == Action.WITHDRAWAL_CONF) {
 			data.setPayload(ca[1]);
 		}
-		if (data.getAction() == Action.SELL) {
+		if (data.getAction() == Action.BUY 
+				|| data.getAction() == Action.SELL) {
 			float price = 1f;
 			try{
 				price = Float.parseFloat(ca[1]);

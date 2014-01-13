@@ -38,6 +38,13 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void testPlivo() {
+		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(new Locale("de","DE")));
+		Assert.assertEquals("arabic",MessagingActivitiesImpl.supportedByPlivo(new Locale("ar","KW")));
+		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(new Locale("de","LU")));
+	}
+	
+	@Test
 	public void test37coinsCreate() throws IOException, TemplateException {
 		rsp.setAction(Action.SIGNUP);
 		System.out.println("SIGNUP:");
@@ -199,14 +206,14 @@ public class LocalizationTest {
 	}
 	
 	@Test
-	public void testBuy() throws IOException, TemplateException {
+	public void testSell() throws IOException, TemplateException {
 		List<Seller> sellers = new ArrayList<>();
 		sellers.add(new Seller().setMobile("0160 83572040").setPrice(1.0f));
 		sellers.add(new Seller().setMobile("0160 83572041").setPrice(1.1f));
 		sellers.add(new Seller().setMobile("0160 83572042").setPrice(1.2f));
 		sellers.add(new Seller().setMobile("0160 83572043").setPrice(1.3f));
 		sellers.add(new Seller().setMobile("0160 83572044").setPrice(1.4f));
-		rsp.setAction(Action.BUY)
+		rsp.setAction(Action.SELL)
 			.setLocale(new Locale("en"))
 			.setPayload(sellers);
 		String s = ef.constructTxt(rsp);
@@ -215,8 +222,8 @@ public class LocalizationTest {
 	}
 	
 	@Test
-	public void testSell() throws IOException, TemplateException {
-		rsp.setAction(Action.SELL)
+	public void testBuy() throws IOException, TemplateException {
+		rsp.setAction(Action.BUY)
 			.setLocale(new Locale("de"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
