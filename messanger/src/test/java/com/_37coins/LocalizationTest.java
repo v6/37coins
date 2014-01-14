@@ -1,16 +1,23 @@
 package com._37coins;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com._37coins.bcJsonRpc.pojo.Transaction;
+import com._37coins.plivo.Speak;
+import com._37coins.plivo.XmlCharacterHandler;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -18,6 +25,8 @@ import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 
 import freemarker.template.TemplateException;
 
@@ -52,6 +61,21 @@ public class LocalizationTest {
 		Assert.assertEquals("es-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("es","US")));//exact match
 		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("sr","CS")));//map any other
 	}
+	
+    @Test
+    public void testXml() throws IOException, TemplateException, JAXBException{
+    	DataSet ds = new DataSet().setLocaleString("de")
+    			.setPayload(", 1 ,2 ,3 , 4");
+    	String text = ef.getText("VoiceRegister",ds);
+    	com._37coins.plivo.Response rv = new com._37coins.plivo.Response().add(new Speak()
+			.setText(text)
+			.setLanguage(ds.getLocaleString()));
+    	JAXBContext jc = JAXBContext.newInstance(com._37coins.plivo.Response.class);
+        Marshaller marshaller = jc.createMarshaller();
+        marshaller.setProperty(CharacterEscapeHandler.class.getName(),new XmlCharacterHandler());
+        marshaller.marshal(rv, System.out);
+
+    }
 	
 	//matches all locales onto what we have, than makes plivo locale from it
 	@Test

@@ -1,6 +1,7 @@
 package com._37coins.resources;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import javax.inject.Inject;
 import javax.naming.AuthenticationException;
@@ -19,6 +20,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -33,20 +38,21 @@ import com._37coins.persistence.dto.Transaction;
 import com._37coins.persistence.dto.Transaction.State;
 import com._37coins.plivo.GetDigits;
 import com._37coins.plivo.Redirect;
-import com._37coins.plivo.Response;
 import com._37coins.plivo.Speak;
 import com._37coins.plivo.Wait;
+import com._37coins.plivo.XmlCharacterHandler;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
+import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 
 import freemarker.template.TemplateException;
 
 @Path(PlivoResource.PATH)
-@Produces(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_XML)
 public class PlivoResource {
 	public final static String PATH = "/plivo";
 	public static final int NUM_DIGIT = 5;
@@ -61,6 +67,8 @@ public class PlivoResource {
 	
 	final private Cache cache;
 	
+	private Marshaller marshaller;
+	
 	@Inject public PlivoResource(
 			JndiLdapContextFactory jlc,
 			ServletRequest request,
@@ -73,6 +81,15 @@ public class PlivoResource {
 		this.msgFactory = msgFactory;
 		this.cache = cache;
 		this.jlc = jlc;
+		JAXBContext jc;
+		try {
+			jc = JAXBContext.newInstance(com._37coins.plivo.Response.class);
+			this.marshaller = jc.createMarshaller();
+	        marshaller.setProperty(CharacterEscapeHandler.class.getName(),new XmlCharacterHandler());
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	
@@ -83,7 +100,7 @@ public class PlivoResource {
 			@PathParam("cn") String cn,
 			@PathParam("workflowId") String workflowId,
 			@PathParam("locale") String locale){
-		Response rv = null;
+		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
 		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
 		String pw = null;
@@ -97,7 +114,7 @@ public class PlivoResource {
 		if (pw!=null){
 			//only check pin
 			try {
-				rv = new Response()
+				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
 					.add(new GetDigits()
 						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+cn+"/"+workflowId+"/"+locale)
@@ -111,7 +128,7 @@ public class PlivoResource {
 		}else{
 			//create a new pin
 			try {
-				rv = new Response()
+				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)+ msgFactory.getText("VoiceSetup",ds)).setLanguage(locale))
 					.add(new Wait())
 					.add(new GetDigits()
@@ -124,7 +141,13 @@ public class PlivoResource {
 				e.printStackTrace();
 			}
 		}
-		return rv;
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
 	}
 	
 	@POST
@@ -150,7 +173,7 @@ public class PlivoResource {
 			@PathParam("workflowId") String workflowId,
 			@PathParam("locale") String locale,
 			@FormParam("Digits") String digits){
-        Response rv =null;
+		com._37coins.plivo.Response rv =null;
 		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
 		try {
 			InitialLdapContext context = null;
@@ -164,12 +187,12 @@ public class PlivoResource {
 		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
 			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
-			rv = new Response().add(new Speak().setText(msgFactory.getText("VoiceMatch",new DataSet().setLocaleString(locale))));
+			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceMatch",new DataSet().setLocaleString(locale))));
 		} catch (AuthenticationException ae){
 			String callText;
 			try {
 				callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
-				rv = new Response()
+				rv = new com._37coins.plivo.Response()
 				.add(new Speak().setText(callText).setLanguage(locale))
 				.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+dn+"/"+workflowId+"/"+locale));
 			} catch (IOException | TemplateException e) {
@@ -180,7 +203,13 @@ public class PlivoResource {
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return rv;
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
 	}
 	
 	
@@ -192,12 +221,12 @@ public class PlivoResource {
 			@PathParam("locale") String locale,
 			@PathParam("workflowId") String workflowId, 
 			@FormParam("Digits") String digits){
-		Response rv = null;
+		com._37coins.plivo.Response rv = null;
 		try {
 			if (digits.length()!=NUM_DIGIT){
 				throw new IOException();
 			}
-			rv = new Response()
+			rv = new com._37coins.plivo.Response()
 				.add(new GetDigits()
 				.setAction(MessagingServletConfig.basePath+ "/plivo/confirm/"+cn+"/"+workflowId+"/"+locale+"/"+digits)
 				.setNumDigits(5)
@@ -208,7 +237,13 @@ public class PlivoResource {
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return rv;
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
 	}
 	
 	@POST
@@ -220,7 +255,7 @@ public class PlivoResource {
 			@PathParam("workflowId") String workflowId,
 			@PathParam("prev") String prev,
 			@FormParam("Digits") String digits){
-        Response rv =null;
+		com._37coins.plivo.Response rv =null;
         DataSet ds = new DataSet().setLocaleString(locale);
         try{
 	        if (digits!=null && prev != null && Integer.parseInt(digits)==Integer.parseInt(prev)){
@@ -236,14 +271,14 @@ public class PlivoResource {
 			    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 			    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
 				manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
-				rv = new Response().add(new Speak().setText(msgFactory.getText("VoiceSuccess",ds)));        	
+				rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceSuccess",ds)));        	
 	        }else{
 	        	throw new NumberFormatException();
 	        }
         }catch(NumberFormatException e){
         	try{
 	        	cache.remove(workflowId);
-				rv = new Response()
+				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceMisMatch",ds)).setLanguage(locale))
 					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
 	        	e.printStackTrace();
@@ -255,7 +290,13 @@ public class PlivoResource {
         	e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
-        return rv;
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
 	}
 	
 	@POST
@@ -264,7 +305,7 @@ public class PlivoResource {
 	public Response register(
 			@PathParam("code") String code,
 			@PathParam("locale") String locale){
-		Response rv = null;
+		com._37coins.plivo.Response rv = null;
 		String spokenCode = "";
 		for (char c : code.toCharArray()){
 			spokenCode+=c+", ";
@@ -274,12 +315,19 @@ public class PlivoResource {
 			.setPayload(spokenCode);
 		try {
 			String text = msgFactory.getText("VoiceRegister",ds);
-			rv = new Response().add(new Speak()
+			rv = new com._37coins.plivo.Response().add(new Speak()
 				.setText(text)
 				.setLanguage(ds.getLocaleString()));
 		} catch (IOException | TemplateException e) {
 			e.printStackTrace();
 		}
-		return rv;
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
 	}
+	
 }
