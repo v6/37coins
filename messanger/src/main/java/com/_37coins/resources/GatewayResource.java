@@ -43,7 +43,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
-import com._37coins.MessagingActivitiesImpl;
 import com._37coins.MessagingServletConfig;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.GatewayUser;
@@ -157,7 +156,7 @@ public class GatewayResource {
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 			    params.put("from", "+4971150888362");
 			    params.put("to", phoneUtil.format(pn, PhoneNumberFormat.E164));
-			    String l = MessagingActivitiesImpl.supportedByPlivo(messageFactory.getLocale(new DataSet().setLocale(gu.getLocale())));
+			    String l = messageFactory.getLocale(new DataSet().setLocale(gu.getLocale())).toString();
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/register/"+code+"/"+l);
 			    params.put("time_limit", "55");
 			    Call response = restAPI.makeCall(params);

@@ -1,7 +1,6 @@
 package com._37coins;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 
 import freemarker.template.TemplateException;
@@ -49,22 +47,22 @@ public class LocalizationTest {
 	//matches all locales onto what plivo has available
 	@Test
 	public void testPlivo() {
-		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(new Locale("de","DE")));//simple map
-		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(new Locale("de")));//map to closest
-		Assert.assertEquals("ru-RU",MessagingActivitiesImpl.supportedByPlivo(new Locale("ru")));//map to closest
-		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(new Locale("de","LU")));//map to closest
-		Assert.assertEquals("arabic",MessagingActivitiesImpl.supportedByPlivo(new Locale("ar","KW")));//map any arabic
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("en")));//map to closest
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("en","MT")));//map to closest
-		Assert.assertEquals("en-CA",MessagingActivitiesImpl.supportedByPlivo(new Locale("en","CA")));//exact match
-		Assert.assertEquals("es-ES",MessagingActivitiesImpl.supportedByPlivo(new Locale("es","BO")));//map to closest
-		Assert.assertEquals("es-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("es","US")));//exact match
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(new Locale("sr","CS")));//map any other
+		Assert.assertEquals("de-DE",Speak.supportedByPlivo(new Locale("de","DE").toString()));//simple map
+		Assert.assertEquals("de-DE",Speak.supportedByPlivo(new Locale("de").toString()));//map to closest
+		Assert.assertEquals("ru-RU",Speak.supportedByPlivo(new Locale("ru").toString()));//map to closest
+		Assert.assertEquals("de-DE",Speak.supportedByPlivo(new Locale("de","LU").toString()));//map to closest
+		Assert.assertEquals("arabic",Speak.supportedByPlivo(new Locale("ar","KW").toString()));//map any arabic
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(new Locale("en").toString()));//map to closest
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(new Locale("en","MT").toString()));//map to closest
+		Assert.assertEquals("en-CA",Speak.supportedByPlivo(new Locale("en","CA").toString()));//exact match
+		Assert.assertEquals("es-ES",Speak.supportedByPlivo(new Locale("es","BO").toString()));//map to closest
+		Assert.assertEquals("es-US",Speak.supportedByPlivo(new Locale("es","US").toString()));//exact match
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(new Locale("sr","CS").toString()));//map any other
 	}
 	
     @Test
     public void testXml() throws IOException, TemplateException, JAXBException{
-    	DataSet ds = new DataSet().setLocaleString("de")
+    	DataSet ds = new DataSet().setLocaleString("ru")
     			.setPayload(", 1 ,2 ,3 , 4");
     	String text = ef.getText("VoiceRegister",ds);
     	com._37coins.plivo.Response rv = new com._37coins.plivo.Response().add(new Speak()
@@ -81,19 +79,19 @@ public class LocalizationTest {
 	@Test
 	public void testResource() throws IOException, TemplateException{
 		//arrabic, available in plivo, but we don't have
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("ar","KW")))));
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("ar","KW"))).toString()));
 		//korean, we have, but not available in plivo
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("kr","KO")))));
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("kr","KO"))).toString()));
 		//swiss german, neither plivo nor we have, default to german
-		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("de","CH")))));
+		Assert.assertEquals("de-DE",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("de","CH"))).toString()));
 		//general german
-		Assert.assertEquals("de-DE",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("de")))));
+		Assert.assertEquals("de-DE",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("de"))).toString()));
 		//US spanish to default spanish
-		Assert.assertEquals("es-ES",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("es","US")))));
+		Assert.assertEquals("es-ES",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("es","US"))).toString()));
 		//general russian
-		Assert.assertEquals("ru-RU",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("ru","RU")))));
+		Assert.assertEquals("ru-RU",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("ru","RU"))).toString()));
 		//absolutely unknown, default to english
-		Assert.assertEquals("en-US",MessagingActivitiesImpl.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("sr","CS")))));
+		Assert.assertEquals("en-US",Speak.supportedByPlivo(ef.getLocale(new DataSet().setLocale(new Locale("sr","CS"))).toString()));
 	}
 	
 	public void testAvailable() {

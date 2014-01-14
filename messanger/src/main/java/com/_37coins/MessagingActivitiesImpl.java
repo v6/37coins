@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Set;
 
 import javax.naming.NamingException;
@@ -124,8 +123,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 			    params.put("from", rsp.getTo().getGateway());
 			    params.put("to", rsp.getTo().getAddress());
-			    String l = supportedByPlivo(mf.getLocale(rsp));
-			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+rsp.getCn()+"/"+workflowId+"/"+l);
+			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+rsp.getCn()+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
 			    params.put("time_limit", "55");
 			    params.put("ring_timeout", "10");
 			    params.put("machine_detection", "hangup");
@@ -148,54 +146,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		}
 	}
 	
-	//taken from here: http://plivo.com/docs/xml/speak/
-	public static String supportedByPlivo(Locale l){
-		String rv = null;
-		if (l.getLanguage().equalsIgnoreCase("ar")){
-			return "arabic";
-		}
-		if (!l.toString().contains("_")){
-			l = new Locale(l.toString(),l.toString().toUpperCase());
-		}
-	    if (null == rv && (l.equals(new Locale("cs", "CZ")) 
-	    	|| l.equals(new Locale("da", "DK"))
-	    	|| l.equals(new Locale("de", "DE"))
-		    || l.equals(new Locale("el", "GR"))
-		    || l.equals(new Locale("en", "AU"))
-		    || l.equals(new Locale("en", "CA"))
-		    || l.equals(new Locale("en", "GB"))
-		    || l.equals(new Locale("en", "US"))
-		    || l.equals(new Locale("es", "ES"))
-		    || l.equals(new Locale("es", "US"))
-		    || l.equals(new Locale("fi", "FI"))
-		    || l.equals(new Locale("fr", "CA"))
-		    || l.equals(new Locale("fr", "FR"))
-		    || l.equals(new Locale("hu", "HU"))
-		    || l.equals(new Locale("it", "IT"))
-		    || l.equals(new Locale("ja", "JP"))
-		    || l.equals(new Locale("nl", "NL"))
-		    || l.equals(new Locale("pl", "PL"))
-		    || l.equals(new Locale("pt", "BR"))
-		    || l.equals(new Locale("pt", "PT"))
-		    || l.equals(new Locale("ru", "RU"))
-		    || l.equals(new Locale("sv", "SE"))
-		    || l.equals(new Locale("zh", "CN")))){
-	    	rv = l.toString();
-	    }
-	    if (null == rv && l.getLanguage().equalsIgnoreCase("en")){
-	    	rv = new Locale("en","US").toString();
-	    }
-	    if (null == rv && (l.getLanguage().equals("de")
-	    		||l.getLanguage().equals("fr")
-	    		||l.getLanguage().equals("es")
-	    		||l.getLanguage().equals("pt"))){
-	    	rv = new Locale(l.getLanguage(),l.getLanguage().toUpperCase()).toString();
-	    }
-	    if (null == rv){
-	    	rv = new Locale("en","US").toString();
-	    }
-	    return rv.replace('_', '-');
-	}
+
 
 	@Override
 	public DataSet readMessageAddress(DataSet data) {
