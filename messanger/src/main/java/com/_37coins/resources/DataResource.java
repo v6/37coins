@@ -2,8 +2,10 @@ package com._37coins.resources;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale.Builder;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,9 +39,13 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Queue;
+import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
+import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.DataSet.Action;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
@@ -51,12 +58,15 @@ public class DataResource {
 	
 	final private InitialLdapContext ctx;
 	final private Cache cache;
+	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	
 	@Inject public DataResource(ServletRequest request, 
+			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			Cache cache) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.cache = cache;
+		this.nonTxFactory = nonTxFactory;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -125,5 +135,34 @@ public class DataResource {
 		cache.put(new Element("gateways", active));
 		return active;
 	}
+	
+	@GET
+	@Path("/address")
+	public Map<String,String> getAddress(@QueryParam("mobile") String mobile){
+		Map<String,String> rv = new HashMap<>();
+		String cn = null;
+		try {
+			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mobile="+mobile+"))", ctx).getAttributes();
+			cn = (String)atts.get("cn").get();
+		} catch (IllegalStateException | NamingException e1) {
+			e1.printStackTrace();
+			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
+		}
+		Element e = cache.get("address"+cn);
+		Element e2 = cache.get("addressReq"+cn);
+		if (null!=e && !e.isExpired()){
+			rv.put("address", (String)e.getObjectValue());
+			return rv;
+		}
+		if (null==e2 || e2.isExpired()){
+			DataSet data = new DataSet()
+				.setAction(Action.GW_DEPOSIT_REQ)
+				.setCn(cn);
+			nonTxFactory.getClient(data.getAction()+"-"+cn).executeCommand(data);
+			cache.put(new Element("addressReq"+cn, true));
+		}
+		throw new WebApplicationException("cache miss, requested, ask again later.", Response.Status.ACCEPTED);
+	}
+
 
 }

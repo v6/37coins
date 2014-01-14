@@ -26,6 +26,7 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
+import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ActivityExecutionContext;
@@ -79,6 +80,11 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	public void putCache(DataSet rsp) {
 		cache.put(new Element("balance"+rsp.getCn(), ((Withdrawal)rsp.getPayload()).getBalance()));
+	}
+	
+	@Override
+	public void putAddressCache(DataSet rsp) {
+		cache.put(new Element("address"+rsp.getCn(), ((PaymentAddress)rsp.getPayload()).getAddress()));
 	}
 
 	@Override

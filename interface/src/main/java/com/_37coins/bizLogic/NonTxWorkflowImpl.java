@@ -28,6 +28,9 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 				||data.getAction()==Action.SIGNUP){
 			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 			respondDepositReq(bcAddress, data);
+		}else if (data.getAction()==Action.GW_DEPOSIT_REQ){
+			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+			respondDataReq(bcAddress, data);
 		}else if (data.getAction()==Action.BALANCE){
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondBalance(balance, data);
@@ -51,6 +54,14 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			.setAddress(bcAddress.get())
 			.setAddressType(PaymentType.BTC));
 		msgClient.sendMessage(data);
+	}
+	
+	@Asynchronous
+	public void respondDataReq(Promise<String> bcAddress,DataSet data){
+		data.setPayload(new PaymentAddress()
+			.setAddress(bcAddress.get())
+			.setAddressType(PaymentType.BTC));
+		msgClient.putAddressCache(data);
 	}
 	
 	@Asynchronous

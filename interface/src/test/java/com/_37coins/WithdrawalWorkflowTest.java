@@ -159,6 +159,10 @@ public class WithdrawalWorkflowTest {
 			@Override
 			public void putCache(DataSet rsp) {
 			}
+
+			@Override
+			public void putAddressCache(DataSet rsp) {
+			}
 		};
 		
 		workflowTest.addActivitiesImplementation(activities);

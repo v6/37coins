@@ -25,6 +25,7 @@ public class DataSet {
 		WITHDRAWAL_CONF("WithdrawalConf"), // confirm a payment
 		BALANCE("Balance"), // request the balance
 		GW_BALANCE("GwBal"), // request the balance
+		GW_DEPOSIT_REQ("GwDepositReq"), //get addresses for bitfinger
 		HELP("Help"), 
 		TRANSACTION("Transactions"),
 		PRICE("Price"),

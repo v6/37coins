@@ -103,6 +103,9 @@ public class NonTxWorkflowTest {
 			@Override
 			public void putCache(DataSet rsp) {
 			}
+			@Override
+			public void putAddressCache(DataSet rsp) {
+			}
 
         };
         workflowTest.addActivitiesImplementation(activities);

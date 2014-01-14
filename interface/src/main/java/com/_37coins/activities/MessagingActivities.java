@@ -17,6 +17,10 @@ public interface MessagingActivities {
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     void putCache(DataSet rsp);
     
+    @Activity(name = "PutAddressCache", version = "0.1")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    void putAddressCache(DataSet rsp);
+    
     @Activity(name = "SendConfirmation", version = "0.7")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)	
 	Action sendConfirmation(DataSet rsp, String workflowId);
