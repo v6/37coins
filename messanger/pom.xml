@@ -34,6 +34,14 @@
 					<artifactId>jackson-annotations</artifactId>
 					<groupId>com.fasterxml.jackson.core</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -48,6 +56,14 @@
 				<exclusion>
 					<artifactId>guava</artifactId>
 					<groupId>com.google.guava</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -106,6 +122,12 @@
 		    <groupId>org.apache.shiro</groupId>
 		    <artifactId>shiro-core</artifactId>
 		    <version>1.2.2</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<artifactId>slf4j-api</artifactId>
+		    		<groupId>org.slf4j</groupId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 
 		<dependency>
@@ -137,6 +159,12 @@
 		    <groupId>net.sf.ehcache</groupId>
 		    <artifactId>ehcache</artifactId>
 		    <version>2.7.4</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<artifactId>slf4j-api</artifactId>
+		    		<groupId>org.slf4j</groupId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>com.unboundid</groupId>
@@ -157,6 +185,32 @@
 		    <groupId>com.sun.xml.bind</groupId>
 		    <artifactId>jaxb-impl</artifactId>
 		    <version>2.2.8-b01</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+        <dependency>
+            <groupId>me.moocar</groupId>
+            <artifactId>logback-gelf</artifactId>
+            <version>0.10p2</version>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>slf4j-api</artifactId>
+            		<groupId>org.slf4j</groupId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>1.7.5</version>
+		</dependency>
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.0.13</version>
 		</dependency>
 	</dependencies>
 
