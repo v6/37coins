@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.bizLogic.NonTxWorkflowImpl;
 import com._37coins.bizLogic.WithdrawalWorkflowImpl;
+import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
@@ -120,6 +121,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	private WorkflowWorker depositWorker;
 	private WorkflowWorker withdrawalWorker;
 	private JavaPushMailAccount jPM;
+	private ServiceLevelThread slt;
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -141,6 +143,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			jPM.setMessageCounterListerer(i.getInstance(EmailListener.class));
 			jPM.run();
 		}
+		slt = i.getInstance(ServiceLevelThread.class);
+		slt.start();
 		log.info("ServletContextListener started");
 	}
 	
@@ -152,6 +156,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/*").through(CorsFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
             	filter("/envayasms/*").through(DirectoryFilter.class);
+            	filter("/.well-known*").through(DirectoryFilter.class);
             	filter("/api/*").through(DirectoryFilter.class);
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
@@ -304,10 +309,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		try {
 			activityWorker.shutdownAndAwaitTermination(1, TimeUnit.MINUTES);
             System.out.println("Activity Worker Exited.");
-            
 		}catch (InterruptedException e) {
             e.printStackTrace();
         }
+		slt.kill();
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");
 	}
