@@ -127,11 +127,17 @@ public class ServiceLevelThread extends Thread {
 					if (new ObjectMapper().readValue(
 							response.getEntity().getContent(), Queue.class)
 							.getConsumers() > 0) {
-						MDC.put("nodeName", gu.getId());
+						MDC.put("hostName", gu.getId());
+						MDC.put("mobile", gu.getMobile());
+						MDC.put("event", "check");
+						MDC.put("Online", "true");
 						log.debug("{} online", gu.getId());
 						active.add(gu);
 					} else {
-						MDC.put("nodeName", gu.getId());
+						MDC.put("hostName", gu.getId());
+						MDC.put("mobile", gu.getMobile());
+						MDC.put("event", "check");
+						MDC.put("Online", "false");
 						log.debug("{} offline", gu.getId());
 					}
 				} catch (Exception ex) {

@@ -212,6 +212,11 @@
 		    <artifactId>logback-classic</artifactId>
 		    <version>1.0.13</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.elasticsearch</groupId>
+		    <artifactId>elasticsearch</artifactId>
+		    <version>1.0.0.RC1</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>

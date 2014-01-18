@@ -36,6 +36,7 @@ import net.sf.ehcache.Element;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com._37coins.MessagingServletConfig;
 import com._37coins.envaya.QueueClient;
@@ -45,7 +46,6 @@ import com._37coins.persistence.dto.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.MessageAddress;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
@@ -117,12 +117,22 @@ public class EnvayaSmsResource {
 			}
 			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 			switch (params.getFirst("action")) {
-				case "status":
-					log.info("id " + params.get("id"));
-					log.info("status " + params.get("status"));
-					log.info("error " + params.get("error"));
+				case "send_status":
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					MDC.put("msgId", params.getFirst("id"));
+					MDC.put("status", params.getFirst("status"));
+					MDC.put("error", params.getFirst("error"));
+					log.info("send status received");
 					break;
 				case "test":
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					log.info("test received");
 					try{
 						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
 						if (!pn.hasCountryCode())
@@ -132,9 +142,35 @@ public class EnvayaSmsResource {
 								javax.ws.rs.core.Response.Status.BAD_REQUEST);
 					}
 				case "amqp_started":
-					log.info("consumerTag " + params.get("consumer_tag"));
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					MDC.put("consumer_tag", params.getFirst("consumer_tag"));
+					log.info("amqp started received");
+					break;
+				case "device_status":
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					MDC.put("status", params.getFirst("status"));
+					log.info("device status received");
+					break;
+				case "forward_send":
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					log.info("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
 					break;
 				case "incoming":
+					MDC.put("hostName", cn);
+					MDC.put("mobile", params.getFirst("phone_number"));
+					MDC.put("event", params.getFirst("action"));
+					MDC.put("log", params.getFirst("log"));
+					MDC.put("message_type", params.getFirst("message_type"));
+					log.info("incoming message {} received from {} via {} at {}",params.getFirst("message"),params.getFirst("from"),params.getFirst("message_type"),params.getFirst("timestamp"));
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
 						String from = params.getFirst("from");
 						String gateway = params.getFirst("phone_number");

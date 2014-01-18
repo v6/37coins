@@ -16,6 +16,8 @@ import net.sf.ehcache.Element;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.activities.MessagingActivities;
 import com._37coins.envaya.QueueClient;
@@ -42,6 +44,7 @@ import com.plivo.helper.api.response.call.Call;
 import com.plivo.helper.exception.PlivoException;
 
 public class MessagingActivitiesImpl implements MessagingActivities {
+	public static Logger log = LoggerFactory.getLogger(MessagingActivitiesImpl.class);
 	ActivityExecutionContextProvider contextProvider = new ActivityExecutionContextProviderImpl();
 	
 	@Inject
