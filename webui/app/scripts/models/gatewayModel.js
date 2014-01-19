@@ -14,6 +14,7 @@ function( Backbone) {
 				var lc = response.locale.substring(1,3).toLowerCase();
 				response.mobile = window.formatLocal(lc,response.mobile);
 				response.locale = lc;
+				response.resPath = window.opt.resPath;
 				response.lName = window.countryCodeToName(lc);
 				response.fee = (response.fee * 1000).toFixed(2);
             }
