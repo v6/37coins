@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import me.moocar.logbackgelf.GelfAppender;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -12,14 +13,24 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.spi.AppenderAttachable;
 
 import com._37coins.bizLogic.NonTxWorkflowImpl;
 import com._37coins.bizLogic.WithdrawalWorkflowImpl;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
+import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
@@ -48,8 +59,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
-
-
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -80,6 +89,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String ldapBaseDn;
 	public static String captchaPubKey;
 	public static String captchaSecKey;
+	public static String elasticSearchHost;
 	public static int localPort;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
@@ -114,6 +124,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		ldapBaseDn = System.getProperty("ldapBaseDn");
 		captchaPubKey = System.getProperty("captchaPubKey");
 		captchaSecKey = System.getProperty("captchaSecKey");
+		elasticSearchHost = System.getProperty("elasticSearchHost");
 	}
 	
 	private ServletContext servletContext;
@@ -126,6 +137,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		servletContext = servletContextEvent.getServletContext();
+		prepareLogging();
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 		activityWorker = i.getInstance(ActivityWorker.class);
@@ -148,6 +160,27 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		log.info("ServletContextListener started");
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void prepareLogging(){
+	    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+	    Logger logger = lc.getLogger (Logger.ROOT_LOGGER_NAME);
+	    AppenderAttachable<ILoggingEvent> appenderAttachable = 
+	    		   (AppenderAttachable<ILoggingEvent>) logger;
+	    appenderAttachable.detachAndStopAllAppenders();
+	    GelfAppender ga = new GelfAppender();
+	    ga.setGraylog2ServerHost(elasticSearchHost);
+	    ga.setGraylog2ServerPort(12201);
+	    ga.setGraylog2ServerVersion("0.9.6");
+	    ga.setChunkThreshold(1000);
+	    ga.setUseLoggerName(true);
+	    ga.setMessagePattern("%m%rEx");
+	    ga.setShortMessagePattern("%.-100(%m%rEx)");
+		ga.setIncludeFullMDC(true);
+		ga.setContext(lc);
+		ga.start();
+		appenderAttachable.addAppender(ga);
+	}
+	
     @Override
     protected Injector getInjector(){
         injector = Guice.createInjector(new ServletModule(){
@@ -160,10 +193,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/api/*").through(DirectoryFilter.class);
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
+            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
             	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	filter("/account*").through(DirectoryFilter.class); //allow directory access
             	filter("/data/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class).annotatedWith(Names.named("activityImpl")).to(MessagingActivitiesImpl.class);
         		bind(ParserClient.class);
@@ -284,6 +318,15 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				jlc.setSystemPassword(ldapPw);
 				return jlc;
 			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public Client provideElasticSearch(){
+				Settings settings = ImmutableSettings.settingsBuilder()
+						.put("cluster.name", "graylog2").build();
+				return new TransportClient(settings)
+						.addTransportAddress(new InetSocketTransportAddress(
+								MessagingServletConfig.elasticSearchHost, 9300));
+			}
         
         	@Provides @Singleton @SuppressWarnings("unused")
         	public Cache provideCache(){
@@ -312,7 +355,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		}catch (InterruptedException e) {
             e.printStackTrace();
         }
-		slt.kill();
+		Client elasticSearch = injector.getInstance(Client.class);
+		elasticSearch.close();
+		if (null!=slt){
+			slt.kill();
+		}
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");
 	}
