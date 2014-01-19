@@ -37,7 +37,7 @@ public class LocalizationTest {
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("en"))
+		.setLocale(new Locale("fr"))
 		.setPayload(new PaymentAddress()
 			.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
 		.setTo(new MessageAddress()
@@ -196,8 +196,9 @@ public class LocalizationTest {
 				.setAmount(new BigDecimal("1000.051"))
 				.setBalance(new BigDecimal("0.5123456789")));
 		String s = ef.constructTxt(rsp);
-		Assert.assertTrue(s.contains("1,000.051"));
-		Assert.assertTrue(s.contains("0.51234568"));
+		System.out.println(s);
+		Assert.assertTrue(s.contains("1 000,051"));
+		Assert.assertTrue(s.contains("0,51234568"));
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
