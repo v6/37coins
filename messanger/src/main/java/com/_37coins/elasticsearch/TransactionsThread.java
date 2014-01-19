@@ -12,6 +12,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 
+import com._37coins.workflow.pojo.DataSet;
+
 public class TransactionsThread extends Thread {
 
 	final Cache cache;
@@ -33,7 +35,7 @@ public class TransactionsThread extends Thread {
 			QueryBuilder hostQuery = QueryBuilders.matchQuery("_hostName", cn);
 			// event type query
 			QueryBuilder eventQuery = QueryBuilders.matchQuery("_event",
-					"transaction");
+					DataSet.Action.WITHDRAWAL_REQ);
 			// date range query
 			long DAY_IN_MS = 1000 * 60 * 60 * 24;
 			RangeQueryBuilder dateRangeQuery = QueryBuilders

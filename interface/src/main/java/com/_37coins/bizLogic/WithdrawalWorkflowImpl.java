@@ -5,6 +5,11 @@ import java.util.Currency;
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import com._37coins.MessagingServletConfig;
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
@@ -30,6 +35,7 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable;
 import com.amazonaws.services.simpleworkflow.flow.core.TryCatch;
 
 public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
+	public static Logger log = LoggerFactory.getLogger(WithdrawalWorkflowImpl.class);
 	DecisionContextProvider contextProvider = new DecisionContextProviderImpl();
     BitcoindActivitiesClient bcdClient = new BitcoindActivitiesClientImpl();
     MessagingActivitiesClient msgClient = new MessagingActivitiesClientImpl();
@@ -123,14 +129,24 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 				if (w.getPayDest().getAddressType()==PaymentType.BTC){
 					toAddress = w.getPayDest().getAddress();
 				}
+				String workflowId = contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId();
 	    		Promise<String> tx = bcdClient.sendTransaction(
 	    				w.getAmount(), 
 	    				w.getFee(), 
 	    				rsp.get().getCn(), 
 	    				toId, 
 	    				toAddress,
-	    				contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId(),
+	    				workflowId,
 	    				w.getComment());
+				MDC.put("hostName", rsp.get().getGwCn());
+				MDC.put("event", rsp.get().getAction().getText());
+				MDC.put("amount", w.getAmount().toString());
+				MDC.put("fee", w.getFee().toString());
+				MDC.put("comment", w.getComment());
+				MDC.put("sender", rsp.get().getCn());
+				MDC.put("recepient", toAddress + toId);
+				MDC.put("workflowId", workflowId);
+				log.info("withdrawal request processed");
 	    		afterSend(tx, rsp.get());
             }
             @Override
