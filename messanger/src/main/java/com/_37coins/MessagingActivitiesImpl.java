@@ -126,7 +126,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			Attributes atts = ctx.getAttributes("cn="+rsp.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
 			boolean pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			
-			if (pwLocked){
+			if (!pwLocked){
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
@@ -143,7 +143,9 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			    	throw new PlivoException(response.message);
 			    }
 			}else{
-				
+		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+		        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+		        manualCompletionClient.complete(Action.ACCOUNT_BLOCKED);				
 			}
 		    return null;
 		} catch (PlivoException | NamingException | MalformedURLException e) {
