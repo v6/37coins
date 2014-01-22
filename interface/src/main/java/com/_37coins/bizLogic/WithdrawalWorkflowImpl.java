@@ -138,15 +138,16 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	    				workflowId,
 	    				w.getComment());
 				MDC.put("hostName", rsp.get().getGwCn());
-				MDC.put("event", rsp.get().getAction().getText());
+				MDC.put("event", Action.WITHDRAWAL_REQ.toString());
 				MDC.put("amount", w.getAmount().toString());
 				MDC.put("fee", w.getFee().toString());
 				MDC.put("comment", w.getComment());
 				MDC.put("sender", rsp.get().getCn());
 				MDC.put("recepient", toAddress + toId);
 				MDC.put("workflowId", workflowId);
-				log.info("withdrawal request processed");
-	    		afterSend(tx, rsp.get());
+				log.debug("withdrawal request processed");
+				MDC.clear();
+	    		sendFee(tx, rsp.get());
             }
             @Override
             protected void doCatch(Throwable e) throws Throwable {
@@ -159,17 +160,27 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     }
     
     @Asynchronous
-    public void afterSend(Promise<String> txId, DataSet data) throws Throwable{
+    public void sendFee(Promise<String> txId, DataSet data) throws Throwable{
     	Withdrawal w = (Withdrawal)data.getPayload();
-    	bcdClient.sendTransaction(
-    			w.getFee(), 
-    			BigDecimal.ZERO, 
-    			data.getCn(), 
-    			w.getFeeAccount(), 
-    			null,
-    			contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId(),
-    			"");
+    	if (w.getFee().compareTo(BigDecimal.ZERO)>0){
+	    	bcdClient.sendTransaction(
+	    			w.getFee(), 
+	    			BigDecimal.ZERO, 
+	    			data.getCn(), 
+	    			w.getFeeAccount(), 
+	    			null,
+	    			contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId(),
+	    			"");
+    	}
+    	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
     	w.setTxId(txId.get());
+    	afterSend(balance, data);
+    }
+    
+    @Asynchronous
+    public void afterSend(Promise<BigDecimal> newBal, DataSet data) throws Throwable{
+    	Withdrawal w = (Withdrawal)data.getPayload();
+    	w.setBalance(newBal.get());
 		data.setAction(Action.WITHDRAWAL_CONF);
     	msgClient.sendMessage(data);
     	if (w.getPayDest().getAddressType()==PaymentType.ACCOUNT){
@@ -178,6 +189,8 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     			.setAction(Action.DEPOSIT_CONF)
     			.setCn(w.getPayDest().getAddress())
     			.setPayload(new Withdrawal()
+    				.setMsgDest(data.getTo())
+    				.setComment(w.getComment())
     				.setAmount(w.getAmount())
     				.setTxId(context.getWorkflowContext().getWorkflowExecution().getRunId()));
     		Promise<Void> rv = factory.getClient().executeCommand(rsp2);
