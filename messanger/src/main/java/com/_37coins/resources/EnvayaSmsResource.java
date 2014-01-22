@@ -125,14 +125,16 @@ public class EnvayaSmsResource {
 					MDC.put("msgId", params.getFirst("id"));
 					MDC.put("status", params.getFirst("status"));
 					MDC.put("error", params.getFirst("error"));
-					log.info("send status received");
+					log.debug("send status received");
+					MDC.clear();
 					break;
 				case "test":
 					MDC.put("hostName", cn);
 					MDC.put("mobile", params.getFirst("phone_number"));
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
-					log.info("test received");
+					log.debug("test received");
+					MDC.clear();
 					try{
 						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
 						if (!pn.hasCountryCode())
@@ -147,7 +149,8 @@ public class EnvayaSmsResource {
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
 					MDC.put("consumer_tag", params.getFirst("consumer_tag"));
-					log.info("amqp started received");
+					log.debug("amqp started received");
+					MDC.clear();
 					break;
 				case "device_status":
 					MDC.put("hostName", cn);
@@ -155,14 +158,16 @@ public class EnvayaSmsResource {
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
 					MDC.put("status", params.getFirst("status"));
-					log.info("device status received");
+					log.debug("device status received");
+					MDC.clear();
 					break;
 				case "forward_send":
 					MDC.put("hostName", cn);
 					MDC.put("mobile", params.getFirst("phone_number"));
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
-					log.info("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
+					log.debug("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
+					MDC.clear();
 					break;
 				case "incoming":
 					MDC.put("hostName", cn);
@@ -170,7 +175,8 @@ public class EnvayaSmsResource {
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
 					MDC.put("message_type", params.getFirst("message_type"));
-					log.info("incoming message {} received from {} via {} at {}",params.getFirst("message"),params.getFirst("from"),params.getFirst("message_type"),params.getFirst("timestamp"));
+					log.debug("incoming message {} received from {} via {} at {}",params.getFirst("message"),params.getFirst("from"),params.getFirst("message_type"),params.getFirst("timestamp"));
+					MDC.clear();
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
 						String from = params.getFirst("from");
 						String gateway = params.getFirst("phone_number");

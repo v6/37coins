@@ -46,7 +46,8 @@ public class QueueClient {
 		MDC.put("event", "outgoing");
 		MDC.put("message_type", "sms");
 		MDC.put("message_action", rsp.getAction().getText());
-		log.info("sending outgoing message");
+		log.debug("sending outgoing message");
+		MDC.clear();
 		if (null==connection || !connection.isOpen()){
 			connect(uri, exchangeName);
 		}

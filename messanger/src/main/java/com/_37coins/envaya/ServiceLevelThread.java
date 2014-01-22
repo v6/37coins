@@ -132,6 +132,7 @@ public class ServiceLevelThread extends Thread {
 						MDC.put("event", "check");
 						MDC.put("Online", "true");
 						log.debug("{} online", gu.getId());
+						MDC.clear();
 						active.add(gu);
 					} else {
 						MDC.put("hostName", gu.getId());
@@ -139,6 +140,7 @@ public class ServiceLevelThread extends Thread {
 						MDC.put("event", "check");
 						MDC.put("Online", "false");
 						log.debug("{} offline", gu.getId());
+						MDC.clear();
 					}
 				} catch (Exception ex) {
 					log.error("AMQP connection failed", ex);
