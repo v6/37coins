@@ -1,2 +1,2 @@
 <#setting locale=locale>
-${resBundle("DepositReqSms",payload.address)}
+${resBundle("DepositReq",payload.address)}
