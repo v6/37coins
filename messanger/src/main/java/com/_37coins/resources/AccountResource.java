@@ -1,7 +1,14 @@
 package com._37coins.resources;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 import javax.mail.MessagingException;
@@ -14,9 +21,11 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -42,6 +51,9 @@ import com._37coins.web.AccountRequest;
 import com._37coins.web.PasswordRequest;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import freemarker.template.TemplateException;
 
@@ -120,6 +132,87 @@ public class AccountResource {
 			return "false";//ldap error
 		}
 		return "true";
+	}
+	
+	
+	@DELETE
+	@Path("/gateways")
+	public void deleteGateways(){
+		NamingEnumeration<?> namingEnum = null;
+		try {
+			ctx.setRequestControls(null);
+			SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setTimeLimit(1000);
+			searchControls.setReturningAttributes(new String[]{"mail","mobile","createTimestamp","cn"});
+			namingEnum = ctx.search("ou=gateways,"
+					+ MessagingServletConfig.ldapBaseDn,
+					"(objectClass=person)", searchControls);
+			
+			while (namingEnum.hasMore()) {
+				Attributes atts = ((SearchResult) namingEnum.next())
+						.getAttributes();
+				String cn = (String) atts.get("cn").get();
+				//ignore system accounts
+				if (cn.length()<15)
+					continue;
+				String mail = (null!=atts.get("mail"))?(String) atts.get("mail").get():null;
+				String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
+				String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				Date createdDate = sdf.parse(createTimestamp);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date());
+				cal.add(Calendar.DAY_OF_YEAR,-7);
+				//ignore all new accounts
+				if (createdDate.after(cal.getTime()))
+					continue;
+				if (null==mobile){
+					//phone never verified
+					deleteAccounts(cn);
+					sendDeleteEmail(mail);
+				}else{
+					NamingEnumeration<?> children = ctx.search("ou=accounts,"
+							+ MessagingServletConfig.ldapBaseDn,
+							"(&(objectClass=person)(manager=cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn+"))", searchControls);
+					if (!children.hasMore()){
+						deleteAccounts(cn);
+						sendDeleteEmail(mail);
+					}
+					children.close();
+				}
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			if (null!=namingEnum){
+				try {
+					namingEnum.close();
+				} catch (NamingException e) {
+				}
+			}
+		}
+	}
+	
+	private void deleteAccounts(String cn) throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException, NamingException, IOException{
+		ConnectionFactory factory = new ConnectionFactory();
+		Connection conn = null;
+		Channel channel = null;
+		factory.setUri(MessagingServletConfig.queueUri);
+		conn = factory.newConnection();
+		channel = conn.createChannel();
+		try{
+			channel.queueDelete(cn);
+		}catch(Exception e){
+		}finally{
+			try{
+			channel.close();
+			conn.close();
+			}catch(Exception ex){}
+		}
+		ctx.unbind("cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
 	}
 	
 	/**
@@ -306,6 +399,18 @@ public class AccountResource {
 			.setLocale(Locale.ENGLISH)
 			.setAction(Action.RESET)
 			.setPayload(MessagingServletConfig.basePath+"#confReset/"+token);
+		mailClient.send(
+			msgFactory.constructSubject(ds), 
+			email,
+			MessagingServletConfig.senderMail, 
+			msgFactory.constructTxt(ds),
+			msgFactory.constructHtml(ds));
+	}
+	
+	private void sendDeleteEmail(String email) throws AddressException, MessagingException, IOException, TemplateException{
+		DataSet ds = new DataSet()
+			.setLocale(Locale.ENGLISH)
+			.setAction(Action.ACCOUNT_DELETE);
 		mailClient.send(
 			msgFactory.constructSubject(ds), 
 			email,

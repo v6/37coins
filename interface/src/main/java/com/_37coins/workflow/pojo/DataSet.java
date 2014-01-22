@@ -39,6 +39,7 @@ public class DataSet {
 		FORMAT_ERROR("FormatError"),
 		UNKNOWN_COMMAND("UnknownCommand"),
 		ACCOUNT_BLOCKED("AccountBlocked"),
+		ACCOUNT_DELETE("AccountDeleted"),
 		INSUFISSIENT_FUNDS("InsufficientFunds"),
 		BELOW_FEE("BelowFee"), 
 		TIMEOUT("Timeout"),
