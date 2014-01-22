@@ -1,24 +1,23 @@
 <#setting locale=locale>
-
 <#if payload.msgDest??>
-	<#assign from = payload.msgDest.address>
+<#assign from = payload.msgDest.address>
 </#if>
 <#if payload.comment??>	
-	<#if payload.comment?length &lt; 20>
-		<#assign comment = payload.comment>
-	<#else>
-		<#assign comment = payload.comment?substring(0,18)+"..">
-	</#if>
+<#if payload.comment?length &lt; 20>
+<#assign comment = payload.comment>
+<#else>
+<#assign comment = payload.comment?substring(0,18)+"..">
+</#if>
 </#if>
 <#if from??>
-	<#if comment??>	
-			${resBundle("DepositConfSndrMsg",payload.amount?string("#,##0.########"),from,comment)}
-	<#else>
-		${resBundle("DepositConfSndr",payload.amount?string("#,##0.########"),from)}
-	</#if>		
+<#if comment??>	
+${resBundle("DepositConfSndrMsg",payload.amount?string("#,##0.########"),from,comment)}
 <#else>
-	${resBundle("DepositConf",payload.amount?string("#,##0.########"))}
+${resBundle("DepositConfSndr",payload.amount?string("#,##0.########"),from)}
+</#if>		
+<#else>
+${resBundle("DepositConf",payload.amount?string("#,##0.########"))}
 </#if>
 <#if payload.balance??>
-	${resBundle("Balance",payload.balance?string("#,##0.########"))}
+${resBundle("Balance",payload.balance?string("#,##0.########"))}
 </#if>
