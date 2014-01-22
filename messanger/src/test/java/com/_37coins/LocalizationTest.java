@@ -130,15 +130,43 @@ public class LocalizationTest {
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
+	
+	@Test
+	public void test37coinsReiceiveComment() throws IOException, TemplateException {
+		rsp.setAction(Action.DEPOSIT_CONF)
+			.setPayload(new Withdrawal()
+				.setComment("hallo saonuhsanotheusaotehusaouh")
+				.setMsgDest(new MessageAddress().setAddress("other@37coins.com"))
+				.setBalance(new BigDecimal("1.25"))
+				.setAmount(new BigDecimal("0.05")));
+		System.out.println("DEPOSIT CONFIRM:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
 		
 	@Test
 	public void test37coinsReiceive() throws IOException, TemplateException {
 		rsp.setAction(Action.DEPOSIT_CONF)
 			.setPayload(new Withdrawal()
+				.setMsgDest(new MessageAddress().setAddress("other@37coins.com"))
+				.setBalance(new BigDecimal("1.25"))
 				.setAmount(new BigDecimal("0.05")));
-		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
-		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsReiceiveNoSender() throws IOException, TemplateException {
+		rsp.setAction(Action.DEPOSIT_CONF)
+			.setPayload(new Withdrawal()
+				.setBalance(new BigDecimal("1.25"))
+				.setAmount(new BigDecimal("0.05")));
+		String s = ef.constructTxt(rsp);
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -163,6 +191,7 @@ public class LocalizationTest {
 	public void test37coinsWithdrawalReq() throws IOException, TemplateException {
 		rsp.setAction(Action.WITHDRAWAL_CONF)
 			.setPayload(new Withdrawal()
+				.setBalance(new BigDecimal("0.23"))
 				.setAmount(new BigDecimal("0.01"))
 				.setConfKey("something")
 				.setConfLink("http://37coins.com/rest/something")

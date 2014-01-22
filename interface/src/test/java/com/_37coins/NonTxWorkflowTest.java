@@ -134,7 +134,7 @@ public class NonTxWorkflowTest {
 	}
 
 	@Test
-	public void testDepositAccount() throws AddressException {
+	public void testGetAddress() throws AddressException {
 		NonTxWorkflowClient workflow = workflowFactory.getClient();
 		DataSet data = new DataSet()
 			.setAction(Action.DEPOSIT_REQ)
@@ -146,6 +146,26 @@ public class NonTxWorkflowTest {
 			.setPayload(new PaymentAddress()
 				.setAddress("1Nsateouhasontuh234")
 				.setAddressType(PaymentType.BTC));
+		validate("address returned", data, trace,booked);
+	}
+	
+	@Test
+	public void testDepositAccount() throws AddressException {
+		NonTxWorkflowClient workflow = workflowFactory.getClient();
+		DataSet data = new DataSet()
+			.setAction(Action.DEPOSIT_CONF)
+			.setCn("1")
+    		.setPayload(new Withdrawal()
+    			.setMsgDest(new MessageAddress().setAddress("from@37coins.com"))
+    			.setComment("hallo")
+    			.setAmount(new BigDecimal("0.01")))
+    		.setTo(new MessageAddress()
+					.setAddress("")
+					.setAddressType(MsgType.SMS)
+					.setGateway(""));
+		Promise<Void> booked = workflow.executeCommand(data);
+		Withdrawal w = (Withdrawal)data.getPayload();
+		w.setBalance(new BigDecimal("2.5"));
 		validate("successfull deposit", data, trace,booked);
 	}
 
