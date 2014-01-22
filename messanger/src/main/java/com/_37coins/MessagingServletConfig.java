@@ -155,8 +155,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			jPM.setMessageCounterListerer(i.getInstance(EmailListener.class));
 			jPM.run();
 		}
-		slt = i.getInstance(ServiceLevelThread.class);
-		slt.start();
+		if (System.getProperty("environment")!=null && System.getProperty("ldapBaseDn").equals("test")){
+			slt = i.getInstance(ServiceLevelThread.class);
+			slt.start();
+		}
 		log.info("ServletContextListener started");
 	}
 	
