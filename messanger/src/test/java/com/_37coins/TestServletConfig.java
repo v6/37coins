@@ -1,7 +1,13 @@
 package com._37coins;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.ServletContextEvent;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
@@ -15,6 +21,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.web.GatewayUser;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
@@ -30,6 +37,16 @@ import com.google.inject.servlet.ServletModule;
 public class TestServletConfig extends GuiceServletContextListener {
 	
 	public static Injector injector;
+	
+	@Override
+	public void contextInitialized(ServletContextEvent servletContextEvent) {
+		// TODO Auto-generated method stub
+		super.contextInitialized(servletContextEvent);
+		Cache cache = injector.getInstance(Cache.class);
+		Set<GatewayUser> gw = new HashSet<>();
+		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
+		cache.put(new Element("gateways",gw));
+	}
 
 	@Override
 	protected Injector getInjector() {

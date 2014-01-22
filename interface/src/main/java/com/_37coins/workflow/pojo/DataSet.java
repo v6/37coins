@@ -44,6 +44,7 @@ public class DataSet {
 		TIMEOUT("Timeout"),
 		OVERUSE("Overuse"),
 		TX_FAILED("TransactionFailed"),
+		DST_ERROR("DestinationUnreachable"),
 		TX_CANCELED("TransactionCanceled");
 
 		private String text;

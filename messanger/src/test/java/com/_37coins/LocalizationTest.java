@@ -219,6 +219,15 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void testDestinationUnavailable() throws IOException, TemplateException {
+		rsp.setAction(Action.DST_ERROR);
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
 	public void testInsuficcientFunds() throws IOException, TemplateException {
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
 			.setPayload(new Withdrawal()

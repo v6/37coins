@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Locale.Builder;
 
 import javax.inject.Inject;
@@ -39,6 +40,7 @@ import org.joda.money.CurrencyUnit;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
+import com._37coins.web.GatewayUser;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -121,7 +123,7 @@ public class ParserResource {
 	}
 	
 	@POST
-	@Path("/WithdrawalReq")
+	@Path("/WithdrawalReq") @SuppressWarnings("unchecked")
 	public Response withdrawalReq(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
@@ -150,18 +152,32 @@ public class ParserResource {
 							searchControls.setTimeLimit(1000);
 							String cc = "+" + w.getMsgDest().getPhoneNumber().getCountryCode();
 							NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+cc+"*))", searchControls);
-							if (namingEnum.hasMore ()){
-								Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
-								gwAddress = (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null;
-								String gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
-								gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
-								gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+							Element gws = cache.get("gateways");
+							if (null!=gws && !gws.isExpired()){
+								Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
+								while (namingEnum.hasMore()){
+									Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
+									String gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
+									for (GatewayUser gu: gateways){
+										if (gu.getId().equals(gwCn)){
+											gwAddress = (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null;
+											gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
+											gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+											break;
+										}
+									}
+									if (null!=gwDn) break;
+								}
 								namingEnum.close();
-							}else{
-								throw new RuntimeException("no gateway available for this user");
 							}
-						}catch (NamingException e1){
-							
+							if (null==gwDn){
+								responseList.clear();
+								responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+								return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+							}
+						}catch (NamingException | JsonProcessingException e1){
+							e1.printStackTrace();
+							throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 						}
 					}
 				}else if (w.getMsgDest().getAddressType()==MsgType.EMAIL){
@@ -264,7 +280,7 @@ public class ParserResource {
 	}
 	
 	@POST
-	@Path("/Buy")
+	@Path("/Buy") @SuppressWarnings("unchecked")
 	public Response buy(){
 		DataSet data = responseList.get(0);
 		PhoneNumber pn = data.getTo().getPhoneNumber();
@@ -298,7 +314,7 @@ public class ParserResource {
 	}
 	
 	@POST
-	@Path("/Sell")
+	@Path("/Sell") @SuppressWarnings("unchecked")
 	public Response sell(){
 		DataSet data = responseList.get(0);
 		PhoneNumber pn = data.getTo().getPhoneNumber();
