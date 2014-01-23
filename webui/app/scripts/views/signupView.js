@@ -62,7 +62,7 @@ function( Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha) {
 			            },
 			            password1: {
 			                minlength: 6,
-			                maxlength: 15,
+			                maxlength: 40,
 			                required: true
 			            },
 			            password2: {

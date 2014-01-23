@@ -64,7 +64,7 @@ function(Backbone, Communicator, LoginTmpl) {
                     },
                     password: {
                         minlength: 6,
-                        maxlength: 15,
+                        maxlength: 40,
                         required: true
                     }
                 },
