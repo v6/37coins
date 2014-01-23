@@ -15,7 +15,7 @@
 
 	<modules>
 		<module>interface</module>
-		<module>messanger</module>
+		<module>server</module>
 		<module>bitcoindManager</module>
 	</modules>
 	
