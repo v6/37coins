@@ -155,7 +155,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			jPM.setMessageCounterListerer(i.getInstance(EmailListener.class));
 			jPM.run();
 		}
-		if (System.getProperty("environment")!=null && System.getProperty("ldapBaseDn").equals("test")){
+		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
 			slt = i.getInstance(ServiceLevelThread.class);
 			slt.start();
 		}
@@ -199,6 +199,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	filter("/account*").through(DirectoryFilter.class); //allow directory access
+            	filter("/plivo/*").through(DirectoryFilter.class); //allow directory access
             	filter("/data/*").through(DirectoryFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class).annotatedWith(Names.named("activityImpl")).to(MessagingActivitiesImpl.class);

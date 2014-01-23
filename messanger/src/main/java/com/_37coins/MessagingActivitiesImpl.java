@@ -23,6 +23,7 @@ import com._37coins.activities.MessagingActivities;
 import com._37coins.envaya.QueueClient;
 import com._37coins.persistence.dto.MsgAddress;
 import com._37coins.persistence.dto.Transaction;
+import com._37coins.persistence.dto.Transaction.State;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -116,9 +117,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
 		try{
-			Element e = cache.get(workflowId);
-			Transaction tt = (Transaction)e.getObjectValue();
+			Transaction tt = new Transaction();
 			tt.setTaskToken(taskToken);
+			tt.setState(State.STARTED);
+			cache.put(new Element(workflowId,tt));
 			
 			InitialLdapContext ctx = null;
 			AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
@@ -130,11 +132,11 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
-			    params.put("from", rsp.getTo().getGateway());
+			    params.put("from", "+4971150888362");
 			    params.put("to", rsp.getTo().getAddress());
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+rsp.getCn()+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
-			    params.put("time_limit", "55");
-			    params.put("ring_timeout", "10");
+			 //   params.put("time_limit", "55");
+			 //   params.put("ring_timeout", "10");
 			    params.put("machine_detection", "hangup");
 			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/hangup/"+workflowId);
 			    params.put("caller_name", "37 Coins");

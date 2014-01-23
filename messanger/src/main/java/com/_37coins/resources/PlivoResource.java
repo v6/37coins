@@ -103,14 +103,18 @@ public class PlivoResource {
 		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
 		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
-		String pw = null;
+		Object pw = null;
 		try{
 			Attributes atts = ctx.getAttributes(dn,new String[]{"userPassword"});
-			pw = (atts.get("userPassword")!=null)?(String)atts.get("userPassword").get():null;
+			pw = (atts.get("userPassword")!=null)?atts.get("userPassword").get():null;
 		}catch(Exception e){
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.NOT_FOUND);
 		}
+		Transaction tt = new Transaction();
+		tt.setTaskToken("bla");
+		tt.setState(State.STARTED);
+		cache.put(new Element(workflowId,tt));
 		if (pw!=null){
 			//only check pin
 			try {
@@ -176,10 +180,8 @@ public class PlivoResource {
 		com._37coins.plivo.Response rv =null;
 		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
 		try {
-			InitialLdapContext context = null;
-			AuthenticationToken at = new UsernamePasswordToken(dn, MessagingServletConfig.ldapPw);
-			context = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-			context.bind(dn, null);
+			AuthenticationToken at = new UsernamePasswordToken(dn, digits);
+			jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
 			Element e = cache.get(workflowId);
 			Transaction tx = (Transaction) e.getObjectValue();
 			tx.setState(State.CONFIRMED);
@@ -189,15 +191,32 @@ public class PlivoResource {
 			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
 			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceMatch",new DataSet().setLocaleString(locale))));
 		} catch (AuthenticationException ae){
+			
+			//check if blocked
+			boolean pwLocked = true;
+			try{
+				InitialLdapContext ctx = null;
+				AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
+				ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
+				Attributes atts = ctx.getAttributes("cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
+				pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
+			}catch(Exception ne){
+			}
 			String callText;
-			try {
-				callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
-				rv = new com._37coins.plivo.Response()
-				.add(new Speak().setText(callText).setLanguage(locale))
-				.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+dn+"/"+workflowId+"/"+locale));
-			} catch (IOException | TemplateException e) {
-				e.printStackTrace();
-				throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+			try{
+				if (pwLocked){
+					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
+					rv = new com._37coins.plivo.Response()
+					.add(new Speak().setText(callText).setLanguage(locale));
+				}else{
+					callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
+					rv = new com._37coins.plivo.Response()
+					.add(new Speak().setText(callText).setLanguage(locale))
+					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
+				}
+			}catch(IOException | TemplateException ex){
+				ex.printStackTrace();
+				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
 		} catch (IllegalStateException | NamingException | IOException | TemplateException e) {
 			e.printStackTrace();
@@ -223,7 +242,7 @@ public class PlivoResource {
 			@FormParam("Digits") String digits){
 		com._37coins.plivo.Response rv = null;
 		try {
-			if (digits.length()!=NUM_DIGIT){
+			if (digits.length()<NUM_DIGIT-1){
 				throw new IOException();
 			}
 			rv = new com._37coins.plivo.Response()
@@ -279,7 +298,7 @@ public class PlivoResource {
         	try{
 	        	cache.remove(workflowId);
 				rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(msgFactory.getText("VoiceMisMatch",ds)).setLanguage(locale))
+					.add(new Speak().setText(msgFactory.getText("VoiceMismatch",ds)).setLanguage(locale))
 					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
 	        	e.printStackTrace();
 			} catch (IOException | TemplateException e1) {

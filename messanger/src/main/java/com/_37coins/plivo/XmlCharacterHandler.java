@@ -9,7 +9,7 @@ public class XmlCharacterHandler implements CharacterEscapeHandler {
 
 	public void escape(char[] buf, int start, int len, boolean isAttValue,
 			Writer out) throws IOException {
-		for (int i = 0; i < buf.length; i++) {
+		for (int i = start; i < start+len; i++) {
 			if (buf[i] < 0x10){
 				//do nothing
 			}else if (buf[i] < 0x20 || buf[i] > 0x7f) {
