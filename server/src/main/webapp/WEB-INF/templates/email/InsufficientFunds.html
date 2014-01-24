@@ -6,9 +6,8 @@
 	</head>
 	<body>
 		<article class="se-content">
-			<h3 id="head2">${resBundle.InsufficientFundsSubject}</h3>
 			<p class="text">	
-				insuf funds
+				${resBundle("InsufficientFunds",payload.balance?string("#,##0.########"),payload.amount?string("#,##0.########"))}
 			</p>
 			<#include "footer.html">
 		</article>

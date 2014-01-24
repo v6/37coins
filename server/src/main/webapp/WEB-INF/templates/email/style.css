@@ -4,13 +4,11 @@
 	  }
 	  article{
 	  	z-index:11;
-	  	color: white;
 	  	font-size: 18px;
 	  	line-height: 24px;
 	  	font-family: serif;
 	  }
 	  h3{
-	  	color: white;
 	  	font-size: 60px;
 	  	position: relative;
 	  	display: inline-block;
@@ -21,9 +19,6 @@
 	  	font-weight: normal;
 	  	margin-top: 0px;
 	  	margin-bottom: 0px;
-	  }
-	  .text{
-	  	color: white;
 	  }
 	  p{
 	  	margin-left: 50px;

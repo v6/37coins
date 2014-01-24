@@ -1,20 +1,18 @@
 <#setting locale=locale>
 <html>
-<head>
-	<title>${resBundle.DepositConfSubject}</title>
-	<#include "style.css">
-</head>
-<body>
-	<article class="se-content">
-		<h3 id="head2">${resBundle.DepositConfSubject}</h3>
-		<p class="text">
-			${resBundle("DepositConf",payload.amount)}<br>
-			<#if txid??>
-				${resBundle("TransactionDetails",payload.txId)}
-			</#if>	
-		</p>
-	<#include "footer.html">
-	</article>
-
-</body>
+	<head>
+		<title>${resBundle.DepositConfSubject}</title>
+		<#include "style.css">
+	</head>
+	<body>
+		<article class="se-content">
+			<p class="text">
+				${resBundle("DepositConf",payload.amount)}<br>
+				<#if txid??>
+					${resBundle("TransactionDetails",payload.txId)}
+				</#if>	
+			</p>
+		<#include "footer.html">
+		</article>
+	</body>
 </html>
