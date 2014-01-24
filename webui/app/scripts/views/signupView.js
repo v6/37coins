@@ -17,7 +17,7 @@ function( Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha) {
 		},
 
 		onError: function(model, response){
-			if (response.status===400){
+			if (response.status===417){
 				location.reload();
 			}
 			this.$('.alert').css('display','');

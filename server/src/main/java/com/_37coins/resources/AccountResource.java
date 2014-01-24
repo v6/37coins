@@ -224,13 +224,13 @@ public class AccountResource {
 		// no ticket, no service
 		if (null==cache.get("ticket"+accountRequest.getTicket())){
 			log.debug("ticket required for this operation.");
-			throw new WebApplicationException("ticket required for this operation.", Response.Status.BAD_REQUEST);
+			throw new WebApplicationException("ticket required for this operation.", Response.Status.EXPECTATION_FAILED);
 		}
 		//#############validate email#################
 		//check regex
 		if (null==accountRequest.getEmail() || !AccountPolicy.isValidEmail(accountRequest.getEmail())){
 			log.debug("send a valid email plz :D");
-			throw new WebApplicationException("send a valid email plz :D", Response.Status.EXPECTATION_FAILED);
+			throw new WebApplicationException("send a valid email plz :D", Response.Status.BAD_REQUEST);
 		}
 		//check it's not taken already
 		try{
@@ -265,7 +265,7 @@ public class AccountResource {
 						System.out.println("EmailRes.->check: "+ accountRequest.getEmail() + " not valid due: " + e.getMessage());
 					}
 					if(!isValidMX ){
-						throw new WebApplicationException("This email's hostname does not have mx record.", Response.Status.EXPECTATION_FAILED);
+						throw new WebApplicationException("This email's hostname does not have mx record.", Response.Status.BAD_REQUEST);
 					}
 				}
 			}catch(Exception e){

@@ -40,7 +40,7 @@ public class AccountPolicy {
 	
 	private Integer pwMinLength = 6;
 	
-	private Integer pwMaxLength = 12;
+	private Integer pwMaxLength = 40;
 	
 	private Integer minDigit = 1;
 	
