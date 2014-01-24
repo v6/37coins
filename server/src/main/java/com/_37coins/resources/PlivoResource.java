@@ -31,6 +31,8 @@ import net.sf.ehcache.Element;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
@@ -54,6 +56,7 @@ import freemarker.template.TemplateException;
 @Path(PlivoResource.PATH)
 @Produces(MediaType.APPLICATION_XML)
 public class PlivoResource {
+	public static Logger log = LoggerFactory.getLogger(PlivoResource.class);
 	public final static String PATH = "/plivo";
 	public static final int NUM_DIGIT = 5;
 	
@@ -111,10 +114,6 @@ public class PlivoResource {
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.NOT_FOUND);
 		}
-		Transaction tt = new Transaction();
-		tt.setTaskToken("bla");
-		tt.setState(State.STARTED);
-		cache.put(new Element(workflowId,tt));
 		if (pw!=null){
 			//only check pin
 			try {

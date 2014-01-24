@@ -73,6 +73,14 @@ public class WithdrawalWorkflowTest {
 	public static Withdrawal USER3 = new Withdrawal()
 		.setPayDest(new PaymentAddress().setAddress("n3Rf315KpvWR7cq2VnZkgkC11KARck2rS4").setAddressType(PaymentType.BTC));
 	
+	// another user 
+	// this user has a block voice pin
+	public static Withdrawal USER4 = new Withdrawal()
+		.setMsgDest(new MessageAddress()
+			.setAddressType(MsgType.SMS))
+		.setPayDest(new PaymentAddress()
+			.setAddress("4")
+			.setAddressType(PaymentType.ACCOUNT));	
 
 	private WithdrawalWorkflowClientFactory workflowFactory = new WithdrawalWorkflowClientFactoryImpl();
 
@@ -150,6 +158,8 @@ public class WithdrawalWorkflowTest {
 			public Action phoneConfirmation(DataSet rsp, String workflowId) {
 				if (rsp.getCn().equalsIgnoreCase(USER2.getPayDest().getAddress())){
 					return Action.TX_CANCELED;
+				}else if (rsp.getCn().equalsIgnoreCase(USER4.getPayDest().getAddress())){
+					return Action.ACCOUNT_BLOCKED;
 				}else{
 					trace.add(rsp);
 					return Action.WITHDRAWAL_REQ;
@@ -306,6 +316,42 @@ public class WithdrawalWorkflowTest {
             	if (e.getCause()!=null && e.getCause().getClass() == CancellationException.class){
             		Assert.assertTrue("unexpected result", trace.size()==1 
             				&& trace.get(0).getAction()==Action.TX_CANCELED);
+            		Withdrawal w = (Withdrawal)trace.get(0).getPayload();
+            		Assert.assertEquals(w.getConfKey(), WithdrawalWorkflow.VOICE_VER_TOKEN);
+            	}else{
+            		throw e;
+            	}
+			}
+		};
+	}
+	
+	/**
+	 * User failed voice call due to blocked account
+	 */
+	@Test
+	public void testSendVoiceVerBlock() throws AddressException {
+		final WithdrawalWorkflowClient workflow = workflowFactory.getClient();
+		final DataSet req = new DataSet()
+			.setAction(Action.WITHDRAWAL_REQ)
+			.setCn(USER4.getPayDest().getAddress())
+			.setTo(USER4.getMsgDest())
+			.setPayload(new Withdrawal()
+				.setComment("hallo")
+				.setAmount(new BigDecimal("1.0").setScale(8))
+				.setFee(FEE)
+				.setFeeAccount("1")
+				.setPayDest(USER1.getPayDest()));
+		new TryCatch() {
+			@Override
+			protected void doTry() throws Throwable {
+				Promise<Void> booked = workflow.executeCommand(req);
+				AsyncAssert.assertEquals("expected Insuficient Funds exception not thrown", 0, booked);
+			}
+            @Override
+            protected void doCatch(Throwable e) throws Throwable {
+            	if (e.getCause()!=null && e.getCause().getClass() == CancellationException.class){
+            		Assert.assertTrue("unexpected result", trace.size()==1 
+            				&& trace.get(0).getAction()==Action.ACCOUNT_BLOCKED);
             		Withdrawal w = (Withdrawal)trace.get(0).getPayload();
             		Assert.assertEquals(w.getConfKey(), WithdrawalWorkflow.VOICE_VER_TOKEN);
             	}else{

@@ -139,7 +139,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	    				toAddress,
 	    				workflowId,
 	    				w.getComment());
-				MDC.put("hostName", rsp.get().getGwCn());
+				MDC.put("hostName", rsp.get().getTo().getGateway());
 				MDC.put("event", Action.WITHDRAWAL_REQ.toString());
 				MDC.put("amount", w.getAmount().toString());
 				MDC.put("fee", w.getFee().toString());
@@ -208,7 +208,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	@Asynchronous
 	public void setConfirm(@NoWait Settable<DataSet> account, OrPromise trigger, Promise<Action> isConfirmed, DataSet data) throws Throwable{
 		if (isConfirmed.isReady()){
-			if (null==isConfirmed.get() || isConfirmed.get()!=Action.WITHDRAWAL_REQ){
+			if (null!=isConfirmed.get() && isConfirmed.get()!=Action.WITHDRAWAL_REQ){
 				data.setAction(isConfirmed.get());
 			}
 			account.set(data);
