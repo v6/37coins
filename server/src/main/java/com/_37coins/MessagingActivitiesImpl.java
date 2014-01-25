@@ -135,9 +135,6 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			    params.put("from", "+4971150888362");
 			    params.put("to", rsp.getTo().getAddress());
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+rsp.getCn()+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
-			 //   params.put("time_limit", "55");
-			 //   params.put("ring_timeout", "10");
-			    params.put("machine_detection", "hangup");
 			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/hangup/"+workflowId);
 			    params.put("caller_name", "37 Coins");
 			    Call response = restAPI.makeCall(params);

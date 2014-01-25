@@ -188,7 +188,7 @@ public class PlivoResource {
 		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
 			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
-			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceMatch",new DataSet().setLocaleString(locale))));
+			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",new DataSet().setLocaleString(locale))));
 		} catch (AuthenticationException ae){
 			
 			//check if blocked

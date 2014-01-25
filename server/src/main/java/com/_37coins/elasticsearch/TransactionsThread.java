@@ -35,7 +35,7 @@ public class TransactionsThread extends Thread {
 			QueryBuilder hostQuery = QueryBuilders.matchQuery("_hostName", cn);
 			// event type query
 			QueryBuilder eventQuery = QueryBuilders.matchQuery("_event",
-					DataSet.Action.WITHDRAWAL_REQ);
+					DataSet.Action.WITHDRAWAL_REQ.toString());
 			// date range query
 			long DAY_IN_MS = 1000 * 60 * 60 * 24;
 			RangeQueryBuilder dateRangeQuery = QueryBuilders
