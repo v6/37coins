@@ -1,2 +1,3 @@
 <#setting locale=locale>
-${resBundle("Balance",payload.balance?string("#,##0.########"))}
+<#assign tick = fiatPriceProvider.getLocalCurValue(payload.balance,getTo().getPhoneNumber())>
+${resBundle("Balance",payload.balance?string("#,##0.########"),"("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")")}

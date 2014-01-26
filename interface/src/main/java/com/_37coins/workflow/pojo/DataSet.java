@@ -88,6 +88,8 @@ public class DataSet {
 	
 	private Object payload;
 	
+	private Object fiatPriceProvider;
+	
 	private String service;
 	
 	private String gwCn;
@@ -223,6 +225,16 @@ public class DataSet {
 
 	public DataSet setResBundle(ResourceBundleModel resBundle) {
 		this.resBundle = resBundle;
+		return this;
+	}
+
+	@JsonIgnore
+	public Object getFiatPriceProvider() {
+		return fiatPriceProvider;
+	}
+
+	public DataSet setFiatPriceProvider(Object fiatPriceProvider) {
+		this.fiatPriceProvider = fiatPriceProvider;
 		return this;
 	}
 

@@ -17,6 +17,7 @@ import org.junit.Test;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.plivo.Speak;
 import com._37coins.plivo.XmlCharacterHandler;
+import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -38,10 +39,11 @@ public class LocalizationTest {
 		rsp =  new DataSet()
 		.setService("37coins")
 		.setLocale(new Locale("fr"))
+		.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setPayload(new PaymentAddress()
 			.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
 		.setTo(new MessageAddress()
-			.setAddress("test@37coins.com"));
+			.setAddress("+491606941382"));
 	}
 	
 	//matches all locales onto what plivo has available

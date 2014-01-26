@@ -256,7 +256,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
 		PriceTick pt = (PriceTick)rv.get(0).getPayload();
-		Assert.assertEquals("USD", pt.getCurCode());
+		Assert.assertEquals("KRW", pt.getCurCode());
 		Assert.assertNotNull(pt.getLast());
 		//get price
 		r = given()

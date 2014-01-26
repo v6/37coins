@@ -21,6 +21,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -102,6 +103,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@Provides @Singleton @SuppressWarnings("unused")
 				public MessageFactory provideMessageFactory() {
 					return new MessageFactory();
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				public FiatPriceProvider provideFiatPrices(Cache cache){
+					return new FiatPriceProvider(cache);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")

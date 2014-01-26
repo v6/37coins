@@ -39,6 +39,7 @@ import com._37coins.parse.ParserFilter;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.SmtpEmailClient;
+import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.AccountPolicy;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -279,6 +280,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			AccountPolicy providePolicy(){
 				return new AccountPolicy()
 					.setEmailMxLookup(true);
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			FiatPriceProvider provideFiatPrices(Cache cache){
+				return new FiatPriceProvider(cache);
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")

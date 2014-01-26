@@ -14,6 +14,7 @@ public class PriceTick {
 	private BigDecimal ask;
 	private BigDecimal bid;
 	private BigDecimal last;
+	private BigDecimal lastFactored;
 	private Date timestamp;
 	private Float volume_btc;
 	private Float volume_percent;
@@ -37,6 +38,13 @@ public class PriceTick {
 	}
 	public PriceTick setLast(BigDecimal last) {
 		this.last = last;
+		return this;
+	}
+	public BigDecimal getLastFactored() {
+		return lastFactored;
+	}
+	public PriceTick setLastFactored(BigDecimal lastFactored) {
+		this.lastFactored = lastFactored;
 		return this;
 	}
 	public Date getTimestamp() {

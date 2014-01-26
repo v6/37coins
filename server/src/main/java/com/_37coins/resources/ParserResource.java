@@ -1,11 +1,8 @@
 package com._37coins.resources;
 
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.Locale.Builder;
 
 import javax.inject.Inject;
 import javax.naming.NameNotFoundException;
@@ -30,18 +27,10 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.joda.money.CurrencyUnit;
-
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
+import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
-import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -68,10 +57,11 @@ public class ParserResource {
 	final private InitialLdapContext ctx;
 	final private ObjectMapper mapper;
 	final private Cache cache;
+	final private FiatPriceProvider fiatPriceProvider;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
-			Cache cache) {
+			Cache cache, FiatPriceProvider fiatPriceProvider) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -79,6 +69,7 @@ public class ParserResource {
 		if (null!=ds)
 			responseList.add(ds);
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		this.fiatPriceProvider = fiatPriceProvider;
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
@@ -336,36 +327,7 @@ public class ParserResource {
 	@Path("/Price")
 	public Response getPrice(){
 		DataSet data = responseList.get(0);
-		PhoneNumber pn = data.getTo().getPhoneNumber();
-		if (null!=pn){
-			List<String> currencies = Arrays.asList(new String[] { "AUD","BRL","CAD","CHF","CNY","CZK","EUR","GBP","ILS","JPY","NOK","NZD","PLN","RUB","SEK","SGD","USD","ZAR" });
-			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-			String cc = phoneUtil.getRegionCodeForCountryCode(pn.getCountryCode());
-			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(cc).build());
-			if (!currencies.contains(cu.getCode())){
-				cu = CurrencyUnit.of("USD");
-			}
-			Element e = cache.get("price"+cu.getCode());
-			if (null==e){
-				PriceTick temp = null;
-				try{
-					HttpClient client = HttpClientBuilder.create().build();
-					HttpGet someHttpGet = new HttpGet("http://api.bitcoinaverage.com/ticker/global/"+cu.getCode());
-					URI uri = new URIBuilder(someHttpGet.getURI()).build();
-					HttpRequestBase request = new HttpGet(uri);
-					HttpResponse response = client.execute(request);
-					temp = new ObjectMapper().readValue(response.getEntity().getContent(), PriceTick.class);
-				}catch(Exception ex){
-					ex.printStackTrace();
-					return null;
-				}
-				e = new Element("price"+cu.getCode(), temp);
-				cache.put(e);
-			}
-			PriceTick pt = (PriceTick)e.getObjectValue();
-			pt.setCurCode(cu.getCode());
-			data.setPayload(pt);
-		}
+		data.setPayload(fiatPriceProvider.getLocalCurValue(data.getTo().getPhoneNumber()));
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {
