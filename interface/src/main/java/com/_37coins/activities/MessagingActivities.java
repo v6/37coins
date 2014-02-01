@@ -9,8 +9,8 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrati
 @Activities
 public interface MessagingActivities {
 	
-    @Activity(name = "SendMessage", version = "0.2")
-    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    @Activity(name = "SendMessage", version = "0.3")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 180)
     void sendMessage(DataSet rsp);
     
     @Activity(name = "PutCache", version = "0.1")

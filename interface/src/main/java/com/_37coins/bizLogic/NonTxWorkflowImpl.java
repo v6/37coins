@@ -24,10 +24,12 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 
 	@Override
 	public void executeCommand(final DataSet data) {
-		if (data.getAction()==Action.DEPOSIT_REQ 
-				||data.getAction()==Action.SIGNUP){
+		if (data.getAction()==Action.DEPOSIT_REQ){
 			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 			respondDepositReq(bcAddress, data);
+		}else if (data.getAction()==Action.SIGNUP){
+			Promise<Void> done = msgClient.sendMessage(data);
+			createAddress(done, data);
 		}else if (data.getAction()==Action.GW_DEPOSIT_REQ){
 			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 			respondDataReq(bcAddress, data);
@@ -47,6 +49,12 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			throw new RuntimeException("unknown action");
 		}
     }
+	
+	@Asynchronous
+	public void createAddress(Promise<Void> done,DataSet data){
+		Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+		respondDataReq(bcAddress, data);
+	}
 	
 	@Asynchronous
 	public void respondDepositReq(Promise<String> bcAddress,DataSet data){

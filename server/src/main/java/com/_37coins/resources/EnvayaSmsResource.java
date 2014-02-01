@@ -127,6 +127,11 @@ public class EnvayaSmsResource {
 					MDC.put("error", params.getFirst("error"));
 					log.debug("send status received");
 					MDC.clear();
+					if (params.getFirst("status").equals("sent")){
+				        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+				        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(params.getFirst("id"));
+				        manualCompletionClient.complete(null);
+					}
 					break;
 				case "test":
 					MDC.put("hostName", cn);

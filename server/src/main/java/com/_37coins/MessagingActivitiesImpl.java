@@ -68,15 +68,19 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	MessageFactory mf;
 
 	@Override
+	@ManualActivityCompletion
 	public void sendMessage(DataSet rsp) {
+		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
+		String taskToken = executionContext.getTaskToken();
 		try {
 			rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 				mt.sendMessage(rsp);
+		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+		        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+		        manualCompletionClient.complete(null);
 			}else{
-				String runId = contextProvider.getActivityExecutionContext().getWorkflowExecution().getRunId();
-				String taskId = contextProvider.getActivityExecutionContext().getTask().getActivityId();
-				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct",runId+"::"+taskId);
+				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct",taskToken);
 			}
 		} catch (Exception e) {
 			return;
