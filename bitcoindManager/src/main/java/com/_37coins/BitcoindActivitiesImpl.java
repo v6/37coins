@@ -46,7 +46,7 @@ public class BitcoindActivitiesImpl implements BitcoindActivities {
 
 	@Override
 	public BigDecimal getAccountBalance(String cn) {
-		BigDecimal rv = client.getbalance(cn, 0);
+		BigDecimal rv = client.getbalance(cn, 1);
 		rv = rv.setScale(8, RoundingMode.DOWN);
 		return rv;
 	}
