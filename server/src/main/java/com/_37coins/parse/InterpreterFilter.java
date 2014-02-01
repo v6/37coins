@@ -108,7 +108,7 @@ public class InterpreterFilter implements Filter {
 				Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+searchAtr+"="+responseData.getTo().getGateway()+"))", ctx).getAttributes();
 				String gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
 				BigDecimal gwFee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
-				//build a new user and same
+				//build a new user and save
 				Attributes attributes=new BasicAttributes();
 				Attribute objectClass=new BasicAttribute("objectClass");
 				objectClass.add("inetOrgPerson");
