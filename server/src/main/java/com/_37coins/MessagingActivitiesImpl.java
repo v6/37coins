@@ -25,6 +25,7 @@ import com._37coins.persistence.dto.MsgAddress;
 import com._37coins.persistence.dto.Transaction;
 import com._37coins.persistence.dto.Transaction.State;
 import com._37coins.sendMail.MailTransporter;
+import com._37coins.util.FiatPriceProvider;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
@@ -69,6 +70,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	public void sendMessage(DataSet rsp) {
 		try {
+			rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 				mt.sendMessage(rsp);
 			}else{
@@ -80,7 +82,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			return;
 		}
 	}
-	
+
 	@Override
 	public void putCache(DataSet rsp) {
 		cache.put(new Element("balance"+rsp.getCn(), ((Withdrawal)rsp.getPayload()).getBalance()));

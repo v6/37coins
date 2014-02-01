@@ -221,6 +221,44 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void test37coinsBalanceNoTicker() throws IOException, TemplateException {
+		rsp =  new DataSet()
+			.setService("37coins")
+			.setLocale(new Locale("de"))
+			.setPayload(new PaymentAddress()
+				.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
+			.setTo(new MessageAddress()
+				.setAddress("+491606941382"))
+			.setAction(Action.BALANCE)
+			.setPayload(new Withdrawal()
+				.setBalance(new BigDecimal("0.05")));
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsBalanceNoTickerResponse() throws IOException, TemplateException {
+		rsp =  new DataSet()
+			.setService("37coins")
+			.setLocale(new Locale("de"))
+			.setFiatPriceProvider(new FiatPriceProvider(null,"http://somehttperror.net/"))
+			.setPayload(new PaymentAddress()
+				.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
+			.setTo(new MessageAddress()
+				.setAddress("+491606941382"))
+			.setAction(Action.BALANCE)
+			.setPayload(new Withdrawal()
+				.setBalance(new BigDecimal("0.05")));
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+
+	
+	@Test
 	public void testDestinationUnavailable() throws IOException, TemplateException {
 		rsp.setAction(Action.DST_ERROR);
 		String s = ef.constructTxt(rsp);

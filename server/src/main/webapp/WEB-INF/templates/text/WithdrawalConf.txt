@@ -9,5 +9,5 @@ ${resBundle("WithdrawalConf",payload.amount?string("#,##0.########"),payload.msg
 ${resBundle("WithdrawalConf",payload.amount?string("#,##0.########"),payload.payDest.address?substring(0,9)+"..")}
 </#if>
 <#if payload.balance??>
-${resBundle("Balance",payload.balance?string("#,##0.########"))}
+<#include "Balance.txt">
 </#if>

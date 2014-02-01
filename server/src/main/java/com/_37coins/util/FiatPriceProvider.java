@@ -27,11 +27,20 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class FiatPriceProvider {
 	
+	public static final String TICKER_URL = "http://api.bitcoinaverage.com/ticker/global/";
+	
 	final private Cache cache;
+	private String url;
 	
 	@Inject
 	public FiatPriceProvider(Cache cache){
 		this.cache = cache;
+		this.url = TICKER_URL;
+	}
+	
+	public FiatPriceProvider(Cache cache, String url){
+		this.cache = cache;
+		this.url = url;
 	}
 	
 	public PriceTick getLocalCurValue(PhoneNumber pn){
@@ -57,7 +66,7 @@ public class FiatPriceProvider {
 				PriceTick temp = null;
 				try{
 					HttpClient client = HttpClientBuilder.create().build();
-					HttpGet someHttpGet = new HttpGet("http://api.bitcoinaverage.com/ticker/global/"+cu.getCode());
+					HttpGet someHttpGet = new HttpGet(url+cu.getCode());
 					URI uri = new URIBuilder(someHttpGet.getURI()).build();
 					HttpRequestBase request = new HttpGet(uri);
 					HttpResponse response = client.execute(request);

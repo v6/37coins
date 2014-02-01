@@ -19,5 +19,5 @@ ${resBundle("DepositConfSndr",payload.amount?string("#,##0.########"),from)}
 ${resBundle("DepositConf",payload.amount?string("#,##0.########"))}
 </#if>
 <#if payload.balance??>
-${resBundle("Balance",payload.balance?string("#,##0.########"))}
+<#include "Balance.txt">
 </#if>
