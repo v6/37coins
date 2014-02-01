@@ -2,11 +2,15 @@ package com._37coins.parse;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.internet.AddressException;
 import javax.servlet.Filter;
@@ -18,9 +22,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.ehcache.Cache;
+
 import org.joda.money.BigMoney;
+import org.joda.money.CurrencyUnit;
 
 import com._37coins.resources.ParserResource;
+import com._37coins.util.FiatPriceProvider;
+import com._37coins.web.PriceTick;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
@@ -29,8 +38,8 @@ import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -38,6 +47,13 @@ import com.google.i18n.phonenumbers.NumberParseException;
 @Singleton
 public class ParserFilter implements Filter {
 	public static final String BC_ADDR_REGEX = "^[mn13][1-9A-Za-z][^OIl]{20,40}";
+	
+	private final Cache cache;
+	
+	@Inject
+	public ParserFilter(Cache cache){
+		this.cache = cache;
+	}
 
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
@@ -150,12 +166,24 @@ public class ParserFilter implements Filter {
 	}
 
 	public boolean readAmount(Withdrawal w, String amount) {
-		if (!amount.contains("BTC")) {
+		if (!amount.matches(".*[a-zA-Z]{3}.*")) {
 			amount = "BTC " + amount;
+		}else{
+			String r[] = amount.split("[a-zA-Z]{3}");
+			Pattern pattern = Pattern.compile("[a-zA-Z]{3}");
+			Matcher matcher = pattern.matcher(amount);
+			matcher.find();
+			amount = matcher.group().toUpperCase() + " "+r[r.length-1];
 		}
 		try {
 			BigMoney money = BigMoney.parse(amount);
-			w.setAmount(money.getAmount().setScale(8, RoundingMode.CEILING));
+			BigDecimal val = money.getAmount().setScale(8, RoundingMode.HALF_UP); 
+			if (money.getCurrencyUnit()!=CurrencyUnit.getInstance("BTC")){
+				FiatPriceProvider fpp = new FiatPriceProvider(cache);
+				PriceTick pt = fpp.getLocalCurValue(null, money.getCurrencyUnit());
+				val = money.getAmount().divide(pt.getLast(),8,RoundingMode.HALF_UP); 
+			}
+			w.setAmount(val);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

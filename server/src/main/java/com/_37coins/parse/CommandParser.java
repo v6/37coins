@@ -97,6 +97,10 @@ public class CommandParser {
 				return wordMap.get(pos).getLeft();
 			}
 		}
+		if (cmd.equals("*"))
+			return Action.WITHDRAWAL_REQ;
+		if (cmd.equals("#"))
+			return Action.WITHDRAWAL_CONF;
 		return null;
 	}
 	

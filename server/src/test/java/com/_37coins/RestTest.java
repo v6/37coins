@@ -374,7 +374,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 test@test.com")
+			.formParam("message", "* 0.01 test@test.com")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -399,6 +399,37 @@ public class RestTest {
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		//send money use dot notation
+		r = given()
+			.formParam("from", "test@test.com")
+			.formParam("gateway", "mail@37coins.com")
+			.formParam("message", "send .01 +821012345678")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
+		w = (Withdrawal)rv.get(0).getPayload();
+		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		//use currency code for sending
+		r = given()
+			.formParam("from", "test@test.com")
+			.formParam("gateway", "mail@37coins.com")
+			.formParam("message", "send eur20 +821012345678")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
+		w = (Withdrawal)rv.get(0).getPayload();
+		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertTrue(w.getAmount()!=null);
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		//request money from email to mobile
 		r = given()
@@ -502,6 +533,19 @@ public class RestTest {
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
 			.formParam("message", "conf test")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalConf");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_CONF, rv.get(0).getAction());
+		Assert.assertEquals("test", rv.get(0).getPayload());
+		//confirm with sign
+		r = given()
+			.formParam("from", "+821012345678")
+			.formParam("gateway", "+821027423984")
+			.formParam("message", "# test")
 		.expect()
 			.statusCode(200)
 		.when()
