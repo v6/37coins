@@ -46,6 +46,7 @@ import com._37coins.persistence.dto.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.DataSet.Action;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
@@ -127,7 +128,7 @@ public class EnvayaSmsResource {
 					MDC.put("error", params.getFirst("error"));
 					log.debug("send status received");
 					MDC.clear();
-					if (params.getFirst("status").equals("sent")){
+					if (params.getFirst("status").equals("sent")&&!params.getFirst("id").contains("SmsResource")){
 				        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 				        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(params.getFirst("id"));
 				        manualCompletionClient.complete(null);
@@ -203,9 +204,13 @@ public class EnvayaSmsResource {
 							@Override
 							public void handleResponse(DataSet data) {
 								try {
-									qc.send(data, MessagingServletConfig.queueUri,
+									if (data.getAction()==Action.SIGNUP){
+										nonTxFactory.getClient(data.getAction()+"-"+data.getCn()).executeCommand(data);
+									}else{
+										qc.send(data, MessagingServletConfig.queueUri,
 											(String) data.getTo().getGateway(), "amq.direct",
 											"SmsResource" + System.currentTimeMillis());
+									}
 								} catch (KeyManagementException
 										| NoSuchAlgorithmException
 										| IOException | TemplateException

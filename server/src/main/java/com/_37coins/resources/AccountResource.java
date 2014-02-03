@@ -7,7 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.inject.Inject;
@@ -45,12 +47,20 @@ import org.slf4j.LoggerFactory;
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.parse.ParserAction;
+import com._37coins.parse.ParserClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.AccountPolicy;
 import com._37coins.web.AccountRequest;
+import com._37coins.web.GatewayUser;
 import com._37coins.web.PasswordRequest;
+import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -67,26 +77,37 @@ public class AccountResource {
 	
 	final private InitialLdapContext ctx;
 	
+	private final NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
+	
 	private final HttpServletRequest httpReq;
 	
 	private final AccountPolicy accountPolicy;
 	
+	private final ParserClient parserClient;
+	
 	private final MailServiceClient mailClient;
 	
 	private final MessageFactory msgFactory;
+	
+	private int localPort;
 
 	@Inject
 	public AccountResource(Cache cache,
 			ServletRequest request,
 			AccountPolicy accountPolicy,
 			MailServiceClient mailClient,
-			MessageFactory msgFactory){
+			MessageFactory msgFactory,
+			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
+			ParserClient parserClient){
 		this.cache = cache;
 		httpReq = (HttpServletRequest)request;
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.accountPolicy = accountPolicy;
 		this.mailClient = mailClient;
 		this.msgFactory = msgFactory;
+		this.parserClient = parserClient;
+		this.nonTxFactory = nonTxFactory;
+		localPort = httpReq.getLocalPort();
 	}
 	
 	
@@ -132,6 +153,57 @@ public class AccountResource {
 			return "false";//ldap error
 		}
 		return "true";
+	}
+	
+	
+	@POST
+	@Path("/invite")
+	public Map<String, String> invite(GatewayUser gu){
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		try{
+			PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
+			String mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
+			parserClient.start(mobile, null, "webSignup", localPort,
+			new ParserAction() {
+				@Override
+				public void handleWithdrawal(DataSet data) {
+				}
+				@Override
+				public void handleResponse(DataSet data) {
+					if (data.getAction()==Action.SIGNUP){
+						nonTxFactory.getClient(data.getAction()+"-"+data.getCn()).executeCommand(data);
+					}else{
+						throw new WebApplicationException("no gateway or number issue",
+								javax.ws.rs.core.Response.Status.BAD_REQUEST);
+					}
+				}
+				@Override
+				public void handleDeposit(DataSet data) {
+				}
+				@Override
+				public void handleConfirm(DataSet data) {
+				}
+			});
+		}catch(NumberParseException e){
+			throw new WebApplicationException("no gateway or number issue",
+					javax.ws.rs.core.Response.Status.BAD_REQUEST);			
+		}
+		for (int i = 0;i<15;i++){
+			Element e = cache.get("address"+gu.getMobile().replace("+", ""));
+			if (null==e){
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
+				}
+			}else{
+				Map<String,String> rv = new HashMap<>();
+				rv.put("address", (String)e.getObjectValue());
+			}
+		}
+		throw new WebApplicationException("no timely response",
+				javax.ws.rs.core.Response.Status.NOT_FOUND);
 	}
 	
 	

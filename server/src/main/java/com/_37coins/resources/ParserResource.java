@@ -1,7 +1,9 @@
 package com._37coins.resources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -114,7 +116,7 @@ public class ParserResource {
 	}
 	
 	@POST
-	@Path("/WithdrawalReq") @SuppressWarnings("unchecked")
+	@Path("/WithdrawalReq")
 	public Response withdrawalReq(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
@@ -137,30 +139,10 @@ public class ParserResource {
 						gwAddress = data.getTo().getGateway();
 					}else{//or try to find a gateway in the database
 						try{
-							ctx.setRequestControls(null);
-							SearchControls searchControls = new SearchControls();
-							searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-							searchControls.setTimeLimit(1000);
-							String cc = "+" + w.getMsgDest().getPhoneNumber().getCountryCode();
-							NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+cc+"*))", searchControls);
-							Element gws = cache.get("gateways");
-							if (null!=gws && !gws.isExpired()){
-								Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
-								while (namingEnum.hasMore()){
-									Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
-									String gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
-									for (GatewayUser gu: gateways){
-										if (gu.getId().equals(gwCn)){
-											gwAddress = (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null;
-											gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
-											gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-											break;
-										}
-									}
-									if (null!=gwDn) break;
-								}
-								namingEnum.close();
-							}
+							Map<String,String> gwVal = ParserResource.findGateway(ctx, cache, "+" + w.getMsgDest().getPhoneNumber().getCountryCode());
+							gwAddress = gwVal.get("gwAddress");
+							gwLng = gwVal.get("gwLng");
+							gwDn = gwVal.get("gwDn");
 							if (null==gwDn){
 								responseList.clear();
 								responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
@@ -252,6 +234,35 @@ public class ParserResource {
 		} catch (JsonProcessingException e) {
 			return null;
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String,String> findGateway(InitialLdapContext ctx, Cache cache, String countryCode) throws NamingException{
+		Map<String,String> rv = new HashMap<>();
+		ctx.setRequestControls(null);
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		searchControls.setTimeLimit(1000);
+		NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+countryCode+"*))", searchControls);
+		Element gws = cache.get("gateways");
+		if (null!=gws && !gws.isExpired()){
+			Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
+			while (namingEnum.hasMore()){
+				Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
+				String gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
+				for (GatewayUser gu: gateways){
+					if (gu.getId().equals(gwCn)){
+						rv.put("gwAddress", (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null);
+						rv.put("gwLng", (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null);
+						rv.put("gwDn", "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
+						break;
+					}
+				}
+				if (null!=rv.get("gwDn")) break;
+			}
+		}
+		namingEnum.close();
+		return rv;
 	}
 
 	@POST
@@ -350,6 +361,6 @@ public class ParserResource {
 		} catch (JsonProcessingException e) {
 			return null;
 		}
-	}	
+	}
 
 }
