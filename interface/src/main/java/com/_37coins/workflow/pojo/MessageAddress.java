@@ -21,10 +21,13 @@ public class MessageAddress {
 		if (address.matches(PHONE_REGEX)) {
 			//prepare the gateway
 			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-			gateway = (gateway.charAt(0)!='+')?"+"+gateway:gateway;
-			MessageAddress referrer = new MessageAddress()
-				.setAddressType(MsgType.SMS)
-				.setPhoneNumber(phoneUtil.parse(gateway, "ZZ"));
+			MessageAddress referrer = null;
+			if (null!=gateway && gateway.length()>0){
+				gateway = (gateway.charAt(0)!='+')?"+"+gateway:gateway;
+				referrer = new MessageAddress()
+					.setAddressType(MsgType.SMS)
+					.setPhoneNumber(phoneUtil.parse(gateway, "ZZ"));
+			}
 			return fromString(address, referrer);
 		}else if (address.matches(EMAIL_REGEX)) {
 			return new MessageAddress()
@@ -43,7 +46,7 @@ public class MessageAddress {
 					(address.substring(0, 2).equalsIgnoreCase("011")&&address.length()>11)){
 				pn = phoneUtil.parse(address, "ZZ");
 			}else{
-				if (gateway.getAddressType()!=MsgType.SMS){
+				if (null!=gateway && gateway.getAddressType()!=MsgType.SMS){
 					throw new RuntimeException("from email you can only send to phone numbers with country code.");
 				}
 				pn = phoneUtil.parse( address, phoneUtil.getRegionCodeForCountryCode(gateway.getPhoneNumber().getCountryCode()));

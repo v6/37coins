@@ -102,41 +102,43 @@ public class InterpreterFilter implements Filter {
 			}
 			responseData.setGwCn(gwCn);
 		}catch (NameNotFoundException e){//new user
-			try{
-				//search the gateway from directory
-				String searchAtr = (responseData.getTo().getAddressType() == MsgType.SMS)?"mobile":"mail";
-				Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+searchAtr+"="+responseData.getTo().getGateway()+"))", ctx).getAttributes();
-				String gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
-				BigDecimal gwFee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
-				//build a new user and save
-				Attributes attributes=new BasicAttributes();
-				Attribute objectClass=new BasicAttribute("objectClass");
-				objectClass.add("inetOrgPerson");
-				attributes.put(objectClass);
-				Attribute sn=new BasicAttribute("sn");
-				Attribute cn=new BasicAttribute("cn");
-				String cnString = responseData.getTo().getAddress().replace("+", "");
-				responseData.getTo().setGateway(gwCn);
-				sn.add(cnString);
-				cn.add(cnString);
-				attributes.put(sn);
-				attributes.put(cn);
-				attributes.put("manager", "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
-				attributes.put((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail", responseData.getTo().getAddress());
-				attributes.put("preferredLanguage", responseData.getLocaleString());
-				ctx.createSubcontext("cn="+cnString+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
-				responseData.setCn(cnString).setGwCn(gwCn).setGwFee(gwFee);
-				//respond to new user with welcome message
-				DataSet create = new DataSet()
-					.setAction(Action.SIGNUP)
-					.setTo(responseData.getTo())
-					.setCn(responseData.getCn())
-					.setLocale(responseData.getLocale())
-					.setService(responseData.getService());
-				httpReq.setAttribute("create", create);
-			}catch(NamingException e1){
-				e1.printStackTrace();
-				httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			if (responseData.getAction()!=Action.SIGNUP){
+				try{
+					//search the gateway from directory
+					String searchAtr = (responseData.getTo().getAddressType() == MsgType.SMS)?"mobile":"mail";
+					Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+searchAtr+"="+responseData.getTo().getGateway()+"))", ctx).getAttributes();
+					String gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
+					BigDecimal gwFee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
+					//build a new user and save
+					Attributes attributes=new BasicAttributes();
+					Attribute objectClass=new BasicAttribute("objectClass");
+					objectClass.add("inetOrgPerson");
+					attributes.put(objectClass);
+					Attribute sn=new BasicAttribute("sn");
+					Attribute cn=new BasicAttribute("cn");
+					String cnString = responseData.getTo().getAddress().replace("+", "");
+					responseData.getTo().setGateway(gwCn);
+					sn.add(cnString);
+					cn.add(cnString);
+					attributes.put(sn);
+					attributes.put(cn);
+					attributes.put("manager", "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
+					attributes.put((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail", responseData.getTo().getAddress());
+					attributes.put("preferredLanguage", responseData.getLocaleString());
+					ctx.createSubcontext("cn="+cnString+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
+					responseData.setCn(cnString).setGwCn(gwCn).setGwFee(gwFee);
+					//respond to new user with welcome message
+					DataSet create = new DataSet()
+						.setAction(Action.SIGNUP)
+						.setTo(responseData.getTo())
+						.setCn(responseData.getCn())
+						.setLocale(responseData.getLocale())
+						.setService(responseData.getService());
+					httpReq.setAttribute("create", create);
+				}catch(NamingException e1){
+					e1.printStackTrace();
+					httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				}
 			}
 		} catch (NamingException e) {
 			e.printStackTrace();

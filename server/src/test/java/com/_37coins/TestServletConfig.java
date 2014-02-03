@@ -46,6 +46,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 		Cache cache = injector.getInstance(Cache.class);
 		Set<GatewayUser> gw = new HashSet<>();
 		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
+		gw.add(new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
 		cache.put(new Element("gateways",gw));
 	}
 

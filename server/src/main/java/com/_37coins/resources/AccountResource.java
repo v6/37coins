@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.sendMail.MailServiceClient;
@@ -163,7 +164,7 @@ public class AccountResource {
 		try{
 			PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
 			String mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
-			parserClient.start(mobile, null, "webSignup", localPort,
+			parserClient.start(mobile, null, Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
 				@Override
 				public void handleWithdrawal(DataSet data) {

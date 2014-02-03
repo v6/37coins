@@ -116,90 +116,148 @@ public class ParserResource {
 	}
 	
 	@POST
+	@Path("/Signup")
+	public Response signup(){
+		DataSet data = responseList.get(0);
+		responseList.clear();
+		Map<String,String> rv = signup(data.getTo(), null, null, data.getLocaleString(), data.getService());
+		try {
+			if (null==rv){
+				responseList.clear();
+				responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+				return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+			}else{
+				data.getTo().setGateway(rv.get("gwAddress"));
+				data.setCn(rv.get("cn"));
+			}
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String,String> signup(MessageAddress recipient, MessageAddress referer, String gwCn, String locale, String service){
+		String gwDn = null;
+		String gwAddress = null;
+		String gwLng = null;
+		String cnString = null;
+		if (recipient.getAddressType()==MsgType.SMS){//create a new user
+			//set gateway from referring user's gateway
+			if (null != referer && referer.getAddressType() == MsgType.SMS 
+					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){
+				gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+				gwAddress = referer.getGateway();
+			}else{//or try to find a gateway in the database
+				try{
+					String countryCode = "+" + recipient.getPhoneNumber().getCountryCode();
+					ctx.setRequestControls(null);
+					SearchControls searchControls = new SearchControls();
+					searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+					searchControls.setTimeLimit(1000);
+					NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+countryCode+"*))", searchControls);
+					Element gws = cache.get("gateways");
+					if (null!=gws && !gws.isExpired()){
+						Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
+						while (namingEnum.hasMore()){
+							Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
+							gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
+							for (GatewayUser gu: gateways){
+								if (gu.getId().equals(gwCn)){
+									gwAddress = (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null;
+									gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
+									gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+									break;
+								}
+							}
+							if (null!=gwDn) break;
+						}
+					}
+					namingEnum.close();
+					if (null==gwDn){
+						return null;
+					}
+				}catch (NamingException e1){
+					e1.printStackTrace();
+					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
+				}
+			}
+		}else if (recipient.getAddressType()==MsgType.EMAIL){
+			Attributes atts;
+			try {
+				atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+MessagingServletConfig.imapUser+"))", ctx).getAttributes();
+				gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
+			    gwDn = "cn="+gwCn + ",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+			    gwAddress = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
+			} catch (IllegalStateException | NamingException e1) {
+				throw new RuntimeException(e1);
+			}
+		}
+		if (null!=gwDn){
+			//create new user
+			Attributes attributes=new BasicAttributes();
+			Attribute objectClass=new BasicAttribute("objectClass");
+			objectClass.add("inetOrgPerson");
+			attributes.put(objectClass);
+			Attribute sn=new BasicAttribute("sn");
+			Attribute cnAtr=new BasicAttribute("cn");
+			cnString = recipient.getAddress().replace("+", "");
+			sn.add(cnString);
+			cnAtr.add(cnString);
+			attributes.put(sn);
+			attributes.put(cnAtr);
+			attributes.put("manager", gwDn);
+			attributes.put((recipient.getAddressType()==MsgType.SMS)?"mobile":"mail", recipient.getAddress());
+			attributes.put("preferredLanguage", locale);
+			try {
+				ctx.createSubcontext("cn="+cnString+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
+				//and say hi to new user
+				DataSet create = new DataSet()
+					.setAction(Action.SIGNUP)
+					.setTo(new MessageAddress()
+						.setAddress(recipient.getAddressObject())
+						.setAddressType(recipient.getAddressType())
+						.setGateway(gwAddress))
+					.setCn(cnString)
+					.setLocaleString((null!=gwLng)?gwLng:locale)
+					.setService(service);
+				responseList.add(create);
+			} catch (NamingException e1) {
+				e1.printStackTrace();
+				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
+			}
+		}
+		Map<String,String> rv = new HashMap<>();
+		rv.put("gwAddress",gwAddress);
+		rv.put("cn",cnString);
+		return rv;
+	}
+	
+	@POST
 	@Path("/WithdrawalReq")
 	public Response withdrawalReq(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
 		if (null!= w.getMsgDest() && w.getMsgDest().getAddress()!=null){
-			
+			Map<String,String> newGw = null;
 			String cn = null;
-			String gwDn = null;
 			String gwAddress = null;
-			String gwLng = null;
 			try{
 				Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((w.getMsgDest().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+w.getMsgDest().getAddress()+"))", ctx).getAttributes();
 				cn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
-				gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
 			}catch(NameNotFoundException e){
-				if (w.getMsgDest().getAddressType()==MsgType.SMS){//create a new user
-					//set gateway from referring user's gateway
-					if (data.getTo().getAddressType() == MsgType.SMS 
-							&& w.getMsgDest().getPhoneNumber().getCountryCode() == data.getTo().getPhoneNumber().getCountryCode()){
-						gwDn = "cn="+data.getGwCn()+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-						gwAddress = data.getTo().getGateway();
-					}else{//or try to find a gateway in the database
-						try{
-							Map<String,String> gwVal = ParserResource.findGateway(ctx, cache, "+" + w.getMsgDest().getPhoneNumber().getCountryCode());
-							gwAddress = gwVal.get("gwAddress");
-							gwLng = gwVal.get("gwLng");
-							gwDn = gwVal.get("gwDn");
-							if (null==gwDn){
-								responseList.clear();
-								responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
-								return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-							}
-						}catch (NamingException | JsonProcessingException e1){
-							e1.printStackTrace();
-							throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
-						}
-					}
-				}else if (w.getMsgDest().getAddressType()==MsgType.EMAIL){
-					Attributes atts;
-					try {
-						atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+MessagingServletConfig.imapUser+"))", ctx).getAttributes();
-						String gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
-					    gwDn = "cn="+gwCn + ",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-					    gwAddress = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
-					} catch (IllegalStateException | NamingException e1) {
-						throw new RuntimeException(e1);
+				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
+				if (null==newGw){
+					responseList.clear();
+					responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+					try{
+						return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+					} catch (JsonProcessingException ex) {
+						return null;
 					}
 				}
-				if (null!=gwDn){
-					//create new user
-					Attributes attributes=new BasicAttributes();
-					Attribute objectClass=new BasicAttribute("objectClass");
-					objectClass.add("inetOrgPerson");
-					attributes.put(objectClass);
-					Attribute sn=new BasicAttribute("sn");
-					Attribute cnAtr=new BasicAttribute("cn");
-					String cnString = w.getMsgDest().getAddress().replace("+", "");
-					cn = cnString;
-					sn.add(cnString);
-					cnAtr.add(cnString);
-					attributes.put(sn);
-					attributes.put(cnAtr);
-					attributes.put("manager", gwDn);
-					attributes.put((w.getMsgDest().getAddressType()==MsgType.SMS)?"mobile":"mail", w.getMsgDest().getAddress());
-					attributes.put("preferredLanguage", data.getLocaleString());
-					try {
-						ctx.createSubcontext("cn="+cnString+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
-						//and say hi to new user
-						DataSet create = new DataSet()
-							.setAction(Action.SIGNUP)
-							.setTo(new MessageAddress()
-								.setAddress(w.getMsgDest().getAddressObject())
-								.setAddressType(w.getMsgDest().getAddressType())
-								.setGateway(gwAddress))
-							.setCn(cnString)
-							.setLocaleString((null!=gwLng)?gwLng:data.getLocaleString())
-							.setService(data.getService());
-						responseList.add(create);
-					} catch (NamingException e1) {
-						e1.printStackTrace();
-						throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
-					}
-				}
-				
+				cn = newGw.get("cn");
+				gwAddress = newGw.get("gwAddress");
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
@@ -234,35 +292,6 @@ public class ParserResource {
 		} catch (JsonProcessingException e) {
 			return null;
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Map<String,String> findGateway(InitialLdapContext ctx, Cache cache, String countryCode) throws NamingException{
-		Map<String,String> rv = new HashMap<>();
-		ctx.setRequestControls(null);
-		SearchControls searchControls = new SearchControls();
-		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-		searchControls.setTimeLimit(1000);
-		NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+countryCode+"*))", searchControls);
-		Element gws = cache.get("gateways");
-		if (null!=gws && !gws.isExpired()){
-			Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
-			while (namingEnum.hasMore()){
-				Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
-				String gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
-				for (GatewayUser gu: gateways){
-					if (gu.getId().equals(gwCn)){
-						rv.put("gwAddress", (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null);
-						rv.put("gwLng", (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null);
-						rv.put("gwDn", "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
-						break;
-					}
-				}
-				if (null!=rv.get("gwDn")) break;
-			}
-		}
-		namingEnum.close();
-		return rv;
 	}
 
 	@POST

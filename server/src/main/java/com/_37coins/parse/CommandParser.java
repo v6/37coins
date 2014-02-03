@@ -27,6 +27,7 @@ public class CommandParser {
 			Action.PRICE,
 			Action.BUY,
 			Action.SELL,
+			Action.SIGNUP,
 			Action.TRANSACTION,
 			Action.WITHDRAWAL_CONF, 
 			Action.WITHDRAWAL_REQ, 
@@ -101,8 +102,6 @@ public class CommandParser {
 			return Action.WITHDRAWAL_REQ;
 		if (cmd.equals("#"))
 			return Action.WITHDRAWAL_CONF;
-		if (cmd.equals("webSignup"))
-			return Action.SIGNUP;
 		return null;
 	}
 	
