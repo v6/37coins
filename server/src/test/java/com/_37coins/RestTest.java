@@ -33,7 +33,6 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -94,50 +93,35 @@ public class RestTest {
     
     @Test
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser());
 		parserClient.start("+821039842742", "+821027423984", "send 0.1 +821039842743", 8087,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
-				//save the transaction id to db
-				try {
-					System.out.println(new ObjectMapper().writeValueAsString(data));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-				Assert.assertFalse(data.getTo().getGateway().contains("+"));
+				ds.setTo(data.getTo());
+				ds.setAction(data.getAction());
 			}
 			@Override
 			public void handleResponse(DataSet data) {
-				try {
-					System.out.println(new ObjectMapper().writeValueAsString(data));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-				Assert.assertFalse(data.getTo().getGateway().contains("+"));
+				ds.setTo(data.getTo());
+				ds.setAction(data.getAction());
 			}
 			
 			@Override
 			public void handleDeposit(DataSet data) {
-				try {
-					System.out.println(new ObjectMapper().writeValueAsString(data));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-				Assert.assertFalse(data.getTo().getGateway().contains("+"));
+				ds.setTo(data.getTo());
+				ds.setAction(data.getAction());
 			}
 			
 			@Override
 			public void handleConfirm(DataSet data) {
-				try {
-					System.out.println(new ObjectMapper().writeValueAsString(data));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-				Assert.assertFalse(data.getTo().getGateway().contains("+"));
+				ds.setTo(data.getTo());
+				ds.setAction(data.getAction());
 			}
 		});
 		parserClient.join();
+		Assert.assertFalse(ds.getTo().getGateway().contains("+"));
     }
     
     @Test
@@ -162,7 +146,7 @@ public class RestTest {
 		});
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
-		Assert.assertNotNull(ds.getTo().getGateway());
+		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
     }
 	
@@ -521,7 +505,7 @@ public class RestTest {
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals(Locale.GERMANY, rv.get(1).getLocale());
-		Assert.assertEquals("+491602742398", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("DEV4N1JS2Z3476DE", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("491087654321", rv.get(1).getCn());
 		//send money, new user, other country, no gateway
 		r = given()

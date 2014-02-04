@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
-import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.sendMail.MailServiceClient;
@@ -160,51 +159,62 @@ public class AccountResource {
 	@POST
 	@Path("/invite")
 	public Map<String, String> invite(GatewayUser gu){
+		final DataSet ds = new DataSet();
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		String mobile = null;
 		try{
 			PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
-			String mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
+			mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
+			//check if it's not an account already
+			ctx.setRequestControls(null);
+			SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setTimeLimit(500);
+			NamingEnumeration<?> namingEnum = null;
+			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+mobile+"))", searchControls);
+			if (namingEnum.hasMore()){
+				throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
+			}
 			parserClient.start(mobile, null, Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
 				@Override
-				public void handleWithdrawal(DataSet data) {
-				}
-				@Override
 				public void handleResponse(DataSet data) {
-					if (data.getAction()==Action.SIGNUP){
+					if (null!=data && data.getAction()==Action.SIGNUP){
 						nonTxFactory.getClient(data.getAction()+"-"+data.getCn()).executeCommand(data);
-					}else{
-						throw new WebApplicationException("no gateway or number issue",
-								javax.ws.rs.core.Response.Status.BAD_REQUEST);
 					}
+					ds.setAction(data.getAction());
+					ds.setCn(data.getCn());
+					ds.setTo(data.getTo());
 				}
 				@Override
-				public void handleDeposit(DataSet data) {
-				}
+				public void handleDeposit(DataSet data) {}
 				@Override
-				public void handleConfirm(DataSet data) {
-				}
+				public void handleConfirm(DataSet data) {}
+				@Override
+				public void handleWithdrawal(DataSet data) {}
 			});
-		}catch(NumberParseException e){
-			throw new WebApplicationException("no gateway or number issue",
-					javax.ws.rs.core.Response.Status.BAD_REQUEST);			
+		}catch(NumberParseException | NamingException e){
+			throw new WebApplicationException("number format issue",
+					javax.ws.rs.core.Response.Status.BAD_REQUEST);
 		}
-		for (int i = 0;i<15;i++){
-			Element e = cache.get("address"+gu.getMobile().replace("+", ""));
-			if (null==e){
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
-				}
-			}else{
-				Map<String,String> rv = new HashMap<>();
-				rv.put("address", (String)e.getObjectValue());
-			}
+		try {
+			parserClient.join(1500L);
+		} catch (InterruptedException e2) {
+			throw new WebApplicationException("could not join parser thread",
+					javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		throw new WebApplicationException("no timely response",
-				javax.ws.rs.core.Response.Status.NOT_FOUND);
+		if (null!=ds && ds.getAction()==Action.SIGNUP){
+			//the web frontend will call the webfinger resource after this
+			//make sure it will only search in the cache
+			cache.put(new Element("addressReq"+mobile.replace("+", ""), true));
+			Map<String,String> rv = new HashMap<>();
+			rv.put("cn",ds.getCn());
+			return rv;
+		}else if (null!=ds && ds.getAction()==Action.DST_ERROR){
+			throw new WebApplicationException("no gateway found",
+					javax.ws.rs.core.Response.Status.NOT_FOUND);
+		}
+		throw new WebApplicationException("unknown", javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 	}
 	
 	

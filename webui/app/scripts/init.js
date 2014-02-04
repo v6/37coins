@@ -56,7 +56,8 @@ require.config({
         recaptcha: 'vendor/recaptcha_ajax',
         jqueryValidation: '../bower_components/jqueryValidation/jquery.validate',
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
-        GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics'
+        GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
+        webfinger: '../bower_components/webfirst/src/webfinger'
     },
 
     config: {

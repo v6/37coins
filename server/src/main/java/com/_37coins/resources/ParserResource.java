@@ -126,9 +126,6 @@ public class ParserResource {
 				responseList.clear();
 				responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
 				return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-			}else{
-				data.getTo().setGateway(rv.get("gwAddress"));
-				data.setCn(rv.get("cn"));
 			}
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {
@@ -164,9 +161,9 @@ public class ParserResource {
 							gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
 							for (GatewayUser gu: gateways){
 								if (gu.getId().equals(gwCn)){
-									gwAddress = (attributes.get("mobile")!=null)?(String)attributes.get("mobile").get():null;
 									gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
 									gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+									gwAddress = gwCn;
 									break;
 								}
 							}

@@ -134,6 +134,7 @@ define(['backbone',
             var self = this;
             script.onload = function(){
                 console.log('fetched');
+                Communicator.mediator.trigger('app:init');
                 self.gateways.fetch({reset: true});
             };
 

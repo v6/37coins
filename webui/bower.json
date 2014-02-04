@@ -22,7 +22,8 @@
     "jqueryValidation": "https://github.com/jzaefferer/jquery-validation.git",
     "requirejs-google-analytics": "~0.1.6",
     "flag-icon-css": null,
-    "font-awesome": null
+    "font-awesome": null,
+    "webfirst": "https://github.com/silverbucket/webfinger.js.git"
   },
   "devDependencies": {},
   "directory": "bower_components"
