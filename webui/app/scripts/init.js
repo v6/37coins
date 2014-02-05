@@ -23,7 +23,12 @@ require.config({
             deps: ['jquery'],
             exports: 'jquery'
         },
-        recaptcha: { exports: 'Recaptcha' }
+        recaptcha: {
+            exports: 'Recaptcha'
+        },
+        webfinger:{
+            exports: 'webfinger'
+        }
     },
 
     paths: {
@@ -57,7 +62,7 @@ require.config({
         jqueryValidation: '../bower_components/jqueryValidation/jquery.validate',
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
-        webfinger: '../bower_components/webfirst/src/webfinger'
+        webfinger: 'vendor/webfinger'
     },
 
     config: {

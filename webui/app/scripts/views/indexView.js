@@ -30,7 +30,7 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger) {
             if (isValid) {
                 var PNT = window.i18n.phonenumbers.PhoneNumberType;
                 var numberType = phoneUtil.getNumberType(number);
-                if (numberType === PNT.MOBILE) {
+                if (numberType === PNT.MOBILE || numberType === PNT.FIXED_LINE_OR_MOBILE) {
                     var PNF = window.i18n.phonenumbers.PhoneNumberFormat;
                     var strIntlNumber = phoneUtil.format(number, PNF.E164);
                     console.log(strIntlNumber);
