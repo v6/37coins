@@ -84,8 +84,7 @@ public class ServiceLevelThread extends Thread {
 						PhoneNumberUtil phoneUtil = PhoneNumberUtil
 								.getInstance();
 						PhoneNumber pn = phoneUtil.parse(mobile, "ZZ");
-						String cc = phoneUtil.getRegionCodeForCountryCode(pn
-								.getCountryCode());
+						String cc = phoneUtil.getRegionCodeForNumber(pn);
 						GatewayUser gu = new GatewayUser()
 								.setMobile(
 										PhoneNumberUtil.getInstance().format(
