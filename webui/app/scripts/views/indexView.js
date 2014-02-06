@@ -71,9 +71,11 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger) {
             }else if (data.status===404){
                 this.$('#donate').append('<p>No gateway in this courtry yet, be the first one to start it!</p>');
                 this.$('button.btn-inverse').button('reset');
+                return;
             }else{
                 this.$('#donate').append('<p>Some error occured, please leave a bug report.</p>');
                 this.$('button.btn-inverse').button('reset');
+                return;
             }
             if (cn && this.attempts < 7){
                 var self = this;

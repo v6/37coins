@@ -1,6 +1,5 @@
 package com._37coins;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -110,8 +109,15 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			Withdrawal w = (Withdrawal)rsp.getPayload();
 			w.setConfKey(tt.getKey());
 			w.setConfLink(confLink);
-			sendMessage(rsp);
-		} catch (UnsupportedEncodingException e) {
+			rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
+		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+		        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+		        manualCompletionClient.complete(null);
+			}else{
+				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct","SmsResource"+taskToken);
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
