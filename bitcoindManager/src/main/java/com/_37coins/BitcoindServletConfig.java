@@ -86,8 +86,7 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 					Map<String,List<Transaction>> txGrouping = new HashMap<>();
 					for (Transaction tx : t.getDetails()){
 						if (tx.getCategory()==Category.RECEIVE 
-								&& tx.getAccount()!=null
-								&& tx.getConfirmations()>0){
+								&& tx.getAccount()!=null){
 							if (txGrouping.containsKey(tx.getAccount())){
 								txGrouping.get(tx.getAccount()).add(tx);
 							}else{
