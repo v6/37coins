@@ -518,7 +518,18 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.DST_ERROR, rv.get(0).getAction());		
+		Assert.assertEquals(Action.DST_ERROR, rv.get(0).getAction());
+		//send money, use foreign gateway
+		r = given()
+			.formParam("from", "+491012345678")
+			.formParam("gateway", "+821027423984")
+			.formParam("message", "send 0.01 +631087654321")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",0, rv.size());
 		//request money, existing user
 		r = given()
 			.formParam("from", "+821012345678")

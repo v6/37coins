@@ -33,6 +33,7 @@ import com._37coins.web.PriceTick;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
+import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -43,6 +44,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Singleton
 public class ParserFilter implements Filter {
@@ -93,6 +96,11 @@ public class ParserFilter implements Filter {
 			// parse message address
 			MessageAddress md = MessageAddress.fromString(from, gateway)
 					.setGateway(gateway);
+			if (md.getAddressType() == MsgType.SMS 
+					&& !isFromSameCountry(md, gateway)
+					&& Action.fromString(actionString) != Action.SIGNUP){
+				respond(new ArrayList<DataSet>(), response);
+			}
 			// parse message into dataset
 			DataSet responseData = process(md, message, locale,Action.fromString(actionString));
 			List<DataSet> responseList = new ArrayList<>();
@@ -109,6 +117,19 @@ public class ParserFilter implements Filter {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private boolean isFromSameCountry(MessageAddress sender, String gateway){
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		PhoneNumber pn = null;
+		try {
+			pn = phoneUtil.parse(gateway, "ZZ");
+		} catch (NumberParseException e) {
+		}
+		if (pn!=null && pn.getCountryCode()==sender.getPhoneNumber().getCountryCode()){
+			return true;
+		}
+		return false;
 	}
 	
 	public void respond(List<DataSet> dsl, ServletResponse response){
