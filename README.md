@@ -21,7 +21,7 @@ A product aimed for international remittence market.
 	-DbasePath=...`
 
 ### Run Local
-   * `cd server'
+   * `cd server`
    * `mvn jetty:run -Denvironment=test -DswfDomain=... -DaccessKey=... -DsecretKey=... -Dendpoint=... -DsenderMail=... -DbasePath=... -DqueueUri=... -DplivoKey=... -DplivoSecret=... -DimapHost=... -DimapPassword=... -DresPath=... -DldapUrl=... -DldapUser=... -DldapPw=... -DldapBaseDn=... -DcaptchaPubKey=... -DcaptchaSecKey=... -DsrvcPath=... -DamqpUser=... -DamqpPassword=... -DamqpHost=...`
 
 ## Web
