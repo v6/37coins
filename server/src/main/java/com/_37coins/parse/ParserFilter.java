@@ -97,8 +97,7 @@ public class ParserFilter implements Filter {
 			MessageAddress md = MessageAddress.fromString(from, gateway)
 					.setGateway(gateway);
 			if (md.getAddressType() == MsgType.SMS 
-					&& !isFromSameCountry(md, gateway)
-					&& Action.fromString(actionString) != Action.SIGNUP){
+					&& !isFromSameCountry(md, gateway)){
 				respond(new ArrayList<DataSet>(), response);
 			}
 			// parse message into dataset
@@ -122,6 +121,9 @@ public class ParserFilter implements Filter {
 	private boolean isFromSameCountry(MessageAddress sender, String gateway){
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 		PhoneNumber pn = null;
+		if (null==gateway || gateway.length()<3){
+			return true;
+		}
 		try {
 			pn = phoneUtil.parse(gateway, "ZZ");
 		} catch (NumberParseException e) {

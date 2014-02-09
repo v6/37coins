@@ -51,7 +51,8 @@ public class AbuseFilter implements Filter {
 		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet ds = responseList.get(0);
 		if (null!=ds.getTo().getPhoneNumber() &&(
-				ds.getAction()==Action.PRICE 
+				ds.getAction()==Action.PRICE
+				|| ds.getAction()==Action.SIGNUP
 				|| ds.getAction()==Action.DEPOSIT_REQ)){
 			String number = PhoneNumberUtil.getInstance().format(ds.getTo().getPhoneNumber(),PhoneNumberFormat.E164);
 			String key= ds.getAction()+number;
