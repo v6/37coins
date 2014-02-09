@@ -16,7 +16,7 @@
 		<dependency>
 		    <groupId>com.amazonaws</groupId>
 		    <artifactId>aws-java-sdk</artifactId>
-		    <version>1.6.2</version>
+		    <version>1.7.1</version>
 		    <exclusions>
 				<exclusion>
 					<artifactId>jackson-core</artifactId>
@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-flow-build-tools</artifactId>
-			<version>1.5.3</version>
+			<version>1.7.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -92,13 +92,6 @@
 			<version>1.5.0</version>
 		</dependency>
 	</dependencies>
-	
-	<repositories>
-		<repository>
-			<id>bitcoinj</id>
-			<url>http://distribution.bitcoinj.googlecode.com/git/releases/</url>
-		</repository>
-	</repositories>
 
 	<build>
 		<plugins>

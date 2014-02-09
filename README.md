@@ -5,24 +5,35 @@ A product aimed for international remittence market.
 ## Server
 
 ### Build
-
-mvn clean package -DldapUrl=... -DldapUser=... -DldapPw=... -DldapBaseDn=... -DimapUser=... -DbasePath=...
+   * download [aws sdk for java](http://aws.amazon.com/sdkforjava/)
+   * `mvn install:install-file 
+    -Dfile=aws-java-sdk-flow-build-tools-<version>.jar 
+    -DgroupId=com.amazonaws 
+    -DartifactId=aws-java-sdk-flow-build-tools 
+    -Dversion=<version> 
+    -Dpackaging=jar`
+   * `mvn clean package 
+	-DldapUrl=... 
+	-DldapUser=... 
+	-DldapPw=... 
+	-DldapBaseDn=... 
+	-DimapUser=... 
+	-DbasePath=...`
 
 ### Run Local
-
-messanger/mvn jetty:run -Denvironment=test -DswfDomain=... -DaccessKey=... -DsecretKey=... -Dendpoint=... -DsenderMail=... -DbasePath=... -DqueueUri=... -DplivoKey=... -DplivoSecret=... -DimapHost=... -DimapPassword=... -DresPath=... -DldapUrl=... -DldapUser=... -DldapPw=... -DldapBaseDn=... -DcaptchaPubKey=... -DcaptchaSecKey=... -DsrvcPath=... -DamqpUser=... -DamqpPassword=... -DamqpHost=...
+   * `cd server'
+   * `mvn jetty:run -Denvironment=test -DswfDomain=... -DaccessKey=... -DsecretKey=... -Dendpoint=... -DsenderMail=... -DbasePath=... -DqueueUri=... -DplivoKey=... -DplivoSecret=... -DimapHost=... -DimapPassword=... -DresPath=... -DldapUrl=... -DldapUser=... -DldapPw=... -DldapBaseDn=... -DcaptchaPubKey=... -DcaptchaSecKey=... -DsrvcPath=... -DamqpUser=... -DamqpPassword=... -DamqpHost=...`
 
 ## Web
 
 ### Build
-
-npm install
-bower install
-grunt build
+   * `npm install`
+   * `bower install`
+   * `grunt build`
 
 ### Run Local
 
-grunt
+   * `grunt`
 
 ## License
 

@@ -21,10 +21,33 @@
 	
 	<repositories>
 		<repository>
-	        <id>tp</id>
-	        <name>Treeplanet</name>
-	        <url>http://build.treepla.net:8081/nexus/content/groups/public</url>
+	        <id>webfinger</id>
+	        <url>https://raw.github.com/Btc4All/webfinger/mvn-repo/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>always</updatePolicy>
+	        </snapshots>
 	    </repository>
+	    <repository>
+	        <id>BitcoindClient4J</id>
+	        <url>https://raw.github.com/johannbarbie/BitcoindClient4J/mvn-repo/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>always</updatePolicy>
+	        </snapshots>
+	    </repository>
+	    <repository>
+	        <id>RestNucleus-Boilerplate</id>
+	        <url>https://raw.github.com/johannbarbie/RestNucleus-Boilerplate/mvn-repo/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>always</updatePolicy>
+	        </snapshots>
+	    </repository>
+	    <repository>
+			<id>bitcoinj</id>
+			<url>http://distribution.bitcoinj.googlecode.com/git/releases/</url>
+		</repository>
 	</repositories>
 
 </project>
