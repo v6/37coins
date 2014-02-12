@@ -21,7 +21,8 @@ public class DataSet {
 		//REQUESTS
 		DEPOSIT_REQ("DepositReq"), // request a bitcoin address to receive a payment
 		WITHDRAWAL_REQ("WithdrawalReq"), // send a payment
-		WITHDRAWAL_REQ_OTHER("WithdrawalReqOther"), // request a payment
+		CHARGE("Charge"), // request a payment
+		PAY("Pay"), // do a payment
 		WITHDRAWAL_CONF("WithdrawalConf"), // confirm a payment
 		BALANCE("Balance"), // request the balance
 		GW_BALANCE("GwBal"), // request the balance

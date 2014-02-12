@@ -221,8 +221,7 @@ public class ParserFilter implements Filter {
 		DataSet data = new DataSet().setLocale(locale).setAction(action)
 				.setTo(sender);
 
-		if (data.getAction() == Action.WITHDRAWAL_REQ
-				|| data.getAction() == Action.WITHDRAWAL_REQ_OTHER) {
+		if (data.getAction() == Action.WITHDRAWAL_REQ) {
 			int pos = (ca[1].length() > ca[2].length()) ? 1 : 2;
 			Withdrawal w = new Withdrawal();
 			if (!readReceiver(w, ca[pos], data.getTo())
@@ -239,6 +238,17 @@ public class ParserFilter implements Filter {
 								: i + 1 + 20));
 			}
 			data.setPayload(w);
+		}
+		if (data.getAction() == Action.CHARGE){
+			Withdrawal w = new Withdrawal();
+			if (readAmount(w, ca[1])){
+				data.setPayload(w);
+			}else{
+				//error
+			}
+		}
+		if (data.getAction() == Action.PAY){
+			data.setPayload(ca[1]);
 		}
 		if (data.getAction() == Action.WITHDRAWAL_CONF) {
 			data.setPayload(ca[1]);

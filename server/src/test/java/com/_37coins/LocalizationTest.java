@@ -190,6 +190,20 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void test37coinsReq() throws IOException, TemplateException {
+		rsp.setAction(Action.CHARGE)
+			.setPayload(new Withdrawal()
+				.setAmount(new BigDecimal("0.01"))
+				.setComment("abc"));
+		System.out.println("REQ:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
 	public void test37coinsWithdrawalReq() throws IOException, TemplateException {
 		rsp.setAction(Action.WITHDRAWAL_CONF)
 			.setPayload(new Withdrawal()

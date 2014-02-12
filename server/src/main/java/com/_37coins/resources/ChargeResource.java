@@ -32,7 +32,7 @@ public class ChargeResource {
 	
 	@POST
 	public Charge create(Charge charge){
-		if (null == charge.getAmount()||null == charge.getSource()){
+		if (null == charge || null == charge.getAmount()||null == charge.getSource()){
 			throw new WebApplicationException(Response.Status.BAD_REQUEST);
 		}
 		String token = null;

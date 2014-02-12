@@ -1,5 +1,6 @@
 package com._37coins.resources;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +30,22 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -60,6 +74,7 @@ public class ParserResource {
 	final private ObjectMapper mapper;
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
+	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
@@ -72,6 +87,7 @@ public class ParserResource {
 			responseList.add(ds);
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.fiatPriceProvider = fiatPriceProvider;
+		localPort = httpReq.getLocalPort();
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
@@ -292,8 +308,59 @@ public class ParserResource {
 	}
 
 	@POST
-	@Path("/WithdrawalReqOther")
-	public Response withdrawalReqOther(){
+	@Path("/Charge")
+	public Response charge(){
+		DataSet data = responseList.get(0);
+		Withdrawal w = (Withdrawal)data.getPayload();
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost("http://127.0.0.1:"+localPort+ChargeResource.PATH);
+			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
+			pn = pn.replace("+", "");
+			Charge charge = new Charge().setAmount(w.getAmount()).setSource(pn);
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()==200){
+				Charge c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Charge.class);
+				w.setComment(c.getToken());
+				try {
+					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+				} catch (JsonProcessingException e) {
+					return null;
+				}
+			}else{
+				return null;
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+	}
+
+	@POST
+	@Path("/Pay")
+	public Response pay(){
+		DataSet data = responseList.get(0);
+		String token = (String)data.getPayload();
+		Charge charge = null;
+		try{
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet someHttpGet = new HttpGet("http://127.0.0.1:"+localPort+ChargeResource.PATH+"?token="+token);
+			URI uri = new URIBuilder(someHttpGet.getURI()).build();
+			HttpRequestBase request = new HttpGet(uri);
+			HttpResponse response = client.execute(request);
+			charge = new ObjectMapper().readValue(response.getEntity().getContent(), Charge.class);
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+		data.setAction(Action.WITHDRAWAL_REQ);
+		Withdrawal w = new Withdrawal();
+		w.setPayDest(new PaymentAddress().setAddressType(PaymentType.ACCOUNT).setAddress(charge.getSource()));
+		w.setAmount(charge.getAmount());
+		data.setPayload(w);
 		return withdrawalReq();
 	}
 	

@@ -85,7 +85,6 @@ public class ParserClient extends Thread {
 		}
 		for (DataSet result: results){
 			switch(result.getAction()){
-			case WITHDRAWAL_REQ_OTHER:
 			case WITHDRAWAL_REQ:
 				pa.handleWithdrawal(result);
 				break;

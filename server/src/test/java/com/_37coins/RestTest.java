@@ -442,21 +442,6 @@ public class RestTest {
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
 		Assert.assertTrue(w.getAmount()!=null);
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
-		//request money from email to mobile
-		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "request 0.01 +821012345678")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReqOther");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.WITHDRAWAL_REQ_OTHER, rv.get(0).getAction());
-		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("test@test.com", w.getPayDest().getAddress());
-		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		//send money from email to local number
 		r = given()
 			.formParam("from", "test@test.com")
@@ -530,26 +515,35 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",0, rv.size());
-		//request money, existing user
+		//charge a customer
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "request 0.01 +491087654321")
+			.formParam("message", "req 0.01")
 		.expect()
 			.statusCode(200)
 		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReqOther");
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Charge");
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.WITHDRAWAL_REQ_OTHER, rv.get(0).getAction());
-		Assert.assertEquals(49, rv.get(0).getTo().getPhoneNumber().getCountryCode());
+		Assert.assertEquals(Action.CHARGE, rv.get(0).getAction());
+		w = (Withdrawal)rv.get(0).getPayload();
+		String token = w.getComment();
+		//pay charge
+		r = given()
+			.formParam("from", "+491087654321")
+			.formParam("gateway", "+491602742398")
+			.formParam("message", "pay "+token)
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Pay");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
-		Assert.assertEquals(82, w.getMsgDest().getPhoneNumber().getCountryCode());
-		Assert.assertEquals(new BigDecimal("0.01").setScale(8), w.getAmount());
-		Assert.assertEquals(new BigDecimal("0.002").setScale(8), w.getFee());
 		Assert.assertEquals("DEV4N1JS2Z3476DE", w.getFeeAccount());
-		Assert.assertEquals("491087654321", rv.get(0).getCn());
 		//confirm a transaction
 		r = given()
 			.formParam("from", "+821012345678")

@@ -2,13 +2,11 @@ package com._37coins.web;
 
 import java.math.BigDecimal;
 
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-
 public class Charge {
 	
 	private BigDecimal amount;
 	
-	private PhoneNumber source;
+	private String source;
 	
 	private String token;
 
@@ -21,11 +19,11 @@ public class Charge {
 		return this;
 	}
 
-	public PhoneNumber getSource() {
+	public String getSource() {
 		return source;
 	}
 
-	public Charge setSource(PhoneNumber source) {
+	public Charge setSource(String source) {
 		this.source = source;
 		return this;
 	}

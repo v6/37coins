@@ -27,13 +27,11 @@ import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
-import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Singleton
 public class InterpreterFilter implements Filter {
@@ -46,11 +44,9 @@ public class InterpreterFilter implements Filter {
 		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet responseData = responseList.get(0);
 		InitialLdapContext ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
-		Withdrawal w = (responseData.getPayload() instanceof Withdrawal)?(Withdrawal)responseData.getPayload():null;
-		if (responseData.getAction()==Action.WITHDRAWAL_REQ_OTHER){
-			MessageAddress temp = w.getMsgDest();
-			w.setMsgDest(responseData.getTo());
-			responseData.setTo(temp);
+		if (responseData.getAction()==Action.CHARGE){
+			chain.doFilter(request, response);
+			return;
 		}
 		//get user from directory
 		try{

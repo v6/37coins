@@ -110,7 +110,6 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     @Asynchronous
     public void handleTransaction(final Promise<DataSet> rsp){
     	if (rsp.get().getAction()!=Action.WITHDRAWAL_REQ
-    			&& rsp.get().getAction()!=Action.WITHDRAWAL_REQ_OTHER
     			&& rsp.get().getAction()!=Action.WITHDRAWAL_CONF){
     		Promise<Void> fail = msgClient.sendMessage(rsp.get());
     		fail(fail, "transaction failed");
