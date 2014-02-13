@@ -44,10 +44,6 @@ public class InterpreterFilter implements Filter {
 		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet responseData = responseList.get(0);
 		InitialLdapContext ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
-		if (responseData.getAction()==Action.CHARGE){
-			chain.doFilter(request, response);
-			return;
-		}
 		//get user from directory
 		try{
 			//read the user
