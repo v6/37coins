@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class Charge {
+public class Product {
 	
 	private BigDecimal amount;
 	
@@ -20,7 +20,7 @@ public class Charge {
 		return amount;
 	}
 
-	public Charge setAmount(BigDecimal amount) {
+	public Product setAmount(BigDecimal amount) {
 		this.amount = amount;
 		return this;
 	}
@@ -29,7 +29,7 @@ public class Charge {
 		return source;
 	}
 
-	public Charge setSource(String source) {
+	public Product setSource(String source) {
 		this.source = source;
 		return this;
 	}
@@ -38,7 +38,7 @@ public class Charge {
 		return token;
 	}
 
-	public Charge setToken(String token) {
+	public Product setToken(String token) {
 		this.token = token;
 		return this;
 	}
