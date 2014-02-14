@@ -17,6 +17,7 @@
 		<module>interface</module>
 		<module>server</module>
 		<module>bitcoindManager</module>
+		<module>products</module>
 	</modules>
 	
 	<repositories>

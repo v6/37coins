@@ -239,7 +239,8 @@ public class ParserFilter implements Filter {
 			}
 			data.setPayload(w);
 		}
-		if (data.getAction() == Action.CHARGE){
+		if (data.getAction() == Action.CHARGE 
+				|| data.getAction() == Action.PRODUCT){
 			Withdrawal w = new Withdrawal();
 			if (readAmount(w, ca[1])){
 				data.setPayload(w);

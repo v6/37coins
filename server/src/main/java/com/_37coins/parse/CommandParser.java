@@ -32,7 +32,8 @@ public class CommandParser {
 			Action.WITHDRAWAL_CONF,
 			Action.PAY,
 			Action.WITHDRAWAL_REQ, 
-			Action.CHARGE);
+			Action.CHARGE,
+			Action.PRODUCT);
 	
 	private Map<String, Pair<Action,Locale>> wordMap = new HashMap<>();
 

@@ -22,6 +22,7 @@ public class DataSet {
 		DEPOSIT_REQ("DepositReq"), // request a bitcoin address to receive a payment
 		WITHDRAWAL_REQ("WithdrawalReq"), // send a payment
 		CHARGE("Charge"), // request a payment
+		PRODUCT("Product"), // like charge, but 24h cache
 		PAY("Pay"), // do a payment
 		WITHDRAWAL_CONF("WithdrawalConf"), // confirm a payment
 		BALANCE("Balance"), // request the balance

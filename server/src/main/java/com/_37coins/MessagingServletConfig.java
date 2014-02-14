@@ -91,6 +91,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String captchaPubKey;
 	public static String captchaSecKey;
 	public static String elasticSearchHost;
+	public static String productPath;
 	public static int localPort;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
@@ -126,6 +127,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		captchaPubKey = System.getProperty("captchaPubKey");
 		captchaSecKey = System.getProperty("captchaSecKey");
 		elasticSearchHost = System.getProperty("elasticSearchHost");
+		productPath = System.getProperty("productPath");
 	}
 	
 	private ServletContext servletContext;

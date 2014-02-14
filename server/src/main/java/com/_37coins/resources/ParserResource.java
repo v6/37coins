@@ -338,6 +338,38 @@ public class ParserResource {
 			return null;
 		}
 	}
+	
+	@POST
+	@Path("/Product")
+	public Response products(){
+		DataSet data = responseList.get(0);
+		Withdrawal w = (Withdrawal)data.getPayload();
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost(MessagingServletConfig.productPath);
+			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
+			pn = pn.replace("+", "");
+			Charge charge = new Charge().setAmount(w.getAmount()).setSource(pn);
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()==200){
+				Charge c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Charge.class);
+				w.setComment(c.getToken());
+				try {
+					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+				} catch (JsonProcessingException e) {
+					return null;
+				}
+			}else{
+				return null;
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return null;
+		}
+	}
 
 	@POST
 	@Path("/Pay")
@@ -351,7 +383,17 @@ public class ParserResource {
 			URI uri = new URIBuilder(someHttpGet.getURI()).build();
 			HttpRequestBase request = new HttpGet(uri);
 			HttpResponse response = client.execute(request);
-			charge = new ObjectMapper().readValue(response.getEntity().getContent(), Charge.class);
+			if (response.getStatusLine().getStatusCode()!=200){
+				HttpGet secondHttpGet = new HttpGet(MessagingServletConfig.productPath+"?token="+token);
+				URI secondUri = new URIBuilder(secondHttpGet.getURI()).build();
+				HttpRequestBase secondRequest = new HttpGet(secondUri);
+				response = client.execute(secondRequest);
+			}
+			if (response.getStatusLine().getStatusCode()==200){
+				charge = new ObjectMapper().readValue(response.getEntity().getContent(), Charge.class);
+			}else{
+				throw new RuntimeException("not found");
+			}
 		}catch(Exception ex){
 			ex.printStackTrace();
 			return null;
