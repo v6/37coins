@@ -82,6 +82,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct",taskToken);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
+			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+	        manualCompletionClient.fail(e);
 			return;
 		}
 	}
@@ -118,6 +122,9 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct","SmsResource"+taskToken);
 			}
 		} catch (Exception e) {
+			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+	        manualCompletionClient.fail(e);
 			e.printStackTrace();
 		}
 		return null;
