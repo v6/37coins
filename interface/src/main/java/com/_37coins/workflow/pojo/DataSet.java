@@ -153,15 +153,33 @@ public class DataSet {
 	
 	@JsonIgnore
 	public DataSet setLocaleString(String locale){
-		if (null==locale)
+		Locale rv = parseLocaleString(locale);
+		if (null==rv)
 			return this;
-		String[] l = locale.split("[-_]");
-		switch(l.length){
-	        case 2: this.locale = new Locale(l[0], l[1]); break;
-	        case 3: this.locale = new Locale(l[0], l[1], l[2]); break;
-	        default: this.locale = new Locale(l[0]); break;
-	    }
+		this.locale = rv;
 		return this;
+	}
+	
+	public static Locale parseLocaleString(String locale){
+		Locale rv = null;
+		if (null!=locale){
+			String str = locale.split(",")[0];
+			String[] arr = str.trim().replace("-", "_").split(";");
+			
+			String[] l = arr[0].split("_");
+			switch (l.length) {
+			case 2:
+				rv = new Locale(l[0], l[1]);
+				break;
+			case 3:
+				rv = new Locale(l[0], l[1], l[2]);
+				break;
+			default:
+				rv = new Locale(l[0]);
+				break;
+			}
+		}
+		return rv;
 	}
 
 	public MessageAddress getTo() {

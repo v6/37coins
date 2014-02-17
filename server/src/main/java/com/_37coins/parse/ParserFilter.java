@@ -67,27 +67,7 @@ public class ParserFilter implements Filter {
 		String message = httpReq.getParameter("message");
 		// Parse the locale
 		String acceptLng = httpReq.getHeader("Accept-Language");
-		Locale locale = null;
-		if (null!=acceptLng){
-			String str = acceptLng.split(",")[0];
-			String[] arr = str.trim().replace("-", "_").split(";");
-			
-			String[] l = arr[0].split("_");
-			switch (l.length) {
-			case 2:
-				locale = new Locale(l[0], l[1]);
-				break;
-			case 3:
-				locale = new Locale(l[0], l[1], l[2]);
-				break;
-			default:
-				locale = new Locale(l[0]);
-				break;
-			}
-		}
-		if (null==locale){
-			locale = new Locale("en_US"); //esperanto
-		}
+		Locale locale = DataSet.parseLocaleString(acceptLng);
 		// parse action
 		String url = httpReq.getRequestURL().toString();
 		String actionString = url.substring(
@@ -96,9 +76,17 @@ public class ParserFilter implements Filter {
 			// parse message address
 			MessageAddress md = MessageAddress.fromString(from, gateway)
 					.setGateway(gateway);
+			//exclude all roaming requests
 			if (md.getAddressType() == MsgType.SMS 
 					&& !isFromSameCountry(md, gateway)){
 				respond(new ArrayList<DataSet>(), response);
+			}
+			if (md.getAddressType() == MsgType.SMS){
+				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
+				locale = DataSet.parseLocaleString(rc);
+			}else if (null==locale){
+				locale = Locale.US;
 			}
 			// parse message into dataset
 			DataSet responseData = process(md, message, locale,Action.fromString(actionString));

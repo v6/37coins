@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Singleton;
 import javax.naming.NameNotFoundException;
@@ -81,13 +82,9 @@ public class InterpreterFilter implements Filter {
 			}
 			responseData.setGwFee(gwFee);			
 			responseData.getTo().setGateway((responseData.getTo().getAddressType() == MsgType.SMS)?gwCn:gwMail);
-			//deal with language
-			if (responseData.getAction()==Action.UNKNOWN_COMMAND){
-				responseData.setLocaleString(locale);//because we did not recognize the command, we also don't know the language
-			}else if (responseData.getLocale()!=new DataSet().setLocaleString(locale).getLocale()){
-				//update language if outdated in directory
-				toModify.put("preferredLanguage", responseData.getLocaleString());
-			}
+			//get users prefered language
+			if (null!=locale)
+				responseData.setLocaleString(locale);
 			//update user if necessary
 			if (toModify.size()>0){
 				ctx.modifyAttributes("cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
