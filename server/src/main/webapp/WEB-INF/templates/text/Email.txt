@@ -1,0 +1,6 @@
+<#setting locale=locale>
+${resBundle.EmailExplain1}
+<#assign x = 0>
+<#list payload as t>${t} <#if x < 2><#assign x = x + 1><#else><#assign x = 0>
+</#if></#list> 
+${resBundle.EmailExplain2}

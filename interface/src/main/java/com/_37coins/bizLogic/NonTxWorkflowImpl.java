@@ -10,7 +10,9 @@ import com._37coins.activities.MessagingActivitiesClientImpl;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.workflow.NonTxWorkflow;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -45,6 +47,16 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 		}else if (data.getAction() == Action.DEPOSIT_CONF){
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondDepositConf(balance, data);
+		}else if (data.getAction() == Action.EMAIL){
+			//send email
+			//send message
+			//start manual completion
+			Promise<Void> doneSms = msgClient.sendMessage(data);
+			EmailFactor ef = (EmailFactor)data.getPayload();
+			data.getTo().setAddressType(MsgType.EMAIL);
+			data.getTo().setAddress(ef.getEmail());
+			Promise<Void> doneEmail = msgClient.sendMessage(data);
+			waitEmailFactorConfirm(doneSms, doneEmail);
 		}else{
 			throw new RuntimeException("unknown action");
 		}
@@ -54,6 +66,12 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	public void createAddress(Promise<Void> done,DataSet data){
 		Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 		respondDataReq(bcAddress, data);
+	}
+	
+	@Asynchronous
+	public void waitEmailFactorConfirm(Promise<Void> doneSms,Promise<Void> doneEmail){
+		//notify mail-otp service
+		//mail-otp service will generate, save and send out otp.
 	}
 	
 	@Asynchronous

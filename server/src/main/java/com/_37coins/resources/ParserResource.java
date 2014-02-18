@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -49,6 +50,7 @@ import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
@@ -474,6 +476,44 @@ public class ParserResource {
 	public Response getPrice(){
 		DataSet data = responseList.get(0);
 		data.setPayload(fiatPriceProvider.getLocalCurValue(data.getTo().getPhoneNumber()));
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Email")
+	public Response activateEmailSecondFactor(){
+		//create two secrets
+		//one will be send out via email
+		//one will be send out via sms
+		//both will have to be returned via sms
+		DataSet data = responseList.get(0);
+		EmailFactor ef = (EmailFactor)data.getPayload();
+		Element e = cache.get("email"+ef.getEmail().getAddress());
+		if (null!=e){
+			//workflow already started for this email
+			//cancel somehow
+			throw new WebApplicationException("conflict, already executing", Response.Status.CONFLICT);
+		}
+		cache.put(new Element("email"+ef.getEmail().getAddress(),true));
+		String emailToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
+		String smsToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
+		ef.setEmailToken(emailToken);
+		ef.setSmsToken(smsToken);
+		try {
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException ex) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Path("/Voice")
+	public Response activateVoiceSecondFactor(){
+		// nothing, just start workflow in parser client
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {

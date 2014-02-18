@@ -202,6 +202,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	filter("/account*").through(DirectoryFilter.class); //allow directory access
+            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
             	filter("/plivo/*").through(DirectoryFilter.class); //allow directory access
             	filter("/data/*").through(DirectoryFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());

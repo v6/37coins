@@ -24,6 +24,8 @@ public class DataSet {
 		CHARGE("Charge"), // request a payment
 		PRODUCT("Product"), // like charge, but 24h cache
 		PAY("Pay"), // do a payment
+		EMAIL("Email"), //set up email second factor
+		VOICE("Voice"), //set up voice second factor
 		WITHDRAWAL_CONF("WithdrawalConf"), // confirm a payment
 		BALANCE("Balance"), // request the balance
 		GW_BALANCE("GwBal"), // request the balance
@@ -35,6 +37,8 @@ public class DataSet {
 		SELL("Sell"),
 		//RESPONSES
 		SIGNUP("Signup"), // create a new account
+		EMAIL_VER("EmailVerify"),
+		EMAIL_SMS_VER("EmailSmsVerify"),
 		RESET("Reset"), // gateway reset password
 		REGISTER("Register"), //gateway signup
 		DEPOSIT_CONF("DepositConf"),

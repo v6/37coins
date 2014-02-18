@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -200,6 +201,43 @@ public class LocalizationTest {
 		System.out.println(s);
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsEmail() throws IOException, TemplateException {
+		List<String> otp = new ArrayList<>();
+		for (int i = 0; i< 30;i++){
+			otp.add(RandomStringUtils.random(4, "0123456789"));
+		}
+		rsp.setAction(Action.EMAIL)
+			.setPayload(otp);
+		System.out.println("EMAIL:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+	}
+	
+	@Test
+	public void test37coinsEmailVerify() throws IOException, TemplateException {
+		rsp.setAction(Action.EMAIL_VER)
+			.setPayload("1234");
+		System.out.println("EMAIL_VER:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+	}
+	
+	@Test
+	public void test37coinsEmailSmsVerify() throws IOException, TemplateException {
+		rsp.setAction(Action.EMAIL_SMS_VER)
+			.setPayload("1234");
+		System.out.println("EMAIL_SMS_VER:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
