@@ -33,6 +33,7 @@ public class CommandParser {
 			Action.PAY,
 			Action.EMAIL,
 			Action.VOICE,
+			Action.RESTORE,
 			Action.WITHDRAWAL_REQ, 
 			Action.CHARGE,
 			Action.PRODUCT);

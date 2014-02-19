@@ -231,6 +231,17 @@ public class ParserFilter implements Filter {
 						i + 1,
 						(i + 1 + 20 > subject.length()) ? subject.length()
 								: i + 1 + 20));
+				//parse TAN from comment
+				int length = 4;
+				String regex = "^[0-9]{"+length+"}( |$).*";
+				if (w.getComment().matches(regex)){
+					w.setConfKey(w.getComment().substring(0, length));
+					if (w.getComment().length()>length){
+						w.setComment(w.getComment().substring(length, w.getComment().length()).trim());
+					}else{
+						w.setComment(null);
+					}
+				}
 			}
 			data.setPayload(w);
 		}
