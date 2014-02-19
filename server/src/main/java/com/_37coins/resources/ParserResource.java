@@ -90,6 +90,7 @@ public class ParserResource {
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.fiatPriceProvider = fiatPriceProvider;
 		localPort = httpReq.getLocalPort();
+		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
@@ -491,18 +492,34 @@ public class ParserResource {
 		//one will be send out via sms
 		//both will have to be returned via sms
 		DataSet data = responseList.get(0);
-		EmailFactor ef = (EmailFactor)data.getPayload();
-		Element e = cache.get("email"+ef.getEmail().getAddress());
-		if (null!=e){
-			//workflow already started for this email
-			//cancel somehow
-			throw new WebApplicationException("conflict, already executing", Response.Status.CONFLICT);
+		if (data.getPayload() instanceof EmailFactor){
+			EmailFactor ef = (EmailFactor)data.getPayload();
+			if (null!=ef.getEmailToken()&&null!=ef.getSmsToken()){
+				Element e = cache.get("emailVer"+ef.getSmsToken()+ef.getEmailToken());
+				if (null!=e){
+					data.setAction(Action.EMAIL_SMS_VER)
+					    .setPayload(e.getObjectValue());
+				}else{
+					//actually this shoud say not found, or something
+					data.setAction(Action.DST_ERROR);
+				}
+			}else if (null!=ef.getEmail()){
+				Element e = cache.get("email"+ef.getEmail().getAddress());
+				if (null!=e){
+					//workflow already started for this email
+					//cancel somehow
+					throw new WebApplicationException("conflict, already executing", Response.Status.CONFLICT);
+				}
+				cache.put(new Element("email"+ef.getEmail().getAddress(),true));
+				String emailToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
+				String smsToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
+				ef.setEmailToken(emailToken);
+				ef.setSmsToken(smsToken);
+				data.setAction(Action.EMAIL_VER);
+			}
+		}else{
+			data.setAction(Action.EMAIL);
 		}
-		cache.put(new Element("email"+ef.getEmail().getAddress(),true));
-		String emailToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
-		String smsToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
-		ef.setEmailToken(emailToken);
-		ef.setSmsToken(smsToken);
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException ex) {

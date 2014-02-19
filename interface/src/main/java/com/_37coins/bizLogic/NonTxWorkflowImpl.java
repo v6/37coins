@@ -3,6 +3,8 @@ package com._37coins.bizLogic;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.mail.internet.InternetAddress;
+
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
@@ -12,6 +14,7 @@ import com._37coins.workflow.NonTxWorkflow;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
@@ -48,15 +51,33 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondDepositConf(balance, data);
 		}else if (data.getAction() == Action.EMAIL){
-			//send email
+				msgClient.emailOtpCreation(data.getCn(), (InternetAddress)data.getPayload());
+		}else if (data.getAction() == Action.EMAIL_VER){
 			//send message
-			//start manual completion
-			Promise<Void> doneSms = msgClient.sendMessage(data);
 			EmailFactor ef = (EmailFactor)data.getPayload();
-			data.getTo().setAddressType(MsgType.EMAIL);
-			data.getTo().setAddress(ef.getEmail());
-			Promise<Void> doneEmail = msgClient.sendMessage(data);
-			waitEmailFactorConfirm(doneSms, doneEmail);
+			DataSet emailDs = new DataSet()
+				.setAction(Action.EMAIL_SMS_VER)
+				.setTo(data.getTo())
+				.setCn(data.getCn())
+				.setPayload(ef.getSmsToken());
+			Promise<Void> doneSms = msgClient.sendMessage(emailDs);
+			//send email
+			
+			data.setAction(Action.EMAIL_VER)
+				.setTo(new MessageAddress()
+					.setAddressType(MsgType.EMAIL)
+					.setAddress(ef.getEmail()))
+				.setPayload(ef.getEmailToken());
+			Promise<String> doneEmail = msgClient.emailVerification(
+					new EmailFactor()
+						.setEmail(ef.getEmail())
+						.setEmailToken(ef.getEmailToken())
+						.setCn(data.getCn()));
+			//start manual completion
+			waitEmailFactorConfirm(doneSms, doneEmail, data.getCn(), ef.getEmail());
+		}else if (data.getAction() == Action.EMAIL){
+			//send new otp
+			msgClient.sendMessage(data);
 		}else{
 			throw new RuntimeException("unknown action");
 		}
@@ -69,9 +90,10 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	}
 	
 	@Asynchronous
-	public void waitEmailFactorConfirm(Promise<Void> doneSms,Promise<Void> doneEmail){
-		//notify mail-otp service
-		//mail-otp service will generate, save and send out otp.
+	public void waitEmailFactorConfirm(Promise<Void> doneSms, Promise<String> doneEmail, String cn, InternetAddress email){
+		String emailServiceToken = doneEmail.get();
+		msgClient.emailConfirmation(emailServiceToken);
+		msgClient.emailOtpCreation(cn, email);
 	}
 	
 	@Asynchronous

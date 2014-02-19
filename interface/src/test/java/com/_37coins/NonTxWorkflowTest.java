@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import com._37coins.workflow.NonTxWorkflowClientFactory;
 import com._37coins.workflow.NonTxWorkflowClientFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -105,6 +107,17 @@ public class NonTxWorkflowTest {
 			}
 			@Override
 			public void putAddressCache(DataSet rsp) {
+			}
+			@Override
+		    public String emailVerification(EmailFactor ef){
+				trace.add(new DataSet().setPayload(ef));
+				return null;
+			}
+			@Override
+		    public void emailConfirmation(String emailServiceToken){
+			}
+			@Override
+		    public void emailOtpCreation(String cn, InternetAddress email){	
 			}
 
         };
@@ -191,10 +204,44 @@ public class NonTxWorkflowTest {
 		data.setPayload(list);
 		validate("successfull tx", data, trace, booked);
 	}
+	
+	@Test
+	public void testEmailVer() throws AddressException {
+		NonTxWorkflowClient workflow = workflowFactory.getClient();
+		DataSet input = new DataSet()
+			.setAction(Action.EMAIL_VER)
+			.setCn("1")
+			.setPayload(new EmailFactor()
+				.setEmail(new InternetAddress("mail@bla.com"))
+				.setEmailToken("email")
+				.setSmsToken("sms"));
+		
+		Promise<Void> booked = workflow.executeCommand(input);
+		//prepare result
+		DataSet data = new DataSet()
+			.setAction(Action.EMAIL_SMS_VER)
+			.setCn("1")
+			.setPayload("sms");
+		DataSet data2 = new DataSet()
+			.setPayload(new EmailFactor()
+				.setEmailToken("email")
+				.setCn("1")
+				.setEmail(new InternetAddress("mail@bla.com")));
+		List<DataSet> result = new ArrayList<>();
+		result.add(data);
+		result.add(data2);
+		//validate
+		validateList("successfull tx", result, trace, booked);
+	}
 
 	@Asynchronous
 	public void validate(String desc, Object expected, List<DataSet> l,Promise<Void> booked){
 		AsyncAssert.assertEqualsWaitFor(desc, expected, l.get(0), booked);
+	}
+	
+	@Asynchronous
+	public void validateList(String desc, List<DataSet> expected, List<DataSet> l,Promise<Void> booked){
+		AsyncAssert.assertEqualsWaitFor(desc, expected, l, booked);
 	}
 	
 }

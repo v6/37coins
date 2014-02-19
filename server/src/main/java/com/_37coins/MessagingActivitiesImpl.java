@@ -1,10 +1,12 @@
 package com._37coins;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import javax.mail.internet.InternetAddress;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
@@ -12,6 +14,11 @@ import javax.naming.ldap.InitialLdapContext;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
@@ -23,10 +30,12 @@ import com._37coins.envaya.QueueClient;
 import com._37coins.persistence.dto.MsgAddress;
 import com._37coins.persistence.dto.Transaction;
 import com._37coins.persistence.dto.Transaction.State;
+import com._37coins.resources.EmailServiceResource;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -39,6 +48,7 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
@@ -208,5 +218,68 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		return list.iterator().next();
 	}
 
+	
+	@Override
+	@ManualActivityCompletion
+    public String emailVerification(EmailFactor ef){
+		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
+		String taskToken = executionContext.getTaskToken();
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/verify");
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(ef), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()==200){
+				EmailFactor c = new ObjectMapper().readValue(rsp.getEntity().getContent(),EmailFactor.class);
+				cache.put(new Element("emailVer"+ef.getSmsToken()+ef.getEmailToken(),new EmailFactor().setEmailToken(c.getEmailToken()).setTaksToken(taskToken)));
+			}else{
+				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
+	        manualCompletionClient.fail(ex);
+		}
+		return null;
+	}
+    
+	@Override
+    public void emailConfirmation(String emailServiceToken){
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/confirm");
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setEmailToken(emailServiceToken)), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()!=204){
+				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+    
+	@Override
+    public void emailOtpCreation(String cn, InternetAddress email){
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/renew");
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(cn).setEmail(email)), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()!=204){
+				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}		
+	}
 
 }

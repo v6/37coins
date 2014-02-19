@@ -92,9 +92,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String captchaSecKey;
 	public static String elasticSearchHost;
 	public static String productPath;
-	public static int localPort;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
+	public static int localPort;
 	static {
 		if (null!=System.getProperty("accessKey")){
 		awsCredentials = new BasicAWSCredentials(

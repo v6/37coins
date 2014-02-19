@@ -25,6 +25,7 @@ import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
+import com._37coins.workflow.pojo.EmailFactor;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.google.inject.Guice;
@@ -48,6 +49,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
 		gw.add(new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
 		cache.put(new Element("gateways",gw));
+		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaksToken("taskToken").setEmailToken("bla")));
 	}
 
 	@Override

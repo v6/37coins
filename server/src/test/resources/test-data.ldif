@@ -51,3 +51,14 @@ givenName: johann
 departmentNumber: test9900
 description: 0.0001
 mail: mail@37coins.com
+
+dn: cn=821039841235,ou=accounts,dc=37coins,dc=com
+objectClass: top
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: person
+cn: 821039841235
+sn: 821039841235
+mobile: +821039841235
+mail: bla@bla.com
+manager: cn=OZV4N1JS2Z3476NL,ou=gateways,dc=37coins,dc=com

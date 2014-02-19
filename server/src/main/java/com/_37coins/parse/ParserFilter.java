@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,6 +33,7 @@ import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.PriceTick;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -234,6 +236,19 @@ public class ParserFilter implements Filter {
 				data.setPayload(w);
 			}else{
 				//error
+			}
+		}
+		if (data.getAction() == Action.EMAIL){
+			if (ca.length == 2){
+				try {
+					data.setPayload(new EmailFactor().setEmail(new InternetAddress(ca[1])));
+				} catch (AddressException e) {
+					data.setAction(Action.FORMAT_ERROR);
+				}
+			}else if (ca.length == 3){
+				data.setPayload(new EmailFactor()
+					.setSmsToken(ca[1])
+					.setEmailToken(ca[2]));
 			}
 		}
 		if (data.getAction() == Action.PAY){

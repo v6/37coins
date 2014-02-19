@@ -14,6 +14,7 @@ public class EmailFactor {
 	private String smsToken;
 	private InternetAddress email;	
 	private String cn;
+	private String taksToken;
 	
 	public String getEmailToken() {
 		return emailToken;
@@ -41,6 +42,13 @@ public class EmailFactor {
 	}
 	public EmailFactor setCn(String cn) {
 		this.cn = cn;
+		return this;
+	}
+	public String getTaksToken() {
+		return taksToken;
+	}
+	public EmailFactor setTaksToken(String taksToken) {
+		this.taksToken = taksToken;
 		return this;
 	}
 }

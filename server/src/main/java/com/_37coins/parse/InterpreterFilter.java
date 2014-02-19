@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Singleton;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -51,6 +52,7 @@ public class InterpreterFilter implements Filter {
 			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+responseData.getTo().getAddress()+"))", ctx).getAttributes();
 			boolean pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			String locale = (atts.get("preferredLanguage")!=null)?(String)atts.get("preferredLanguage").get():null;
+			String mail = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
 			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
 			String cn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
 			//check if account is disabled
@@ -58,6 +60,9 @@ public class InterpreterFilter implements Filter {
 				responseData.setAction(Action.ACCOUNT_BLOCKED);
 				respond(responseList,response);
 				return;
+			}
+			if (responseData.getAction()==Action.EMAIL && null == responseData.getPayload()){
+				responseData.setPayload(new InternetAddress(mail));
 			}
 			responseData.setCn(cn);
 			//read the gateway
@@ -129,7 +134,7 @@ public class InterpreterFilter implements Filter {
 					httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			}
-		} catch (NamingException e) {
+		} catch (NamingException | AddressException e) {
 			e.printStackTrace();
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 import junit.framework.Assert;
 
@@ -25,6 +26,7 @@ import com._37coins.workflow.WithdrawalWorkflowClient;
 import com._37coins.workflow.WithdrawalWorkflowClientFactory;
 import com._37coins.workflow.WithdrawalWorkflowClientFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
@@ -172,6 +174,16 @@ public class WithdrawalWorkflowTest {
 
 			@Override
 			public void putAddressCache(DataSet rsp) {
+			}
+			@Override
+		    public String emailVerification(EmailFactor ef){
+				return null;
+			}
+			@Override
+		    public void emailConfirmation(String emailServiceToken){
+			}
+			@Override
+		    public void emailOtpCreation(String cn, InternetAddress email){	
 			}
 		};
 		

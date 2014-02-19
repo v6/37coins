@@ -10,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.core.Form;
 
 import junit.framework.Assert;
@@ -30,6 +32,7 @@ import com._37coins.resources.ParserResource;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -174,6 +177,77 @@ public class RestTest {
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CHARGE);
 		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
+    }
+    
+    @Test
+	public void testEmail() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException, AddressException{
+    	final DataSet ds = new DataSet();
+    	ParserClient parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+821039841234", "+821027423984", "email mail@bla.com", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {
+				ds.setAction(data.getAction());
+				ds.setTo(data.getTo());
+				ds.setPayload(data.getPayload());
+				ds.setCn(data.getCn());}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		EmailFactor ef = (EmailFactor)ds.getPayload();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.EMAIL_VER);
+		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+		Assert.assertEquals("mail@bla.com",ef.getEmail().getAddress());
+		Assert.assertNotNull(ds.getCn());
+		
+		parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+821039841234", "+821027423984", "email sms email", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleConfirm(DataSet data) {
+				ds.setAction(data.getAction());
+				ds.setTo(data.getTo());
+				ds.setPayload(data.getPayload());
+				ds.setCn(data.getCn());
+			}
+		});
+		parserClient.join();
+		EmailFactor ef2 = (EmailFactor)ds.getPayload();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.EMAIL_SMS_VER);
+		Assert.assertEquals("taskToken",ef2.getTaksToken());
+		Assert.assertNotNull(ef2.getEmailToken());
+		
+		parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+821039841235", "+821027423984", "email", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {
+				ds.setAction(data.getAction());
+				ds.setPayload(data.getPayload());
+			}
+			@Override
+			public void handleConfirm(DataSet data) {
+				ds.setAction(data.getAction());
+			}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.EMAIL);
+		Assert.assertEquals(new InternetAddress("bla@bla.com"),ds.getPayload());
     }
 	
 	@Test
