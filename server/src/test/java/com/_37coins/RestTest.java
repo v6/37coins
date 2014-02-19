@@ -602,6 +602,24 @@ public class RestTest {
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821087654321", rv.get(1).getCn());
+		//restore account
+		r = given()
+			.formParam("from", "+821087654321")
+			.formParam("gateway", "+821027423984")
+			.formParam("message", "restore 01012345678 1234")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Restore");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
+		w = (Withdrawal)rv.get(0).getPayload();
+		Assert.assertEquals("821087654321", w.getPayDest().getAddress());
+		Assert.assertEquals(BigDecimal.ZERO, w.getAmount());
+		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
+		Assert.assertEquals("1234", w.getConfKey());
 		//check out the TestServletConfig for cached data
 		//send money, new user, other country
 		r = given()

@@ -310,6 +310,12 @@ public class ParserResource {
 			return null;
 		}
 	}
+	
+	@POST
+	@Path("/Restore")
+	public Response restore(){
+		return withdrawalReq();
+	}
 
 	@POST
 	@Path("/Charge")

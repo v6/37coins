@@ -234,6 +234,26 @@ public class ParserFilter implements Filter {
 			}
 			data.setPayload(w);
 		}
+		if (data.getAction() == Action.RESTORE){
+			if (ca.length!=3){
+				data.setAction(Action.FORMAT_ERROR);
+				return data;
+			}
+			Withdrawal w = new Withdrawal();
+			w.setAmount(BigDecimal.ZERO);
+			MessageAddress ma;
+			try{
+				ma = MessageAddress.fromString(ca[1], data.getTo());
+			}catch(AddressException | NumberParseException e){
+				data.setAction(Action.FORMAT_ERROR);
+				return data;
+			}
+			w.setConfKey(ca[2]);
+			w.setMsgDest(data.getTo());
+			data.setTo(ma);
+			data.setPayload(w);
+			data.setAction(Action.WITHDRAWAL_REQ);
+		}
 		if (data.getAction() == Action.CHARGE 
 				|| data.getAction() == Action.PRODUCT){
 			Withdrawal w = new Withdrawal();
