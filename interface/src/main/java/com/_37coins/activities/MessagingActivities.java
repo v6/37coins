@@ -36,6 +36,10 @@ public interface MessagingActivities {
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
     Action phoneConfirmation(DataSet rsp, String workflowId);
     
+    @Activity(name = "OtpConfirmation", version = "0.1")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    Action otpConfirmation(String cn, String otp, Locale locale);
+    
     @Activity(name = "EmailVerification", version = "0.2")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
     String emailVerification(EmailFactor emailFactor, Locale locale);

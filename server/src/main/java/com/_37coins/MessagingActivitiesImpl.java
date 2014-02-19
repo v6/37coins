@@ -290,5 +290,28 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			throw new RuntimeException(ex);
 		}		
 	}
+	
+	@Override
+	public Action otpConfirmation(String cn, String otp, Locale locale){
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/consume");
+			if (null!=locale){
+				req.addHeader("Accept-Language", locale.toString().replace("_", "-"));
+			}
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(cn).setTaksToken(otp)), "UTF-8");
+			entity.setContentType("application/json");
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()==204){
+				return Action.WITHDRAWAL_REQ;
+			}else{
+				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+			return Action.TX_FAILED;
+		}	
+	}
 
 }

@@ -35,6 +35,7 @@ import com.amazonaws.services.simpleworkflow.flow.core.TryCatch;
 
 public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	public static Logger log = LoggerFactory.getLogger(WithdrawalWorkflowImpl.class);
+	public static BigDecimal bcFee = new BigDecimal("0.0001");
 	DecisionContextProvider contextProvider = new DecisionContextProviderImpl();
     BitcoindActivitiesClient bcdClient = new BitcoindActivitiesClientImpl();
     MessagingActivitiesClient msgClient = new MessagingActivitiesClientImpl();
@@ -57,11 +58,15 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     public void handleAccount(Promise<BigDecimal> balance, Promise<BigDecimal> volume24h, final DataSet data){
 		final Settable<DataSet> confirm = new Settable<>();
     	Withdrawal w = (Withdrawal)data.getPayload();
-    	BigDecimal amount = w.getAmount().setScale(8);
+    	BigDecimal amount = w.getAmount();
     	BigDecimal fee = w.getFee().setScale(8);
+    	//for withdrawing everything
+    	if (amount.equals(BigDecimal.ZERO) && w.getConfKey()!=null){
+    		amount = balance.get().subtract(fee).subtract(bcFee);
+    		w.setAmount(amount);
+    	}
     	
-    	
-    	if (balance.get().compareTo(amount.add(fee).setScale(8))<0){
+    	if (balance.get().compareTo(amount.add(fee).add(bcFee).setScale(8))<0){
     		//balance not sufficient
     		data.setPayload(new Withdrawal()
     				.setAmount(amount.add(fee).setScale(8))
@@ -70,7 +75,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     		Promise<Void> fail = msgClient.sendMessage(data);
     		fail(fail, "insufficient funds");
     		return;
-    	}else if (fee.multiply(new BigDecimal("2")).compareTo(amount)>=0){
+    	}else if (fee.compareTo(amount)>=0){
     		//avoid dust
     		data.setPayload(new Withdrawal()
 					.setAmount(amount)
@@ -83,7 +88,9 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     		//balance sufficient, now secure transaction authenticity 
 			final Promise<Action> response;
 			BigDecimal callFee = convService.convertToBtc(CallPrices.getUsdPrice(data.getTo()), Currency.getInstance(Locale.US));
-			if (volume24h.get().add(amount).compareTo(fee.add(callFee).multiply(new BigDecimal("100.0"))) > 0){
+			if (w.getConfKey()!=null){
+				response = msgClient.otpConfirmation(data.getCn(), w.getConfKey(),data.getLocale());
+			}else if (volume24h.get().add(amount).compareTo(fee.add(callFee).multiply(new BigDecimal("100.0"))) > 0){
 				response = msgClient.phoneConfirmation(data,contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
 				w.setConfKey(WithdrawalWorkflow.VOICE_VER_TOKEN);
 			}else {

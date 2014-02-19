@@ -1,5 +1,6 @@
 package com._37coins.resources;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -295,7 +296,7 @@ public class ParserResource {
 		w.setFeeAccount(data.getGwCn());
 		//check that transaction amount is > fee 
 		//(otherwise tx history gets screwed up)
-		if (w.getAmount().compareTo(w.getFee())<=0){
+		if (w.getAmount()!=BigDecimal.ZERO && w.getAmount().compareTo(w.getFee())<=0){
 			data.setAction(Action.BELOW_FEE);
 			try {
 				return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
@@ -378,16 +379,16 @@ public class ParserResource {
 	@Path("/Pay")
 	public Response pay(){
 		DataSet data = responseList.get(0);
-		String token = (String)data.getPayload();
+		Withdrawal w = (Withdrawal)data.getPayload();
 		Charge charge = null;
 		try{
 			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet someHttpGet = new HttpGet("http://127.0.0.1:"+localPort+ChargeResource.PATH+"?token="+token);
+			HttpGet someHttpGet = new HttpGet("http://127.0.0.1:"+localPort+ChargeResource.PATH+"?token="+w.getComment());
 			URI uri = new URIBuilder(someHttpGet.getURI()).build();
 			HttpRequestBase request = new HttpGet(uri);
 			HttpResponse response = client.execute(request);
 			if (response.getStatusLine().getStatusCode()!=200){
-				HttpGet secondHttpGet = new HttpGet(MessagingServletConfig.productPath+"?token="+token);
+				HttpGet secondHttpGet = new HttpGet(MessagingServletConfig.productPath+"?token="+w.getComment());
 				URI secondUri = new URIBuilder(secondHttpGet.getURI()).build();
 				HttpRequestBase secondRequest = new HttpGet(secondUri);
 				response = client.execute(secondRequest);
@@ -402,8 +403,10 @@ public class ParserResource {
 			return null;
 		}
 		data.setAction(Action.WITHDRAWAL_REQ);
-		Withdrawal w = new Withdrawal();
 		w.setPayDest(new PaymentAddress().setAddressType(PaymentType.ACCOUNT).setAddress(charge.getSource()));
+		if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
+			return null;
+		}
 		w.setAmount(charge.getAmount());
 		data.setPayload(w);
 		return withdrawalReq();

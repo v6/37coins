@@ -182,11 +182,16 @@ public class ParserFilter implements Filter {
 		if (!amount.matches(".*[a-zA-Z]{3}.*")) {
 			amount = "BTC " + amount;
 		}else{
-			String r[] = amount.split("[a-zA-Z]{3}");
-			Pattern pattern = Pattern.compile("[a-zA-Z]{3}");
-			Matcher matcher = pattern.matcher(amount);
-			matcher.find();
-			amount = matcher.group().toUpperCase() + " "+r[r.length-1];
+			if (amount.equals("all")){
+				w.setAmount(BigDecimal.ZERO);
+				return true;
+			}else{
+				String r[] = amount.split("[a-zA-Z]{3}");
+				Pattern pattern = Pattern.compile("[a-zA-Z]{3}");
+				Matcher matcher = pattern.matcher(amount);
+				matcher.find();
+				amount = matcher.group().toUpperCase() + " "+r[r.length-1];
+			}
 		}
 		try {
 			BigMoney money = BigMoney.parse(amount);
@@ -253,7 +258,19 @@ public class ParserFilter implements Filter {
 			}
 		}
 		if (data.getAction() == Action.PAY){
-			data.setPayload(ca[1]);
+			Withdrawal w = new Withdrawal();
+			if (ca.length>1){
+				w.setComment(ca[1]);
+			}else{
+				data.setAction(Action.FORMAT_ERROR);
+			}
+			if (ca.length>2){
+				w.setConfKey(ca[2]);
+			}
+			if (ca.length>3){
+				w.setAmount(new BigDecimal(ca[3]));
+			}
+			data.setPayload(w);
 		}
 		if (data.getAction() == Action.WITHDRAWAL_CONF) {
 			data.setPayload(ca[1]);

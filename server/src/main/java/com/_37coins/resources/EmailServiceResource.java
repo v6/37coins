@@ -29,7 +29,6 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.workflow.pojo.DataSet;
@@ -38,6 +37,7 @@ import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import freemarker.template.TemplateException;
@@ -63,6 +63,61 @@ public class EmailServiceResource {
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		String acceptLng = httpReq.getHeader("Accept-Language");
 		locale = DataSet.parseLocaleString(acceptLng);
+	}
+	
+	@POST
+	@Path("/consume")
+	public void cosume(EmailFactor emailFactor){
+		if (null==emailFactor.getTaksToken()||null==emailFactor.getCn()){
+			throw new WebApplicationException(Response.Status.BAD_REQUEST);
+		}
+		Attributes atts = null;
+		List<String> otp = null;
+		String mail = null;
+		try {
+			atts = ctx.getAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail","description"});
+			String description = (atts.get("description")!=null)?(String)atts.get("description").get():null;
+			mail = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
+			if (null==description || description.length()<6){
+				throw new WebApplicationException("otp not set up.", Response.Status.PRECONDITION_FAILED);
+			}
+			try {
+				otp = new ObjectMapper().readValue(description, new TypeReference<List<String>>(){});
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new WebApplicationException("otp not set up.", Response.Status.PRECONDITION_FAILED);
+			}
+		} catch (IllegalStateException | NamingException e) {
+			e.printStackTrace();
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (null==otp || null==mail){
+			throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		boolean found = false;
+		for (String s : otp){
+			if(s.equals(emailFactor.getTaksToken())){
+				found = true;
+				break;
+			}
+		}
+		if (found){
+			otp.remove(emailFactor.getTaksToken());
+			try {
+				String otpString = new ObjectMapper().writeValueAsString(otp);
+				Attributes toModify = new BasicAttributes();
+		    	toModify.put("description", otpString);
+		    	ctx.modifyAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+			} catch (JsonProcessingException | NamingException ex) {
+				ex.printStackTrace();
+				throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
+			}
+			if (otp.size()<4){
+				renewOTP(emailFactor.setEmail(mail));
+			}
+		}else{
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
 	}
 	
 	
@@ -129,10 +184,10 @@ public class EmailServiceResource {
 		//read from ldap and verify request
 		Attributes atts = null;
 		try {
-			atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+emailFactor.getEmail()+"))", ctx).getAttributes();
-			String cn = (String)atts.get("cn").get();
-			if (!cn.equals(emailFactor.getCn())){
-				throw new IllegalStateException("cn is "+cn + ", but requested "+emailFactor.getCn());
+			atts = ctx.getAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail"});
+			String mail = (String)atts.get("mail").get();
+			if (!mail.equals(emailFactor.getEmail())){
+				throw new IllegalStateException("mail is "+mail + ", but requested "+emailFactor.getEmail());
 			}
 		} catch (IllegalStateException | NamingException e) {
 			e.printStackTrace();

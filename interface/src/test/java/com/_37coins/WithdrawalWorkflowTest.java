@@ -185,6 +185,11 @@ public class WithdrawalWorkflowTest {
 			@Override
 		    public void emailOtpCreation(String cn, String email, Locale locale){	
 			}
+			@Override
+			public Action otpConfirmation(String cn, String otp, Locale locale){
+				trace.add(new DataSet().setCn(cn).setLocale(locale).setAction(Action.WITHDRAWAL_REQ));
+				return Action.WITHDRAWAL_REQ;
+			}
 		};
 		
 		workflowTest.addActivitiesImplementation(activities);
@@ -450,7 +455,7 @@ public class WithdrawalWorkflowTest {
 	}
 	
 	/**
-	 * filter all transaction that are < 2 fee
+	 * filter all transaction that are < fee
 	 */
 	@Test
 	public void testBelowFee() throws AddressException {
@@ -485,6 +490,36 @@ public class WithdrawalWorkflowTest {
             	}
 			}
 		};
+	}
+	
+	/**
+	 * send all the money
+	 */
+	@Test
+	public void testSendAll() throws AddressException {
+		final WithdrawalWorkflowClient workflow = workflowFactory.getClient();
+		final DataSet req = new DataSet()
+			.setAction(Action.WITHDRAWAL_REQ)
+			.setCn(USER1.getPayDest().getAddress())
+			.setTo(USER1.getMsgDest())
+			.setPayload(new Withdrawal()
+				.setAmount(BigDecimal.ZERO)
+				.setFee(FEE)
+				.setConfKey("1234")
+				.setFeeAccount("1")
+				.setPayDest(USER2.getPayDest()));		
+		Promise<Void> booked = workflow.executeCommand(req);
+		validateSendAll(booked);
+	}
+	
+	@Asynchronous
+	public void validateSendAll(Promise<Void> booked){
+		Assert.assertTrue("verification not executed, no result " +trace.get(0).getAction() , trace.size()==3
+				&& trace.get(0).getAction()==Action.WITHDRAWAL_REQ
+				&& trace.get(1).getAction()==Action.WITHDRAWAL_CONF
+				&& trace.get(2).getAction()==Action.DEPOSIT_CONF);
+		Withdrawal w = (Withdrawal)trace.get(1).getPayload();
+		Assert.assertEquals(new BigDecimal("2.49940000"),w.getAmount());
 	}
 
 }

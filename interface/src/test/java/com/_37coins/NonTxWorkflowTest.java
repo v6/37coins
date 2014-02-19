@@ -119,7 +119,10 @@ public class NonTxWorkflowTest {
 			@Override
 		    public void emailOtpCreation(String cn, String email, Locale locale){	
 			}
-
+			@Override
+			public Action otpConfirmation(String cn, String otp, Locale locale){
+				return null;
+			}
         };
         workflowTest.addActivitiesImplementation(activities);
         workflowTest.addActivitiesImplementation(mailActivities);
