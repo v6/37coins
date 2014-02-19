@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
@@ -90,10 +91,10 @@ public class EmailServiceResource {
 			.setAction(Action.EMAIL_VER)
 			.setLocale(locale)
 			.setTo(new MessageAddress()
-					.setEmail(emailFactor.getEmail())
 					.setAddressType(MsgType.EMAIL))
 			.setPayload(emailFactor.getEmailToken());
 		try {
+			ds.getTo().setEmail(new InternetAddress(emailFactor.getEmail()));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
 			e.printStackTrace();
@@ -114,7 +115,7 @@ public class EmailServiceResource {
 		EmailFactor ef = (EmailFactor) e.getObjectValue();
 		try{
 	    	Attributes toModify = new BasicAttributes();
-	    	toModify.put("mail", ef.getEmail().getAddress());
+	    	toModify.put("mail", ef.getEmail());
 	    	ctx.modifyAttributes("cn="+ef.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 		}catch(NamingException ex){
 			ex.printStackTrace();
@@ -128,7 +129,7 @@ public class EmailServiceResource {
 		//read from ldap and verify request
 		Attributes atts = null;
 		try {
-			atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+emailFactor.getEmail().getAddress()+"))", ctx).getAttributes();
+			atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+emailFactor.getEmail()+"))", ctx).getAttributes();
 			String cn = (String)atts.get("cn").get();
 			if (!cn.equals(emailFactor.getCn())){
 				throw new IllegalStateException("cn is "+cn + ", but requested "+emailFactor.getCn());
@@ -157,11 +158,11 @@ public class EmailServiceResource {
 		.setAction(Action.EMAIL)
 		.setLocale(locale)
 		.setTo(new MessageAddress()
-				.setEmail(emailFactor.getEmail())
 				.setAddressType(MsgType.EMAIL))
 		.setPayload(otp);
 		//sed email
 		try {
+			ds.getTo().setEmail(new InternetAddress(emailFactor.getEmail()));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
 			e.printStackTrace();

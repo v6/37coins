@@ -1,6 +1,6 @@
 package com._37coins.activities;
 
-import javax.mail.internet.InternetAddress;
+import java.util.Locale;
 
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -36,16 +36,16 @@ public interface MessagingActivities {
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
     Action phoneConfirmation(DataSet rsp, String workflowId);
     
-    @Activity(name = "EmailVerification", version = "0.1")
+    @Activity(name = "EmailVerification", version = "0.2")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
-    String emailVerification(EmailFactor emailFactor);
+    String emailVerification(EmailFactor emailFactor, Locale locale);
     
-    @Activity(name = "EmailConfirmation", version = "0.1")
+    @Activity(name = "EmailConfirmation", version = "0.2")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
-    void emailConfirmation(String emailServiceToken);
+    void emailConfirmation(String emailServiceToken, Locale locale);
     
-    @Activity(name = "EmailOtpCreation", version = "0.1")
+    @Activity(name = "EmailOtpCreation", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
-    void emailOtpCreation(String cn, InternetAddress email);
+    void emailOtpCreation(String cn, String email, Locale locale);
     
 }

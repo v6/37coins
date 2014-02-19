@@ -504,13 +504,13 @@ public class ParserResource {
 					data.setAction(Action.DST_ERROR);
 				}
 			}else if (null!=ef.getEmail()){
-				Element e = cache.get("email"+ef.getEmail().getAddress());
+				Element e = cache.get("email"+ef.getEmail());
 				if (null!=e){
 					//workflow already started for this email
 					//cancel somehow
 					throw new WebApplicationException("conflict, already executing", Response.Status.CONFLICT);
 				}
-				cache.put(new Element("email"+ef.getEmail().getAddress(),true));
+				cache.put(new Element("email"+ef.getEmail(),true));
 				String emailToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
 				String smsToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
 				ef.setEmailToken(emailToken);

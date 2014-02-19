@@ -241,7 +241,8 @@ public class ParserFilter implements Filter {
 		if (data.getAction() == Action.EMAIL){
 			if (ca.length == 2){
 				try {
-					data.setPayload(new EmailFactor().setEmail(new InternetAddress(ca[1])));
+					InternetAddress ia = new InternetAddress(ca[1]);
+					data.setPayload(new EmailFactor().setEmail(ia.getAddress()));
 				} catch (AddressException e) {
 					data.setAction(Action.FORMAT_ERROR);
 				}

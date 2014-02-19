@@ -6,8 +6,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import javax.inject.Singleton;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -62,7 +60,7 @@ public class InterpreterFilter implements Filter {
 				return;
 			}
 			if (responseData.getAction()==Action.EMAIL && null == responseData.getPayload()){
-				responseData.setPayload(new InternetAddress(mail));
+				responseData.setPayload(mail);
 			}
 			responseData.setCn(cn);
 			//read the gateway
@@ -134,7 +132,7 @@ public class InterpreterFilter implements Filter {
 					httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			}
-		} catch (NamingException | AddressException e) {
+		} catch (NamingException e) {
 			e.printStackTrace();
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

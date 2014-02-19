@@ -202,7 +202,7 @@ public class RestTest {
 		EmailFactor ef = (EmailFactor)ds.getPayload();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.EMAIL_VER);
 		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
-		Assert.assertEquals("mail@bla.com",ef.getEmail().getAddress());
+		Assert.assertEquals("mail@bla.com",ef.getEmail());
 		Assert.assertNotNull(ds.getCn());
 		
 		parserClient = new ParserClient(new CommandParser());
@@ -247,7 +247,7 @@ public class RestTest {
 		});
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.EMAIL);
-		Assert.assertEquals(new InternetAddress("bla@bla.com"),ds.getPayload());
+		Assert.assertEquals("bla@bla.com",ds.getPayload());
     }
 	
 	@Test

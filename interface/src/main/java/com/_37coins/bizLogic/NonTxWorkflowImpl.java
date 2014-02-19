@@ -2,8 +2,7 @@ package com._37coins.bizLogic;
 
 import java.math.BigDecimal;
 import java.util.List;
-
-import javax.mail.internet.InternetAddress;
+import java.util.Locale;
 
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
@@ -12,8 +11,8 @@ import com._37coins.activities.MessagingActivitiesClientImpl;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.workflow.NonTxWorkflow;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -51,7 +50,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondDepositConf(balance, data);
 		}else if (data.getAction() == Action.EMAIL){
-				msgClient.emailOtpCreation(data.getCn(), (InternetAddress)data.getPayload());
+				msgClient.emailOtpCreation(data.getCn(), (String)data.getPayload(), data.getLocale());
 		}else if (data.getAction() == Action.EMAIL_VER){
 			//send message
 			EmailFactor ef = (EmailFactor)data.getPayload();
@@ -59,6 +58,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 				.setAction(Action.EMAIL_SMS_VER)
 				.setTo(data.getTo())
 				.setCn(data.getCn())
+				.setLocale(data.getLocale())
 				.setPayload(ef.getSmsToken());
 			Promise<Void> doneSms = msgClient.sendMessage(emailDs);
 			//send email
@@ -72,9 +72,11 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					new EmailFactor()
 						.setEmail(ef.getEmail())
 						.setEmailToken(ef.getEmailToken())
-						.setCn(data.getCn()));
+						.setSmsToken(ef.getSmsToken())
+						.setCn(data.getCn()), 
+					data.getLocale());
 			//start manual completion
-			waitEmailFactorConfirm(doneSms, doneEmail, data.getCn(), ef.getEmail());
+			waitEmailFactorConfirm(doneSms, doneEmail, data.getCn(), ef.getEmail(), data.getLocale());
 		}else if (data.getAction() == Action.EMAIL){
 			//send new otp
 			msgClient.sendMessage(data);
@@ -90,10 +92,15 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	}
 	
 	@Asynchronous
-	public void waitEmailFactorConfirm(Promise<Void> doneSms, Promise<String> doneEmail, String cn, InternetAddress email){
+	public void waitEmailFactorConfirm(Promise<Void> doneSms, Promise<String> doneEmail, String cn, String email, Locale locale){
 		String emailServiceToken = doneEmail.get();
-		msgClient.emailConfirmation(emailServiceToken);
-		msgClient.emailOtpCreation(cn, email);
+		Promise<Void> doneConf = msgClient.emailConfirmation(emailServiceToken, locale);
+		waitEmailFactorConfirm(doneConf, cn, email, locale);
+	}
+	
+	@Asynchronous
+	public void waitEmailFactorConfirm(Promise<Void> doneConf, String cn, String email, Locale locale){
+		msgClient.emailOtpCreation(cn, email, locale);
 	}
 	
 	@Asynchronous

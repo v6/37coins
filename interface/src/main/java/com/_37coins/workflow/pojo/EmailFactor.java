@@ -1,7 +1,5 @@
 package com._37coins.workflow.pojo;
 
-import javax.mail.internet.InternetAddress;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,7 +10,7 @@ public class EmailFactor {
 	
 	private String emailToken;
 	private String smsToken;
-	private InternetAddress email;	
+	private String email;	
 	private String cn;
 	private String taksToken;
 	
@@ -30,10 +28,10 @@ public class EmailFactor {
 		this.smsToken = smsToken;
 		return this;
 	}
-	public InternetAddress getEmail() {
+	public String getEmail() {
 		return email;
 	}
-	public EmailFactor setEmail(InternetAddress email) {
+	public EmailFactor setEmail(String email) {
 		this.email = email;
 		return this;
 	}

@@ -3,9 +3,9 @@ package com._37coins;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 import org.junit.After;
 import org.junit.Before;
@@ -109,15 +109,15 @@ public class NonTxWorkflowTest {
 			public void putAddressCache(DataSet rsp) {
 			}
 			@Override
-		    public String emailVerification(EmailFactor ef){
+		    public String emailVerification(EmailFactor ef, Locale locale){
 				trace.add(new DataSet().setPayload(ef));
 				return null;
 			}
 			@Override
-		    public void emailConfirmation(String emailServiceToken){
+		    public void emailConfirmation(String emailServiceToken, Locale locale){
 			}
 			@Override
-		    public void emailOtpCreation(String cn, InternetAddress email){	
+		    public void emailOtpCreation(String cn, String email, Locale locale){	
 			}
 
         };
@@ -212,7 +212,7 @@ public class NonTxWorkflowTest {
 			.setAction(Action.EMAIL_VER)
 			.setCn("1")
 			.setPayload(new EmailFactor()
-				.setEmail(new InternetAddress("mail@bla.com"))
+				.setEmail("mail@bla.com")
 				.setEmailToken("email")
 				.setSmsToken("sms"));
 		
@@ -225,8 +225,9 @@ public class NonTxWorkflowTest {
 		DataSet data2 = new DataSet()
 			.setPayload(new EmailFactor()
 				.setEmailToken("email")
+				.setSmsToken("sms")
 				.setCn("1")
-				.setEmail(new InternetAddress("mail@bla.com")));
+				.setEmail("mail@bla.com"));
 		List<DataSet> result = new ArrayList<>();
 		result.add(data);
 		result.add(data2);

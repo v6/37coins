@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Set;
 
-import javax.mail.internet.InternetAddress;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
@@ -221,12 +221,15 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
 	@Override
 	@ManualActivityCompletion
-    public String emailVerification(EmailFactor ef){
+    public String emailVerification(EmailFactor ef, Locale locale){
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/verify");
+			if (null!=locale){
+				req.addHeader("Accept-Language", locale.toString().replace("_", "-"));
+			}
 			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(ef), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);
@@ -247,10 +250,13 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	}
     
 	@Override
-    public void emailConfirmation(String emailServiceToken){
+    public void emailConfirmation(String emailServiceToken, Locale locale){
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/confirm");
+			if (null!=locale){
+				req.addHeader("Accept-Language", locale.toString().replace("_", "-"));
+			}
 			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setEmailToken(emailServiceToken)), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);
@@ -265,10 +271,13 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	}
     
 	@Override
-    public void emailOtpCreation(String cn, InternetAddress email){
+    public void emailOtpCreation(String cn, String email, Locale locale){
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpPost req = new HttpPost("http://127.0.0.1:"+MessagingServletConfig.localPort+EmailServiceResource.PATH+"/renew");
+			if (null!=locale){
+				req.addHeader("Accept-Language", locale.toString().replace("_", "-"));
+			}
 			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(cn).setEmail(email)), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);

@@ -3,10 +3,10 @@ package com._37coins;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
 
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 import junit.framework.Assert;
 
@@ -26,8 +26,8 @@ import com._37coins.workflow.WithdrawalWorkflowClient;
 import com._37coins.workflow.WithdrawalWorkflowClientFactory;
 import com._37coins.workflow.WithdrawalWorkflowClientFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -176,14 +176,14 @@ public class WithdrawalWorkflowTest {
 			public void putAddressCache(DataSet rsp) {
 			}
 			@Override
-		    public String emailVerification(EmailFactor ef){
+		    public String emailVerification(EmailFactor ef, Locale locale){
 				return null;
 			}
 			@Override
-		    public void emailConfirmation(String emailServiceToken){
+		    public void emailConfirmation(String emailServiceToken, Locale locale){
 			}
 			@Override
-		    public void emailOtpCreation(String cn, InternetAddress email){	
+		    public void emailOtpCreation(String cn, String email, Locale locale){	
 			}
 		};
 		
