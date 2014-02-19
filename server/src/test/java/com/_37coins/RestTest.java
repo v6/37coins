@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.core.Form;
 
 import junit.framework.Assert;
@@ -32,8 +31,8 @@ import com._37coins.resources.ParserResource;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -526,6 +525,34 @@ public class RestTest {
 		w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		//prevent sending zero
+		r = given()
+			.formParam("from", "test@test.com")
+			.formParam("gateway", "mail@37coins.com")
+			.formParam("message", "send 0.0 +821012345678")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.BELOW_FEE, rv.get(0).getAction());
+		//send all money to other user
+		r = given()
+			.formParam("from", "test@test.com")
+			.formParam("gateway", "mail@37coins.com")
+			.formParam("message", "send all +821012345678")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
+		w = (Withdrawal)rv.get(0).getPayload();
+		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		Assert.assertEquals(BigDecimal.ZERO, w.getAmount());
 		//use currency code for sending
 		r = given()
 			.formParam("from", "test@test.com")
