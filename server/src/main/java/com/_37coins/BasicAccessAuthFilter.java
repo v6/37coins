@@ -46,11 +46,79 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
 		}
 	}
 	
+	//taken from https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+	public static final String escapeLDAPSearchFilter(String filter) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < filter.length(); i++) {
+            char curChar = filter.charAt(i);
+            switch (curChar) {
+                case '\\':
+                    sb.append("\\5c");
+                    break;
+                case '*':
+                    sb.append("\\2a");
+                    break;
+                case '(':
+                    sb.append("\\28");
+                    break;
+                case ')':
+                    sb.append("\\29");
+                    break;
+                case '\u0000': 
+                    sb.append("\\00"); 
+                    break;
+                default:
+                    sb.append(curChar);
+            }
+        }
+        return sb.toString();
+    }
+	
+	//taken from  https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+    public static String escapeDN(String name) {
+        StringBuilder sb = new StringBuilder(); 
+        if ((name.length() > 0) && ((name.charAt(0) == ' ') || (name.charAt(0) == '#'))) {
+            sb.append('\\'); // add the leading backslash if needed
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char curChar = name.charAt(i);
+            switch (curChar) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case ',':
+                    sb.append("\\,");
+                    break;
+                case '+':
+                    sb.append("\\+");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '<':
+                    sb.append("\\<");
+                    break;
+                case '>':
+                    sb.append("\\>");
+                    break;
+                case ';':
+                    sb.append("\\;");
+                    break;
+                default:
+                    sb.append(curChar);
+            }
+        }
+        if ((name.length() > 1) && (name.charAt(name.length() - 1) == ' ')) {
+            sb.insert(sb.length() - 1, '\\'); // add the trailing backslash if needed
+        }
+        return sb.toString();
+    }
+	
 	public static SearchResult searchUnique(String searchFilter,InitialLdapContext ctx) throws IllegalStateException, NamingException{
 		ctx.setRequestControls(null);
 		SearchControls searchControls = new SearchControls();
 		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-		searchControls.setTimeLimit(1000);
+		searchControls.setTimeLimit(500);
 		NamingEnumeration<?> namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, searchFilter, searchControls);
 		if (namingEnum.hasMore ()){
 			SearchResult result = (SearchResult) namingEnum.next();
@@ -87,13 +155,14 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
         
         String username = prinCred[0];
         String password = prinCred[1];
-    	String sf = SF.replace("{0}", username);
+    	String sf = SF.replace("{0}", BasicAccessAuthFilter.escapeLDAPSearchFilter(username));
 		try {
 			AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
 			InitialLdapContext ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-	    	SearchResult result = searchUnique(sf, ctx);
+	    	SearchResult result = BasicAccessAuthFilter.searchUnique(sf, ctx);
 	        Attributes attrs = result.getAttributes();
-	        username = "cn="+attrs.get("cn").get(0)+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+	        String cn = BasicAccessAuthFilter.escapeDN((String)attrs.get("cn").get(0));
+	        username = "cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 	        ctx.close();
 		} catch (IllegalStateException | NamingException e) {
 			e.printStackTrace();

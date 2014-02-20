@@ -145,6 +145,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	public Action phoneConfirmation(DataSet rsp, String workflowId) {
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
+		String sanitizedCn = BasicAccessAuthFilter.escapeDN(rsp.getCn());
 		try{
 			Transaction tt = new Transaction();
 			tt.setTaskToken(taskToken);
@@ -154,7 +155,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			InitialLdapContext ctx = null;
 			AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
 			ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-			Attributes atts = ctx.getAttributes("cn="+rsp.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
+			Attributes atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
 			boolean pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			
 			if (!pwLocked){
@@ -163,7 +164,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 			    params.put("from", "+4971150888362");
 			    params.put("to", rsp.getTo().getAddress());
-			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+rsp.getCn()+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
+			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+sanitizedCn+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
 			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/hangup/"+workflowId);
 			    params.put("caller_name", "37 Coins");
 			    Call response = restAPI.makeCall(params);
@@ -197,7 +198,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			e.printStackTrace();
 		}
 		try{
-			Attributes atts = ctx.getAttributes("cn="+data.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mobile", "manager","preferredLanguage"});
+			String sanitizedCn = BasicAccessAuthFilter.escapeDN(data.getCn());
+			Attributes atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mobile", "manager","preferredLanguage"});
 			String locale = (atts.get("preferredLanguage")!=null)?(String)atts.get("preferredLanguage").get():null;
 			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
 			String mobile = (atts.get("mobile")!=null)?(String)atts.get("mobile").get():null;

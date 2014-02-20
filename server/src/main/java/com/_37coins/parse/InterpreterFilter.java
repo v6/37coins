@@ -47,7 +47,8 @@ public class InterpreterFilter implements Filter {
 		//get user from directory
 		try{
 			//read the user
-			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+responseData.getTo().getAddress()+"))", ctx).getAttributes();
+			String sanitizedAddress = BasicAccessAuthFilter.escapeLDAPSearchFilter(responseData.getTo().getAddress());
+			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+sanitizedAddress+"))", ctx).getAttributes();
 			boolean pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			String locale = (atts.get("preferredLanguage")!=null)?(String)atts.get("preferredLanguage").get():null;
 			String mail = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
@@ -108,7 +109,7 @@ public class InterpreterFilter implements Filter {
 					attributes.put(objectClass);
 					Attribute sn=new BasicAttribute("sn");
 					Attribute cn=new BasicAttribute("cn");
-					String cnString = responseData.getTo().getAddress().replace("+", "");
+					String cnString = BasicAccessAuthFilter.escapeDN(responseData.getTo().getAddress().replace("+", ""));
 					responseData.getTo().setGateway(gwCn);
 					sn.add(cnString);
 					cn.add(cnString);

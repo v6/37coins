@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.envaya.QueueClient;
 import com._37coins.parse.ParserAction;
@@ -108,7 +109,8 @@ public class EnvayaSmsResource {
 			@Context UriInfo uriInfo){
 		Map<String, Object> rv = new HashMap<>();
 		try{
-			String dn = "cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+			String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
+			String dn = "cn="+sanitizedCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 			Attributes atts = ctx.getAttributes(dn,new String[]{"departmentNumber"});
 			String envayaToken = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
 			String url = MessagingServletConfig.basePath + uriInfo.getPath();

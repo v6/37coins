@@ -29,6 +29,7 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.workflow.pojo.DataSet;
@@ -74,8 +75,9 @@ public class EmailServiceResource {
 		Attributes atts = null;
 		List<String> otp = null;
 		String mail = null;
+		String sanitizedCn = BasicAccessAuthFilter.escapeDN(emailFactor.getCn());
 		try {
-			atts = ctx.getAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail","description"});
+			atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail","description"});
 			String description = (atts.get("description")!=null)?(String)atts.get("description").get():null;
 			mail = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
 			if (null==description || description.length()<6){
@@ -107,7 +109,7 @@ public class EmailServiceResource {
 				String otpString = new ObjectMapper().writeValueAsString(otp);
 				Attributes toModify = new BasicAttributes();
 		    	toModify.put("description", otpString);
-		    	ctx.modifyAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+		    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 			} catch (JsonProcessingException | NamingException ex) {
 				ex.printStackTrace();
 				throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
@@ -126,6 +128,7 @@ public class EmailServiceResource {
 	public EmailFactor sendVerification(EmailFactor emailFactor){
 		if (null==emailFactor.getEmail()||null==emailFactor.getCn()||null==emailFactor.getEmailToken())
 			throw new WebApplicationException(Response.Status.BAD_REQUEST);
+		String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(emailFactor.getEmail());
 		//check it's not verified already
 		try{
 			ctx.setRequestControls(null);
@@ -133,7 +136,7 @@ public class EmailServiceResource {
 			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			searchControls.setTimeLimit(1);
 			NamingEnumeration<?> namingEnum = null;
-			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+emailFactor.getEmail()+"))", searchControls);
+			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+sanitizedMail+"))", searchControls);
 			if (namingEnum.hasMore()){
 				throw new WebApplicationException("email taken already.", Response.Status.CONFLICT);
 			}
@@ -149,7 +152,7 @@ public class EmailServiceResource {
 					.setAddressType(MsgType.EMAIL))
 			.setPayload(emailFactor.getEmailToken());
 		try {
-			ds.getTo().setEmail(new InternetAddress(emailFactor.getEmail()));
+			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
 			e.printStackTrace();
@@ -170,8 +173,10 @@ public class EmailServiceResource {
 		EmailFactor ef = (EmailFactor) e.getObjectValue();
 		try{
 	    	Attributes toModify = new BasicAttributes();
-	    	toModify.put("mail", ef.getEmail());
-	    	ctx.modifyAttributes("cn="+ef.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+	    	String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(ef.getEmail());
+	    	toModify.put("mail", sanitizedMail);
+	    	String sanitizedCn = BasicAccessAuthFilter.escapeDN(ef.getCn());
+	    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 		}catch(NamingException ex){
 			ex.printStackTrace();
 			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
@@ -181,13 +186,15 @@ public class EmailServiceResource {
 	@POST
 	@Path("/renew")
 	public void renewOTP(EmailFactor emailFactor){
+		String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(emailFactor.getEmail());
+		String sanitizedCn = BasicAccessAuthFilter.escapeDN(emailFactor.getCn());
 		//read from ldap and verify request
 		Attributes atts = null;
 		try {
-			atts = ctx.getAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail"});
+			atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"mail"});
 			String mail = (String)atts.get("mail").get();
-			if (!mail.equals(emailFactor.getEmail())){
-				throw new IllegalStateException("mail is "+mail + ", but requested "+emailFactor.getEmail());
+			if (!mail.equals(sanitizedMail)){
+				throw new IllegalStateException("mail is "+mail + ", but requested "+sanitizedMail);
 			}
 		} catch (IllegalStateException | NamingException e) {
 			e.printStackTrace();
@@ -203,7 +210,7 @@ public class EmailServiceResource {
 			String otpString = new ObjectMapper().writeValueAsString(otp);
 			Attributes toModify = new BasicAttributes();
 	    	toModify.put("description", otpString);
-	    	ctx.modifyAttributes("cn="+emailFactor.getCn()+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+	    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 		} catch (JsonProcessingException | NamingException ex) {
 			ex.printStackTrace();
 			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
@@ -217,7 +224,7 @@ public class EmailServiceResource {
 		.setPayload(otp);
 		//sed email
 		try {
-			ds.getTo().setEmail(new InternetAddress(emailFactor.getEmail()));
+			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
 			e.printStackTrace();

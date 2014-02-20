@@ -227,7 +227,8 @@ public class ParserResource {
 			attributes.put((recipient.getAddressType()==MsgType.SMS)?"mobile":"mail", recipient.getAddress());
 			attributes.put("preferredLanguage", locale);
 			try {
-				ctx.createSubcontext("cn="+cnString+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
+				String sanitizedCn = BasicAccessAuthFilter.escapeDN(cnString);
+				ctx.createSubcontext("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
 				//and say hi to new user
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)

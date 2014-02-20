@@ -144,7 +144,8 @@ public class AccountResource {
 			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			searchControls.setTimeLimit(1);
 			NamingEnumeration<?> namingEnum = null;
-			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+email+"))", searchControls);
+			String sanitizedEmail = BasicAccessAuthFilter.escapeLDAPSearchFilter(email);
+			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+sanitizedEmail+"))", searchControls);
 			if (namingEnum.hasMore()){
 				return "false";//email used
 			}
@@ -171,7 +172,8 @@ public class AccountResource {
 			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			searchControls.setTimeLimit(500);
 			NamingEnumeration<?> namingEnum = null;
-			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+mobile+"))", searchControls);
+			String sanitizedMobile = BasicAccessAuthFilter.escapeLDAPSearchFilter(mobile);
+			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+sanitizedMobile+"))", searchControls);
 			if (namingEnum.hasMore()){
 				throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
 			}
@@ -226,7 +228,7 @@ public class AccountResource {
 			ctx.setRequestControls(null);
 			SearchControls searchControls = new SearchControls();
 			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			searchControls.setTimeLimit(1000);
+			searchControls.setTimeLimit(500);
 			searchControls.setReturningAttributes(new String[]{"mail","mobile","createTimestamp","cn"});
 			namingEnum = ctx.search("ou=gateways,"
 					+ MessagingServletConfig.ldapBaseDn,
@@ -295,7 +297,8 @@ public class AccountResource {
 			conn.close();
 			}catch(Exception ex){}
 		}
-		ctx.unbind("cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
+		String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
+		ctx.unbind("cn="+sanitizedCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
 	}
 	
 	/**
@@ -311,7 +314,8 @@ public class AccountResource {
 		}
 		//#############validate email#################
 		//check regex
-		if (null==accountRequest.getEmail() || !AccountPolicy.isValidEmail(accountRequest.getEmail())){
+		String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(accountRequest.getEmail());
+		if (null==sanitizedMail || !AccountPolicy.isValidEmail(sanitizedMail)){
 			log.debug("send a valid email plz :D");
 			throw new WebApplicationException("send a valid email plz :D", Response.Status.BAD_REQUEST);
 		}
@@ -322,7 +326,7 @@ public class AccountResource {
 			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			searchControls.setTimeLimit(1);
 			NamingEnumeration<?> namingEnum = null;
-			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+accountRequest.getEmail()+"))", searchControls);
+			namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mail="+sanitizedMail+"))", searchControls);
 			if (namingEnum.hasMore()){
 				throw new WebApplicationException("email taken already.", Response.Status.CONFLICT);
 			}
@@ -332,7 +336,7 @@ public class AccountResource {
 		}
 		if (accountPolicy.isEmailMxLookup()){
 			//check db for active email with same domain
-			String hostName = accountRequest.getEmail().substring(accountRequest.getEmail().indexOf("@") + 1, accountRequest.getEmail().length());
+			String hostName = sanitizedMail.substring(sanitizedMail.indexOf("@") + 1, sanitizedMail.length());
 			try{
 				ctx.setRequestControls(null);
 				SearchControls searchControls = new SearchControls();
@@ -343,9 +347,9 @@ public class AccountResource {
 					//check host mx record
 					boolean isValidMX = false;
 					try{
-						isValidMX = AccountPolicy.isValidMX(accountRequest.getEmail());
+						isValidMX = AccountPolicy.isValidMX(sanitizedMail);
 					}catch(Exception e){
-						System.out.println("EmailRes.->check: "+ accountRequest.getEmail() + " not valid due: " + e.getMessage());
+						System.out.println("EmailRes.->check: "+ sanitizedMail + " not valid due: " + e.getMessage());
 					}
 					if(!isValidMX ){
 						throw new WebApplicationException("This email's hostname does not have mx record.", Response.Status.BAD_REQUEST);
@@ -364,13 +368,13 @@ public class AccountResource {
 		//put it into cache, and wait for email validation
 		String token = RandomStringUtils.random(14, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
 		try {
-			sendCreateEmail(accountRequest.getEmail() ,token);
+			sendCreateEmail(sanitizedMail ,token);
 		} catch (MessagingException | IOException| TemplateException e1) {
 			e1.printStackTrace();
 			throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		AccountRequest ar = new AccountRequest()
-			.setEmail(accountRequest.getEmail())
+			.setEmail(sanitizedMail)
 			.setPassword(accountRequest.getPassword());
 		cache.put(new Element("create"+token,ar));
 	}
@@ -385,6 +389,7 @@ public class AccountResource {
 		Element e = cache.get("create"+accountRequest.getToken());
 		if (null!=e){
 			accountRequest = (AccountRequest)e.getObjectValue();
+			String sanitizedMail = BasicAccessAuthFilter.escapeDN(accountRequest.getEmail());
 			//build a new user and same
 			Attributes attributes=new BasicAttributes();
 			Attribute objectClass=new BasicAttribute("objectClass");
@@ -397,7 +402,7 @@ public class AccountResource {
 			cn.add(cnString);
 			attributes.put(sn);
 			attributes.put(cn);
-			attributes.put("mail", accountRequest.getEmail());
+			attributes.put("mail", sanitizedMail);
 			attributes.put("userPassword", accountRequest.getPassword());
 			try{
 				ctx.createSubcontext("cn="+cnString+",ou=gateways,"+MessagingServletConfig.ldapBaseDn, attributes);
@@ -429,8 +434,9 @@ public class AccountResource {
 		}
 		//fetch account by email, then send email
 		String dn = null;
+		String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(pwRequest.getEmail());
 		try {
-			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+pwRequest.getEmail()+"))", ctx).getAttributes();
+			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+sanitizedMail+"))", ctx).getAttributes();
 			dn = "cn="+atts.get("cn").get()+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 		} catch (IllegalStateException | NamingException e1) {
 			e1.printStackTrace();
@@ -438,7 +444,7 @@ public class AccountResource {
 		}
 		String token = RandomStringUtils.random(14, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
 		try {
-			sendResetEmail(pwRequest.getEmail(), token);
+			sendResetEmail(sanitizedMail, token);
 		} catch (MessagingException | IOException| TemplateException e1) {
 			e1.printStackTrace();
 			throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
@@ -461,11 +467,12 @@ public class AccountResource {
 			if (!isValid)
 				throw new WebApplicationException("password does not pass account policy", Response.Status.BAD_REQUEST);
 			pwRequest = (PasswordRequest)e.getObjectValue();
+			String sanitizedDn = BasicAccessAuthFilter.escapeDN(pwRequest.getDn());
 			
 			Attributes toModify = new BasicAttributes();
 			toModify.put("userPassword", newPw);
 			try{
-				ctx.modifyAttributes(pwRequest.getDn(), DirContext.REPLACE_ATTRIBUTE, toModify);
+				ctx.modifyAttributes(sanitizedDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 			}catch(Exception ex){
 				ex.printStackTrace();
 				throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);

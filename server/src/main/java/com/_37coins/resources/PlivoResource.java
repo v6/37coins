@@ -34,6 +34,7 @@ import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.persistence.dto.Transaction;
@@ -105,7 +106,8 @@ public class PlivoResource {
 			@PathParam("locale") String locale){
 		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
-		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
+		String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
+		String dn = "cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
 		Object pw = null;
 		try{
 			Attributes atts = ctx.getAttributes(dn,new String[]{"userPassword"});
@@ -120,7 +122,7 @@ public class PlivoResource {
 				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
 					.add(new GetDigits()
-						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+cn+"/"+workflowId+"/"+locale)
+						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+sanitizedCn+"/"+workflowId+"/"+locale)
 						.setNumDigits(NUM_DIGIT)
 						.setRedirect(true)
 						.setSpeak(new Speak()
@@ -197,7 +199,8 @@ public class PlivoResource {
 				InitialLdapContext ctx = null;
 				AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
 				ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-				Attributes atts = ctx.getAttributes("cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
+				String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
+				Attributes atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
 				pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			}catch(Exception ne){
 			}
