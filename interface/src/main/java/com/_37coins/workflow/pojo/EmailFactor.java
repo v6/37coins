@@ -45,7 +45,7 @@ public class EmailFactor {
 	public String getTaksToken() {
 		return taksToken;
 	}
-	public EmailFactor setTaksToken(String taksToken) {
+	public EmailFactor setTaskToken(String taksToken) {
 		this.taksToken = taksToken;
 		return this;
 	}

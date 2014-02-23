@@ -26,15 +26,23 @@ define(['backbone',
     'views/feeView',
     'views/gatewayLayout',
     'views/notFoundView',
+    'views/merchantFrontView',
+    'views/merchantLoginView',
+    'views/merchantConnectingView',
+    'views/merchantDisconnectView',
     'views/exampleView',
-    'routeFilter'
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, ExampleView) {
+    'routeFilter',
+    'socketio'
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, MerchantFrontView, MerchantLoginView, MerchantConnectingView, MerchantDisconnectView, ExampleView) {
     'use strict';
 
     var Controller = {};
 
     // private module/app router  capture route and call start method of our controller
     Controller.Router = Backbone.Marionette.AppRouter.extend({
+        initialize: function(opt){
+            this.app = opt.app;
+        },
         appRoutes: {
             '': 'showIndex',
             'gateways': 'showGateway',
@@ -46,6 +54,7 @@ define(['backbone',
             'contact': 'showContact',
             'signUp': 'showSignUp',
             'logout': 'showLogout',
+            'merchantFront': 'showMerchantFront',
             'example': 'showExample',
             'notFound': 'showNotFound'
         },
@@ -54,6 +63,7 @@ define(['backbone',
             'reset': 'getTicket',
             'gateways': 'showLogin',
             'balance': 'showLogin',
+            'merchantFront': 'showMerchantLogin',
             '*any': function(fragment, args, next){
                 //set title
                 if (fragment){
@@ -95,6 +105,56 @@ define(['backbone',
             }else{
                 view = new LoginView({model:model,next:next});
                 Communicator.mediator.trigger('app:show', view);
+            }
+        },
+        showMerchantLogin: function(fragment, args, next){
+            //take care of the socket
+            if (!this.app.socketio){
+                var self = this;
+                var socket = io.connect(window.opt.basePath.split(':8')[0]+':8081');
+                this.app.socketio = socket;
+                socket.on('message', function (data) {
+                    Communicator.mediator.trigger('app:message', data);
+                    //new events: charge  pay
+                    //data return for txns
+                });
+                socket.on('connecting', function () {
+                    var view = new MerchantConnectingView();
+                    Communicator.mediator.trigger('app:show', view);
+                });
+                socket.on('reconnecting', function () {
+                    var view = new MerchantConnectingView();
+                    Communicator.mediator.trigger('app:show', view);
+                });
+                socket.on('disconnect', function () {
+                    var view = new MerchantDisconnectView();
+                    Communicator.mediator.trigger('app:show', view);
+                });
+                socket.on('reconnect', function () {
+                    self.reconnect(data);
+                });
+                socket.on('connect', function (data) {
+                    //send subscribe event for new session
+                    self.reconnect(data,next);
+                });
+            }
+            next();
+        },
+        reconnect: function(data,next){
+            var sessionToken = (!sessionStorage.getItem('sessionToken')||sessionStorage.getItem('sessionToken')==='undefined')?undefined:sessionStorage.getItem('sessionToken');
+            if (!sessionToken){
+                if (next){
+                    var view = new MerchantLoginView({next:next});
+                    Communicator.mediator.trigger('app:show', view);
+                }else{
+                    console.log('reconnect, but no prev session.');
+                }
+            }else{
+                //we have a session, subscribe to it
+                var obj = { '@class' : 'com._37coins.web.Subscribe',
+                    'sessionToken' : sessionToken
+                };
+                this.app.socketio.json.send(obj);
             }
         }
     });
@@ -173,6 +233,10 @@ define(['backbone',
     };
     Controller.showLogout = function() {
         var contentView = new LogoutView();
+        Communicator.mediator.trigger('app:show',contentView);
+    };
+    Controller.showMerchantFront = function() {
+        var contentView = new MerchantFrontView();
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showNotFound = function() {

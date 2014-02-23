@@ -15,7 +15,10 @@ require.config({
             exports: 'Backbone'
         },
         'socketio': {
-          exports: 'io'
+            exports: 'io'
+        },
+        qrcode: {
+            exports: 'QRCode'
         },
         jqueryValidation: {
             deps: [
@@ -25,12 +28,6 @@ require.config({
         bootstrap: {
             deps: ['jquery'],
             exports: 'jquery'
-        },
-        recaptcha: {
-            exports: 'Recaptcha'
-        },
-        webfinger:{
-            exports: 'webfinger'
         }
     },
 
@@ -60,13 +57,11 @@ require.config({
         i18nprecompile: '../bower_components/require-handlebars-plugin/hbs/i18nprecompile',
         json2: '../bower_components/require-handlebars-plugin/hbs/json2',
         hbs: '../bower_components/require-handlebars-plugin/hbs',
-        basicauth: '../bower_components/backbone.basicauth/backbone.basicauth',
-        recaptcha: 'vendor/recaptcha_ajax',
         jqueryValidation: '../bower_components/jqueryValidation/jquery.validate',
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
-        webfinger: 'vendor/webfinger',
-        socketio: '../bower_components/socket.io-client/dist/socket.io'
+        socketio: '../bower_components/socket.io-client/dist/socket.io',
+        qrcode: '../bower_components/qrcode/qrcode'
     },
 
     config: {

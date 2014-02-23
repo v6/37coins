@@ -11,6 +11,8 @@ import org.slf4j.MDC;
 
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
+import com._37coins.activities.EposActivitiesClient;
+import com._37coins.activities.EposActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
 import com._37coins.activities.MessagingActivitiesClientImpl;
 import com._37coins.conversion.CallPrices;
@@ -39,6 +41,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	DecisionContextProvider contextProvider = new DecisionContextProviderImpl();
     BitcoindActivitiesClient bcdClient = new BitcoindActivitiesClientImpl();
     MessagingActivitiesClient msgClient = new MessagingActivitiesClientImpl();
+    EposActivitiesClient eposClient = new EposActivitiesClientImpl();
     NonTxWorkflowClientFactory factory = new NonTxWorkflowClientFactoryImpl();
     private final int confirmationPeriod = 3500;
     DecisionContextProvider provider = new DecisionContextProviderImpl();

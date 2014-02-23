@@ -2,10 +2,12 @@ define([
 	'backbone',
 	'communicator',
 	'views/headerView',
-	'views/footerView'
+	'views/footerView',
+    'views/merchantChargeView',
+    'views/merchantThanksView'
 ],
 
-function( Backbone, Communicator, HeaderView, FooterView ) {
+function( Backbone, Communicator, HeaderView, FooterView, MerchantChargeView, MerchantThanksView) {
     'use strict';
 
 	var App = new Backbone.Marionette.Application();
@@ -36,13 +38,43 @@ function( Backbone, Communicator, HeaderView, FooterView ) {
         App.router.navigate('logout',{trigger: true});
     });
 
+    Communicator.mediator.on('app:message', function(data) {
+        console.dir(data);
+        if (data.action==='charge'){
+            var chargeView = new MerchantChargeView({model:new Backbone.Model(data)});
+            App.content.show(chargeView);
+        }
+        if (data.action==='payed'){
+            var thxView = new MerchantThanksView();
+            App.content.show(thxView);
+        }
+        if (data.action==='login'){
+            App.next();
+            App.next = undefined;
+        }
+        if (data.action==='failed'){
+            //tell the login view
+        }
+    });
+
+    Communicator.mediator.on('app:authenticate', function(phoneNumber, tan, next) {
+        var obj = { '@class' : 'com._37coins.web.Subscribe',
+            'phoneNumber' : phoneNumber,
+            'tan' : tan
+        };
+        App.next = next;
+        App.socketio.json.send(obj);
+        console.log('initializing authentication...');
+    });
+
 	/* Add initializers here */
 	App.addInitializer( function (options) {
 
         App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath})}));
         App.footer.show(new FooterView());
         this.router = new options.pageController.Router({
-            controller: options.pageController // wire-up the start method
+            controller: options.pageController, // wire-up the start method
+            app:App
         });
 
         // Use delegation to avoid initial DOM selection and allow all matching elements to bubble

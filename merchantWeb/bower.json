@@ -23,8 +23,8 @@
     "requirejs-google-analytics": "~0.1.6",
     "flag-icon-css": null,
     "font-awesome": null,
-    "webfirst": "https://github.com/silverbucket/webfinger.js.git",
-    "socket.io-client": null
+    "socket.io-client": null,
+    "qrcode": "https://github.com/davidshimjs/qrcodejs.git"
   },
   "devDependencies": {},
   "directory": "bower_components"

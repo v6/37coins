@@ -238,7 +238,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
 				EmailFactor c = new ObjectMapper().readValue(rsp.getEntity().getContent(),EmailFactor.class);
-				cache.put(new Element("emailVer"+ef.getSmsToken()+ef.getEmailToken(),new EmailFactor().setEmailToken(c.getEmailToken()).setTaksToken(taskToken)));
+				cache.put(new Element("emailVer"+ef.getSmsToken()+ef.getEmailToken(),new EmailFactor().setEmailToken(c.getEmailToken()).setTaskToken(taskToken)));
 			}else{
 				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 			}
@@ -301,7 +301,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			if (null!=locale){
 				req.addHeader("Accept-Language", locale.toString().replace("_", "-"));
 			}
-			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(cn).setTaksToken(otp)), "UTF-8");
+			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(cn).setTaskToken(otp)), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);

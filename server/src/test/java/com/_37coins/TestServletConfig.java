@@ -49,7 +49,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
 		gw.add(new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
 		cache.put(new Element("gateways",gw));
-		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaksToken("taskToken").setEmailToken("bla")));
+		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaskToken("taskToken").setEmailToken("bla")));
 	}
 
 	@Override
