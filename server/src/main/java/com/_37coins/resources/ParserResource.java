@@ -49,6 +49,7 @@ import com._37coins.MessagingServletConfig;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;
+import com._37coins.web.MerchantSession;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.EmailFactor;
@@ -58,6 +59,7 @@ import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,11 +79,13 @@ public class ParserResource {
 	final private ObjectMapper mapper;
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
+	final private SocketIOServer server;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
-			Cache cache, FiatPriceProvider fiatPriceProvider) {
+			Cache cache, FiatPriceProvider fiatPriceProvider,
+			SocketIOServer server) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -90,6 +94,7 @@ public class ParserResource {
 			responseList.add(ds);
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.fiatPriceProvider = fiatPriceProvider;
+		this.server = server;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -335,7 +340,16 @@ public class ParserResource {
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
 				Charge c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Charge.class);
-				w.setComment(c.getToken());
+				String room = data.getCn()+"/"+data.getCn();
+				if (server.getRoomOperations(room).getClients().size()>0){
+					MerchantSession rv = new MerchantSession().setAction("charge").setAmount(w.getAmount()).setCid(c.getToken());
+					server.getRoomOperations(room).sendJsonObject(rv);
+					cache.put(new Element("merchantState"+data.getCn(),rv));
+					//start a workflow to fetch the current address
+					data.setAction(Action.GW_DEPOSIT_REQ);
+				}else{
+					w.setComment(c.getToken());
+				}
 				try {
 					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 				} catch (JsonProcessingException e) {

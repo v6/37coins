@@ -100,6 +100,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String plivoKey;
 	public static String plivoSecret;
 	public static String resPath;
+	public static String merchantResPath;
 	public static String ldapUrl;
 	public static String ldapUser;
 	public static String ldapPw;
@@ -136,6 +137,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");
+		merchantResPath = System.getProperty("merchantResPath");
 		ldapUrl = System.getProperty("ldapUrl");
 		ldapUser = System.getProperty("ldapUser");
 		ldapPw = System.getProperty("ldapPw");

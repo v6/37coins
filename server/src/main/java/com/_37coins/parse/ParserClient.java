@@ -92,6 +92,7 @@ public class ParserClient extends Thread {
 			case TRANSACTION:
 			case EMAIL_VER:
 			case EMAIL:
+			case GW_DEPOSIT_REQ:
 			case DEPOSIT_REQ:
 				pa.handleDeposit(result);
 				break;

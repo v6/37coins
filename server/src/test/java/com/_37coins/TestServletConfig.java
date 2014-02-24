@@ -28,6 +28,8 @@ import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.EmailFactor;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -111,6 +113,14 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@Provides @Singleton @SuppressWarnings("unused")
 				public FiatPriceProvider provideFiatPrices(Cache cache){
 					return new FiatPriceProvider(cache);
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				public SocketIOServer provideSocket(){
+				 	Configuration config = new Configuration();
+				    config.setPort(8081);
+				    SocketIOServer server = new SocketIOServer(config);
+				    return server;
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")

@@ -6,6 +6,8 @@ import java.util.Locale;
 
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
+import com._37coins.activities.EposActivitiesClient;
+import com._37coins.activities.EposActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
 import com._37coins.activities.MessagingActivitiesClientImpl;
 import com._37coins.bcJsonRpc.pojo.Transaction;
@@ -25,6 +27,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 
     BitcoindActivitiesClient bcdClient = new BitcoindActivitiesClientImpl();
     MessagingActivitiesClient msgClient = new MessagingActivitiesClientImpl();
+    EposActivitiesClient eposClient = new EposActivitiesClientImpl();
 
 	@Override
 	public void executeCommand(final DataSet data) {
@@ -117,6 +120,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			.setAddress(bcAddress.get())
 			.setAddressType(PaymentType.BTC));
 		msgClient.putAddressCache(data);
+		eposClient.displayCharge(data.getCn(), bcAddress.get());
 	}
 	
 	@Asynchronous
@@ -143,8 +147,20 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	public void respondDepositConf(Promise<BigDecimal> balance,DataSet data){
 		Withdrawal dep = (Withdrawal)data.getPayload();
 		dep.setBalance(balance.get());
-		Promise<DataSet> addr = msgClient.readMessageAddress(data);
-		msgClient.sendMessage(addr);
+		String address = null;
+		if (null!=dep.getPayDest() && dep.getPayDest().getAddressType()==PaymentType.BTC){
+			address = dep.getPayDest().getAddress();
+		}
+		Promise<Boolean> delivered = eposClient.transactionReceived(data.getCn(),dep.getAmount(), address, dep.getComment(), 1);
+		respondDepositConfMessage(data,delivered);
+	}
+	
+	@Asynchronous
+	public void respondDepositConfMessage(DataSet data,Promise<Boolean> delivered){
+		if (!delivered.get()){
+			Promise<DataSet> addr = msgClient.readMessageAddress(data);
+			msgClient.sendMessage(addr);			
+		}
 	}
 
 }

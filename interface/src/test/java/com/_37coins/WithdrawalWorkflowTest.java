@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com._37coins.activities.BitcoindActivities;
+import com._37coins.activities.EposActivities;
 import com._37coins.activities.MessagingActivities;
 import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.bizLogic.NonTxWorkflowImpl;
@@ -191,7 +192,20 @@ public class WithdrawalWorkflowTest {
 				return Action.WITHDRAWAL_REQ;
 			}
 		};
-		
+        EposActivities eposActivities = new EposActivities() {
+
+			@Override
+			public Boolean displayCharge(String cn, String btcAddress) {
+				return false;
+			}
+			@Override
+			public Boolean transactionReceived(String cn, BigDecimal amount,
+					String btcAddress, String cid, int status) {
+				return false;
+			}
+        	
+        };
+        workflowTest.addActivitiesImplementation(eposActivities);
 		workflowTest.addActivitiesImplementation(activities);
 		workflowTest.addActivitiesImplementation(mailActivities);
 		workflowTest.addWorkflowImplementationType(WithdrawalWorkflowImpl.class);
