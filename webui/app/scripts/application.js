@@ -2,12 +2,10 @@ define([
 	'backbone',
 	'communicator',
 	'views/headerView',
-	'views/footerView',
-    'views/merchantChargeView',
-    'views/merchantThanksView'
+	'views/footerView'
 ],
 
-function( Backbone, Communicator, HeaderView, FooterView, MerchantChargeView, MerchantThanksView) {
+function( Backbone, Communicator, HeaderView, FooterView) {
     'use strict';
 
 	var App = new Backbone.Marionette.Application();
@@ -36,35 +34,6 @@ function( Backbone, Communicator, HeaderView, FooterView, MerchantChargeView, Me
     Communicator.mediator.on('app:logout', function() {
         //renavigate to see if we still have permission
         App.router.navigate('logout',{trigger: true});
-    });
-
-    Communicator.mediator.on('app:message', function(data) {
-        console.dir(data);
-        if (data.action==='charge'){
-            var chargeView = new MerchantChargeView({model:new Backbone.Model(data)});
-            App.content.show(chargeView);
-        }
-        if (data.action==='payed'){
-            var thxView = new MerchantThanksView();
-            App.content.show(thxView);
-        }
-        if (data.action==='login'){
-            App.next();
-            App.next = undefined;
-        }
-        if (data.action==='failed'){
-            //tell the login view
-        }
-    });
-
-    Communicator.mediator.on('app:authenticate', function(phoneNumber, tan, next) {
-        var obj = { '@class' : 'com._37coins.web.Subscribe',
-            'phoneNumber' : phoneNumber,
-            'tan' : tan
-        };
-        App.next = next;
-        App.socketio.json.send(obj);
-        console.log('initializing authentication...');
     });
 
 	/* Add initializers here */

@@ -26,14 +26,10 @@ define(['backbone',
     'views/feeView',
     'views/gatewayLayout',
     'views/notFoundView',
-    'views/merchantFrontView',
-    'views/merchantLoginView',
-    'views/merchantConnectingView',
-    'views/merchantDisconnectView',
     'views/exampleView',
     'routeFilter',
     'socketio'
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, MerchantFrontView, MerchantLoginView, MerchantConnectingView, MerchantDisconnectView, ExampleView) {
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, ExampleView) {
     'use strict';
 
     var Controller = {};
