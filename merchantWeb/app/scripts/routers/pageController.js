@@ -2,10 +2,11 @@ define(['backbone',
     'communicator',
     'GA',
     'views/merchantFrontView',
+    'views/merchantBackView',
     'views/merchantLoginView',
     'routeFilter',
     'socketio'
-    ], function(Backbone, Communicator, GA, MerchantFrontView, MerchantLoginView) {
+    ], function(Backbone, Communicator, GA, MerchantFrontView, MerchantBackView, MerchantLoginView) {
     'use strict';
 
     var Controller = {};
@@ -16,7 +17,9 @@ define(['backbone',
             this.app = opt.app;
         },
         appRoutes: {
-            '': 'showMerchantFront'
+	    '': 'showMerchantFront',
+	    'front': 'showMerchantFront',
+	    'back': 'showMerchantBack'
         },
         before:{
             '*any': function(fragment, args, next){
@@ -39,6 +42,11 @@ define(['backbone',
     Controller.showMerchantFront = function() {
         var contentView = new MerchantFrontView();
         Communicator.mediator.trigger('app:show',contentView);
+    };
+
+    Controller.showMerchantBack = function() {
+	var contentView = new MerchantBackView();
+	Communicator.mediator.trigger('app:show',contentView);
     };
 
     return Controller;
