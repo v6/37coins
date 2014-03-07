@@ -151,6 +151,34 @@ public class RestTest {
     }
     
     @Test
+	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	final DataSet ds = new DataSet();
+    	ParserClient parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+821039841235", "+821027423984", Action.VOICE.toString(), 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}			
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {
+				ds.setAction(data.getAction())
+					.setTo(data.getTo())
+					.setLocale(data.getLocale())
+					.setCn(data.getCn());
+			}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.VOICE);
+		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+		Assert.assertEquals("+821039841235",ds.getTo().getAddress());
+		Assert.assertEquals(Locale.forLanguageTag("kr"),ds.getLocale());
+		Assert.assertNotNull(ds.getCn());
+    }
+    
+    @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser());

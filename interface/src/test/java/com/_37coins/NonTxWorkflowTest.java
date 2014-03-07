@@ -34,6 +34,7 @@ import com.amazonaws.services.simpleworkflow.flow.core.Promise;
 import com.amazonaws.services.simpleworkflow.flow.junit.AsyncAssert;
 import com.amazonaws.services.simpleworkflow.flow.junit.FlowBlockJUnit4ClassRunner;
 import com.amazonaws.services.simpleworkflow.flow.junit.WorkflowTest;
+import com.google.i18n.phonenumbers.NumberParseException;
 
 @RunWith(FlowBlockJUnit4ClassRunner.class)
 public class NonTxWorkflowTest {
@@ -101,7 +102,13 @@ public class NonTxWorkflowTest {
 			}
 			@Override
 			public Action phoneConfirmation(DataSet rsp, String workflowId) {
-				return null;
+				if (rsp.getCn().equals("1")){
+					trace.add(rsp);
+					return rsp.getAction();
+				}else{
+					trace.add(rsp.setAction(Action.ACCOUNT_BLOCKED));
+					return Action.ACCOUNT_BLOCKED;
+				}
 			}
 			@Override
 			public void putCache(DataSet rsp) {
@@ -178,6 +185,32 @@ public class NonTxWorkflowTest {
 				.setAddress("1Nsateouhasontuh234")
 				.setAddressType(PaymentType.BTC));
 		validate("address returned", data, trace,booked);
+	}
+	
+	@Test
+	public void testActivatePin() throws AddressException, NumberParseException {
+		NonTxWorkflowClient workflow = workflowFactory.getClient();
+		DataSet data = new DataSet()
+			.setAction(Action.VOICE)
+			.setCn("1")
+			.setTo(MessageAddress.fromString("+491606941382",""));
+		Promise<Void> booked = workflow.executeCommand(data);
+		validate("address returned", data, trace,booked);
+	}
+	
+	@Test
+	public void testActivatePin2() throws AddressException, NumberParseException {
+		NonTxWorkflowClient workflow = workflowFactory.getClient();
+		DataSet data = new DataSet()
+			.setAction(Action.VOICE)
+			.setCn("2")
+			.setTo(MessageAddress.fromString("+491606941382",""));
+		Promise<Void> booked = workflow.executeCommand(data);
+		DataSet ds = new DataSet()
+			.setAction(Action.ACCOUNT_BLOCKED)
+			.setCn("2")
+			.setTo(MessageAddress.fromString("+491606941382",""));
+		validate("address returned", ds, trace,booked);
 	}
 	
 	@Test
