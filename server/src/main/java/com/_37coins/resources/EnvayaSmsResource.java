@@ -47,7 +47,6 @@ import com._37coins.persistence.dto.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
@@ -235,12 +234,13 @@ public class EnvayaSmsResource {
 							        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());
 							        manualCompletionClient.complete(null);
-								}else if (data.getAction()==Action.EMAIL_SMS_VER){
-									EmailFactor ef = (EmailFactor)data.getPayload();
-									ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
-							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(ef.getTaksToken());
-							        manualCompletionClient.complete(ef.getEmailToken());
 								}
+//								}else if (data.getAction()==Action.EMAIL_SMS_VER){
+//									EmailFactor ef = (EmailFactor)data.getPayload();
+//									ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+//							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(ef.getTaksToken());
+//							        manualCompletionClient.complete(ef.getEmailToken());
+//								}
 							}
 						});
 						

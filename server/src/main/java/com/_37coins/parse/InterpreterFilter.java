@@ -51,7 +51,6 @@ public class InterpreterFilter implements Filter {
 			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((responseData.getTo().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+sanitizedAddress+"))", ctx).getAttributes();
 			boolean pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
 			String locale = (atts.get("preferredLanguage")!=null)?(String)atts.get("preferredLanguage").get():null;
-			String mail = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
 			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
 			String cn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
 			//check if account is disabled
@@ -59,9 +58,6 @@ public class InterpreterFilter implements Filter {
 				responseData.setAction(Action.ACCOUNT_BLOCKED);
 				respond(responseList,response);
 				return;
-			}
-			if (responseData.getAction()==Action.EMAIL && null == responseData.getPayload()){
-				responseData.setPayload(mail);
 			}
 			responseData.setCn(cn);
 			//read the gateway

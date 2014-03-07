@@ -90,16 +90,11 @@ public class ParserClient extends Thread {
 				break;
 			case BALANCE:
 			case TRANSACTION:
-			case EMAIL_VER:
-			case EMAIL:
 			case GW_DEPOSIT_REQ:
 			case DEPOSIT_REQ:
 				pa.handleDeposit(result);
 				break;
 			case WITHDRAWAL_CONF:
-			case EMAIL_SMS_VER:
-				pa.handleConfirm(result);
-		        break;
 			default:
 				pa.handleResponse(result);
 				break;

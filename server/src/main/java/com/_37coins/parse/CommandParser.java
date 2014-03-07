@@ -31,7 +31,6 @@ public class CommandParser {
 			Action.TRANSACTION,
 			Action.WITHDRAWAL_CONF,
 			Action.PAY,
-			Action.EMAIL,
 			Action.VOICE,
 			Action.RESTORE,
 			Action.WITHDRAWAL_REQ, 

@@ -33,7 +33,6 @@ import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
@@ -146,7 +145,7 @@ public class EmailServiceResource {
 		}
 		
 		DataSet ds = new DataSet()
-			.setAction(Action.EMAIL_VER)
+			//.setAction(Action.EMAIL_VER)
 			.setLocale(locale)
 			.setTo(new MessageAddress()
 					.setAddressType(MsgType.EMAIL))
@@ -217,7 +216,7 @@ public class EmailServiceResource {
 		}
 		//prepare email data
 		DataSet ds = new DataSet()
-		.setAction(Action.EMAIL)
+		//.setAction(Action.EMAIL)
 		.setLocale(locale)
 		.setTo(new MessageAddress()
 				.setAddressType(MsgType.EMAIL))

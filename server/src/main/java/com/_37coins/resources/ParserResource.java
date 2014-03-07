@@ -31,7 +31,6 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -52,7 +51,6 @@ import com._37coins.web.GatewayUser;
 import com._37coins.web.MerchantSession;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
@@ -504,49 +502,6 @@ public class ParserResource {
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {
-			return null;
-		}
-	}
-	
-	@POST
-	@Path("/Email")
-	public Response activateEmailSecondFactor(){
-		//create two secrets
-		//one will be send out via email
-		//one will be send out via sms
-		//both will have to be returned via sms
-		DataSet data = responseList.get(0);
-		if (data.getPayload() instanceof EmailFactor){
-			EmailFactor ef = (EmailFactor)data.getPayload();
-			if (null!=ef.getEmailToken()&&null!=ef.getSmsToken()){
-				Element e = cache.get("emailVer"+ef.getSmsToken()+ef.getEmailToken());
-				if (null!=e){
-					data.setAction(Action.EMAIL_SMS_VER)
-					    .setPayload(e.getObjectValue());
-				}else{
-					//actually this shoud say not found, or something
-					data.setAction(Action.DST_ERROR);
-				}
-			}else if (null!=ef.getEmail()){
-				Element e = cache.get("email"+ef.getEmail());
-				if (null!=e){
-					//workflow already started for this email
-					//cancel somehow
-					throw new WebApplicationException("conflict, already executing", Response.Status.CONFLICT);
-				}
-				cache.put(new Element("email"+ef.getEmail(),true));
-				String emailToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
-				String smsToken = RandomStringUtils.random(4, "abcdefghijkmnopqrstuvwxyz123456789");
-				ef.setEmailToken(emailToken);
-				ef.setSmsToken(smsToken);
-				data.setAction(Action.EMAIL_VER);
-			}
-		}else{
-			data.setAction(Action.EMAIL);
-		}
-		try {
-			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-		} catch (JsonProcessingException ex) {
 			return null;
 		}
 	}

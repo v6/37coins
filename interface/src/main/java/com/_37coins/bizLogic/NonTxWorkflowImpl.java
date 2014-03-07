@@ -14,9 +14,6 @@ import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.workflow.NonTxWorkflow;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.EmailFactor;
-import com._37coins.workflow.pojo.MessageAddress;
-import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -52,37 +49,6 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 		}else if (data.getAction() == Action.DEPOSIT_CONF){
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondDepositConf(balance, data);
-		}else if (data.getAction() == Action.EMAIL){
-				msgClient.emailOtpCreation(data.getCn(), (String)data.getPayload(), data.getLocale());
-		}else if (data.getAction() == Action.EMAIL_VER){
-			//send message
-			EmailFactor ef = (EmailFactor)data.getPayload();
-			DataSet emailDs = new DataSet()
-				.setAction(Action.EMAIL_SMS_VER)
-				.setTo(data.getTo())
-				.setCn(data.getCn())
-				.setLocale(data.getLocale())
-				.setPayload(ef.getSmsToken());
-			Promise<Void> doneSms = msgClient.sendMessage(emailDs);
-			//send email
-			
-			data.setAction(Action.EMAIL_VER)
-				.setTo(new MessageAddress()
-					.setAddressType(MsgType.EMAIL)
-					.setAddress(ef.getEmail()))
-				.setPayload(ef.getEmailToken());
-			Promise<String> doneEmail = msgClient.emailVerification(
-					new EmailFactor()
-						.setEmail(ef.getEmail())
-						.setEmailToken(ef.getEmailToken())
-						.setSmsToken(ef.getSmsToken())
-						.setCn(data.getCn()), 
-					data.getLocale());
-			//start manual completion
-			waitEmailFactorConfirm(doneSms, doneEmail, data.getCn(), ef.getEmail(), data.getLocale());
-		}else if (data.getAction() == Action.EMAIL){
-			//send new otp
-			msgClient.sendMessage(data);
 		}else{
 			throw new RuntimeException("unknown action");
 		}

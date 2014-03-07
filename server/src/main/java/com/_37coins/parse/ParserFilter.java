@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -33,7 +32,6 @@ import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.PriceTick;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -246,7 +244,7 @@ public class ParserFilter implements Filter {
 			data.setPayload(w);
 		}
 		if (data.getAction() == Action.RESTORE){
-			if (ca.length!=3){
+			if (ca.length!=2){
 				data.setAction(Action.FORMAT_ERROR);
 				return data;
 			}
@@ -259,7 +257,6 @@ public class ParserFilter implements Filter {
 				data.setAction(Action.FORMAT_ERROR);
 				return data;
 			}
-			w.setConfKey(ca[2]);
 			w.setMsgDest(data.getTo());
 			data.setTo(ma);
 			data.setPayload(w);
@@ -274,32 +271,12 @@ public class ParserFilter implements Filter {
 				//error
 			}
 		}
-		if (data.getAction() == Action.EMAIL){
-			if (ca.length == 2){
-				try {
-					InternetAddress ia = new InternetAddress(ca[1]);
-					data.setPayload(new EmailFactor().setEmail(ia.getAddress()));
-				} catch (AddressException e) {
-					data.setAction(Action.FORMAT_ERROR);
-				}
-			}else if (ca.length == 3){
-				data.setPayload(new EmailFactor()
-					.setSmsToken(ca[1])
-					.setEmailToken(ca[2]));
-			}
-		}
 		if (data.getAction() == Action.PAY){
 			Withdrawal w = new Withdrawal();
 			if (ca.length>1){
 				w.setComment(ca[1]);
 			}else{
 				data.setAction(Action.FORMAT_ERROR);
-			}
-			if (ca.length>2){
-				w.setConfKey(ca[2]);
-			}
-			if (ca.length>3){
-				w.setAmount(new BigDecimal(ca[3]));
 			}
 			data.setPayload(w);
 		}

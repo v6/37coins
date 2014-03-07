@@ -222,36 +222,6 @@ public class NonTxWorkflowTest {
 		data.setPayload(list);
 		validate("successfull tx", data, trace, booked);
 	}
-	
-	@Test
-	public void testEmailVer() throws AddressException {
-		NonTxWorkflowClient workflow = workflowFactory.getClient();
-		DataSet input = new DataSet()
-			.setAction(Action.EMAIL_VER)
-			.setCn("1")
-			.setPayload(new EmailFactor()
-				.setEmail("mail@bla.com")
-				.setEmailToken("email")
-				.setSmsToken("sms"));
-		
-		Promise<Void> booked = workflow.executeCommand(input);
-		//prepare result
-		DataSet data = new DataSet()
-			.setAction(Action.EMAIL_SMS_VER)
-			.setCn("1")
-			.setPayload("sms");
-		DataSet data2 = new DataSet()
-			.setPayload(new EmailFactor()
-				.setEmailToken("email")
-				.setSmsToken("sms")
-				.setCn("1")
-				.setEmail("mail@bla.com"));
-		List<DataSet> result = new ArrayList<>();
-		result.add(data);
-		result.add(data2);
-		//validate
-		validateList("successfull tx", result, trace, booked);
-	}
 
 	@Asynchronous
 	public void validate(String desc, Object expected, List<DataSet> l,Promise<Void> booked){
