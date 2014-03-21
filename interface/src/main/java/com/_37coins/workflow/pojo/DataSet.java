@@ -40,6 +40,7 @@ public class DataSet {
 		RESET("Reset"), // gateway reset password
 		REGISTER("Register"), //gateway signup
 		DEPOSIT_CONF("DepositConf"),
+		DEPOSIT_NOT("DepositNot"),
 		FORMAT_ERROR("FormatError"),
 		UNKNOWN_COMMAND("UnknownCommand"),
 		ACCOUNT_BLOCKED("AccountBlocked"),

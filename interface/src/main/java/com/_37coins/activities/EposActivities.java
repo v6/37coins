@@ -9,11 +9,11 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrati
 @Activities
 public interface EposActivities {
 	
-    @Activity(name = "DisplayCharge", version = "0.2")
+    @Activity(name = "DisplayCharge", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     Boolean displayCharge(String cn, String btcAddress);
     
-    @Activity(name = "TransactionReceived", version = "0.2")
+    @Activity(name = "TransactionReceived", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     Boolean transactionReceived(String cn, BigDecimal amount, String btcAddress, String cid, int status);
         

@@ -80,7 +80,8 @@ import com.google.inject.servlet.ServletModule;
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
 	public static String domainName;
-	public static String actListName = "mail-activities-tasklist";
+	public static String msgActListName = "message-activities-tasklist";
+	public static String eposActListName = "epos-activities-tasklist";
 	public static String endpoint;
 	public static String senderMail;
 	public static String smtpHost;
@@ -418,7 +419,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			public ActivityWorker getMsgActivityWorker(AmazonSimpleWorkflow swfClient, 
 					MessagingActivitiesImpl activitiesImpl) {
 				ActivityWorker activityWorker = new ActivityWorker(swfClient, domainName,
-						actListName);
+						msgActListName);
 				try {
 					activityWorker.addActivitiesImplementation(activitiesImpl);
 				} catch (InstantiationException | IllegalAccessException
@@ -432,7 +433,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			public ActivityWorker getEposActivityWorker(AmazonSimpleWorkflow swfClient, 
 					EposActivitiesImpl activitiesImpl) {
 				ActivityWorker activityWorker = new ActivityWorker(swfClient, domainName,
-						actListName);
+						eposActListName);
 				try {
 					activityWorker.addActivitiesImplementation(activitiesImpl);
 				} catch (InstantiationException | IllegalAccessException

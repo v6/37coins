@@ -175,6 +175,18 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void test37coinsReiceiveNot() throws IOException, TemplateException {
+		rsp.setAction(Action.DEPOSIT_NOT)
+			.setPayload(new Withdrawal()
+				.setBalance(new BigDecimal("1.25"))
+				.setAmount(new BigDecimal("0.05")));
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
 	public void test37coinsSend() throws IOException, TemplateException {
 		rsp.setAction(Action.WITHDRAWAL_REQ)
 			.setPayload(new Withdrawal()
@@ -280,6 +292,15 @@ public class LocalizationTest {
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
+	
+	@Test
+	public void testVoice() throws IOException, TemplateException {
+		rsp.setAction(Action.VOICE);
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
 	
 	@Test
 	public void testInsuficcientFunds() throws IOException, TemplateException {

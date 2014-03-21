@@ -232,6 +232,24 @@ public class NonTxWorkflowTest {
 		w.setBalance(new BigDecimal("2.5"));
 		validate("successfull deposit", data, trace,booked);
 	}
+	
+	@Test
+	public void testDepositNotify() throws AddressException {
+		NonTxWorkflowClient workflow = workflowFactory.getClient();
+		DataSet data = new DataSet()
+			.setAction(Action.DEPOSIT_NOT)
+			.setCn("1")
+    		.setPayload(new Withdrawal()
+    			.setAmount(new BigDecimal("0.01")))
+    		.setTo(new MessageAddress()
+					.setAddress("")
+					.setAddressType(MsgType.SMS)
+					.setGateway(""));
+		Promise<Void> booked = workflow.executeCommand(data);
+		Withdrawal w = (Withdrawal)data.getPayload();
+		w.setBalance(new BigDecimal("2.5"));
+		validate("successfull deposit", data, trace,booked);
+	}
 
 	@Test
 	public void testBalanceAccount() throws AddressException {

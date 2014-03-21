@@ -96,6 +96,8 @@ public class ParserClient extends Thread {
 				pa.handleDeposit(result);
 				break;
 			case WITHDRAWAL_CONF:
+				pa.handleConfirm(result);
+				break;
 			default:
 				pa.handleResponse(result);
 				break;

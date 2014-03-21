@@ -16,6 +16,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContextEvent;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +88,16 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 				@Override
 				public void update(Observable o, Object arg) {
 					Transaction t = (Transaction)arg;
+					//check if a notification has happened before
+					Cache cache = i.getInstance(Cache.class);
+					String cacheKey = t.getTxid()+t.getConfirmations();
+					if (null==cache.get(cacheKey)){
+						//put into cache to avoid second notification
+						cache.put(new Element(cacheKey,true));
+					}else{
+						//skip if notification has happened before
+						return;
+					}
 					//group transaction inputs by account
 					Map<String,List<Transaction>> txGrouping = new HashMap<>();
 					for (Transaction tx : t.getDetails()){
@@ -95,7 +111,7 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 								txGrouping.put(tx.getAccount(), set);
 							}
 						}
-					}					
+					}
 					//start a workflow for each account concerned by transaction
 					for (Entry<String,List<Transaction>> e : txGrouping.entrySet()){
 						BigDecimal sum = BigDecimal.ZERO.setScale(8, RoundingMode.HALF_UP); 
@@ -106,8 +122,12 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 						.setCn(e.getKey())
 						.setPayload(new Withdrawal()
 							.setTxId(t.getTxid())
-							.setAmount(sum.setScale(8, RoundingMode.FLOOR)))
-						.setAction(Action.DEPOSIT_CONF);
+							.setAmount(sum.setScale(8, RoundingMode.FLOOR)));
+						if (t.getConfirmations()>0){
+							rsp.setAction(Action.DEPOSIT_CONF);
+						}else{
+							rsp.setAction(Action.DEPOSIT_NOT);
+						}
 						i.getInstance(NonTxWorkflowClientExternalFactoryImpl.class).getClient().executeCommand(rsp);
 					}
 				}
@@ -148,6 +168,21 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 				}
 				return bcf.getClient();
 			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+        	public Cache provideCache(){
+        		//Create a singleton CacheManager using defaults
+        		CacheManager manager = CacheManager.create();
+        		//Create a Cache specifying its configuration.
+        		Cache testCache = new Cache(new CacheConfiguration("cache", 100)
+        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
+        		    .eternal(false)
+        		    .timeToLiveSeconds(7200)
+        		    .timeToIdleSeconds(3600)
+        		    .diskExpiryThreadIntervalSeconds(0));
+        		  manager.addCache(testCache);
+        		  return testCache;
+        	}
 
 			@Provides @Singleton @SuppressWarnings("unused")
 			public ActivityWorker getActivityWorker(

@@ -77,6 +77,10 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 		}else if (data.getAction() == Action.DEPOSIT_CONF){
 			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 			respondDepositConf(balance, data);
+		}else if (data.getAction() == Action.DEPOSIT_NOT){
+			final Settable<Boolean> next = new Settable<>();
+			respondDepositConfMessage(data,next);
+			next.set(false);
 		}else{
 			throw new RuntimeException("unknown action");
 		}
@@ -90,7 +94,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	@Asynchronous
 	public void setConfirm(@NoWait Settable<DataSet> account, OrPromise trigger, Promise<Action> isConfirmed, DataSet data) throws Throwable{
 		if (isConfirmed.isReady()){
-			if (null!=isConfirmed.get() && isConfirmed.get()!=Action.VOICE){
+			if (null!=isConfirmed.get() && isConfirmed.get()!=Action.WITHDRAWAL_REQ){
 				data.setAction(isConfirmed.get());
 			}
 			account.set(data);
