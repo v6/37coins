@@ -1,6 +1,7 @@
 package com._37coins;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
@@ -163,6 +164,13 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		servletContext = servletContextEvent.getServletContext();
 		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
 			prepareLogging();
+			//handle uncaught exceptions
+			Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					log.error(t.getName(), e);
+				}
+			});
 		}
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
@@ -186,9 +194,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			jPM.run();
 		}
 		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
+			//handle service level thread
 			slt = i.getInstance(ServiceLevelThread.class);
 			slt.start();
 		}
+		
 		server = i.getInstance(SocketIOServer.class);
 		server.addJsonObjectListener(MerchantSession.class, new DataListener<MerchantSession>() {
 	        @Override

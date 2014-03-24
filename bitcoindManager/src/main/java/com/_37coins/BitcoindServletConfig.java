@@ -1,6 +1,7 @@
 package com._37coins;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
@@ -14,8 +15,10 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import me.moocar.logbackgelf.GelfAppender;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -24,6 +27,10 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.spi.AppenderAttachable;
 
 import com._37coins.bcJsonRpc.BitcoindClientFactory;
 import com._37coins.bcJsonRpc.BitcoindInterface;
@@ -56,6 +63,7 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 	public static URL bcdUrl;
 	public static String bcdUser;
 	public static String bcdPassword;
+	public static String elasticSearchHost;
 	public static Logger log = LoggerFactory.getLogger(BitcoindServletConfig.class);
 	static {
 		if (null!= System.getProperty("accessKey")){
@@ -72,12 +80,25 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 		}
 		bcdUser = System.getProperty("user");
 		bcdPassword = System.getProperty("password");
+		elasticSearchHost = System.getProperty("elasticSearchHost");
 	}
+	private ServletContext servletContext;
 	private ActivityWorker activityWorker;
 	private WalletListener listener;
 
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
+		servletContext = servletContextEvent.getServletContext();
+		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
+			prepareLogging();
+			//handle uncaught exceptions
+			Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					log.error(t.getName(), e);
+				}
+			});
+		}
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 		BitcoindInterface client = i.getInstance(BitcoindInterface.class);
@@ -140,6 +161,27 @@ public class BitcoindServletConfig extends GuiceServletContextListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void prepareLogging(){
+	    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+	    Logger logger = lc.getLogger (Logger.ROOT_LOGGER_NAME);
+	    AppenderAttachable<ILoggingEvent> appenderAttachable = 
+	    		   (AppenderAttachable<ILoggingEvent>) logger;
+	    appenderAttachable.detachAndStopAllAppenders();
+	    GelfAppender ga = new GelfAppender();
+	    ga.setGraylog2ServerHost(elasticSearchHost);
+	    ga.setGraylog2ServerPort(12201);
+	    ga.setGraylog2ServerVersion("0.9.6");
+	    ga.setChunkThreshold(1000);
+	    ga.setUseLoggerName(true);
+	    ga.setMessagePattern("%m%rEx");
+	    ga.setShortMessagePattern("%.-100(%m%rEx)");
+		ga.setIncludeFullMDC(true);
+		ga.setContext(lc);
+		ga.start();
+		appenderAttachable.addAppender(ga);
 	}
 
 	@Override
