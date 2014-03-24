@@ -260,8 +260,10 @@ public class EnvayaSmsResource {
 	 * TODO: fix this crappy code
 	 */
 	static public String fixAmerica(String from, String gateway, String message){
-		if (message.substring(0, 2).equalsIgnoreCase("+1") &&
-				message.contains(" - ")){
+		if (null!=message 
+				&& message.length()> 2 
+				&& message.substring(0, 2).equalsIgnoreCase("+1") 
+				&& message.contains(" - ")){
 			return message.split(" - ")[0];
 		}
 		return from;
