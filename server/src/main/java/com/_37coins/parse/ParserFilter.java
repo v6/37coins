@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.ehcache.Cache;
 
+import org.btc4all.webfinger.WebfingerClient;
+import org.btc4all.webfinger.pojo.JsonResourceDescriptor;
+import org.btc4all.webfinger.pojo.Link;
 import org.joda.money.BigMoney;
 import org.joda.money.CurrencyUnit;
 
@@ -165,6 +169,32 @@ public class ParserFilter implements Filter {
 			} catch (AddressFormatException e) {
 				return false;
 			}
+		}
+		if (receiver.matches(MessageAddress.EMAIL_REGEX)){
+			String bitcoinAddr = null;
+			try{
+				WebfingerClient wc = new WebfingerClient(true);
+				JsonResourceDescriptor jrd = wc.webFinger(receiver);
+				
+				for (Link l : jrd.getLinks()){
+					if (l.getRel().contains("bitcoin")){
+						bitcoinAddr = l.getHref().toString();
+					}
+				}
+			}catch(IOException| URISyntaxException e){
+				e.printStackTrace();
+			}
+			if (bitcoinAddr!=null){
+				//parse link
+				String[] str = 	bitcoinAddr.split(":");
+				bitcoinAddr = str[(str.length>2)?1:str.length-1];
+			}else{
+				return false;
+			}
+			w.setPayDest(new PaymentAddress()
+				.setAddress(bitcoinAddr)
+				.setAddressType(PaymentType.BTC));
+			return true;
 		}
 		try {
 			w.setMsgDest(MessageAddress.fromString(receiver, to));

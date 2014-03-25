@@ -458,7 +458,7 @@ public class WithdrawalWorkflowTest {
             				&& trace.get(0).getAction()==Action.INSUFISSIENT_FUNDS);
             		Withdrawal w = (Withdrawal)trace.get(0).getPayload();
             		//amount needed as displayed to user
-            		Assert.assertEquals(new BigDecimal("100.0055").setScale(8),w.getAmount());
+            		Assert.assertEquals(new BigDecimal("100.0056").setScale(8),w.getAmount());
             		//current balance as displayed to user
             		Assert.assertEquals(new BigDecimal("2.5").setScale(8),w.getBalance());
             	}else{

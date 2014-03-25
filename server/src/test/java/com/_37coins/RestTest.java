@@ -31,6 +31,7 @@ import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -203,6 +204,34 @@ public class RestTest {
 		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
     }
+    
+    @Test
+	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	final DataSet ds = new DataSet();
+    	ParserClient parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+821039841234", "+821027423984", "send 0.1 jangkim321@gmail.com", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			
+			@Override
+			public void handleWithdrawal(DataSet data) {
+				ds.setAction(data.getAction());
+				ds.setPayload(data.getPayload());
+				ds.setCn(data.getCn());
+			}
+			@Override
+			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.WITHDRAWAL_REQ);
+		Withdrawal w = (Withdrawal)ds.getPayload();
+		Assert.assertEquals("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh",w.getPayDest().getAddress());
+		Assert.assertEquals(PaymentAddress.PaymentType.BTC,w.getPayDest().getAddressType());
+		Assert.assertNotNull(ds.getCn());
+    }
 	
 	@Test
 	public void testSignature() throws NoSuchAlgorithmException, UnsupportedEncodingException{
@@ -265,7 +294,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "test@test.com")
 			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 0.01 test2@test.com")
+			.formParam("message", "send 0.01 +821053215679")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -274,13 +303,13 @@ public class RestTest {
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		Withdrawal w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("test2@test.com", w.getPayDest().getAddress());
+		Assert.assertEquals("821053215679", w.getPayDest().getAddress());
 		Assert.assertEquals(new BigDecimal("0.01").setScale(8), w.getAmount());
 		Assert.assertEquals(new BigDecimal("0.0001").setScale(8), w.getFee());
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
-		Assert.assertEquals("mail@37coins.com", rv.get(1).getTo().getGateway());
-		Assert.assertEquals("test2@test.com", rv.get(1).getCn());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("821053215679", rv.get(1).getCn());
 		//say hi
 		r = given()
 			.formParam("from", "+821043215678")
@@ -435,21 +464,6 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.BALANCE, rv.get(0).getAction());
-		//send money from mobile to email
-		r = given()
-			.formParam("from", "+821012345678")
-			.formParam("gateway", "+821027423984")
-			.formParam("message", "* 0.01 test@test.com")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
-		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("test@test.com", w.getPayDest().getAddress());
-		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		//send money from email to mobile
 		r = given()
 			.formParam("from", "test@test.com")
