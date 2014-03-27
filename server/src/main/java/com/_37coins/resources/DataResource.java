@@ -17,6 +17,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.elasticsearch.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.elasticsearch.AvailabilityThread;
 import com._37coins.elasticsearch.TransactionsThread;
@@ -26,6 +28,7 @@ import com._37coins.web.GatewayUser;
 @Produces(MediaType.APPLICATION_JSON)
 public class DataResource {
 	public final static String PATH = "/data";
+	public static Logger log = LoggerFactory.getLogger(DataResource.class);
 	final private Cache cache;
 	final private Client elasticSearch;
 	
@@ -64,6 +67,7 @@ public class DataResource {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
+					log.error("data resource exception",e1);
 					e1.printStackTrace();
 					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 				}

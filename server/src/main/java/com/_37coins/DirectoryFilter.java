@@ -18,13 +18,15 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.restnucleus.filter.EncodingRequestWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 
 @Singleton
 public class DirectoryFilter implements Filter{
-	
+	public static Logger log = LoggerFactory.getLogger(DirectoryFilter.class);
 	final private JndiLdapContextFactory jlc;
 
 	@Inject
@@ -51,6 +53,7 @@ public class DirectoryFilter implements Filter{
 			try {
 				ctx.close();
 			} catch (NamingException e) {
+				log.error("directory filter exception",e);
 				e.printStackTrace();
 			}
 		}

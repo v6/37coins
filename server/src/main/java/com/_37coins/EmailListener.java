@@ -11,6 +11,9 @@ import javax.mail.internet.InternetAddress;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dto.Transaction;
@@ -27,6 +30,7 @@ import com.google.inject.Inject;
 import freemarker.template.TemplateException;
 
 public class EmailListener implements MessageCountListener {
+	public static Logger log = LoggerFactory.getLogger(EmailListener.class);
 
 	@Inject
 	WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory;
@@ -75,7 +79,7 @@ public class EmailListener implements MessageCountListener {
 						try {
 							mt.sendMessage(data);
 						} catch (IOException | TemplateException | MessagingException e) {
-							// TODO Auto-generated catch block
+							log.error("email listener exception",e);
 							e.printStackTrace();
 						}
 					}
@@ -96,6 +100,7 @@ public class EmailListener implements MessageCountListener {
 				});
 
 			} catch (MessagingException ex) {
+				log.error("email listener exception",ex);
 				ex.printStackTrace();
 			}
 		}

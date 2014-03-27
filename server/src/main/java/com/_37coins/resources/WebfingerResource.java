@@ -17,10 +17,14 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import com._37coins.BasicAccessAuthFilter;
+import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.web.WebfingerLink;
 import com._37coins.web.WebfingerResponse;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
@@ -35,6 +39,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @Produces(MediaType.APPLICATION_JSON)
 public class WebfingerResource {
 	public final static String PATH = "/.well-known/webfinger";
+	public static Logger log = LoggerFactory.getLogger(WebfingerResource.class);
 	
 	final private ObjectMapper mapper;
 	final private InitialLdapContext ctx;
@@ -67,6 +72,7 @@ public class WebfingerResource {
 			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mobile="+mobile+"))", ctx).getAttributes();
 			cn = (String)atts.get("cn").get();
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("webfinger exception",e1);
 			e1.printStackTrace();
 			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
 		}
@@ -89,6 +95,7 @@ public class WebfingerResource {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
+					log.error("webfinger exception",e1);
 					e1.printStackTrace();
 					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 				}

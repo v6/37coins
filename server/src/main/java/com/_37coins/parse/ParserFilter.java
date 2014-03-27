@@ -30,6 +30,8 @@ import org.btc4all.webfinger.pojo.JsonResourceDescriptor;
 import org.btc4all.webfinger.pojo.Link;
 import org.joda.money.BigMoney;
 import org.joda.money.CurrencyUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.resources.ParserResource;
 import com._37coins.util.FiatPriceProvider;
@@ -53,6 +55,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Singleton
 public class ParserFilter implements Filter {
+	public static Logger log = LoggerFactory.getLogger(ParserFilter.class);
 	public static final String BC_ADDR_REGEX = "^[mn13][1-9A-Za-z][^OIl]{20,40}";
 	
 	private final Cache cache;
@@ -104,6 +107,7 @@ public class ParserFilter implements Filter {
 				respond(responseList,response);
 			}
 		} catch (Exception e) {
+			log.error("parser exception", e);
 			e.printStackTrace();
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -138,9 +142,12 @@ public class ParserFilter implements Filter {
 	        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
 			mapper.writeValue(os, dsl);
 		} catch (IOException e) {
+			log.error("parser exception", e);
 			e.printStackTrace();
 		} finally{
-			try {if (null!=os)os.close();} catch (IOException e) {}
+			try {if (null!=os)os.close();} catch (IOException e) {
+				log.error("parser exception", e);
+			}
 		}
 	}
 
@@ -182,6 +189,7 @@ public class ParserFilter implements Filter {
 					}
 				}
 			}catch(IOException| URISyntaxException e){
+				log.error("parser exception",e);
 				e.printStackTrace();
 			}
 			if (bitcoinAddr!=null){
@@ -232,6 +240,7 @@ public class ParserFilter implements Filter {
 			w.setAmount(val);
 			return true;
 		} catch (Exception e) {
+			log.error("parser exception",e);
 			e.printStackTrace();
 			return false;
 		}
@@ -284,6 +293,7 @@ public class ParserFilter implements Filter {
 			try{
 				ma = MessageAddress.fromString(ca[1], data.getTo());
 			}catch(AddressException | NumberParseException e){
+				log.error("format error",e);
 				data.setAction(Action.FORMAT_ERROR);
 				return data;
 			}
@@ -318,7 +328,9 @@ public class ParserFilter implements Filter {
 			float price = 1f;
 			try{
 				price = Float.parseFloat(ca[1]);
-			}catch(Exception e){}
+			}catch(Exception e){
+				log.error("parse float failed",e);
+			}
 			data.setPayload(price);
 		}
 		return data;

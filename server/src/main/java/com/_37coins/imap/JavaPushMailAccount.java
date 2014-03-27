@@ -13,11 +13,14 @@ import javax.mail.event.MessageChangedListener;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 public class JavaPushMailAccount implements Runnable {
-
+	public static Logger log = LoggerFactory.getLogger(JavaPushMailAccount.class);
 	public final static int READ_ONLY_FOLDER = Folder.READ_ONLY;
 	public final static int READ_WRITE_FOLDER = Folder.READ_WRITE;
 	private boolean connected = false;
@@ -115,6 +118,7 @@ public class JavaPushMailAccount implements Runnable {
 	}
 
 	public void onError(Exception e) {
+		log.error("push mail failed.",e);
 		e.printStackTrace();
 	}
 
@@ -166,10 +170,9 @@ public class JavaPushMailAccount implements Runnable {
 			}
 			openFolder();
 		} catch (MessagingException ex) {
-			System.out.println(ex.getMessage());
 			onError(ex);
 		} catch (IllegalStateException ex) {
-			System.out.println(ex.getMessage());
+			log.error("folder selection failed",ex);
 		}
 	}
 
@@ -197,8 +200,7 @@ public class JavaPushMailAccount implements Runnable {
 					try {
 						folder.idle();
 					} catch (MessagingException e) {
-						System.err.println("Messaging exception during IDLE: "
-								+ e.getMessage());
+						log.error("Messaging exception during IDLE.",e);
 						nullifyListeners();
 						break;
 					}
@@ -220,7 +222,7 @@ public class JavaPushMailAccount implements Runnable {
 					System.out.println("disconnected...");
 					onDisconnect();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					log.error("wait interrupted", e);
 					e.printStackTrace();
 				}
 				// your block of code

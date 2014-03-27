@@ -14,9 +14,11 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AvailabilityThread extends Thread {
-
+	public static Logger log = LoggerFactory.getLogger(AvailabilityThread.class);
 	final Cache cache;
 	final String hashKey;
 	final String cn;
@@ -62,6 +64,7 @@ public class AvailabilityThread extends Thread {
 			}
 			cache.put(new Element(hashKey + cn, online));
 		} catch (Exception e) {
+			log.error("availability thread failed", e);
 			e.printStackTrace();
 		}
 	}

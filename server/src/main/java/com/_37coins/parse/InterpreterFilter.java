@@ -23,6 +23,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.workflow.pojo.DataSet;
@@ -35,7 +38,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Singleton
 public class InterpreterFilter implements Filter {
-
+	public static Logger log = LoggerFactory.getLogger(InterpreterFilter.class);
+	
 	@SuppressWarnings("unchecked")
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
@@ -125,11 +129,13 @@ public class InterpreterFilter implements Filter {
 						.setService(responseData.getService());
 					httpReq.setAttribute("create", create);
 				}catch(NamingException e1){
+					log.error("interpreter exception", e1);
 					e1.printStackTrace();
 					httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				}
 			}
 		} catch (NamingException e) {
+			log.error("interpreter exception", e);
 			e.printStackTrace();
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -148,6 +154,7 @@ public class InterpreterFilter implements Filter {
 	        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
 			mapper.writeValue(os, dsl);
 		} catch (IOException e) {
+			log.error("interpreter exception", e);
 			e.printStackTrace();
 		} finally{
 			try {if (null!=os)os.close();} catch (IOException e) {}

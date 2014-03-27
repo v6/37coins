@@ -42,9 +42,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
+import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;
@@ -71,7 +74,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 @Produces(MediaType.APPLICATION_JSON)
 public class ParserResource {
 	public final static String PATH = "/parser";
-	
+	public static Logger log = LoggerFactory.getLogger(ParserResource.class);
 	final private List<DataSet> responseList;
 	final private InitialLdapContext ctx;
 	final private ObjectMapper mapper;
@@ -198,6 +201,7 @@ public class ParserResource {
 						return null;
 					}
 				}catch (NamingException e1){
+					log.error("signup exception",e1);
 					e1.printStackTrace();
 					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 				}
@@ -244,6 +248,7 @@ public class ParserResource {
 					.setService(service);
 				responseList.add(create);
 			} catch (NamingException e1) {
+				log.error("signup exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 			}
@@ -280,6 +285,7 @@ public class ParserResource {
 				cn = newGw.get("cn");
 				gwAddress = newGw.get("gwAddress");
 			} catch (Exception e) {
+				log.error("withdrawal req exception",e);
 				e.printStackTrace();
 				throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 			}
@@ -357,6 +363,7 @@ public class ParserResource {
 				return null;
 			}
 		}catch(Exception ex){
+			log.error("charge exception",ex);
 			ex.printStackTrace();
 			return null;
 		}
@@ -389,6 +396,7 @@ public class ParserResource {
 				return null;
 			}
 		}catch(Exception ex){
+			log.error("product exception",ex);
 			ex.printStackTrace();
 			return null;
 		}
@@ -418,6 +426,7 @@ public class ParserResource {
 				throw new RuntimeException("not found");
 			}
 		}catch(Exception ex){
+			log.error("pay exception",ex);
 			ex.printStackTrace();
 			return null;
 		}

@@ -14,9 +14,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -29,7 +33,7 @@ import com.google.inject.Inject;
 
 @Singleton
 public class AbuseFilter implements Filter {
-	
+	public static Logger log = LoggerFactory.getLogger(AbuseFilter.class);
 	private Cache cache;
 	
 	@Inject
@@ -86,6 +90,7 @@ public class AbuseFilter implements Filter {
 	        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
 			mapper.writeValue(os, dsl);
 		} catch (IOException e) {
+			log.error("abuse filter exception",e);
 			e.printStackTrace();
 		} finally{
 			try {if (null!=os)os.close();} catch (IOException e) {}

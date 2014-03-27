@@ -92,6 +92,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				qc.send(rsp,MessagingServletConfig.queueUri, rsp.getTo().getGateway(),"amq.direct",taskToken);
 			}
 		} catch (Exception e) {
+			log.error("messaging activity exception",e);
 			e.printStackTrace();
 			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
@@ -135,6 +136,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
 	        manualCompletionClient.fail(e);
+	        log.error("send confirmation exception",e);
 			e.printStackTrace();
 		}
 		return null;
@@ -181,6 +183,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
 	        manualCompletionClient.complete(Action.TX_CANCELED);
+	        log.error("phone confirmation exception",e);
 	        e.printStackTrace();
 	        return null;
 		}
@@ -195,6 +198,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		try {
 			ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
 		} catch (IllegalStateException | NamingException e) {
+			log.error("read message address exception",e);
 			e.printStackTrace();
 		}
 		try{
@@ -243,6 +247,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 			}
 		}catch(Exception ex){
+			log.error("email verification exepction",ex);
 			ex.printStackTrace();
 			ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 	        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
@@ -267,6 +272,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 			}
 		}catch(Exception ex){
+			log.error("email confirmation exception",ex);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -288,6 +294,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 			}
 		}catch(Exception ex){
+			log.error("email otp exception",ex);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}		
@@ -311,6 +318,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 			}
 		}catch(Exception ex){
+			log.error("otp confirmation exception",ex);
 			ex.printStackTrace();
 			return Action.TX_FAILED;
 		}	

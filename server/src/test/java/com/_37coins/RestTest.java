@@ -232,6 +232,26 @@ public class RestTest {
 		Assert.assertEquals(PaymentAddress.PaymentType.BTC,w.getPayDest().getAddressType());
 		Assert.assertNotNull(ds.getCn());
     }
+    
+    @Test
+	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	final DataSet ds = new DataSet();
+    	ParserClient parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+491039841234", "+821027423984", "send 0.1 +821123723984", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response",ds.getAction()==null);
+    }
 	
 	@Test
 	public void testSignature() throws NoSuchAlgorithmException, UnsupportedEncodingException{

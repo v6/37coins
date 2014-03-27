@@ -217,6 +217,7 @@ public class EnvayaSmsResource {
 										| NoSuchAlgorithmException
 										| IOException | TemplateException
 										| URISyntaxException e) {
+									log.warn("sms response failed", e);
 									e.printStackTrace();
 								}
 							}
@@ -248,6 +249,7 @@ public class EnvayaSmsResource {
 				break;
 			}
 		}catch(NamingException | NoSuchAlgorithmException | UnsupportedEncodingException | NumberParseException e){
+			log.warn("envaya call failed", e);
 			e.printStackTrace();
 		}
 		rv.put("events", new ArrayList<String>());

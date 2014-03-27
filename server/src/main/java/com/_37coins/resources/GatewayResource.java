@@ -40,6 +40,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
@@ -65,6 +67,7 @@ import com.rabbitmq.client.ConnectionFactory;
 @Produces(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 	public final static String PATH = "/api/gateway";
+	public static Logger log = LoggerFactory.getLogger(GatewayResource.class);
 	private static final BigDecimal FEE = new BigDecimal("0.0007").setScale(8);
 	
 	final private InitialLdapContext ctx;
@@ -112,6 +115,7 @@ public class GatewayResource {
 			gu.setFee((atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null);
 			gu.setEnvayaToken((atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null);
 		}catch(IllegalStateException | NamingException e){
+			log.error("login exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -130,6 +134,7 @@ public class GatewayResource {
 			mobile = (atts.get("mobile")!=null)?(String)atts.get("mobile").get():null;
 			fee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
 		}catch(IllegalStateException | NamingException e){
+			log.error("gateway exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -165,6 +170,7 @@ public class GatewayResource {
 			    }
 			    System.out.println("code: "+code);
 			} catch (NumberParseException | IllegalStateException | NamingException | PlivoException | MalformedURLException e) {
+				log.error("gateway exception",e);
 				e.printStackTrace();
 				throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 			}
@@ -186,6 +192,7 @@ public class GatewayResource {
 				conn.close();
 			} catch (KeyManagementException | NoSuchAlgorithmException
 					| URISyntaxException | IOException e1) {
+				log.error("gateway exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 			}finally{
@@ -215,6 +222,7 @@ public class GatewayResource {
 					.setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
 					.setEnvayaToken(envayaToken);
 			} catch (IllegalStateException | NamingException e1) {
+				log.error("gateway exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 			}
@@ -226,6 +234,7 @@ public class GatewayResource {
 					ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
 					rv = new GatewayUser().setFee(gu.getFee());
 				} catch (IllegalStateException | NamingException e1) {
+					log.error("gateway exception",e1);
 					e1.printStackTrace();
 					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 				}
@@ -249,6 +258,7 @@ public class GatewayResource {
 			ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
 			rv = new GatewayUser().setFee(gu.getFee());
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("set fee exception",e1);
 			e1.printStackTrace();
 			throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -275,6 +285,7 @@ public class GatewayResource {
 			    }
 			}
 		}catch(Exception e){
+			log.debug("get balance exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -308,6 +319,7 @@ public class GatewayResource {
 			    }
 			}
 		}catch(Exception e){
+			log.error("withdrawal exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -328,6 +340,7 @@ public class GatewayResource {
 				"user "+ cn + " wants to withdraw " + withdrawalRequest.getAmount() + " to "+ withdrawalRequest.getAddress(),
 				"<html><head></head><body>user "+ cn + " wants to withdraw " + withdrawalRequest.getAmount() + " to "+ withdrawalRequest.getAddress()+"</body></html>");
 		}catch(Exception ex){
+			log.error("withdrawal exception",e);
 			ex.printStackTrace();
 			throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 		}

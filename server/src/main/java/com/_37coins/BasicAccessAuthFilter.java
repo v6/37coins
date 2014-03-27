@@ -165,8 +165,8 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
 	        username = "cn="+cn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 	        ctx.close();
 		} catch (IllegalStateException | NamingException e) {
+			log.error("auth filter directory miss",e);
 			e.printStackTrace();
-			log.warn(username + "not found in directory");
 		}
         return createToken(username, password, request, response);
 	}

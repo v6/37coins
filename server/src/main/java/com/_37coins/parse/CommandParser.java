@@ -15,10 +15,13 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.workflow.pojo.DataSet.Action;
 
 public class CommandParser {
+	public static Logger log = LoggerFactory.getLogger(CommandParser.class);
 	public static final String RB_NAME = "37coins";
 	public static final List<Action> reqCmdList = Arrays.asList(
 			Action.BALANCE,
@@ -64,7 +67,9 @@ public class CommandParser {
 				files = root.listFiles();
 				URL[] urls = {root.toURI().toURL()};
 				loader = new URLClassLoader(urls);
-			}catch(Exception e){}
+			}catch(Exception e){
+				log.error("command parser exception",e);
+			}
 		}
 		// find all available locales
 		List<Locale> locales = new ArrayList<>();

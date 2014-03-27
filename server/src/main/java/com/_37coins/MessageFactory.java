@@ -15,6 +15,9 @@ import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com._37coins.workflow.pojo.DataSet;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -24,6 +27,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class MessageFactory {
+	public static Logger log = LoggerFactory.getLogger(MessageFactory.class);
 	// where to find the templates when running in web container
 	public static final String RESOURCE_PATH = "/WEB-INF/templates/";
 	// where to find the templates when outside web container
@@ -32,6 +36,7 @@ public class MessageFactory {
 	public static final String CT_PLAIN_TEXT = "text/plain";
 	public static final String TEXT_FOLDER = "text/";
 	public static final String HTML_FOLDER = "email/";
+	
 
 	private final Configuration cfg;
 	private final ServletContext servletContext;
@@ -48,6 +53,7 @@ public class MessageFactory {
 			try {
 				cfg.setDirectoryForTemplateLoading(new File(LOCAL_RESOURCE_PATH));
 			} catch (IOException e) {
+				log.error("message factory exception",e);
 				e.printStackTrace();
 			}
 		} else {

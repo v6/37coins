@@ -11,11 +11,13 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.workflow.pojo.DataSet;
 
 public class TransactionsThread extends Thread {
-
+	public static Logger log = LoggerFactory.getLogger(TransactionsThread.class);
 	final Cache cache;
 	final String hashKey;
 	final String cn;
@@ -50,6 +52,7 @@ public class TransactionsThread extends Thread {
 			long txCount = response.count();
 			cache.put(new Element(hashKey + cn, txCount));
 		} catch (Exception e) {
+			log.error("transactions thread failed", e);
 			e.printStackTrace();
 		}
 	}

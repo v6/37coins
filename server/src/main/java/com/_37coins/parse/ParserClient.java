@@ -17,6 +17,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -24,12 +26,12 @@ import com._37coins.workflow.pojo.MessageAddress;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 public class ParserClient extends Thread {
-	
+	public static Logger log = LoggerFactory.getLogger(ParserClient.class);
 	private String from;
 	private String gateway;
 	private String message;
@@ -80,7 +82,7 @@ public class ParserClient extends Thread {
 				results = Arrays.asList(new DataSet().setAction(Action.FORMAT_ERROR).setTo(MessageAddress.fromString(from, gateway)).setLocale(locale));
 			}
 		} catch (IOException |AddressException |NumberParseException e) {
-			// TODO Auto-generated catch block
+			log.error("parser exception", e);
 			e.printStackTrace();
 		}
 		for (DataSet result: results){

@@ -230,8 +230,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		    				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
 		    			}
 		    		}catch(Exception ex){
+		    			log.info(client.getRemoteAddress()+" authentication failed",ex);
 		    			ex.printStackTrace();
-		    			log.info(client.getRemoteAddress()+" authentication failed");
 		    			client.sendJsonObject(new MerchantSession().setAction("failed"));
 		    			//add to monitoring list
 		    			//if exceeded limit, kick
@@ -359,6 +359,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					workflowWorker
 							.addWorkflowImplementationType(NonTxWorkflowImpl.class);
 				} catch (InstantiationException | IllegalAccessException e) {
+					log.error("deposit worker exception",e);
 					e.printStackTrace();
 				}
 				return workflowWorker;
@@ -375,6 +376,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					workflowWorker
 							.addWorkflowImplementationType(WithdrawalWorkflowImpl.class);
 				} catch (InstantiationException | IllegalAccessException e) {
+					log.error("withdrawal worker exception",e);
 					e.printStackTrace();
 				}
 				return workflowWorker;
@@ -434,6 +436,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					activityWorker.addActivitiesImplementation(activitiesImpl);
 				} catch (InstantiationException | IllegalAccessException
 						| SecurityException | NoSuchMethodException e) {
+					log.error("msg activity exception",e);
 					e.printStackTrace();
 				}
 				return activityWorker;
@@ -448,6 +451,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					activityWorker.addActivitiesImplementation(activitiesImpl);
 				} catch (InstantiationException | IllegalAccessException
 						| SecurityException | NoSuchMethodException e) {
+					log.error("epos activity exception",e);
 					e.printStackTrace();
 				}
 				return activityWorker;

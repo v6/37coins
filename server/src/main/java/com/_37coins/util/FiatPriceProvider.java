@@ -19,6 +19,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.money.CurrencyUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.web.PriceTick;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,8 +28,8 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class FiatPriceProvider {
-	
 	public static final String TICKER_URL = "http://api.bitcoinaverage.com/ticker/global/";
+	public static Logger log = LoggerFactory.getLogger(FiatPriceProvider.class);
 	
 	final private Cache cache;
 	private String url;
@@ -68,6 +70,7 @@ public class FiatPriceProvider {
 				HttpResponse response = client.execute(request);
 				temp = new ObjectMapper().readValue(response.getEntity().getContent(), PriceTick.class);
 			}catch(Exception ex){
+				log.error("fiat price exception",ex);
 				ex.printStackTrace();
 				return null;
 			}

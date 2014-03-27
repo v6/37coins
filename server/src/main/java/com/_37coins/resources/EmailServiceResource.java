@@ -28,6 +28,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
@@ -46,7 +48,7 @@ import freemarker.template.TemplateException;
 @Produces(MediaType.APPLICATION_JSON)
 public class EmailServiceResource {
 	public final static String PATH = "/email";
-	
+	public static Logger log = LoggerFactory.getLogger(EmailServiceResource.class);
 	private final MailTransporter mt;
 	private final Cache cache;
 	private final HttpServletRequest httpReq;
@@ -85,10 +87,12 @@ public class EmailServiceResource {
 			try {
 				otp = new ObjectMapper().readValue(description, new TypeReference<List<String>>(){});
 			} catch (IOException e) {
+				log.error("otp not set up",e);
 				e.printStackTrace();
 				throw new WebApplicationException("otp not set up.", Response.Status.PRECONDITION_FAILED);
 			}
 		} catch (IllegalStateException | NamingException e) {
+			log.error("email service error",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -110,6 +114,7 @@ public class EmailServiceResource {
 		    	toModify.put("description", otpString);
 		    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 			} catch (JsonProcessingException | NamingException ex) {
+				log.error("email service exception",ex);
 				ex.printStackTrace();
 				throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
 			}
@@ -140,6 +145,7 @@ public class EmailServiceResource {
 				throw new WebApplicationException("email taken already.", Response.Status.CONFLICT);
 			}
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("verification send error",e1);
 			e1.printStackTrace();
 			throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -154,6 +160,7 @@ public class EmailServiceResource {
 			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
+			log.error("email service exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -177,6 +184,7 @@ public class EmailServiceResource {
 	    	String sanitizedCn = BasicAccessAuthFilter.escapeDN(ef.getCn());
 	    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 		}catch(NamingException ex){
+			log.error("email confirmation exception",ex);
 			ex.printStackTrace();
 			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -196,6 +204,7 @@ public class EmailServiceResource {
 				throw new IllegalStateException("mail is "+mail + ", but requested "+sanitizedMail);
 			}
 		} catch (IllegalStateException | NamingException e) {
+			log.error("email service exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.NOT_FOUND);
 		}
@@ -211,6 +220,7 @@ public class EmailServiceResource {
 	    	toModify.put("description", otpString);
 	    	ctx.modifyAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
 		} catch (JsonProcessingException | NamingException ex) {
+			log.error("email service exception",ex);
 			ex.printStackTrace();
 			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -226,6 +236,7 @@ public class EmailServiceResource {
 			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
 			mt.sendMessage(ds);
 		} catch (IOException | TemplateException| MessagingException e) {
+			log.error("email service exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}

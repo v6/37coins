@@ -91,6 +91,7 @@ public class PlivoResource {
 			this.marshaller = jc.createMarshaller();
 	        marshaller.setProperty(CharacterEscapeHandler.class.getName(),new XmlCharacterHandler());
 		} catch (JAXBException e) {
+			log.error("jaxb exception",e);
 			e.printStackTrace();
 		}
 		
@@ -113,6 +114,7 @@ public class PlivoResource {
 			Attributes atts = ctx.getAttributes(dn,new String[]{"userPassword"});
 			pw = (atts.get("userPassword")!=null)?atts.get("userPassword").get():null;
 		}catch(Exception e){
+			log.error("plivo answer exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.NOT_FOUND);
 		}
@@ -128,6 +130,7 @@ public class PlivoResource {
 						.setSpeak(new Speak()
 							.setText(msgFactory.getText("VoiceEnter",ds)).setLanguage(locale)));
 			} catch (IOException | TemplateException e) {
+				log.error("plivo answer exception",e);
 				e.printStackTrace();
 			}
 		}else{
@@ -143,6 +146,7 @@ public class PlivoResource {
 						.setSpeak(new Speak()
 							.setText(msgFactory.getText("VoiceCreate",ds)).setLanguage(locale)));
 			} catch (IOException | TemplateException e) {
+				log.error("plivo answer exception",e);
 				e.printStackTrace();
 			}
 		}
@@ -217,10 +221,12 @@ public class PlivoResource {
 					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
 				}
 			}catch(IOException | TemplateException ex){
+				log.error("plivo exception",ex);
 				ex.printStackTrace();
 				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
 		} catch (IllegalStateException | NamingException | IOException | TemplateException e) {
+			log.error("plivo exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -255,6 +261,7 @@ public class PlivoResource {
 				.setSpeak(new Speak()
 					.setText(msgFactory.getText("VoiceConfirm",new DataSet().setLocaleString(locale)))));
 		} catch (IOException | TemplateException e) {
+			log.error("plivo create exception",e);
 			e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -302,12 +309,15 @@ public class PlivoResource {
 				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceMismatch",ds)).setLanguage(locale))
 					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
+				log.error("plivo confirm exception",e);
 	        	e.printStackTrace();
 			} catch (IOException | TemplateException e1) {
+				log.error("plivo confirm exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
         } catch (IOException | TemplateException| NamingException e) {
+        	log.error("plivo confirm exception",e);
         	e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -340,6 +350,7 @@ public class PlivoResource {
 				.setText(text)
 				.setLanguage(ds.getLocaleString()));
 		} catch (IOException | TemplateException e) {
+			log.error("plivo register exception",e);
 			e.printStackTrace();
 		}
 		try {

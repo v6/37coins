@@ -150,6 +150,7 @@ public class AccountResource {
 				return "false";//email used
 			}
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("check email exception",e1);
 			e1.printStackTrace();
 			return "false";//ldap error
 		}
@@ -270,6 +271,7 @@ public class AccountResource {
 			}
 			
 		}catch(Exception e){
+			log.error("account resource exception",e);
 			e.printStackTrace();
 		}finally{
 			if (null!=namingEnum){
@@ -331,6 +333,7 @@ public class AccountResource {
 				throw new WebApplicationException("email taken already.", Response.Status.CONFLICT);
 			}
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("register exception",e1);
 			e1.printStackTrace();
 			throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -356,6 +359,7 @@ public class AccountResource {
 					}
 				}
 			}catch(Exception e){
+				log.error("register exception",e);
 				e.printStackTrace();
 			}
 		}
@@ -370,6 +374,7 @@ public class AccountResource {
 		try {
 			sendCreateEmail(sanitizedMail ,token);
 		} catch (MessagingException | IOException| TemplateException e1) {
+			log.error("register exception", e1);
 			e1.printStackTrace();
 			throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -439,6 +444,7 @@ public class AccountResource {
 			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+sanitizedMail+"))", ctx).getAttributes();
 			dn = "cn="+atts.get("cn").get()+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 		} catch (IllegalStateException | NamingException e1) {
+			log.error("password request error", e1);
 			e1.printStackTrace();
 			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
 		}
@@ -446,6 +452,7 @@ public class AccountResource {
 		try {
 			sendResetEmail(sanitizedMail, token);
 		} catch (MessagingException | IOException| TemplateException e1) {
+			log.error("password request error", e1);
 			e1.printStackTrace();
 			throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -467,13 +474,13 @@ public class AccountResource {
 			if (!isValid)
 				throw new WebApplicationException("password does not pass account policy", Response.Status.BAD_REQUEST);
 			pwRequest = (PasswordRequest)e.getObjectValue();
-			String sanitizedDn = BasicAccessAuthFilter.escapeDN(pwRequest.getDn());
 			
 			Attributes toModify = new BasicAttributes();
 			toModify.put("userPassword", newPw);
 			try{
-				ctx.modifyAttributes(sanitizedDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+				ctx.modifyAttributes(pwRequest.getDn(), DirContext.REPLACE_ATTRIBUTE, toModify);
 			}catch(Exception ex){
+				log.error("password reset exception",ex);
 				ex.printStackTrace();
 				throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 			}
