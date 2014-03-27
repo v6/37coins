@@ -252,6 +252,26 @@ public class RestTest {
 		parserClient.join();
 		Assert.assertTrue("unexpected Response",ds.getAction()==null);
     }
+    
+    @Test
+	public void testPayedNumber() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	final DataSet ds = new DataSet();
+    	ParserClient parserClient = new ParserClient(new CommandParser());
+		parserClient.start("+3940047374", "+393602742398", "some shit here", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+			
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response",ds.getAction()==null);
+    }
 	
 	@Test
 	public void testSignature() throws NoSuchAlgorithmException, UnsupportedEncodingException{
@@ -613,7 +633,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 +491087654321")
+			.formParam("message", "send 0.01 +491607654321")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -624,12 +644,12 @@ public class RestTest {
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals(Locale.GERMANY, rv.get(1).getLocale());
 		Assert.assertEquals("DEV4N1JS2Z3476DE", rv.get(1).getTo().getGateway());
-		Assert.assertEquals("491087654321", rv.get(1).getCn());
+		Assert.assertEquals("491607654321", rv.get(1).getCn());
 		//send money, new user, other country, no gateway
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 +631087654321")
+			.formParam("message", "send 0.01 +639177639690")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -637,17 +657,6 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.DST_ERROR, rv.get(0).getAction());
-		//send money, use foreign gateway
-		r = given()
-			.formParam("from", "+491012345678")
-			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 +631087654321")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",0, rv.size());
 		//charge a customer
 		r = given()
 			.formParam("from", "+821012345678")
@@ -664,7 +673,7 @@ public class RestTest {
 		String token = w.getComment();
 		//pay charge
 		r = given()
-			.formParam("from", "+491087654321")
+			.formParam("from", "+491607654321")
 			.formParam("gateway", "+491602742398")
 			.formParam("message", "pay "+token)
 		.expect()

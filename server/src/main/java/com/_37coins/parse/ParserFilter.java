@@ -51,6 +51,7 @@ import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.Base58;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Singleton
@@ -88,6 +89,12 @@ public class ParserFilter implements Filter {
 					&& !isFromSameCountry(md, gateway)){
 				respond(new ArrayList<DataSet>(), response);
 			}
+			//exclude non mobile numbers
+			if (md.getAddressType() == MsgType.SMS
+					&& !isMobileNumber(md)){
+				respond(new ArrayList<DataSet>(), response);
+			}
+			//set locale
 			if (md.getAddressType() == MsgType.SMS){
 				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
@@ -112,6 +119,16 @@ public class ParserFilter implements Filter {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private boolean isMobileNumber(MessageAddress sender){
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		PhoneNumber pn = sender.getPhoneNumber();
+		if (phoneUtil.getNumberType(pn)==PhoneNumberType.FIXED_LINE_OR_MOBILE 
+				|| phoneUtil.getNumberType(pn)==PhoneNumberType.MOBILE){
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean isFromSameCountry(MessageAddress sender, String gateway){
@@ -167,6 +184,7 @@ public class ParserFilter implements Filter {
 		if (receiver == null | receiver.length() < 3) {
 			return false;
 		}
+		//try bitcoin address
 		if (receiver.matches(BC_ADDR_REGEX)) {
 			try {
 				Base58.decodeChecked(receiver);
@@ -177,6 +195,7 @@ public class ParserFilter implements Filter {
 				return false;
 			}
 		}
+		//try email
 		if (receiver.matches(MessageAddress.EMAIL_REGEX)){
 			String bitcoinAddr = null;
 			try{
@@ -204,9 +223,15 @@ public class ParserFilter implements Filter {
 				.setAddressType(PaymentType.BTC));
 			return true;
 		}
+		//try phone
 		try {
 			w.setMsgDest(MessageAddress.fromString(receiver, to));
-			return true;
+			if (w.getMsgDest().getAddressType()==MsgType.SMS
+				&& isMobileNumber(w.getMsgDest())){
+				return true;
+			}else{
+				return false;
+			}
 		} catch (AddressException | NumberParseException e1) {
 			return false;
 		} catch (RuntimeException e2){
@@ -268,17 +293,6 @@ public class ParserFilter implements Filter {
 						i + 1,
 						(i + 1 + 20 > subject.length()) ? subject.length()
 								: i + 1 + 20));
-				//parse TAN from comment
-				int length = 4;
-				String regex = "^[0-9]{"+length+"}( |$).*";
-				if (w.getComment().matches(regex)){
-					w.setConfKey(w.getComment().substring(0, length));
-					if (w.getComment().length()>length){
-						w.setComment(w.getComment().substring(length, w.getComment().length()).trim());
-					}else{
-						w.setComment(null);
-					}
-				}
 			}
 			data.setPayload(w);
 		}

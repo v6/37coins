@@ -40,6 +40,20 @@ preferredLanguage: de-DE
 mail: johannbarbie@me.com
 mobile: +491602742398
 
+dn: cn=ITV4N1JS2Z3476DE,ou=gateways,dc=37coins,dc=com
+objectClass: top
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: person
+cn: ITV4N1JS2Z3476DE
+sn: italian
+givenName: gateway
+departmentNumber: test9900
+description: 0.002
+preferredLanguage: it-IT
+mail: stefano@mail.com
+mobile: +393602742398
+
 dn: cn=MAILN1JS2Z34MAIL,ou=gateways,dc=37coins,dc=com
 objectClass: top
 objectClass: organizationalPerson
