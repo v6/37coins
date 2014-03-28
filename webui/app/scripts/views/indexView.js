@@ -3,9 +3,10 @@ define([
     'communicator',
     'hbs!tmpl/index',
     'views/gatewayPreView',
-    'webfinger'
+    'webfinger',
+    'intlTelInput'
 ],
-function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger) {
+function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput) {
     'use strict';
     return Backbone.Marionette.CompositeView.extend({
         itemView: GatewayView,
@@ -100,18 +101,24 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger) {
                 this.submitInvite({status:200});
             }
         },
+        onShow: function(){
+            console.log('show');
+            if (window.lpnLoaded){
+                this.$('[name="search"]').attr('disabled', false);
+                this.$('button.btn-inverse').attr('disabled', false);
+                var country = (!window.opt.country||window.opt.country==='undefined')?'de':window.opt.country.toLowerCase();
+                this.$('[name="search"]').intlTelInput({preferredCountries:[],defaultCountry:country});
+                var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
+                var example = phoneUtil.format(phoneUtil.getExampleNumberForType(country,window.i18n.phonenumbers.PhoneNumberType.MOBILE),window.i18n.phonenumbers.PhoneNumberFormat.E164);
+                this.$('[name="search"]').attr('placeholder',example);
+                this.$('[name="search"]').focus();
+            }
+        },
         initialize: function() {
             var self = this;
             Communicator.mediator.on('app:init', function() {
-                self.$('[name="search"]').attr('disabled', false);
-                self.$('button.btn-inverse').attr('disabled', false);
-                var t = window.opt.lng.split(/[-_]/);
-                var ter = t[t.length-1].toUpperCase();
-                var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
-                //phoneUtil.getCountryCodeForRegion(ter);
-                var example = phoneUtil.format(phoneUtil.getExampleNumberForType(ter,window.i18n.phonenumbers.PhoneNumberType.MOBILE),window.i18n.phonenumbers.PhoneNumberFormat.E164);
-                self.$('[name="search"]').attr('placeholder',example);
-                self.$('[name="search"]').focus();
+                window.lpnLoaded = true;
+                self.onShow();
             });
         }
     });

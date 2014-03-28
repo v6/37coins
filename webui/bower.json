@@ -24,7 +24,8 @@
     "flag-icon-css": null,
     "font-awesome": null,
     "webfirst": "https://github.com/silverbucket/webfinger.js.git",
-    "socket.io-client": null
+    "socket.io-client": null,
+    "intl-tel-input": null
   },
   "devDependencies": {},
   "directory": "bower_components"

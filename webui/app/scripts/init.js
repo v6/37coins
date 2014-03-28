@@ -66,7 +66,8 @@ require.config({
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         webfinger: 'vendor/webfinger',
-        socketio: '../bower_components/socket.io-client/dist/socket.io'
+        socketio: '../bower_components/socket.io-client/dist/socket.io',
+        intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput'
     },
 
     config: {

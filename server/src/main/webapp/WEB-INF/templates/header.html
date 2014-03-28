@@ -23,6 +23,7 @@
 		window.opt = {
 			resPath: '${payload.resPath}',
 			lng: '${payload.lng}',
+			<#if payload.country??>country: '${payload.country}',</#if>
 			<#if payload.srvcPath??> srvcPath: '${payload.srvcPath}',</#if>
 			<#if payload.captchaPubKey??> captchaPubKey: '${payload.captchaPubKey}',</#if>
             i18nResPath: '${payload.basePath}/res/locales/__lng__/__ns__.json',

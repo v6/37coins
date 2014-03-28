@@ -43,7 +43,14 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
             var jForm = this.$('form');
             var self = this;
             $.validator.addMethod('phone', function(value) {
-                return (/^\+\d{1,3}[\s.()-]*(\d[\s.()-]*){10,12}(x\d*)?$/).test(value);
+                var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
+                var isValid = false;
+                var number;
+                try{
+                    number = phoneUtil.parseAndKeepRawInput(value);
+                    isValid = phoneUtil.isValidNumber(number);
+                }catch(err){}
+                return isValid;
             }, 'Please enter a mobile number in international format.');
             jForm.validate({
                 rules: {

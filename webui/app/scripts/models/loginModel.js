@@ -11,7 +11,7 @@ define(['backbone','communicator'], function(Backbone, Communicator) {
             srvcPath: window.opt.srvcPath,
             cn: (!sessionStorage.getItem('cn')||sessionStorage.getItem('cn')==='undefined')?undefined:sessionStorage.getItem('cn'),
             roles: (!sessionStorage.getItem('roles')||sessionStorage.getItem('roles')==='undefined')?undefined:[sessionStorage.getItem('roles')],
-            mobile: (!sessionStorage.getItem('mobile')||sessionStorage.getItem('mobile')==='mobile')?undefined:sessionStorage.getItem('mobile'),
+            mobile: (!sessionStorage.getItem('mobile')||sessionStorage.getItem('mobile')==='undefined')?undefined:sessionStorage.getItem('mobile'),
             fee: (!sessionStorage.getItem('fee')||sessionStorage.getItem('fee')==='undefined')?undefined:sessionStorage.getItem('fee'),
             envayaToken: (!sessionStorage.getItem('envayaToken')||sessionStorage.getItem('envayaToken')==='undefined')?undefined:sessionStorage.getItem('envayaToken')
         },

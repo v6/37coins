@@ -1,7 +1,10 @@
 package com._37coins;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
@@ -77,6 +80,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.maxmind.geoip.LookupService;
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -400,6 +404,27 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			AccountPolicy providePolicy(){
 				return new AccountPolicy()
 					.setEmailMxLookup(true);
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			LookupService getLookupService(){
+				LookupService cl = null;
+				ClassLoader loader = null;
+				try {
+					if (null==servletContext){
+						File file = new File(MessageFactory.LOCAL_RESOURCE_PATH+"../classes");
+						URL[] urls = {file.toURI().toURL()};
+						loader = new URLClassLoader(urls);
+					}else{
+						loader = MessageFactory.class.getClassLoader();
+					}
+					File file = new File(loader.getResource("maxmind/GeoIP.dat").getFile());
+					cl = new LookupService(file, LookupService.GEOIP_MEMORY_CACHE);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return cl;
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
