@@ -1,13 +1,9 @@
 package com._37coins;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
@@ -21,11 +17,12 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.sendMail.MailServiceClient;
+import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
-import com._37coins.web.GatewayUser;
+import com._37coins.web.AccountPolicy;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
-import com._37coins.workflow.pojo.EmailFactor;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
@@ -48,12 +45,6 @@ public class TestServletConfig extends GuiceServletContextListener {
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		// TODO Auto-generated method stub
 		super.contextInitialized(servletContextEvent);
-		Cache cache = injector.getInstance(Cache.class);
-		Set<GatewayUser> gw = new HashSet<>();
-		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
-		gw.add(new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
-		cache.put(new Element("gateways",gw));
-		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaskToken("taskToken").setEmailToken("bla")));
 	}
 
 	@Override
@@ -68,8 +59,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
 	            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
 	            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
+	            	filter("/account*").through(DirectoryFilter.class); //allow directory access
+	            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());
 	            	bind(ParserClient.class);
+	            	bind(QueueClient.class);
 	        	}
 				
 				@Provides
@@ -87,6 +81,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 					jlc.setSystemUsername(MessagingServletConfig.ldapUser);
 					jlc.setSystemPassword(MessagingServletConfig.ldapPw);
 					return jlc;
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				AccountPolicy providePolicy(){
+					return new AccountPolicy().setEmailMxLookup(true);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
@@ -118,6 +117,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
+				MailServiceClient getMailClient(Cache cache){
+					return new MockEmailClient(cache);
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
 				public SocketIOServer provideSocket(){
 				 	Configuration config = new Configuration();
 				    config.setPort(8081);
@@ -131,12 +135,8 @@ public class TestServletConfig extends GuiceServletContextListener {
 					gac.setEnabled(false);
 					GoogleAnalytics ga = new GoogleAnalytics(gac,"UA-123456");
 					return ga;
-	        	}
+	        	}	
 				
-				@Provides @Singleton @SuppressWarnings("unused")
-				public QueueClient provideMessageFactory(MessageFactory mf) {
-					return new QueueClient(mf);
-				}	
 		       	@Provides @Singleton @SuppressWarnings("unused")
 	        	public Cache provideCache(){
 	        		//Create a singleton CacheManager using defaults

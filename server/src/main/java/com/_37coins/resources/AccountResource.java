@@ -157,6 +157,40 @@ public class AccountResource {
 		return "true";
 	}
 	
+	@GET
+	@Path("/find")
+	public String findByEmail(@QueryParam("mobile") String mobile){
+		//how to avoid account fishing?
+		Element e = cache.get(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq));
+		if (e!=null){
+			if (e.getHitCount()>50){
+				throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
+			}
+		}
+		//check it's not taken already
+		try{
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		PhoneNumber pn = phoneUtil.parse(mobile, "ZZ");
+		mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
+		//check if it's not an account already
+		ctx.setRequestControls(null);
+		SearchControls searchControls = new SearchControls();
+		searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		searchControls.setTimeLimit(500);
+		NamingEnumeration<?> namingEnum = null;
+		String sanitizedMobile = BasicAccessAuthFilter.escapeLDAPSearchFilter(mobile);
+		namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+sanitizedMobile+"))", searchControls);
+		if (namingEnum.hasMore()){
+			Attributes atts = ((SearchResult) namingEnum.next())
+					.getAttributes();
+			return (String) atts.get("cn").get();
+		}else{
+			throw new WebApplicationException("no gateway found",javax.ws.rs.core.Response.Status.NOT_FOUND);
+		}
+		}catch(Exception ex){
+			throw new WebApplicationException(ex,javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@POST
 	@Path("/invite")
@@ -310,7 +344,7 @@ public class AccountResource {
 	@POST
 	public void register(AccountRequest accountRequest){
 		// no ticket, no service
-		if (null==cache.get("ticket"+accountRequest.getTicket())){
+		if (null==cache.get(TicketResource.TICKET_SCOPE+accountRequest.getTicket())){
 			log.debug("ticket required for this operation.");
 			throw new WebApplicationException("ticket required for this operation.", Response.Status.EXPECTATION_FAILED);
 		}

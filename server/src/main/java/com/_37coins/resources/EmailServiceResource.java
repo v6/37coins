@@ -32,9 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
+import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
-import com._37coins.sendMail.MailTransporter;
+import com._37coins.sendMail.MailServiceClient;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
@@ -49,17 +51,20 @@ import freemarker.template.TemplateException;
 public class EmailServiceResource {
 	public final static String PATH = "/email";
 	public static Logger log = LoggerFactory.getLogger(EmailServiceResource.class);
-	private final MailTransporter mt;
+	private final MailServiceClient mailClient;
 	private final Cache cache;
 	private final HttpServletRequest httpReq;
 	final private InitialLdapContext ctx;
 	final private Locale locale;
+	private final MessageFactory msgFactory;
 	
 	@Inject
-	public EmailServiceResource(MailTransporter mt,
+	public EmailServiceResource(MailServiceClient mailClient,
 			ServletRequest request,
-			Cache cache){
-		this.mt = mt;
+			Cache cache,
+			MessageFactory msgFactory){
+		this.mailClient = mailClient;
+		this.msgFactory = msgFactory;
 		this.cache = cache;
 		httpReq = (HttpServletRequest)request;
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
@@ -151,14 +156,18 @@ public class EmailServiceResource {
 		}
 		
 		DataSet ds = new DataSet()
-			//.setAction(Action.EMAIL_VER)
+			.setAction(Action.REGISTER)
 			.setLocale(locale)
 			.setTo(new MessageAddress()
 					.setAddressType(MsgType.EMAIL))
 			.setPayload(emailFactor.getEmailToken());
 		try {
 			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
-			mt.sendMessage(ds);
+			mailClient.send(msgFactory.constructSubject(ds), 
+					emailFactor.getEmail(),
+					MessagingServletConfig.senderMail, 
+					msgFactory.constructTxt(ds),
+					msgFactory.constructHtml(ds));
 		} catch (IOException | TemplateException| MessagingException e) {
 			log.error("email service exception",e);
 			e.printStackTrace();
@@ -226,7 +235,7 @@ public class EmailServiceResource {
 		}
 		//prepare email data
 		DataSet ds = new DataSet()
-		//.setAction(Action.EMAIL)
+		.setAction(Action.RESET)
 		.setLocale(locale)
 		.setTo(new MessageAddress()
 				.setAddressType(MsgType.EMAIL))
@@ -234,7 +243,11 @@ public class EmailServiceResource {
 		//sed email
 		try {
 			ds.getTo().setEmail(new InternetAddress(sanitizedMail));
-			mt.sendMessage(ds);
+			mailClient.send(msgFactory.constructSubject(ds), 
+					emailFactor.getEmail(),
+					MessagingServletConfig.senderMail, 
+					msgFactory.constructTxt(ds),
+					msgFactory.constructHtml(ds));
 		} catch (IOException | TemplateException| MessagingException e) {
 			log.error("email service exception",e);
 			e.printStackTrace();

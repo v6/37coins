@@ -1,6 +1,8 @@
 package com._37coins;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -9,6 +11,7 @@ import java.net.Inet4Address;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.ws.rs.core.Form;
 
@@ -20,20 +23,29 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com._37coins.helper.HelperResource;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dto.Account;
+import com._37coins.resources.AccountResource;
+import com._37coins.resources.EmailServiceResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.ParserResource;
+import com._37coins.resources.TicketResource;
+import com._37coins.web.AccountRequest;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
+import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -52,6 +64,7 @@ public class RestTest {
 	static Account acc1;
 	
     private static EmbeddedJetty embeddedJetty;
+    private static GoogleAnalytics ga;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -75,6 +88,9 @@ public class RestTest {
         InMemoryDirectoryServer ds = new InMemoryDirectoryServer(config);
         ds.importFromLDIF(true, "src/test/resources/test-data.ldif");
         ds.startListening();
+        GoogleAnalyticsConfig gac = new GoogleAnalyticsConfig();
+		gac.setEnabled(false);
+		ga = new GoogleAnalytics(gac,"UA-123456");
 	}
     
     @AfterClass
@@ -92,10 +108,19 @@ public class RestTest {
         mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
     }
     
+    public String json(Object o) throws IOException{
+    	try {
+			return new ObjectMapper().writeValueAsString(o);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return null;
+		}
+    }
+    
     @Test
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+821039842742", "+821027423984", "send 0.1 +821039842743", 8087,
 		new ParserAction() {
 			@Override
@@ -127,8 +152,14 @@ public class RestTest {
     
     @Test
 	public void testWebInvite() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    	//flush
+    	given()
+			.contentType(ContentType.JSON)
+		.when()
+			.post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
+    	//run invite
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+821039841234", null, Action.SIGNUP.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -154,7 +185,7 @@ public class RestTest {
     @Test
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+821039841235", "+821027423984", Action.VOICE.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -182,7 +213,7 @@ public class RestTest {
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+821039841234", "+821027423984", "req 0.01", 8087,
 		new ParserAction() {
 			@Override
@@ -208,7 +239,7 @@ public class RestTest {
     @Test
 	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+821039841234", "+821027423984", "send 0.1 jangkim321@gmail.com", 8087,
 		new ParserAction() {
 			@Override
@@ -236,7 +267,7 @@ public class RestTest {
     @Test
 	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+491039841234", "+821027423984", "send 0.1 +821123723984", 8087,
 		new ParserAction() {
 			@Override
@@ -256,7 +287,7 @@ public class RestTest {
     @Test
 	public void testPayedNumber() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser());
+    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
 		parserClient.start("+3940047374", "+393602742398", "some shit here", 8087,
 		new ParserAction() {
 			@Override
@@ -302,8 +333,216 @@ public class RestTest {
 			.post(serverUrl);
 	}
 	
+	   
+    @Test
+    public void testHealthcheck() throws IOException{
+    	given()
+		.expect()
+			.statusCode(200)
+		.when()
+			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
+    }
+    
+    
+    @Test
+    public void testEmailActivation() throws IOException {
+    	//find the id
+    	String id = given()
+			.contentType(ContentType.JSON)
+			.queryParam("mobile", "+821039841235")
+		.when()
+			.get(embeddedJetty.getBaseUri() + AccountResource.PATH+"/find").asString();
+    	System.out.println("id:"+id);
+    	//create request
+    	EmailFactor ef = new EmailFactor()
+    		.setEmail("alex@test.com")
+    		.setEmailToken("1234")
+    		.setCn(id);
+    	
+    	Response r = given()
+    		.contentType(ContentType.JSON)
+    		.headers("Accept-Language", "en, en-gb;q=0.8")
+    		.body(json(ef))
+    	.expect()
+    		.statusCode(200)
+    	.when()
+    		.post(embeddedJetty.getBaseUri() + EmailServiceResource.PATH+"/verify");
+    	EmailFactor ver = new ObjectMapper().readValue(r.asInputStream(), EmailFactor.class);
+    	//confirm request
+    	given()
+        	.contentType(ContentType.JSON)
+        	.body(json(new EmailFactor().setEmailToken(ver.getEmailToken())))
+        .expect()
+        	.statusCode(204)
+        .when()
+        	.post(embeddedJetty.getBaseUri() + EmailServiceResource.PATH+"/confirm");    	
+    }
+    
+    @Test
+    public void testTicket() throws IOException {
+    	//flush
+    	given()
+			.contentType(ContentType.JSON)
+		.when()
+			.post(embeddedJetty.getBaseUri() + HelperResource.PATH);
+    	//get a ticket
+    	Response r = given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(200)
+			.body("key", equalToIgnoringCase("ticket"))
+			.body("value", notNullValue())
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	Map<String,String> rv = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>(){});
+    	//validate
+    	given()
+			.contentType(ContentType.JSON)
+			.queryParam("ticket", rv.get("value"))
+		.expect()
+			.statusCode(200)
+			.body("value", equalToIgnoringCase("active"))
+		.when()
+			.get(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	//get another ticket
+    	given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(200)
+			.body("key", equalToIgnoringCase("ticket"))
+			.body("value", notNullValue())
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	//validate old ticket
+    	given()
+			.contentType(ContentType.JSON)
+			.queryParam("ticket", rv.get("value"))
+		.expect()
+			.statusCode(200)
+			.body("value", equalToIgnoringCase("active"))
+		.when()
+			.get(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	//get a third ticket
+    	given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(200)
+			.body("key", equalToIgnoringCase("ticket"))
+			.body("value", notNullValue())
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	//get blocked
+    	given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(400)
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    }
+    
+    @Test
+    public void testEmailIsFree() throws IOException{
+    	//test taken
+    	String rv = given()
+    		.contentType(ContentType.JSON)
+    		.queryParam("email", "johannbarbie@me.com")
+		.expect()
+			.statusCode(200)
+		.when()
+			.get(embeddedJetty.getBaseUri() + AccountResource.PATH+"/check").asString();
+    	Assert.assertEquals(rv, "false");
+    	//test invalid
+    	rv = given()
+			.contentType(ContentType.JSON)
+			.queryParam("email", "test@bla")
+		.expect()
+			.statusCode(200)
+		.when()
+			.get(embeddedJetty.getBaseUri() + AccountResource.PATH+"/check").asString();
+    	Assert.assertEquals(rv, "false");
+    	//test taken
+    	rv = given()
+    		.contentType(ContentType.JSON)
+    		.queryParam("email", "test2@bp.org")
+		.expect()
+			.statusCode(200)
+		.when()
+			.get(embeddedJetty.getBaseUri() + AccountResource.PATH+"/check").asString();
+    	Assert.assertEquals(rv, "true");
+    }
+    
+    @Test
+    public void testSignup() throws IOException {
+    	//flush
+    	given()
+			.contentType(ContentType.JSON)
+		.when()
+			.post(embeddedJetty.getBaseUri() + HelperResource.PATH);
+    	//data
+    	AccountRequest request = new AccountRequest()
+        		.setPassword("password");
+    	//try without ticket
+    	given()
+			.body(json(request))
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(417)
+		.when()
+			.post(embeddedJetty.getBaseUri() + AccountResource.PATH);
+    	//get a ticket
+    	Response r = given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(200)
+			.body("value", notNullValue())
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	Map<String,String> rv = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>(){});
+    	//try with bad email
+    	given()
+			.body(json(request.setEmail("test@bla").setTicket(rv.get("value"))))
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(400)
+		.when()
+			.post(embeddedJetty.getBaseUri() + AccountResource.PATH);
+    	//get a ticket
+    	r = given()
+			.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(200)
+			.body("value", notNullValue())
+		.when()
+			.post(embeddedJetty.getBaseUri() + TicketResource.PATH);
+    	rv = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>(){});
+    	//register
+    	given()
+    		.body(json(request.setTicket(rv.get("value")).setEmail("test3@bp.org")))
+    		.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(204)
+		.when()
+			.post(embeddedJetty.getBaseUri() + AccountResource.PATH);
+    	//fetch email content
+    	String token = given().contentType(ContentType.JSON).when()
+			.get(embeddedJetty.getBaseUri() + HelperResource.PATH).asString();
+    	//confirm account creation
+    	given()
+    		.body(json(new AccountRequest().setToken(token)))
+    		.contentType(ContentType.JSON)
+		.expect()
+			.statusCode(204)
+		.when()
+			.post(embeddedJetty.getBaseUri() + AccountResource.PATH+"/create");
+    }
+	
 	@Test
 	public void testUser() throws JsonParseException, JsonMappingException, IOException{
+    	//flush
+    	given()
+			.contentType(ContentType.JSON)
+		.when()
+			.post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
 		//ask help
 		Response r = given()
 			.formParam("from", "test@test.com")

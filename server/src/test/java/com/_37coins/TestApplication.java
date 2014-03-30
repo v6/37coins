@@ -19,7 +19,7 @@ public class TestApplication extends ResourceConfig {
     @Inject
     public TestApplication(ServiceLocator serviceLocator) {
         // Set package to look for resources in
-        packages("com._37coins.resources","org.glassfish.jersey.examples.jackson");
+        packages("com._37coins.resources","com._37coins.helper","org.glassfish.jersey.examples.jackson");
 
         System.out.println("Registering injectables...");
 

@@ -39,6 +39,7 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 
 import com._37coins.bizLogic.NonTxWorkflowImpl;
 import com._37coins.bizLogic.WithdrawalWorkflowImpl;
+import com._37coins.envaya.QueueClient;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.parse.AbuseFilter;
@@ -330,6 +331,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		bind(MessagingActivitiesImpl.class);
         		bind(EposActivitiesImpl.class);
         		bind(ParserClient.class);
+        		bind(QueueClient.class);
         	}
 			
 			@Provides

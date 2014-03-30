@@ -29,6 +29,10 @@ import com._37coins.MessagingServletConfig;
 @Produces(MediaType.APPLICATION_JSON)
 public class TicketResource {
 	public final static String PATH = "/ticket";
+	public final static String TICKET_SCOPE = "account";
+	public final static String TICKET_CHARS = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789";
+	public final static String REQUEST_SCOPE = "remoteHost";
+	public final static int TICKET_LENGTH = 14;
 	public static Logger log = LoggerFactory.getLogger(TicketResource.class);
 		
 	private final Cache cache;
@@ -48,17 +52,17 @@ public class TicketResource {
 	 */
 	@POST
 	public Pair<String,String> getTicket(){
-		Element e = cache.get(getRemoteAddress());
+		Element e = cache.get(REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq));
 		if (e!=null){
-			if (e.getHitCount()>3){
+			if (e.getHitCount()>=3){
 				//TODO: implement turing test
 				throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
 			}
 		}else{
-			cache.put(new Element(getRemoteAddress(),getRemoteAddress()));
+			cache.put(new Element(REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq),TicketResource.getRemoteAddress(httpReq)));
 		}
-		String ticket = RandomStringUtils.random(14, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
-		cache.put(new Element("ticket"+ticket,ticket));
+		String ticket = RandomStringUtils.random(TICKET_LENGTH, TICKET_SCOPE);
+		cache.put(new Element(TICKET_SCOPE+ticket,ticket));
 		return Pair.of("ticket",ticket);
 	}
 	
@@ -71,11 +75,11 @@ public class TicketResource {
 			@FormParam("resp") String response){
         ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
         reCaptcha.setPrivateKey(MessagingServletConfig.captchaSecKey);
-        ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(getRemoteAddress(), challenge, response);
+        ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(TicketResource.getRemoteAddress(httpReq), challenge, response);
         if (reCaptchaResponse.isValid()) {
-        	cache.remove(getRemoteAddress());
-    		String ticket = RandomStringUtils.random(14, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
-    		cache.put(new Element("ticket"+ticket,ticket));
+        	cache.remove(TicketResource.getRemoteAddress(httpReq));
+    		String ticket = RandomStringUtils.random(TICKET_LENGTH, TICKET_SCOPE);
+    		cache.put(new Element(TICKET_SCOPE+ticket,ticket));
     		return Pair.of("ticket",ticket);
         } else {
           	throw new WebApplicationException("error", Response.Status.BAD_REQUEST);
@@ -83,7 +87,7 @@ public class TicketResource {
 	}
 	
 	
-	private String getRemoteAddress(){
+	public static String getRemoteAddress(HttpServletRequest httpReq){
 		String addr = httpReq.getHeader("X-Forwarded-For");
 		if (null==addr || addr.length()<7){
 			addr = httpReq.getRemoteAddr();
@@ -91,10 +95,13 @@ public class TicketResource {
 		return addr;
 	}
 	
+	public static void consume(Cache cache, String ticket){
+		cache.remove(TICKET_SCOPE+ticket);
+	}
 	
 	@GET
 	public Pair<String,String> validateToken(@QueryParam("ticket") String ticket){
-		Element e = cache.get("reset"+ticket);
+		Element e = cache.getQuiet(TICKET_SCOPE+ticket);
 		if (null!=e){
 			return Pair.of("status", "active");
 		}else{
