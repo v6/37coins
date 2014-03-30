@@ -64,6 +64,7 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.amazonaws.services.simpleworkflow.flow.ActivityWorker;
 import com.amazonaws.services.simpleworkflow.flow.WorkflowWorker;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
@@ -115,6 +116,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String captchaSecKey;
 	public static String elasticSearchHost;
 	public static String productPath;
+	public static String gaTrackingId;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
 	public static int localPort;
@@ -152,6 +154,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		captchaSecKey = System.getProperty("captchaSecKey");
 		elasticSearchHost = System.getProperty("elasticSearchHost");
 		productPath = System.getProperty("productPath");
+		gaTrackingId = System.getProperty("gaTrackingId");
 	}
 	
 	private ServletContext servletContext;
@@ -392,6 +395,12 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				return new NonTxWorkflowClientExternalFactoryImpl(
 						workflowClient, domainName);
 			}
+
+			@Provides @Singleton @SuppressWarnings("unused")
+			public GoogleAnalytics getGoogleAnalytics(){
+				GoogleAnalytics ga = new GoogleAnalytics(MessagingServletConfig.gaTrackingId);
+				return ga;
+        	}
 
 			@Provides @Singleton @SuppressWarnings("unused")
 			public WithdrawalWorkflowClientExternalFactoryImpl getSWorkflowClientExternal(

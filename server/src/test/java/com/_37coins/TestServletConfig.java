@@ -28,6 +28,8 @@ import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.EmailFactor;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
+import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.google.inject.Guice;
@@ -122,6 +124,14 @@ public class TestServletConfig extends GuiceServletContextListener {
 				    SocketIOServer server = new SocketIOServer(config);
 				    return server;
 				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				public GoogleAnalytics getGoogleAnalytics(){
+					GoogleAnalyticsConfig gac = new GoogleAnalyticsConfig();
+					gac.setEnabled(false);
+					GoogleAnalytics ga = new GoogleAnalytics(gac,"UA-123456");
+					return ga;
+	        	}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				public QueueClient provideMessageFactory(MessageFactory mf) {

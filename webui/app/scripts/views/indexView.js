@@ -70,7 +70,7 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput
                 this.$('#donate').append('<p>Existing Wallet found, retrieving bitcoin address...</p>');
                 cn = this.number;
             }else if (data.status===404){
-                this.$('#donate').append('<p>No gateway in this courtry yet, be the first one to start it!</p>');
+                this.$('#donate').append('<p>No gateway in this courtry yet, be the first one to <a href="#gateways">start it!</a></p>');
                 this.$('button.btn-inverse').button('reset');
                 return;
             }else{

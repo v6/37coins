@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
-import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;

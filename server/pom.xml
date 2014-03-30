@@ -232,6 +232,11 @@
 	        <artifactId>geoip-api</artifactId>
 	        <version>1.2.12</version>
     	</dependency>
+		<dependency>
+		    <groupId>com.brsanthu</groupId>
+		    <artifactId>google-analytics-java</artifactId>
+		    <version>1.0.4</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>

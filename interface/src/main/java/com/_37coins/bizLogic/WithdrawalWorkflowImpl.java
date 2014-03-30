@@ -48,7 +48,6 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     DecisionContext context = provider.getDecisionContext();
     private WorkflowClock clock = context.getWorkflowClock();
     private ConversionService convService = new ConversionService();
-
     
     @Override
     public void executeCommand(final DataSet data) {

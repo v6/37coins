@@ -61,6 +61,7 @@ public class IndexResource {
 		
 		data.put("resPath", MessagingServletConfig.resPath);
 		data.put("basePath", MessagingServletConfig.basePath);
+		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
 		data.put("srvcPath", MessagingServletConfig.srvcPath);
 		String country = null;
 		try{

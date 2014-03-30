@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.naming.NamingException;
@@ -52,6 +53,8 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
+import com.brsanthu.googleanalytics.EventHit;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -79,6 +82,8 @@ public class EnvayaSmsResource {
 	
 	private final Cache cache;
 	
+	private final GoogleAnalytics ga;
+	
 	private int localPort;
 	
 	@Inject public EnvayaSmsResource(ServletRequest request,
@@ -88,7 +93,8 @@ public class EnvayaSmsResource {
 			Cache cache,
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
-			AmazonSimpleWorkflow swfService) {
+			AmazonSimpleWorkflow swfService,
+			GoogleAnalytics ga) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
 		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
@@ -98,6 +104,7 @@ public class EnvayaSmsResource {
 		this.parserClient = parserClient;
 		this.nonTxFactory = nonTxFactory;
 		this.withdrawalFactory = withdrawalFactory;
+		this.ga = ga;
 	}
 	
 	@POST
@@ -178,13 +185,6 @@ public class EnvayaSmsResource {
 					MDC.clear();
 					break;
 				case "incoming":
-					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
-					MDC.put("message_type", params.getFirst("message_type"));
-					log.debug("incoming message {} received from {} via {} at {}",params.getFirst("message"),params.getFirst("from"),params.getFirst("message_type"),params.getFirst("timestamp"));
-					MDC.clear();
 					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
 						String from = params.getFirst("from");
 						String gateway = params.getFirst("phone_number");
@@ -194,6 +194,13 @@ public class EnvayaSmsResource {
 							from = fixAmerica(from, gateway,message);
 							message = fixAmerica(message);
 						}
+						MDC.put("hostName", cn);
+						MDC.put("mobile", from);
+						MDC.put("event", params.getFirst("action"));
+						MDC.put("log", params.getFirst("log"));
+						MDC.put("message_type", params.getFirst("message_type"));
+						log.debug("incoming message {} received from {} via {} at {}",params.getFirst("message"),from,params.getFirst("message_type"),params.getFirst("timestamp"));
+						MDC.clear();
 						parserClient.start(from, gateway, message, localPort,
 						new ParserAction() {
 							@Override

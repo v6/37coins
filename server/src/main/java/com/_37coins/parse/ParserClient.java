@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
@@ -23,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
+import com.brsanthu.googleanalytics.EventHit;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,10 +41,13 @@ public class ParserClient extends Thread {
 	private int localPort;
 	private final CommandParser commandParser;
 	private ParserAction pa;
+	private final GoogleAnalytics ga;
 	
 	@Inject
-	public ParserClient(CommandParser commandParser){
+	public ParserClient(CommandParser commandParser,
+			GoogleAnalytics ga){
 		this.commandParser = commandParser;
+		this.ga = ga;
 	}
 	
 	public void start(String from, String gateway, String message, int localPort, ParserAction pa){
@@ -85,6 +91,8 @@ public class ParserClient extends Thread {
 			log.error("parser exception", e);
 			e.printStackTrace();
 		}
+		String uuid = UUID.nameUUIDFromBytes(from.getBytes()).toString();
+		uuid = uuid.substring(0, 14)+"4"+uuid.substring(15);//violates google analytics terms, as it is not randomA
 		for (DataSet result: results){
 			switch(result.getAction()){
 			case WITHDRAWAL_REQ:
@@ -104,6 +112,12 @@ public class ParserClient extends Thread {
 				pa.handleResponse(result);
 				break;
 			}
+			if (result.getAction()!=Action.GW_BALANCE && result.getAction()!=Action.GW_DEPOSIT_REQ){
+				ga.postAsync(new EventHit("parser", "processed", result.getAction().toString(), results.size()).clientId(uuid));
+			}
+		}
+		if (results.size()==0){
+			ga.postAsync(new EventHit("parser", "processed", message, results.size()).clientId(uuid));
 		}
 	}
 	
