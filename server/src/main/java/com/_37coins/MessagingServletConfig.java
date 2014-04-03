@@ -33,6 +33,7 @@ import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.spi.AppenderAttachable;
@@ -287,10 +288,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		log.info("ServletContextListener started");
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void prepareLogging(){
 	    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    Logger logger = lc.getLogger (Logger.ROOT_LOGGER_NAME);
+	    ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)lc.getLogger(Logger.ROOT_LOGGER_NAME);
+	    logger.setLevel(Level.INFO);
 	    AppenderAttachable<ILoggingEvent> appenderAttachable = 
 	    		   (AppenderAttachable<ILoggingEvent>) logger;
 	    appenderAttachable.detachAndStopAllAppenders();

@@ -130,7 +130,7 @@ public class ServiceLevelThread extends Thread {
 						MDC.put("mobile", gu.getMobile());
 						MDC.put("event", "check");
 						MDC.put("Online", "true");
-						log.debug("{} online", gu.getId());
+						log.info("{} online", gu.getId());
 						MDC.clear();
 						active.add(gu);
 					} else {
@@ -138,7 +138,7 @@ public class ServiceLevelThread extends Thread {
 						MDC.put("mobile", gu.getMobile());
 						MDC.put("event", "check");
 						MDC.put("Online", "false");
-						log.debug("{} offline", gu.getId());
+						log.info("{} offline", gu.getId());
 						MDC.clear();
 					}
 				} catch (Exception ex) {

@@ -155,7 +155,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 				MDC.put("sender", rsp.get().getCn());
 				MDC.put("recepient", toId);
 				MDC.put("workflowId", workflowId);
-				log.debug("withdrawal request processed");
+				log.info("withdrawal request processed");
 				MDC.clear();
 	    		sendFee(tx, rsp.get());
             }

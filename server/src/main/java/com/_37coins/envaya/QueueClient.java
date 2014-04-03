@@ -53,7 +53,7 @@ public class QueueClient {
 		MDC.put("event", "outgoing");
 		MDC.put("message_type", "sms");
 		MDC.put("message_action", rsp.getAction().getText());
-		log.debug("sending outgoing message");
+		log.info("sending outgoing message");
 		MDC.clear();
 		String uuid = UUID.nameUUIDFromBytes(from.getBytes()).toString();
 		uuid = uuid.substring(0, 14)+"4"+uuid.substring(15);//violates google analytics terms, as it is not randomA

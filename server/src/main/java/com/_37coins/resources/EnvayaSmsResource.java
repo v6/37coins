@@ -135,7 +135,7 @@ public class EnvayaSmsResource {
 					MDC.put("msgId", params.getFirst("id"));
 					MDC.put("status", params.getFirst("status"));
 					MDC.put("error", params.getFirst("error"));
-					log.debug("send status received");
+					log.info("send status received");
 					MDC.clear();
 					if (params.getFirst("status").equals("sent")&&!params.getFirst("id").contains("SmsResource")){
 				        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
@@ -148,7 +148,7 @@ public class EnvayaSmsResource {
 					MDC.put("mobile", params.getFirst("phone_number"));
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
-					log.debug("test received");
+					log.info("test received");
 					MDC.clear();
 					try{
 						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
@@ -164,7 +164,7 @@ public class EnvayaSmsResource {
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
 					MDC.put("consumer_tag", params.getFirst("consumer_tag"));
-					log.debug("amqp started received");
+					log.info("amqp started received");
 					MDC.clear();
 					break;
 				case "device_status":
@@ -173,7 +173,7 @@ public class EnvayaSmsResource {
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
 					MDC.put("status", params.getFirst("status"));
-					log.debug("device status received");
+					log.info("device status received");
 					MDC.clear();
 					break;
 				case "forward_send":
@@ -181,7 +181,7 @@ public class EnvayaSmsResource {
 					MDC.put("mobile", params.getFirst("phone_number"));
 					MDC.put("event", params.getFirst("action"));
 					MDC.put("log", params.getFirst("log"));
-					log.debug("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
+					log.info("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
 					MDC.clear();
 					break;
 				case "incoming":
@@ -199,7 +199,7 @@ public class EnvayaSmsResource {
 						MDC.put("event", params.getFirst("action"));
 						MDC.put("log", params.getFirst("log"));
 						MDC.put("message_type", params.getFirst("message_type"));
-						log.debug("incoming message {} received from {} via {} at {}",params.getFirst("message"),from,params.getFirst("message_type"),params.getFirst("timestamp"));
+						log.info("incoming message {} received from {} via {} at {}",params.getFirst("message"),from,params.getFirst("message_type"),params.getFirst("timestamp"));
 						MDC.clear();
 						parserClient.start(from, gateway, message, localPort,
 						new ParserAction() {

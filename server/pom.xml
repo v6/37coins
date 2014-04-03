@@ -226,6 +226,12 @@
 		    <groupId>org.btc4all</groupId>
 		    <artifactId>webfinger</artifactId>
 		    <version>0.2.0-SNAPSHOT</version>
+		    <exclusions>
+            	<exclusion>
+            		<artifactId>slf4j-simple</artifactId>
+            		<groupId>org.slf4j</groupId>
+            	</exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 	        <groupId>com.maxmind.geoip</groupId>
