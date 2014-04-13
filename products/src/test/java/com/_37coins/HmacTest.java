@@ -14,6 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restnucleus.filter.HmacFilter;
 
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.ProductResource;

@@ -8,6 +8,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +20,10 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
 public class ProductsServletConfig extends GuiceServletContextListener {
-	public static String elasticSearchHost;
 	public static String hmacToken;
 	public static Logger log = LoggerFactory.getLogger(ProductsServletConfig.class);
 	public static Injector injector;
 	static {
-		elasticSearchHost = System.getProperty("elasticSearchHost");
 		hmacToken = System.getProperty("hmacToken");
 	}
     
@@ -39,10 +38,13 @@ public class ProductsServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
-            	filter("/*").through(CorsFilter.class);
             	filter("/product*").through(HmacFilter.class);
         	}
 			
+        	@Provides @Singleton @SuppressWarnings("unused")
+        	public String provideHmacToken(){
+        		return ProductsServletConfig.hmacToken;
+        	}
         
             @Named("day")
         	@Provides @Singleton @SuppressWarnings("unused")

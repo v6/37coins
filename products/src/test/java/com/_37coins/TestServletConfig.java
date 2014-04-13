@@ -8,6 +8,9 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.restnucleus.filter.CorsFilter;
+import org.restnucleus.filter.HmacFilter;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -32,8 +35,12 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            protected void configureServlets(){
 	            	filter("/*").through(CorsFilter.class);
 	            	filter("/charges*").through(HmacFilter.class);
+	        	}	            
+	            
+	        	@Provides @Singleton @SuppressWarnings("unused")
+	        	public String provideHmacToken(){
+	        		return ProductsServletConfig.hmacToken;
 	        	}
-
 				
 	            @Named("day")
 	        	@Provides @Singleton @SuppressWarnings("unused")
