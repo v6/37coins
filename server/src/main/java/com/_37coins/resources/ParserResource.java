@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import net.sf.ehcache.Cache;
@@ -42,6 +43,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,6 @@ import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
-import com._37coins.web.MerchantSession;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -58,7 +59,6 @@ import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
-import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,13 +78,11 @@ public class ParserResource {
 	final private ObjectMapper mapper;
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
-	final private SocketIOServer server;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
-			Cache cache, FiatPriceProvider fiatPriceProvider,
-			SocketIOServer server) {
+			Cache cache, FiatPriceProvider fiatPriceProvider) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -93,7 +91,6 @@ public class ParserResource {
 			responseList.add(ds);
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.fiatPriceProvider = fiatPriceProvider;
-		this.server = server;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -329,57 +326,32 @@ public class ParserResource {
 	@Path("/Charge")
 	public Response charge(){
 		DataSet data = responseList.get(0);
-		Withdrawal w = (Withdrawal)data.getPayload();
-		try{
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpPost req = new HttpPost("http://127.0.0.1:"+localPort+ChargeResource.PATH);
-			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
-			pn = pn.replace("+", "");
-			Withdrawal charge = new Withdrawal().setAmount(w.getAmount()).setPayDest(new PaymentAddress().setAddress(pn).setAddressType(PaymentType.ACCOUNT));
-			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
-			entity.setContentType("application/json");
-			req.setEntity(entity);
-			CloseableHttpResponse rsp = httpclient.execute(req);
-			if (rsp.getStatusLine().getStatusCode()==200){
-				Withdrawal c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Withdrawal.class);
-				String room = data.getCn()+"/"+data.getCn();
-				if (server.getRoomOperations(room).getClients().size()>0){
-					MerchantSession rv = new MerchantSession().setAction("charge").setAmount(w.getAmount()).setCid(c.getTxId());
-					server.getRoomOperations(room).sendJsonObject(rv);
-					cache.put(new Element("merchantState"+data.getCn(),rv));
-					//start a workflow to fetch the current address
-					data.setAction(Action.GW_DEPOSIT_REQ);
-				}else{
-					w.setComment(c.getTxId());
-				}
-				try {
-					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-				} catch (JsonProcessingException e) {
-					return null;
-				}
-			}else{
-				return null;
-			}
-		}catch(Exception ex){
-			log.error("charge exception",ex);
-			ex.printStackTrace();
-			return null;
-		}
+		return callCache(data, "/charge");
 	}
 	
 	@POST
 	@Path("/Product")
 	public Response products(){
 		DataSet data = responseList.get(0);
+		return callCache(data, "/product");
+	}
+	
+	public Response callCache(DataSet data, String path){
 		Withdrawal w = (Withdrawal)data.getPayload();
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpPost req = new HttpPost(MessagingServletConfig.productPath);
+			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+path);
 			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
 			pn = pn.replace("+", "");
 			Withdrawal charge = new Withdrawal().setAmount(w.getAmount()).setPayDest(new PaymentAddress().setAddress(pn).setAddressType(PaymentType.ACCOUNT));
-			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
+			String reqValue = new ObjectMapper().writeValueAsString(charge);
+			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");
+			String reqSig = HmacFilter.calculateSignature(
+					MessagingServletConfig.paymentsPath+path,
+					HmacFilter.parseJson(reqValue.getBytes()),
+					MessagingServletConfig.hmacToken);
+			req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
@@ -394,10 +366,10 @@ public class ParserResource {
 				return null;
 			}
 		}catch(Exception ex){
-			log.error("product exception",ex);
+			log.error("charge exception",ex);
 			ex.printStackTrace();
 			return null;
-		}
+		}		
 	}
 
 	@POST
@@ -408,16 +380,14 @@ public class ParserResource {
 		Withdrawal charge = null;
 		try{
 			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet someHttpGet = new HttpGet("http://127.0.0.1:"+localPort+ChargeResource.PATH+"?token="+w.getComment());
+			String url = MessagingServletConfig.paymentsPath+"/charge"+"?token="+w.getComment();
+			String sig = HmacFilter.calculateSignature(url, new MultivaluedHashMap<String,String>(), MessagingServletConfig.hmacToken);
+			HttpGet someHttpGet = new HttpGet(url);
+			someHttpGet.setHeader(HmacFilter.AUTH_HEADER, sig);
 			URI uri = new URIBuilder(someHttpGet.getURI()).build();
 			HttpRequestBase request = new HttpGet(uri);
 			HttpResponse response = client.execute(request);
-			if (response.getStatusLine().getStatusCode()!=200){
-				HttpGet secondHttpGet = new HttpGet(MessagingServletConfig.productPath+"?token="+w.getComment());
-				URI secondUri = new URIBuilder(secondHttpGet.getURI()).build();
-				HttpRequestBase secondRequest = new HttpGet(secondUri);
-				response = client.execute(secondRequest);
-			}
+			//TODO: also check for product, avoid possible collision of tokens
 			if (response.getStatusLine().getStatusCode()==200){
 				charge = new ObjectMapper().readValue(response.getEntity().getContent(), Withdrawal.class);
 			}else{

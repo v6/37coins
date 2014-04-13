@@ -22,6 +22,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restnucleus.filter.HmacFilter;
 
 import com._37coins.helper.HelperResource;
 import com._37coins.parse.CommandParser;
@@ -32,6 +33,7 @@ import com._37coins.resources.AccountResource;
 import com._37coins.resources.EmailServiceResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.HealthCheckResource;
+import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
 import com._37coins.web.AccountRequest;
@@ -41,6 +43,7 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.PaymentAddress;
+import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
@@ -534,6 +537,31 @@ public class RestTest {
 			.statusCode(204)
 		.when()
 			.post(embeddedJetty.getBaseUri() + AccountResource.PATH+"/create");
+    }
+    
+    /**
+     * make sure module is started with: mvn jetty:run -Denvironment=test -DhmacToken=
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    @Test
+    public void testMerchant() throws JsonParseException, JsonMappingException, IOException, NoSuchAlgorithmException{
+    	Withdrawal w = new Withdrawal().setAmount(new BigDecimal("0.5")).setComment("bla");
+    	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
+    	w.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
+		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), MessagingServletConfig.hmacToken);
+    	Response r = given()
+    		.contentType(ContentType.JSON)
+    		.header("X-Request-Signature", sig)
+    		.body(json(w))
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + MerchantResource.PATH+"/charge/test");
+    	w = new ObjectMapper().readValue(r.asInputStream(), Withdrawal.class);
+    	System.out.println(w.getTxId());
     }
 	
 	@Test

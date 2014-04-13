@@ -1,9 +1,12 @@
 package com._37coins.resources;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -20,6 +23,12 @@ import javax.ws.rs.core.UriInfo;
 
 import net.sf.ehcache.Cache;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +36,9 @@ import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.web.MerchantSession;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.Withdrawal;
 import com.corundumstudio.socketio.SocketIOServer;
-import com.google.inject.Inject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import freemarker.template.TemplateException;
 
@@ -41,6 +51,7 @@ public class MerchantResource {
 	final private MessageFactory htmlFactory;
 	final private Cache cache;
 	final private SocketIOServer server;
+	final private ObjectMapper mapper;
 	
 	@Inject
 	public MerchantResource(MessageFactory htmlFactory,
@@ -49,6 +60,7 @@ public class MerchantResource {
 		this.htmlFactory = htmlFactory;
 		this.cache = cache;
 		this.server = server;
+		this.mapper = new ObjectMapper();
 	}
 	
 	
@@ -90,14 +102,53 @@ public class MerchantResource {
 	}
 	
 	@POST
-	@Path("/charge/{accountToken}")
-	public Map<String,String> charge(
-			@PathParam("accountToken") String accountToken, 
-			MultivaluedMap<String, String> params,
-			@HeaderParam("X-Request-Signature") String sig,
-			@Context UriInfo uriInfo){//charge request hording amount, 
-		
-		return null;
+	@Path("/charge/{apiToken}")
+	public Response charge(Withdrawal withdrawal,
+			@PathParam("accountToken") String apiToken,
+			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
+			@Context UriInfo uriInfo){
+		String apiSecret = "test";
+		MultivaluedMap<String,String> mvm = null;
+		try {
+			mvm = HmacFilter.parseJson(mapper.writeValueAsBytes(withdrawal));
+		} catch (IOException e) {
+			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (mvm==null || mvm.size()<2 || withdrawal.getAmount()==null || withdrawal.getPayDest()==null){
+			throw new WebApplicationException("mandatory data (amount, payDest) missing.", Response.Status.BAD_REQUEST);
+		}
+		String url = MessagingServletConfig.basePath + uriInfo.getPath();
+		String calcSig = null;
+		try {
+			calcSig = HmacFilter.calculateSignature(url, mvm, apiSecret);
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (null==sig || null==calcSig || !calcSig.equals(sig)){
+			throw new WebApplicationException("signatures don't match",Response.Status.UNAUTHORIZED);
+		}
+		try{
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+"/charge");
+			String reqValue = mapper.writeValueAsString(withdrawal);
+			StringEntity entity = new StringEntity(reqValue, "UTF-8");
+			entity.setContentType("application/json");
+			String reqSig = HmacFilter.calculateSignature(
+					MessagingServletConfig.paymentsPath+"/charge",
+					HmacFilter.parseJson(reqValue.getBytes()),
+					MessagingServletConfig.hmacToken);
+			req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
+			req.setEntity(entity);
+			CloseableHttpResponse rsp = httpclient.execute(req);
+			if (rsp.getStatusLine().getStatusCode()==200){
+				return Response.ok(rsp.getEntity().getContent(), MediaType.APPLICATION_JSON).build();
+			}else{
+				throw new WebApplicationException("received status: "+rsp.getStatusLine().getStatusCode(),Response.Status.INTERNAL_SERVER_ERROR);
+			}
+		}catch(Exception ex){
+			log.error("merchant exception",ex);
+			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
