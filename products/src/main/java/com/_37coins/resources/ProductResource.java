@@ -1,10 +1,12 @@
 package com._37coins.resources;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -16,23 +18,28 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import com._37coins.web.Product;
+import com._37coins.workflow.pojo.Withdrawal;
 
 @Path(ProductResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductResource {
-	public final static String PATH = "/product";
+	public final static String PATH = "/charges";
 
-	private final Cache cache;
+	private final Cache hourCache;
+	private final Cache dayCache;
 	
 	@Inject
-	public ProductResource(Cache cache){
-		this.cache = cache;
+	public ProductResource(@Named("hour") Cache hourCache,
+			@Named("day") Cache dayCache){
+		this.hourCache = hourCache;
+		this.dayCache = dayCache;
 	}
 	
 	@POST
-	public Product create(Product charge){
-		if (null == charge || null == charge.getAmount()||null == charge.getSource()){
+	@Path("/{type}")
+	public Withdrawal create(Withdrawal charge, @PathParam("type")String type){
+		Cache cache = type.equals("product")?dayCache:hourCache;
+		if (null == charge || null == charge.getAmount()||null == charge.getPayDest()){
 			throw new WebApplicationException(Response.Status.BAD_REQUEST);
 		}
 		String token = null;
@@ -46,21 +53,25 @@ public class ProductResource {
 			i++;
 		}
 		cache.put(new Element("charge"+token,charge));
-		return new Product().setToken(token);
+		return new Withdrawal().setTxId(token);
 	}
 	
 	@GET
-	public Product get(@QueryParam("token") String token){
+	@Path("/{type}")
+	public Withdrawal get(@QueryParam("token") String token, @PathParam("type")String type){
+		Cache cache = type.equals("product")?dayCache:hourCache;
 		Element e = cache.get("charge"+token);
 		if (null!=e){
-			return (Product)e.getObjectValue();
+			return (Withdrawal)e.getObjectValue();
 		}else{
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
 	}
 	
 	@DELETE
-	public void delete(@QueryParam("token") String token){
+	@Path("/{type}")
+	public void delete(@QueryParam("token") String token, @PathParam("type")String type){
+		Cache cache = type.equals("product")?dayCache:hourCache;
 		Element e = cache.get("charge"+token);
 		if (null!=e){
 			cache.remove("charge"+token);

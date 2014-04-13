@@ -17,7 +17,6 @@ public class CorsFilter implements Filter{
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
     FilterChain filterChain) throws IOException, ServletException {
-
         if(response instanceof HttpServletResponse){
         HttpServletResponse alteredResponse = ((HttpServletResponse)response);
         // I need to find a way to make sure this only gets called on 200-300 http responses

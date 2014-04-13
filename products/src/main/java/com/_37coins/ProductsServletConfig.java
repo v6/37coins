@@ -1,5 +1,6 @@
 package com._37coins;
 
+import javax.inject.Named;
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
@@ -19,10 +20,12 @@ import com.google.inject.servlet.ServletModule;
 
 public class ProductsServletConfig extends GuiceServletContextListener {
 	public static String elasticSearchHost;
+	public static String hmacToken;
 	public static Logger log = LoggerFactory.getLogger(ProductsServletConfig.class);
 	public static Injector injector;
 	static {
 		elasticSearchHost = System.getProperty("elasticSearchHost");
+		hmacToken = System.getProperty("hmacToken");
 	}
     
 	@Override
@@ -37,15 +40,17 @@ public class ProductsServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/*").through(CorsFilter.class);
+            	filter("/product*").through(HmacFilter.class);
         	}
 			
         
+            @Named("day")
         	@Provides @Singleton @SuppressWarnings("unused")
         	public Cache provideCache(){
         		//Create a singleton CacheManager using defaults
         		CacheManager manager = CacheManager.create();
         		//Create a Cache specifying its configuration.
-        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
+        		Cache testCache = new Cache(new CacheConfiguration("day", 1000)
         		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
         		    .eternal(false)
         		    .timeToLiveSeconds(79200) //22 hours, reset daily
@@ -53,7 +58,23 @@ public class ProductsServletConfig extends GuiceServletContextListener {
         		    .diskExpiryThreadIntervalSeconds(0));
         		  manager.addCache(testCache);
         		  return testCache;
-        	}});
+        	}
+        
+			@Named("hour")
+	    	@Provides @Singleton @SuppressWarnings("unused")
+	    	public Cache provideHourCache(){
+	    		//Create a singleton CacheManager using defaults
+	    		CacheManager manager = CacheManager.create();
+	    		//Create a Cache specifying its configuration.
+	    		Cache testCache = new Cache(new CacheConfiguration("hour", 1000)
+	    		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
+	    		    .eternal(false)
+	    		    .timeToLiveSeconds(7200)
+	    		    .timeToIdleSeconds(3600)
+	    		    .diskExpiryThreadIntervalSeconds(0));
+	    		manager.addCache(testCache);
+	    		return testCache;
+	    	}});
         return injector;
     }
 	
