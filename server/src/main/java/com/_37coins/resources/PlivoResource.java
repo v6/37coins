@@ -28,6 +28,7 @@ import javax.xml.bind.Marshaller;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
@@ -44,12 +45,14 @@ import com._37coins.plivo.Redirect;
 import com._37coins.plivo.Speak;
 import com._37coins.plivo.Wait;
 import com._37coins.plivo.XmlCharacterHandler;
+import com._37coins.web.GatewayUser;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 
 import freemarker.template.TemplateException;
@@ -359,6 +362,95 @@ public class PlivoResource {
 			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
 		} catch (JAXBException e) {
 			return null;
+		}
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/merchant/req/{cn}/{code}/{locale}")
+	public Response merchant(
+			@PathParam("cn") String cn,
+			@PathParam("code") String code,
+			@PathParam("locale") String locale){
+		com._37coins.plivo.Response rv = null;
+		DataSet ds = new DataSet().setLocaleString(locale);
+		try {
+			rv = new com._37coins.plivo.Response()
+				.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
+				.add(new GetDigits()
+					.setAction(MessagingServletConfig.basePath+"/plivo/merchant/"+cn+"/"+code+"/"+locale)
+					.setNumDigits(NUM_DIGIT)
+					.setRedirect(true)
+					.setSpeak(new Speak()
+						.setText(msgFactory.getText("VoiceEnter",ds)).setLanguage(locale)));
+		} catch (IOException | TemplateException e) {
+			log.error("plivo answer exception",e);
+			e.printStackTrace();
+		}
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
+	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/merchant/{cn}/{code}/locale")
+	public Response merchantConfirm(
+			@PathParam("cn") String cn,
+			@PathParam("code") String code,
+			@PathParam("locale") String locale,
+			@FormParam("Digits") String digits){
+		com._37coins.plivo.Response rv = null;
+		DataSet ds = new DataSet().setLocaleString(locale);
+		if (digits!=null && Integer.parseInt(digits)==Integer.parseInt(code)){
+			
+			//
+    		boolean auth = false;
+			if (auth){
+				client.joinRoom(data.getPhoneNumber());
+				data.setSessionToken(client.getSessionId().toString())
+					.setAction("login")
+					.setTan(null);
+				cache.put(new Element("merchant"+data.getSessionToken(),data));
+				server.getRoomOperations(data.getPhoneNumber()+"/"+data.getPhoneNumber()).sendJsonObject(data);
+				log.info(client.getRemoteAddress()+" authenticated");
+			}else{
+				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
+			}
+			
+			try {
+				Attributes a = new BasicAttributes();
+				a.put("preferredLanguage", gu.getLocaleString());
+				a.put("mobile",phoneUtil.format(pn, PhoneNumberFormat.E164));
+				//some abuses here: description -> fee and departementNumber -> envayapw
+				a.put("description",FEE.toString());
+				String envayaToken = RandomStringUtils.random(12, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+				a.put("departmentNumber",envayaToken);
+				ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
+				rv = new GatewayUser()
+					.setLocale(gu.getLocale())
+					.setFee(FEE)
+					.setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
+					.setEnvayaToken(envayaToken);
+			} catch (IllegalStateException | NamingException e1) {
+				log.error("gateway exception",e1);
+				e1.printStackTrace();
+				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
+			}
+		}else{
+			//try again
+			rv = new com._37coins.plivo.Response()
+			.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
+			.add(new GetDigits()
+				.setAction(MessagingServletConfig.basePath+"/plivo/merchant/"+cn+"/"+code+"/"+locale)
+				.setNumDigits(NUM_DIGIT)
+				.setRedirect(true)
+				.setSpeak(new Speak()
+					.setText(msgFactory.getText("VoiceEnter",ds)).setLanguage(locale)));
 		}
 	}
 	

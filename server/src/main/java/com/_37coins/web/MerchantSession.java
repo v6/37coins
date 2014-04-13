@@ -1,13 +1,12 @@
 package com._37coins.web;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public class MerchantSession {
 	
 	private String phoneNumber;
 	
-	private String tan;
+	private String otp;
 	
 	private String sessionToken;
 	
@@ -28,12 +27,12 @@ public class MerchantSession {
 		return this;
 	}
 
-	public String getTan() {
-		return tan;
+	public String getOtp() {
+		return otp;
 	}
 
-	public MerchantSession setTan(String tan) {
-		this.tan = tan;
+	public MerchantSession setOtp(String otp) {
+		this.otp = otp;
 		return this;
 	}
 

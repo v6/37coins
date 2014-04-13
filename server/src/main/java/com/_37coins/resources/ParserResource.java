@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.util.FiatPriceProvider;
-import com._37coins.web.Charge;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.MerchantSession;
 import com._37coins.web.Seller;
@@ -336,22 +335,22 @@ public class ParserResource {
 			HttpPost req = new HttpPost("http://127.0.0.1:"+localPort+ChargeResource.PATH);
 			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
 			pn = pn.replace("+", "");
-			Charge charge = new Charge().setAmount(w.getAmount()).setSource(pn);
+			Withdrawal charge = new Withdrawal().setAmount(w.getAmount()).setPayDest(new PaymentAddress().setAddress(pn).setAddressType(PaymentType.ACCOUNT));
 			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
-				Charge c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Charge.class);
+				Withdrawal c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Withdrawal.class);
 				String room = data.getCn()+"/"+data.getCn();
 				if (server.getRoomOperations(room).getClients().size()>0){
-					MerchantSession rv = new MerchantSession().setAction("charge").setAmount(w.getAmount()).setCid(c.getToken());
+					MerchantSession rv = new MerchantSession().setAction("charge").setAmount(w.getAmount()).setCid(c.getTxId());
 					server.getRoomOperations(room).sendJsonObject(rv);
 					cache.put(new Element("merchantState"+data.getCn(),rv));
 					//start a workflow to fetch the current address
 					data.setAction(Action.GW_DEPOSIT_REQ);
 				}else{
-					w.setComment(c.getToken());
+					w.setComment(c.getTxId());
 				}
 				try {
 					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
@@ -378,14 +377,14 @@ public class ParserResource {
 			HttpPost req = new HttpPost(MessagingServletConfig.productPath);
 			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
 			pn = pn.replace("+", "");
-			Charge charge = new Charge().setAmount(w.getAmount()).setSource(pn);
+			Withdrawal charge = new Withdrawal().setAmount(w.getAmount()).setPayDest(new PaymentAddress().setAddress(pn).setAddressType(PaymentType.ACCOUNT));
 			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(charge), "UTF-8");
 			entity.setContentType("application/json");
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
-				Charge c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Charge.class);
-				w.setComment(c.getToken());
+				Withdrawal c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Withdrawal.class);
+				w.setComment(c.getTxId());
 				try {
 					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 				} catch (JsonProcessingException e) {
@@ -406,7 +405,7 @@ public class ParserResource {
 	public Response pay(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
-		Charge charge = null;
+		Withdrawal charge = null;
 		try{
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet someHttpGet = new HttpGet("http://127.0.0.1:"+localPort+ChargeResource.PATH+"?token="+w.getComment());
@@ -420,7 +419,7 @@ public class ParserResource {
 				response = client.execute(secondRequest);
 			}
 			if (response.getStatusLine().getStatusCode()==200){
-				charge = new ObjectMapper().readValue(response.getEntity().getContent(), Charge.class);
+				charge = new ObjectMapper().readValue(response.getEntity().getContent(), Withdrawal.class);
 			}else{
 				throw new RuntimeException("not found");
 			}
@@ -430,7 +429,7 @@ public class ParserResource {
 			return null;
 		}
 		data.setAction(Action.WITHDRAWAL_REQ);
-		w.setPayDest(new PaymentAddress().setAddressType(PaymentType.ACCOUNT).setAddress(charge.getSource()));
+		w.setPayDest(charge.getPayDest());
 		if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
 			return null;
 		}

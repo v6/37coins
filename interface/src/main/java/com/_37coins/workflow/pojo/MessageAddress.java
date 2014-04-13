@@ -72,7 +72,7 @@ public class MessageAddress {
 	public enum MsgType {
 		SMS,
 		EMAIL,
-		UNKNOWN;
+		CALLBACK;
 	}
 	
 	private PhoneNumber phoneNumber;

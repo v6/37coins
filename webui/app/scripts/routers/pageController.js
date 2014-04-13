@@ -28,8 +28,11 @@ define(['backbone',
     'views/notFoundView',
     'views/exampleView',
     'routeFilter',
-    'socketio'
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, ExampleView) {
+    'socketio',
+    'views/merchantLoginView',
+    'views/merchantConnectingView',
+    'views/MerchantDisconnectView'
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, ExampleView, io, MerchantLoginView, MerchantConnectingView, MerchantDisconnectView) {
     'use strict';
 
     var Controller = {};
@@ -50,7 +53,7 @@ define(['backbone',
             'contact': 'showContact',
             'signUp': 'showSignUp',
             'logout': 'showLogout',
-            'merchantFront': 'showMerchantFront',
+            'merchant': 'showMerchantFront',
             'example': 'showExample',
             'notFound': 'showNotFound'
         },
@@ -59,7 +62,7 @@ define(['backbone',
             'reset': 'getTicket',
             'gateways': 'showLogin',
             'balance': 'showLogin',
-            'merchantFront': 'showMerchantLogin',
+            'merchant': 'showMerchantLogin',
             '*any': function(fragment, args, next){
                 //set title
                 if (fragment){
@@ -127,7 +130,7 @@ define(['backbone',
                     Communicator.mediator.trigger('app:show', view);
                 });
                 socket.on('reconnect', function () {
-                    self.reconnect(data);
+                    self.reconnect();
                 });
                 socket.on('connect', function (data) {
                     //send subscribe event for new session

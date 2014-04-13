@@ -16,7 +16,7 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import com._37coins.web.Charge;
+import com._37coins.workflow.pojo.Withdrawal;
 
 @Path(ChargeResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -31,8 +31,8 @@ public class ChargeResource {
 	}
 	
 	@POST
-	public Charge create(Charge charge){
-		if (null == charge || null == charge.getAmount()||null == charge.getSource()){
+	public Withdrawal create(Withdrawal withdrawal){
+		if (null == withdrawal || null == withdrawal.getAmount()||null == withdrawal.getPayDest()){
 			throw new WebApplicationException(Response.Status.BAD_REQUEST);
 		}
 		String token = null;
@@ -45,15 +45,15 @@ public class ChargeResource {
 			}
 			i++;
 		}
-		cache.put(new Element("charge"+token,charge));
-		return new Charge().setToken(token);
+		cache.put(new Element("charge"+token,withdrawal));
+		return new Withdrawal().setTxId(token);
 	}
 	
 	@GET
-	public Charge get(@QueryParam("token") String token){
+	public Withdrawal get(@QueryParam("token") String token){
 		Element e = cache.get("charge"+token);
 		if (null!=e){
-			return (Charge)e.getObjectValue();
+			return (Withdrawal)e.getObjectValue();
 		}else{
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}

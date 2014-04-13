@@ -27,6 +27,10 @@ public class Withdrawal {
 	private String confKey;
 	
 	private String comment;
+	
+	private Double rate;
+	
+	private String currencyCode;
 
 	public String getConfLink() {
 		return confLink;
@@ -115,6 +119,24 @@ public class Withdrawal {
 
 	public Withdrawal setBalance(BigDecimal balance) {
 		this.balance = balance;
+		return this;
+	}
+
+	public Double getRate() {
+		return rate;
+	}
+
+	public Withdrawal setRate(Double rate) {
+		this.rate = rate;
+		return this;
+	}
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public Withdrawal setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
 		return this;
 	}
 

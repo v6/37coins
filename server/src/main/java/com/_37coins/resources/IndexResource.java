@@ -88,26 +88,6 @@ public class IndexResource {
 	}
 	
 	@GET
-	@Path("/merchant")
-	public Response merchant(@HeaderParam("Accept-Language") String lng){
-		Map<String,String> data = new HashMap<>();
-		data.put("resPath", MessagingServletConfig.merchantResPath);
-		data.put("basePath", MessagingServletConfig.basePath);
-		data.put("lng", (lng!=null)?lng.split(",")[0]:"en-US");
-		DataSet ds = new DataSet()
-			.setService("index.html")
-			.setPayload(data);
-		String rsp;
-		try {
-			rsp = htmlFactory.processTemplate(ds, null);
-		} catch (IOException | TemplateException e) {
-			throw new WebApplicationException("template not loaded",
-					javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		return Response.ok(rsp, MediaType.TEXT_HTML_TYPE).build();
-	}
-	
-	@GET
 	@Path("robots.txt")
 	public Response robots(){
 		String response = "User-agent: *\n" +

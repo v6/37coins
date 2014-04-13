@@ -17,6 +17,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -216,30 +217,19 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	        	if (null==data.getSessionToken()){
 	        		//if no session token available, start authentication
 	        		//verify phone number
-	        		//verify pin
-	        		if (null==data.getPhoneNumber()||null==data.getTan()){
+	        		if (null==data.getPhoneNumber()){
 	        			client.sendJsonObject(new MerchantSession().setAction("failed"));
+	        			client.disconnect();
+	        			return;
 	        		}
 		        	try{
-		    			CloseableHttpClient httpclient = HttpClients.createDefault();
-		    			HttpPost req = new HttpPost("http://127.0.0.1:8084"+EmailServiceResource.PATH+"/consume");
-		    			StringEntity entity = new StringEntity(new ObjectMapper().writeValueAsString(new EmailFactor().setCn(data.getPhoneNumber().replace("+", "")).setTaskToken(data.getTan())), "UTF-8");
-		    			entity.setContentType("application/json");
-		    			req.setEntity(entity);
-		    			CloseableHttpResponse rsp = httpclient.execute(req);
-		    			if (rsp.getStatusLine().getStatusCode()==204){
-		    				client.joinRoom(data.getPhoneNumber());
-		    				data.setSessionToken(client.getSessionId().toString())
-		    					.setAction("login")
-		    					.setTan(null);
-		    				cache.put(new Element("merchant"+data.getSessionToken(),data));
-		    				server.getRoomOperations(data.getPhoneNumber()+"/"+data.getPhoneNumber()).sendJsonObject(data);
-		    				log.info(client.getRemoteAddress()+" authenticated");
-		    			}else{
-		    				throw new IOException("return code: "+rsp.getStatusLine().getStatusCode());
-		    			}
+		    			//initialize plivo call
+		        		String random = RandomStringUtils.random(4, "0123456789");
+		        		client.sendJsonObject(new MerchantSession()
+		        			.setOtp(random)
+		        			.setAction("started"));
 		    		}catch(Exception ex){
-		    			log.info(client.getRemoteAddress()+" authentication failed",ex);
+		    			log.info(client.getRemoteAddress()+" call initialization failed",ex);
 		    			ex.printStackTrace();
 		    			client.sendJsonObject(new MerchantSession().setAction("failed"));
 		    			//add to monitoring list
