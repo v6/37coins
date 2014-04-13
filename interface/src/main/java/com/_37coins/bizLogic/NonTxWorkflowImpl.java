@@ -39,51 +39,63 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 
 	@Override
 	public void executeCommand(final DataSet data) {
-		if (data.getAction()==Action.DEPOSIT_REQ){
-			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
-			respondDepositReq(bcAddress, data);
-		}else if (data.getAction()==Action.SIGNUP){
-			Promise<Void> done = msgClient.sendMessage(data);
-			createAddress(done, data);
-		}else if (data.getAction()==Action.GW_DEPOSIT_REQ){
-			Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
-			respondDataReq(bcAddress, data);
-		}else if (data.getAction()==Action.BALANCE){
-			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-			respondBalance(balance, data);
-		}else if (data.getAction()==Action.GW_BALANCE){
-			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-			cacheBalance(balance, data);
-		}else if (data.getAction()==Action.TRANSACTION){
-			Promise<List<Transaction>> transactions = bcdClient.getAccountTransactions(data.getCn());
-			respondTransactions(transactions, data);
-		}else if (data.getAction()==Action.VOICE){
-			final Settable<DataSet> confirm = new Settable<>();
-			final Promise<Action> response = msgClient.phoneConfirmation(data, contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
-			final OrPromise confirmOrTimer = new OrPromise(startDaemonTimer(confirmationPeriod), response);
-		   	new TryCatch() {
-				@Override
-	            protected void doTry() throws Throwable {
-					setConfirm(confirm, confirmOrTimer, response, data);
+		new TryCatch() {
+			@Override
+            protected void doTry() throws Throwable {
+				if (data.getAction()==Action.DEPOSIT_REQ){
+					Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+					respondDepositReq(bcAddress, data);
+				}else if (data.getAction()==Action.SIGNUP){
+					Promise<Void> done = msgClient.sendMessage(data);
+					createAddress(done, data);
+				}else if (data.getAction()==Action.GW_DEPOSIT_REQ){
+					Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+					respondDataReq(bcAddress, data);
+				}else if (data.getAction()==Action.BALANCE){
+					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
+					respondBalance(balance, data);
+				}else if (data.getAction()==Action.GW_BALANCE){
+					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
+					cacheBalance(balance, data);
+				}else if (data.getAction()==Action.TRANSACTION){
+					Promise<List<Transaction>> transactions = bcdClient.getAccountTransactions(data.getCn());
+					respondTransactions(transactions, data);
+				}else if (data.getAction()==Action.VOICE){
+					final Settable<DataSet> confirm = new Settable<>();
+					final Promise<Action> response = msgClient.phoneConfirmation(data, contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
+					final OrPromise confirmOrTimer = new OrPromise(startDaemonTimer(confirmationPeriod), response);
+				   	new TryCatch() {
+						@Override
+			            protected void doTry() throws Throwable {
+							setConfirm(confirm, confirmOrTimer, response, data);
+						}
+			            @Override
+			            protected void doCatch(Throwable e) throws Throwable {
+			            	data.setAction(Action.TIMEOUT);
+			    			msgClient.sendMessage(data);
+			            	cancel(e);
+						}
+					};
+					handleVoice(confirm);
+				}else if (data.getAction() == Action.DEPOSIT_CONF){
+					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
+					respondDepositConf(balance, data);
+				}else if (data.getAction() == Action.DEPOSIT_NOT){
+					final Settable<Boolean> next = new Settable<>();
+					respondDepositConfMessage(data,next);
+					next.set(false);
+				}else{
+					throw new RuntimeException("unknown action");
 				}
-	            @Override
-	            protected void doCatch(Throwable e) throws Throwable {
-	            	data.setAction(Action.TIMEOUT);
-	    			msgClient.sendMessage(data);
-	            	cancel(e);
-				}
-			};
-			handleVoice(confirm);
-		}else if (data.getAction() == Action.DEPOSIT_CONF){
-			Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-			respondDepositConf(balance, data);
-		}else if (data.getAction() == Action.DEPOSIT_NOT){
-			final Settable<Boolean> next = new Settable<>();
-			respondDepositConfMessage(data,next);
-			next.set(false);
-		}else{
-			throw new RuntimeException("unknown action");
-		}
+			 }
+            @Override
+            protected void doCatch(Throwable e) throws Throwable {
+            	data.setAction(Action.UNAVAILABLE);
+    			msgClient.sendMessage(data);
+    			e.printStackTrace();
+            	cancel(e);
+            }
+		};
     }
 	
 	@Asynchronous

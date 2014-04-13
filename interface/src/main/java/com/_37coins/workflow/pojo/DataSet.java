@@ -50,6 +50,7 @@ public class DataSet {
 		TIMEOUT("Timeout"),
 		OVERUSE("Overuse"),
 		TX_FAILED("TransactionFailed"),
+		UNAVAILABLE("Unavailable"),
 		DST_ERROR("DestinationUnreachable"),
 		TX_CANCELED("TransactionCanceled");
 

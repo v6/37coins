@@ -112,6 +112,17 @@ public class LocalizationTest {
 	}
 	
 	@Test
+	public void test37coinsUnavailable() throws IOException, TemplateException {
+		rsp.setAction(Action.UNAVAILABLE);
+		System.out.println("UNAVAILABLE:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
 	public void test37coinsDeposit() throws IOException, TemplateException {
 		rsp.setAction(Action.DEPOSIT_REQ);
 		System.out.println("DEPOSIT REQ:");
