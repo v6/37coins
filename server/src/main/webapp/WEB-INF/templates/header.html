@@ -25,6 +25,8 @@
 			lng: '${payload.lng}',
 			gaTrackingId: '${payload.gaTrackingId}',
 			<#if payload.country??>country: '${payload.country}',</#if>
+			<#if payload.delivery??>delivery: '${payload.delivery}',</#if>
+			<#if payload.deliveryParam??>deliveryParam: '${payload.deliveryParam}',</#if>
 			<#if payload.srvcPath??> srvcPath: '${payload.srvcPath}',</#if>
 			<#if payload.captchaPubKey??> captchaPubKey: '${payload.captchaPubKey}',</#if>
             i18nResPath: '${payload.basePath}/res/locales/__lng__/__ns__.json',

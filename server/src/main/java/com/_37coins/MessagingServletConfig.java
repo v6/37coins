@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
@@ -46,6 +48,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.resources.TicketResource;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.SmtpEmailClient;
@@ -67,6 +70,10 @@ import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.DataListener;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -78,6 +85,9 @@ import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.maxmind.geoip.LookupService;
+import com.plivo.helper.api.client.RestAPI;
+import com.plivo.helper.api.response.call.Call;
+import com.plivo.helper.exception.PlivoException;
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -157,7 +167,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	
 	private ServletContext servletContext;
 	private ActivityWorker msgActivityWorker;
-	private ActivityWorker eposActivityWorker;
 	private WorkflowWorker depositWorker;
 	private WorkflowWorker withdrawalWorker;
 	private JavaPushMailAccount jPM;
@@ -182,9 +191,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		msgActivityWorker = i.getInstance(Key.get(ActivityWorker.class,
 				Names.named("messaging")));
 		msgActivityWorker.start();
-		eposActivityWorker = i.getInstance(Key.get(ActivityWorker.class,
-				Names.named("epos")));
-		eposActivityWorker.start();
 		depositWorker = i.getInstance(Key.get(WorkflowWorker.class,
 				Names.named("nonTx")));
 		depositWorker.start();
@@ -210,63 +216,85 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	        public void onData(SocketIOClient client, MerchantSession data, AckRequest ackRequest) {
 	        	Cache cache = i.getInstance(Cache.class);
 	        	if (null==data.getSessionToken()){
-	        		//if no session token available, start authentication
-	        		//verify phone number
-	        		if (null==data.getPhoneNumber()){
-	        			client.sendJsonObject(new MerchantSession().setAction("failed"));
-	        			client.disconnect();
-	        			return;
-	        		}
-		        	try{
-		    			//initialize plivo call
-		        		String random = RandomStringUtils.random(4, "0123456789");
-		        		client.sendJsonObject(new MerchantSession()
-		        			.setOtp(random)
-		        			.setAction("started"));
-		    		}catch(Exception ex){
-		    			log.info(client.getRemoteAddress()+" call initialization failed",ex);
-		    			ex.printStackTrace();
-		    			client.sendJsonObject(new MerchantSession().setAction("failed"));
-		    			//add to monitoring list
-		    			//if exceeded limit, kick
-		    		}
-	        	}else{
-	        		//verify session
-	        		Element e = cache.get("merchant"+data.getSessionToken());
-	        		if (null==e){
-	        			//add to monitoring list
-	        			//if exceeded limit, kick
-	        			client.sendJsonObject(new MerchantSession().setAction("failed"));
-	        			client.disconnect();
-	        			return;
-	        		}
-	        		MerchantSession session = (MerchantSession)e.getObjectValue();
-	        		client.joinRoom(session.getPhoneNumber());
-	        		//validate session data
-	        		
-	        		if (null!=data.getAction() && data.getAction().equals("charge") && null != data.getAmount()){
-	        			//received charge from merchant BackView
-	        			//initialize workflow
-	        		}
-	        		
-	        		if (null!=data.getAction() && data.getAction().equals("txns")){
-	        			//received request for previous transaction
-	        			//initialize workflow
-	        		}
-	        		
-	        		if (null!=data.getAction() && data.getAction().equals("logout")){
-	        			cache.remove("merchant"+data.getSessionToken());
-	        			client.sendJsonObject(new MerchantSession().setAction("logout"));
-	        			client.disconnect();
-	        		}
-	        		
-	        		if (null!=data.getAction() && data.getAction().equals("getState")){
-	        			Element elem = cache.get("merchantState"+data.getSessionToken());
-	        			if (null!=elem){
-	        				client.sendJsonObject((MerchantSession)elem.getObjectValue());
-	        			}
-	        		}
+        			//add to monitoring list
+        			//if exceeded limit, kick
+        			client.sendJsonObject(new MerchantSession().setAction("unauthenticated"));
+        			client.disconnect();
+        			return;
 	        	}
+        		//verify session
+        		Element e = cache.getQuiet(TicketResource.TICKET_SCOPE+data.getSessionToken());
+        		if (null==e){
+        			//add to monitoring list
+        			//if exceeded limit, kick
+        			client.sendJsonObject(new MerchantSession().setAction("unauthenticated"));
+        			client.disconnect();
+        			return;
+        		}else{
+        			client.sendJsonObject(new MerchantSession().setAction("authenticated"));
+        		}
+        		if (data.getAction().equals("subscribe")){
+        			client.joinRoom(data.getSessionToken());
+        			client.sendJsonObject(new MerchantSession().setAction("subscribed"));
+        			return;
+        		}
+        		if (data.getAction().equals("logout")){
+        			client.sendJsonObject(new MerchantSession().setAction("disconnected"));
+        			client.disconnect();
+        			return;
+        		}
+        		if (data.getAction().equals("verify")){
+        			//verify data
+        			String phone = data.getPhoneNumber();
+        			if (null!=phone){
+        				PhoneNumber phoneNumber;
+						try {
+							phoneNumber = PhoneNumberUtil.getInstance().parse(phone, "ZZ");
+							phone = PhoneNumberUtil.getInstance().format(phoneNumber,PhoneNumberFormat.E164);
+						} catch (NumberParseException e1) {
+							e1.printStackTrace();
+						}
+        			}
+        			if (phone==null){
+        				client.sendJsonObject(new MerchantSession().setAction("error"));
+        				return;
+        			}
+        			String delivery = (data.getDelivery()==null||data.getDelivery().length()<2)?"display":data.getDelivery();
+        			String deliveryParam = (data.getDeliveryParam()==null||data.getDeliveryParam().length()<2)?null:data.getDelivery();
+        			if (!delivery.equals("display")&&(deliveryParam==null||deliveryParam.length()<2)){
+        				client.sendJsonObject(new MerchantSession().setAction("error"));
+        				return;
+        			}
+        			
+        			//create tan
+        			MerchantSession ms = new MerchantSession()
+        				.setDelivery(delivery)
+        				.setDeliveryParam(deliveryParam)
+        				.setPhoneNumber(phone)
+        				.setCallAction(data.getCallAction())
+        				.setSessionToken(RandomStringUtils.random(4, "0123456789"));
+        			cache.put(new Element("merchant"+data.getSessionToken(),ms));
+        			//initialize call
+        			try{
+	    				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
+	    				
+	    				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+	    			    params.put("from", "+4971150888362");
+	    			    params.put("to", phone);
+	    			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/merchant/req/"+data.getSessionToken()+"/"+ms.getSessionToken()+"/"+Locale.US.toString());
+	    			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/merchant/hangup/"+data.getSessionToken());
+	    			    params.put("caller_name", "37 Coins");
+	    			    Call response = restAPI.makeCall(params);
+	    			    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
+	    			    	throw new PlivoException(response.message);
+	    			    }
+        			}catch(PlivoException ex){
+        				ex.printStackTrace();
+        				client.sendJsonObject(new MerchantSession().setAction("error"));
+        			}
+        			client.sendJsonObject(new MerchantSession().setAction("started").setSessionToken(ms.getSessionToken()));
+        			return;
+        		}        		        		
 	        }
 	    });
 		server.start();
@@ -313,9 +341,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/email/*").through(DirectoryFilter.class); //allow directory access
             	filter("/plivo/*").through(DirectoryFilter.class); //allow directory access
             	filter("/data/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/merchant/*").through(DirectoryFilter.class);
+            	filter("/healthcheck/*").through(DirectoryFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class);
-        		bind(EposActivitiesImpl.class);
         		bind(ParserClient.class);
         		bind(QueueClient.class);
         	}
@@ -459,21 +488,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				} catch (InstantiationException | IllegalAccessException
 						| SecurityException | NoSuchMethodException e) {
 					log.error("msg activity exception",e);
-					e.printStackTrace();
-				}
-				return activityWorker;
-			}
-			
-			@Provides @Singleton @SuppressWarnings("unused") @Named("epos")
-			public ActivityWorker getEposActivityWorker(AmazonSimpleWorkflow swfClient, 
-					EposActivitiesImpl activitiesImpl) {
-				ActivityWorker activityWorker = new ActivityWorker(swfClient, domainName,
-						eposActListName);
-				try {
-					activityWorker.addActivitiesImplementation(activitiesImpl);
-				} catch (InstantiationException | IllegalAccessException
-						| SecurityException | NoSuchMethodException e) {
-					log.error("epos activity exception",e);
 					e.printStackTrace();
 				}
 				return activityWorker;

@@ -1,22 +1,24 @@
 package com._37coins.web;
 
-import java.math.BigDecimal;
 
 public class MerchantSession {
 	
 	private String phoneNumber;
 	
-	private String otp;
-	
 	private String sessionToken;
 	
 	private String action;
 	
-	private BigDecimal amount;
+	private String callAction;
 	
-	private String address;
+	private String delivery;
 	
-	private String cid;
+	private String deliveryParam;
+	
+	private String apiToken;
+	
+	private String apiSecret;
+
 
 	public String getPhoneNumber() {
 		return phoneNumber;
@@ -24,15 +26,6 @@ public class MerchantSession {
 
 	public MerchantSession setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
-		return this;
-	}
-
-	public String getOtp() {
-		return otp;
-	}
-
-	public MerchantSession setOtp(String otp) {
-		this.otp = otp;
 		return this;
 	}
 
@@ -54,30 +47,48 @@ public class MerchantSession {
 		return this;
 	}
 
-	public BigDecimal getAmount() {
-		return amount;
+	public String getCallAction() {
+		return callAction;
 	}
 
-	public MerchantSession setAmount(BigDecimal amount) {
-		this.amount = amount;
+	public MerchantSession setCallAction(String callAction) {
+		this.callAction = callAction;
 		return this;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getDelivery() {
+		return delivery;
 	}
 
-	public MerchantSession setAddress(String address) {
-		this.address = address;
+	public MerchantSession setDelivery(String delivery) {
+		this.delivery = delivery;
 		return this;
 	}
 
-	public String getCid() {
-		return cid;
+	public String getDeliveryParam() {
+		return deliveryParam;
 	}
 
-	public MerchantSession setCid(String cid) {
-		this.cid = cid;
+	public MerchantSession setDeliveryParam(String deliveryParam) {
+		this.deliveryParam = deliveryParam;
+		return this;
+	}
+
+	public String getApiToken() {
+		return apiToken;
+	}
+
+	public MerchantSession setApiToken(String apiToken) {
+		this.apiToken = apiToken;
+		return this;
+	}
+
+	public String getApiSecret() {
+		return apiSecret;
+	}
+
+	public MerchantSession setApiSecret(String apiSecret) {
+		this.apiSecret = apiSecret;
 		return this;
 	}
 

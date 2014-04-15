@@ -31,11 +31,6 @@ function( Backbone, Communicator, HeaderView, FooterView) {
         App.content.show(appView);
     });
 
-    Communicator.mediator.on('app:message', function(data) {
-        console.log('here');
-        console.dir(data);
-    });
-
     Communicator.mediator.on('app:logout', function() {
         //renavigate to see if we still have permission
         App.router.navigate('logout',{trigger: true});

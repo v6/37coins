@@ -72,7 +72,7 @@ require.config({
 
     config: {
         'GA': {
-            'id' : window.opt.gaTrackingId
+            'id' : 'UA-29543456-1'
         }
     },
 

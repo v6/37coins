@@ -1,5 +1,11 @@
 package com._37coins;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
@@ -36,14 +42,16 @@ import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.maxmind.geoip.LookupService;
 
 public class TestServletConfig extends GuiceServletContextListener {
 	
 	public static Injector injector;
+	private ServletContext servletContext;
 	
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
-		// TODO Auto-generated method stub
+		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
 	}
 
@@ -135,7 +143,28 @@ public class TestServletConfig extends GuiceServletContextListener {
 					gac.setEnabled(false);
 					GoogleAnalytics ga = new GoogleAnalytics(gac,"UA-123456");
 					return ga;
-	        	}	
+	        	}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				LookupService getLookupService(){
+					LookupService cl = null;
+					ClassLoader loader = null;
+					try {
+						if (null==servletContext){
+							File file = new File(MessageFactory.LOCAL_RESOURCE_PATH+"../classes");
+							URL[] urls = {file.toURI().toURL()};
+							loader = new URLClassLoader(urls);
+						}else{
+							loader = MessageFactory.class.getClassLoader();
+						}
+						File file = new File(loader.getResource("maxmind/GeoIP.dat").getFile());
+						cl = new LookupService(file, LookupService.GEOIP_MEMORY_CACHE);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return cl;
+				}
 				
 		       	@Provides @Singleton @SuppressWarnings("unused")
 	        	public Cache provideCache(){

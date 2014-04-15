@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import javax.naming.ldap.InitialLdapContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -32,13 +37,13 @@ import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
-import com._37coins.web.MerchantSession;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.Withdrawal;
-import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maxmind.geoip.LookupService;
 
 import freemarker.template.TemplateException;
 
@@ -49,26 +54,41 @@ public class MerchantResource {
 	public static Logger log = LoggerFactory.getLogger(MerchantResource.class);
 	
 	final private MessageFactory htmlFactory;
-	final private Cache cache;
-	final private SocketIOServer server;
 	final private ObjectMapper mapper;
+	final private HttpServletRequest httpReq;
+	final private LookupService lookupService;
+	final private InitialLdapContext ctx;
 	
 	@Inject
-	public MerchantResource(MessageFactory htmlFactory,
-			Cache cache,
-			SocketIOServer server){
+	public MerchantResource(ServletRequest request,
+			MessageFactory htmlFactory,
+			Cache cache, LookupService lookupService){
+		this.httpReq = (HttpServletRequest)request;
 		this.htmlFactory = htmlFactory;
-		this.cache = cache;
-		this.server = server;
 		this.mapper = new ObjectMapper();
+		this.lookupService = lookupService;
+		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 	}
 	
 	
 	@GET
-	public Response merchant(@HeaderParam("Accept-Language") String lng){
+	public Response merchant(@HeaderParam("Accept-Language") String lng,
+			@QueryParam("delivery")String delivery,
+			@QueryParam("deliveryParam")String deliveryParam){
 		Map<String,String> data = new HashMap<>();
-		data.put("resPath", MessagingServletConfig.merchantResPath);
+		data.put("resPath", MessagingServletConfig.resPath);
 		data.put("basePath", MessagingServletConfig.basePath);
+		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
+		String country = null;
+		try{
+			country = lookupService.getCountry(IndexResource.getRemoteAddress(httpReq)).getCode();
+			country = (country.equals("--"))?null:country;
+		}catch(Exception e){
+			log.error("geoip exception",e);
+			e.printStackTrace();
+		}
+		data.put("country", country);
+		data.put("captchaPubKey", MessagingServletConfig.captchaPubKey);
 		data.put("lng", (lng!=null)?lng.split(",")[0]:"en-US");
 		DataSet ds = new DataSet()
 			.setService("index.html")
@@ -83,31 +103,21 @@ public class MerchantResource {
 		return Response.ok(rsp, MediaType.TEXT_HTML_TYPE).build();
 	}
 	
-	//0. if there is a referrer url, check it with the backend
-	//1. receive the phone number through socket.io, check if call already in progress
-	//2. initiate the phone call, set state to calling, set form on frontend to disabled
-	//   once call ended, verify number, notify frontend
-	//3. generate new apitoken/key and replace it
-	
-	@GET
-	@Path("/test/fin")
-	public void testFin(@QueryParam("accountToken") String accountToken){
-		server.getRoomOperations(accountToken+"/"+accountToken).sendJsonObject(new MerchantSession().setAction("failed"));
-	}
-	
-	@GET
-	@Path("/test/fail")
-	public void testFail(@QueryParam("accountToken") String accountToken){
-		server.getRoomOperations(accountToken+"/"+accountToken).sendJsonObject(new MerchantSession().setAction("failed"));
-	}
-	
 	@POST
 	@Path("/charge/{apiToken}")
 	public Response charge(Withdrawal withdrawal,
-			@PathParam("accountToken") String apiToken,
+			@PathParam("apiToken") String apiToken,
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo){
-		String apiSecret = "test";
+		String apiSecret = null;
+		try{
+			//read the user
+			String sanitizedToken = BasicAccessAuthFilter.escapeLDAPSearchFilter(apiToken);
+			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(description="+sanitizedToken+"))", ctx).getAttributes();
+			apiSecret = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
+		}catch(NamingException e){
+			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
+		}
 		MultivaluedMap<String,String> mvm = null;
 		try {
 			mvm = HmacFilter.parseJson(mapper.writeValueAsBytes(withdrawal));
