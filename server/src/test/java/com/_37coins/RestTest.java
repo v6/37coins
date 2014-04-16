@@ -646,21 +646,6 @@ public class RestTest {
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get price
 		r = given()
-			.formParam("from", "+821012345678")
-			.formParam("gateway", "+821027423984")
-			.formParam("message", "preis")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
-		PriceTick pt = (PriceTick)rv.get(0).getPayload();
-		Assert.assertEquals("KRW", pt.getCurCode());
-		Assert.assertNotNull(pt.getLast());
-		//get price
-		r = given()
 			.formParam("from", "+491601234567")
 			.formParam("gateway", "+491602742398")
 			.formParam("message", "preis")
@@ -671,8 +656,23 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
-		pt = (PriceTick)rv.get(0).getPayload();
+		PriceTick pt = (PriceTick)rv.get(0).getPayload();
 		Assert.assertEquals("EUR", pt.getCurCode());
+		Assert.assertNotNull(pt.getLast());
+		//get price
+		r = given()
+			.formParam("from", "+821012345678")
+			.formParam("gateway", "+821027423984")
+			.formParam("message", "preis")
+		.expect()
+			.statusCode(200)
+		.when()
+			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Price");
+		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+		Assert.assertEquals("size expected",1, rv.size());
+		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
+		pt = (PriceTick)rv.get(0).getPayload();
+		Assert.assertEquals("KRW", pt.getCurCode());
 		Assert.assertNotNull(pt.getLast());
 		//test overuse
 		r = given()

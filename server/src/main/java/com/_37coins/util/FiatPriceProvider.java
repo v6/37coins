@@ -6,6 +6,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale.Builder;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.web.PriceTick;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -61,22 +64,27 @@ public class FiatPriceProvider {
 			e = cache.get("price"+cu.getCode());
 		}
 		if (null==e){
-			PriceTick temp = null;
+			Map<String,PriceTick> temp = null;
 			try{
 				HttpClient client = HttpClientBuilder.create().build();
-				HttpGet someHttpGet = new HttpGet(url+cu.getCode());
+				HttpGet someHttpGet = new HttpGet(url+"/all");
 				URI uri = new URIBuilder(someHttpGet.getURI()).build();
 				HttpRequestBase request = new HttpGet(uri);
 				HttpResponse response = client.execute(request);
-				temp = new ObjectMapper().readValue(response.getEntity().getContent(), PriceTick.class);
+				temp = new ObjectMapper().readValue(response.getEntity().getContent(), new TypeReference<Map<String,PriceTick>>(){});
 			}catch(Exception ex){
 				log.error("fiat price exception",ex);
 				ex.printStackTrace();
 				return null;
 			}
-			e = new Element("price"+cu.getCode(), temp);
-			if (null!=cache){
-				cache.put(e);
+			for (Entry<String,PriceTick> pt: temp.entrySet()){
+				if (pt.getKey().equalsIgnoreCase(cu.getCode())){
+					e = new Element("price"+pt.getKey(), pt.getValue());
+				}
+				Element te = new Element("price"+pt.getKey(), pt.getValue());
+				if (null!=cache){
+					cache.put(te);
+				}
 			}
 		}
 		PriceTick pt = (PriceTick)e.getObjectValue();
