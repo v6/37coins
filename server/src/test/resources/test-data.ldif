@@ -73,6 +73,8 @@ objectClass: inetOrgPerson
 objectClass: person
 cn: 821039841235
 sn: 821039841235
+description: test
+departmentNumber: test
 mobile: +821039841235
 mail: bla@bla.com
 manager: cn=OZV4N1JS2Z3476NL,ou=gateways,dc=37coins,dc=com

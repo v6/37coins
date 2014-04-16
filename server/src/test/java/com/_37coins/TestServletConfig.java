@@ -68,6 +68,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
 	            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
 	            	filter("/account*").through(DirectoryFilter.class); //allow directory access
+	            	filter("/merchant/*").through(DirectoryFilter.class);
 	            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());
 	            	bind(ParserClient.class);
