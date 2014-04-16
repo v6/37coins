@@ -44,7 +44,7 @@ require.config({
         'backbone.wreqr': '../bower_components/backbone.wreqr/lib/amd/backbone.wreqr',
         'backbone.babysitter': '../bower_components/backbone.babysitter/lib/amd/backbone.babysitter',
         'backbone.eventbinder': '../bower_components/backbone.eventbinder/lib/amd/backbone.eventbinder', // amd version
-        routeFilter: '../bower_components/backbone-async-route-filter/backbone-route-filter-amd',
+        routeFilter: '../bower_components/backbone-route-filter/backbone-route-filter',
 
         /* alias the bootstrap js lib */
         bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap',
@@ -62,7 +62,7 @@ require.config({
         hbs: '../bower_components/require-handlebars-plugin/hbs',
         basicauth: '../bower_components/backbone.basicauth/backbone.basicauth',
         recaptcha: 'vendor/recaptcha_ajax',
-        jqueryValidation: '../bower_components/jqueryValidation/jquery.validate',
+        jqueryValidation: '../bower_components/jqueryValidation/dist/jquery.validate',
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         webfinger: 'vendor/webfinger',

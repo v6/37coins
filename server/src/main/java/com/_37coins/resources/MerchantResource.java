@@ -77,6 +77,8 @@ public class MerchantResource {
 			@QueryParam("deliveryParam")String deliveryParam){
 		Map<String,String> data = new HashMap<>();
 		data.put("resPath", MessagingServletConfig.resPath);
+		data.put("delivery", delivery);
+		data.put("deliveryParam", deliveryParam);
 		data.put("basePath", MessagingServletConfig.basePath);
 		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
 		String country = null;

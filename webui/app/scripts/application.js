@@ -36,11 +36,24 @@ function( Backbone, Communicator, HeaderView, FooterView) {
         App.router.navigate('logout',{trigger: true});
     });
 
+    App.getParameterByName = function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
+        results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+
 	/* Add initializers here */
 	App.addInitializer( function (options) {
-
-        App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath})}));
-        App.footer.show(new FooterView());
+        if (!App.getParameterByName('noHead')){
+            App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath})}));
+            App.footer.show(new FooterView());
+        }else{
+            $('div#header').remove();
+            $('div#content').css('padding-top','5px');
+            $('div#footer').remove();
+            $('div#push').remove();
+        }
         this.router = new options.pageController.Router({
             controller: options.pageController, // wire-up the start method
             app:App

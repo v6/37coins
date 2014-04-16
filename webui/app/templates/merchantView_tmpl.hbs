@@ -1,15 +1,23 @@
-<div class="pusher"></div>
 <div class="container">
     <div class="row marketing">
         <div class="col-sm-12 wbox">
-	        <h2 class="form-signin-heading">Identify Account for Merchant</h2>
-            <form class="form-horizontal">
-	            <div class="control-group form-inline">
-	                <input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
-	                <input class="form-control" id="disabledInput" type="text" placeholder="4 digit code here.." disabled>
+	        <h2 class="form-signin-heading">Account Verification</h2>
+            <form role="form">
+            	<p>We are going to call you at your phone number to verify your mobile. Click <b>Call me now</b> below and enter the 4-digit code that will be displayed to you.</p>
+	            <div class="control-group">
+	            	<div class="form-group">
+	            		<label for="searchInput">Phone Number:</label><br>
+	                	<input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
+	                </div>
+	                <div class="form-group">
+	                	<label for="disabledInput">Code:</label>
+	                	<input class="form-control" id="disabledInput" type="text" placeholder="4 digit code here.." disabled>
+	                </div>
 	            </div>
+	            <button class="btn btn-inverse" type="submit" disabled="disabled">Call me now</button>
 	        </form>
-            <button class="btn btn-inverse" type="submit" disabled="disabled">Call</button>
+	        <span id="merchStatus" class="bg-info">Please insert your phone number.</span><br>
+            
 		</div>
     </div>
 </div>

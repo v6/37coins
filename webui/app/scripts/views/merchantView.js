@@ -22,39 +22,67 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
                 console.dir(data);
                 if (data.action === 'started'){
                     self.$('#disabledInput').val(data.sessionToken);
+                    self.$('#merchStatus').html('Press '+data.sessionToken+' during the call.');
+                    self.$('#merchStatus').attr('class','bg-success');
                 }
                 if (data.action === 'success'){
+                    self.$('#merchStatus').html('Phone successfully verified.');
+                    self.$('#merchStatus').attr('class','bg-success');
                     console.log('token ' + data.apiToken + ', secret ' + data.apiSecret);
-                    var view = new MerchantSuccessView({'apiToken':data.apiToken,'apiSecret':data.apiSecret,'delivery':self.getParameterByName('delivery'),'deliveryParam':self.getParameterByName('deliveryParam')});
+                    var view = new MerchantSuccessView({
+                        'apiToken':data.apiToken,
+                        'apiSecret':data.apiSecret,
+                        'delivery':self.app.getParameterByName('delivery'),
+                        'deliveryParam':self.app.getParameterByName('deliveryParam')
+                    });
                     Communicator.mediator.trigger('app:show', view);
                 }
                 if (data.action === 'error'){
                     self.$('#disabledInput').val('');
-                    this.$('button.btn-inverse').button('reset');
+                    self.$('button.btn-inverse').button('reset');
+                    self.$('#merchStatus').html('Error! Please retry.');
+                    self.$('#merchStatus').attr('class','bg-danger');
                 }
             });
             if (!this.socketio){
-                var socketio = io.connect(window.opt.basePath.split(':8')[0]+':443');
+                var ioPath = (window.opt.ioPath)?window.opt.ioPath:window.opt.basePath.split(':8')[0]+':443';
+                var socketio = io.connect(ioPath);
                 this.socketio = socketio;
                 socketio.on('message', function (data) {
                     Communicator.mediator.trigger('app:message', data);
                     //new events: charge  pay
                     //data return for txns
                 });
+                socketio.on('error', function(data) {
+                    self.$('#merchStatus').html('Connection lost. Please reload.<br>'+data);
+                    self.$('#merchStatus').attr('class','bg-danger');
+                    self.$('button.btn-inverse').attr('disabled', true);
+                });
                 socketio.on('connecting', function () {
-                    console.log('connecting');
+                    self.$('#merchStatus').html('Connecting...');
+                    self.$('#merchStatus').attr('class','bg-info');
+                    self.$('button.btn-inverse').attr('disabled', true);
                 });
                 socketio.on('reconnecting', function () {
-                    console.log('reconnecting');
+                    self.$('#merchStatus').html('Connecting...');
+                    self.$('#merchStatus').attr('class','bg-info');
+                    self.$('button.btn-inverse').attr('disabled', true);
                 });
                 socketio.on('disconnect', function () {
-                    console.log('disconnect');
+                    self.$('#merchStatus').html('Connection lost. Please reload.');
+                    self.$('#merchStatus').attr('class','bg-danger');
+                    self.$('button.btn-inverse').attr('disabled', true);
                 });
                 socketio.on('reconnect', function () {
-                    console.log('reconnect');
+                    self.$('#merchStatus').html('Connection established.');
+                    self.$('#merchStatus').attr('class','bg-success');
+                    self.$('button.btn-inverse').button('reset');
                 });
                 socketio.on('connect', function () {
                     console.log('connect ' + self.ticket);
+                    self.$('#merchStatus').html('Please insert your phone number.');
+                    self.$('#merchStatus').attr('class','bg-info');
+                    self.$('button.btn-inverse').button('reset');
                     var obj = { '@class' : 'com._37coins.web.MerchantSession',
                         'sessionToken' : self.ticket,
                         'action' : 'subscribe'
@@ -67,15 +95,10 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
         events: {
             'click button.btn-inverse': 'handleJoin',
         },
-        getParameterByName: function(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
-                results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        },
+
         handleJoin: function(e) {
             e.preventDefault();
-            this.$('button').button('loading');
+            self.$('button.btn-inverse').attr('disabled', true);
             var val = this.$('#searchInput').val();
             var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
             var isValid = false;
@@ -93,10 +116,10 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
                     var strIntlNumber = phoneUtil.format(number, PNF.E164);
                     var obj = { '@class' : 'com._37coins.web.MerchantSession',
                         'sessionToken' : this.ticket,
-                        'delivery': this.getParameterByName('delivery'),
-                        'deliveryParam': this.getParameterByName('deliveryParam'),
+                        'delivery': this.app.getParameterByName('delivery'),
+                        'deliveryParam': this.app.getParameterByName('deliveryParam'),
                         'action' : 'verify',
-                        'callAction' : this.getParameterByName('action'),
+                        'callAction' : this.app.getParameterByName('action'),
                         'phoneNumber' : strIntlNumber
                     };
                     this.socketio.json.send(obj);
@@ -105,8 +128,8 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
                 }
             }
             if (!isValid){
-                this.$('#donate').empty();
-                this.$('#donate').append('<p>Please enter a valid mobile number.</p>');
+                this.$('#merchStatus').html('Please enter a valid mobile number.');
+                this.$('#merchStatus').attr('class','bg-danger');
                 this.$('button.btn-inverse').button('reset');
             }
         },
@@ -114,7 +137,6 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
         onShow:function () {
             if (window.lpnLoaded){
                 this.$('[name="search"]').attr('disabled', false);
-                this.$('button.btn-inverse').attr('disabled', false);
                 var country = (!window.opt.country||window.opt.country==='undefined')?'de':window.opt.country.toLowerCase();
                 this.$('[name="search"]').intlTelInput({preferredCountries:[],defaultCountry:country});
                 var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
