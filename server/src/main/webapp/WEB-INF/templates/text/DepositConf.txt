@@ -11,12 +11,12 @@
 </#if>
 <#if from??>
 <#if comment??>	
-${resBundle("DepositConfSndrMsg",payload.amount?string("#,##0.########"),from,comment)}
+${resBundle("DepositConfSndrMsg",payload.miliAmount?string("#,##0.#####"),from,comment)}
 <#else>
-${resBundle("DepositConfSndr",payload.amount?string("#,##0.########"),from)}
+${resBundle("DepositConfSndr",payload.miliAmount?string("#,##0.#####"),from)}
 </#if>		
 <#else>
-${resBundle("DepositConf",payload.amount?string("#,##0.########"))}
+${resBundle("DepositConf",payload.miliAmount?string("#,##0.#####"))}
 </#if>
 <#if payload.balance??>
 <#include "Balance.txt">

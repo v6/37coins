@@ -317,12 +317,12 @@ public class LocalizationTest {
 	public void testInsuficcientFunds() throws IOException, TemplateException {
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
 			.setPayload(new Withdrawal()
-				.setAmount(new BigDecimal("1000.051"))
+				.setAmount(new BigDecimal("1000.0511"))
 				.setBalance(new BigDecimal("0.5123456789")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1 000,051"));
-		Assert.assertTrue(s.contains("0,51234568"));
+		Assert.assertTrue(s.contains("1 000 051,1"));
+		Assert.assertTrue(s.contains("512,34568"));
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -333,12 +333,12 @@ public class LocalizationTest {
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
 			.setLocale(new Locale("de"))
 			.setPayload(new Withdrawal()
-				.setAmount(new BigDecimal("1000.051"))
+				.setAmount(new BigDecimal("1000.0511"))
 				.setBalance(new BigDecimal("0.5123456789")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1.000,051"));
-		Assert.assertTrue(s.contains("0,51234568"));
+		Assert.assertTrue(s.contains("1.000.051,1"));
+		Assert.assertTrue(s.contains("512,34568"));
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
