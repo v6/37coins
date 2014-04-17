@@ -335,7 +335,11 @@ public class ParserFilter implements Filter {
 			data.setPayload(w);
 		}
 		if (data.getAction() == Action.WITHDRAWAL_CONF) {
-			data.setPayload(ca[1]);
+			if (ca.length==2 && ca[1].toLowerCase().matches("[adgjmptw]\\d\\d\\d\\d")){
+				data.setPayload(ca[1].toLowerCase());
+			}else{
+				data.setPayload(ca[0].toLowerCase());
+			}
 		}
 		if (data.getAction() == Action.BUY 
 				|| data.getAction() == Action.SELL) {

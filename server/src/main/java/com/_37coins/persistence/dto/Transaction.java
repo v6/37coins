@@ -58,7 +58,7 @@ public class Transaction extends Model {
 	}
 	
 	static public String generateKey(){
-		return RandomStringUtils.random(5, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+		return RandomStringUtils.random(1, "adgjmptw")+RandomStringUtils.random(4, "0123456789");
 	}
 	
 	@Persistent

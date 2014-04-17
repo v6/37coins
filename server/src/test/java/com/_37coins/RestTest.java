@@ -957,7 +957,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "conf test")
+			.formParam("message", "conf a1234")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -965,12 +965,12 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_CONF, rv.get(0).getAction());
-		Assert.assertEquals("test", rv.get(0).getPayload());
+		Assert.assertEquals("a1234", rv.get(0).getPayload());
 		//confirm with sign
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "# test")
+			.formParam("message", "a1234")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -978,7 +978,7 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_CONF, rv.get(0).getAction());
-		Assert.assertEquals("test", rv.get(0).getPayload());
+		Assert.assertEquals("a1234", rv.get(0).getPayload());
 		//ask help
 		r = given()
 			.formParam("from", "+821099999999")

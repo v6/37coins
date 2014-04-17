@@ -109,7 +109,7 @@ public class CommandParser {
 		}
 		if (cmd.equals("*"))
 			return Action.WITHDRAWAL_REQ;
-		if (cmd.equals("#"))
+		if (cmd.toLowerCase().matches("[adgjmptw]\\d\\d\\d\\d"))
 			return Action.WITHDRAWAL_CONF;
 		return null;
 	}
