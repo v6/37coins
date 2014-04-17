@@ -1,8 +1,6 @@
 package com._37coins.bizLogic;
 
 import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.Locale;
 import java.util.concurrent.CancellationException;
 
 import org.slf4j.Logger;
@@ -15,8 +13,6 @@ import com._37coins.activities.EposActivitiesClient;
 import com._37coins.activities.EposActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
 import com._37coins.activities.MessagingActivitiesClientImpl;
-import com._37coins.conversion.CallPrices;
-import com._37coins.conversion.ConversionService;
 import com._37coins.workflow.NonTxWorkflowClientFactory;
 import com._37coins.workflow.NonTxWorkflowClientFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflow;
@@ -47,7 +43,6 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     DecisionContextProvider provider = new DecisionContextProviderImpl();
     DecisionContext context = provider.getDecisionContext();
     private WorkflowClock clock = context.getWorkflowClock();
-    private ConversionService convService = new ConversionService();
     
     @Override
     public void executeCommand(final DataSet data) {
@@ -89,10 +84,9 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	}else{
     		//balance sufficient, now secure transaction authenticity 
 			final Promise<Action> response;
-			BigDecimal callFee = convService.convertToBtc(CallPrices.getUsdPrice(data.getTo()), Currency.getInstance(Locale.US));
 			if (w.getConfKey()!=null){
 				response = msgClient.otpConfirmation(data.getCn(), w.getConfKey(),data.getLocale());
-			}else if (volume24h.get().add(amount).compareTo(fee.add(callFee).multiply(new BigDecimal("100.0"))) > 0){
+			}else if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("50.0"))) > 0){
 				response = msgClient.phoneConfirmation(data,contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
 				w.setConfKey(WithdrawalWorkflow.VOICE_VER_TOKEN);
 			}else {
@@ -190,7 +184,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     @Asynchronous
     public void afterSend(Promise<BigDecimal> newBal, DataSet data) throws Throwable{
     	Withdrawal w = (Withdrawal)data.getPayload();
-    	w.setBalance(newBal.get());
+    	w.setBalance(newBal.get().subtract(w.getFee()));
 		data.setAction(Action.WITHDRAWAL_CONF);
     	msgClient.sendMessage(data);
     	if (w.getPayDest().getAddressType()==PaymentType.ACCOUNT){

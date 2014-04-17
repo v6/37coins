@@ -61,7 +61,7 @@ public class WithdrawalWorkflowTest {
 				.setAddressType(PaymentType.ACCOUNT))
 			.setBalance(new BigDecimal("2.5").setScale(8))
 			//for 24h transaction volume
-			.setAmount(new BigDecimal("0.1").setScale(8));
+			.setAmount(new BigDecimal("0.01").setScale(8));
 	
 	// another user 
 	// if this user sends a transaction, he always rejects it later
@@ -195,6 +195,10 @@ public class WithdrawalWorkflowTest {
 			public BigDecimal readAccountFee(String cn) {
 				return new BigDecimal("0.0001");
 			}
+			@Override
+			public BigDecimal readRate(String curCode, BigDecimal amountBtc) {
+				return null;
+			}
 		};
         EposActivities eposActivities = new EposActivities() {
 
@@ -251,6 +255,7 @@ public class WithdrawalWorkflowTest {
 		Assert.assertEquals(((Withdrawal)trace.get(0).getPayload()).getConfKey(), "123");
 		Withdrawal w = (Withdrawal)trace.get(1).getPayload();
 		Assert.assertTrue("tx not executed", w.getTxId().equalsIgnoreCase("txid2038942304"));
+		Assert.assertEquals(w.getBalance(), new BigDecimal("2.4995").setScale(8));
 	}
 
 	/**

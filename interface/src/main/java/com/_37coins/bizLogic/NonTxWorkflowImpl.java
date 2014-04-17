@@ -78,14 +78,24 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 						}
 					};
 					handleVoice(confirm);
-				}else if (data.getAction() == Action.DEPOSIT_CONF){
-					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-					Promise<BigDecimal> fee = msgClient.readAccountFee(data.getCn());
-					respondDepositConf(balance, fee, data);
-				}else if (data.getAction() == Action.DEPOSIT_NOT){
-					final Settable<Boolean> next = new Settable<>();
-					respondDepositConfMessage(data,next);
-					next.set(false);
+				}else if (data.getAction() == Action.DEPOSIT_CONF 
+						|| data.getAction() == Action.DEPOSIT_NOT){
+					Withdrawal w = (Withdrawal)data.getPayload();
+					Promise<BigDecimal> balance = null;
+					if (w.getBalance()==null){
+						balance = bcdClient.getAccountBalance(data.getCn());
+					}
+					Promise<BigDecimal> fee = null;
+					if (w.getFee()==null){
+						fee = msgClient.readAccountFee(data.getCn());
+					}
+					if (data.getTo()==null){
+						respondDepositConfMessage(balance, fee, msgClient.readMessageAddress(data));
+					}else{
+						Settable<DataSet> ds = new Settable<>();
+						respondDepositConfMessage(balance, fee, ds);
+						ds.set(data);
+					}
 				}else{
 					throw new RuntimeException("unknown action");
 				}
@@ -168,23 +178,13 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	}
 	
 	@Asynchronous
-	public void respondDepositConf(Promise<BigDecimal> balance,Promise<BigDecimal> fee,DataSet data){
-		Withdrawal dep = (Withdrawal)data.getPayload();
-		dep.setBalance(balance.get().subtract(fee.get()));
-		String address = null;
-		if (null!=dep.getPayDest() && dep.getPayDest().getAddressType()==PaymentType.BTC){
-			address = dep.getPayDest().getAddress();
-		}
-		Promise<Boolean> delivered = eposClient.transactionReceived(data.getCn(),dep.getAmount(), address, dep.getComment(), 1);
-		respondDepositConfMessage(data,delivered);
-	}
-	
-	@Asynchronous
-	public void respondDepositConfMessage(DataSet data,Promise<Boolean> delivered){
-		if (!delivered.get()){
-			Promise<DataSet> addr = msgClient.readMessageAddress(data);
-			msgClient.sendMessage(addr);			
-		}
+	public void respondDepositConfMessage(Promise<BigDecimal> balance,Promise<BigDecimal> fee,Promise<DataSet> addr){
+		DataSet ds =  addr.get();
+		Withdrawal dep = (Withdrawal)ds.getPayload();
+		BigDecimal bal = (dep.getBalance()!=null)?dep.getBalance():balance.get();
+		BigDecimal f = (dep.getFee()!=null)?dep.getFee():fee.get();
+		dep.setBalance(bal.subtract(f));
+		msgClient.sendMessage(ds);
 	}
 
 }

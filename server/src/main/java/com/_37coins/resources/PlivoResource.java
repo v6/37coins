@@ -162,7 +162,7 @@ public class PlivoResource {
 			//create a new pin
 			try {
 				rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)+ msgFactory.getText("VoiceSetup",ds)).setLanguage(locale))
+					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)+" "+msgFactory.getText("VoiceSetup",ds)).setLanguage(locale))
 					.add(new Wait())
 					.add(new GetDigits()
 						.setAction(MessagingServletConfig.basePath+ "/plivo/create/"+cn+"/"+workflowId+"/"+locale)

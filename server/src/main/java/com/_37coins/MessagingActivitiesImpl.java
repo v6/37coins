@@ -23,6 +23,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.joda.money.CurrencyUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,6 +212,12 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@Override
+	public BigDecimal readRate(String curCode, BigDecimal amountBtc) {
+		FiatPriceProvider fpp = new FiatPriceProvider(cache);
+		return fpp.getLocalCurValue(amountBtc, CurrencyUnit.of(curCode)).getLast();
 	}
 
 	@Override

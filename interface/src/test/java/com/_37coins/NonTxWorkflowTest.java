@@ -135,6 +135,10 @@ public class NonTxWorkflowTest {
 			public BigDecimal readAccountFee(String cn) {
 				return new BigDecimal("0.0001");
 			}
+			@Override
+			public BigDecimal readRate(String curCode, BigDecimal amountBtc) {
+				return null;
+			}
         };
         EposActivities eposActivities = new EposActivities() {
 
@@ -232,9 +236,14 @@ public class NonTxWorkflowTest {
 					.setAddressType(MsgType.SMS)
 					.setGateway(""));
 		Promise<Void> booked = workflow.executeCommand(data);
-		Withdrawal w = (Withdrawal)data.getPayload();
-		w.setBalance(new BigDecimal("2.4999"));
-		validate("successfull deposit", data, trace,booked);
+		DataSet comp = new DataSet()
+			.setAction(data.getAction())
+			.setTo(data.getTo())
+			.setCn(data.getCn())
+			.setPayload(new Withdrawal().setMsgDest(new MessageAddress().setAddress("from@37coins.com"))
+	    			.setComment("hallo")
+	    			.setAmount(new BigDecimal("0.01")).setBalance(new BigDecimal("2.4999")));
+		validate("successfull deposit", comp, trace,booked);
 	}
 	
 	@Test
@@ -250,9 +259,12 @@ public class NonTxWorkflowTest {
 					.setAddressType(MsgType.SMS)
 					.setGateway(""));
 		Promise<Void> booked = workflow.executeCommand(data);
-		Withdrawal w = (Withdrawal)data.getPayload();
-		w.setBalance(new BigDecimal("2.5"));
-		validate("successfull deposit", data, trace,booked);
+		DataSet comp = new DataSet()
+			.setCn("1")
+			.setAction(data.getAction())
+			.setTo(data.getTo())
+			.setPayload(new Withdrawal().setBalance(new BigDecimal("2.4999")).setAmount(new BigDecimal("0.01")));
+		validate("successfull deposit", comp, trace,booked);
 	}
 
 	@Test

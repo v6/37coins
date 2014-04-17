@@ -36,6 +36,10 @@ public interface MessagingActivities {
     @Activity(name = "ReadAccountFee", version = "0.1")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     BigDecimal readAccountFee(String cn);
+
+    @Activity(name = "ReadRate", version = "0.1")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    BigDecimal readRate(String curCode, BigDecimal amountBtc);
     
     @Activity(name = "PhoneConfirmation", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
