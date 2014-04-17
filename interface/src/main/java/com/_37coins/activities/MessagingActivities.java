@@ -1,5 +1,6 @@
 package com._37coins.activities;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 
 import com._37coins.workflow.pojo.DataSet;
@@ -31,6 +32,10 @@ public interface MessagingActivities {
     @Activity(name = "ReadMessageAddress", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     DataSet readMessageAddress(DataSet data);
+    
+    @Activity(name = "ReadAccountFee", version = "0.1")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    BigDecimal readAccountFee(String cn);
     
     @Activity(name = "PhoneConfirmation", version = "0.3")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)

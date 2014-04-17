@@ -131,6 +131,10 @@ public class NonTxWorkflowTest {
 			public Action otpConfirmation(String cn, String otp, Locale locale){
 				return null;
 			}
+			@Override
+			public BigDecimal readAccountFee(String cn) {
+				return new BigDecimal("0.0001");
+			}
         };
         EposActivities eposActivities = new EposActivities() {
 
@@ -229,7 +233,7 @@ public class NonTxWorkflowTest {
 					.setGateway(""));
 		Promise<Void> booked = workflow.executeCommand(data);
 		Withdrawal w = (Withdrawal)data.getPayload();
-		w.setBalance(new BigDecimal("2.5"));
+		w.setBalance(new BigDecimal("2.4999"));
 		validate("successfull deposit", data, trace,booked);
 	}
 	
@@ -259,7 +263,7 @@ public class NonTxWorkflowTest {
 			.setCn("1");
 		Promise<Void> booked = workflow.executeCommand(data);
 		data.setPayload(new Withdrawal()
-				.setBalance(new BigDecimal("2.5")));
+				.setBalance(new BigDecimal("2.4999")));
 		validate("successfull balance", data, trace, booked);
 	}
 	

@@ -1,6 +1,7 @@
 package com._37coins;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -189,7 +190,28 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		}
 	}
 	
-
+	@Override
+	public BigDecimal readAccountFee(String cn) {
+		InitialLdapContext ctx = null;
+		AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
+		try {
+			ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
+		} catch (IllegalStateException | NamingException e) {
+			log.error("read message address exception",e);
+			e.printStackTrace();
+		}
+		try{
+			String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
+			Attributes atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"manager"});
+			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
+			Attributes gwAtts = ctx.getAttributes(gwDn,new String[]{"description"});
+			BigDecimal fee = (gwAtts.get("description")!=null)?new BigDecimal(gwAtts.get("description").get().toString()):BigDecimal.ZERO;
+			return fee;
+		}catch(NamingException e){
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	@Override
 	public DataSet readMessageAddress(DataSet data) {

@@ -191,6 +191,10 @@ public class WithdrawalWorkflowTest {
 				trace.add(new DataSet().setCn(cn).setLocale(locale).setAction(Action.WITHDRAWAL_REQ));
 				return Action.WITHDRAWAL_REQ;
 			}
+			@Override
+			public BigDecimal readAccountFee(String cn) {
+				return new BigDecimal("0.0001");
+			}
 		};
         EposActivities eposActivities = new EposActivities() {
 

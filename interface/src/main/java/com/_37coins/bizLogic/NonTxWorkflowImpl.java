@@ -53,7 +53,8 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					respondDataReq(bcAddress, data);
 				}else if (data.getAction()==Action.BALANCE){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-					respondBalance(balance, data);
+					Promise<BigDecimal> fee = msgClient.readAccountFee(data.getCn());
+					respondBalance(balance, fee, data);
 				}else if (data.getAction()==Action.GW_BALANCE){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 					cacheBalance(balance, data);
@@ -79,7 +80,8 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					handleVoice(confirm);
 				}else if (data.getAction() == Action.DEPOSIT_CONF){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-					respondDepositConf(balance, data);
+					Promise<BigDecimal> fee = msgClient.readAccountFee(data.getCn());
+					respondDepositConf(balance, fee, data);
 				}else if (data.getAction() == Action.DEPOSIT_NOT){
 					final Settable<Boolean> next = new Settable<>();
 					respondDepositConfMessage(data,next);
@@ -146,9 +148,9 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	}
 	
 	@Asynchronous
-	public void respondBalance(Promise<BigDecimal> balance,DataSet data){
+	public void respondBalance(Promise<BigDecimal> balance, Promise<BigDecimal> fee, DataSet data){
 		data.setPayload(new Withdrawal()
-				.setBalance(balance.get()));
+				.setBalance(balance.get().subtract(fee.get())));
 		msgClient.sendMessage(data);
 	}
 	
@@ -166,9 +168,9 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	}
 	
 	@Asynchronous
-	public void respondDepositConf(Promise<BigDecimal> balance,DataSet data){
+	public void respondDepositConf(Promise<BigDecimal> balance,Promise<BigDecimal> fee,DataSet data){
 		Withdrawal dep = (Withdrawal)data.getPayload();
-		dep.setBalance(balance.get());
+		dep.setBalance(balance.get().subtract(fee.get()));
 		String address = null;
 		if (null!=dep.getPayDest() && dep.getPayDest().getAddressType()==PaymentType.BTC){
 			address = dep.getPayDest().getAddress();
