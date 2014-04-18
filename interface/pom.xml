@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>interface</artifactId>
 	<packaging>jar</packaging>
-	<description>37Coins Interface</description>
+	<description>37coins Interface</description>
 	<name>interface</name>
 
 	<parent>

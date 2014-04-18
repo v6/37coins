@@ -5,8 +5,6 @@ import java.util.List;
 
 import com._37coins.activities.BitcoindActivitiesClient;
 import com._37coins.activities.BitcoindActivitiesClientImpl;
-import com._37coins.activities.EposActivitiesClient;
-import com._37coins.activities.EposActivitiesClientImpl;
 import com._37coins.activities.MessagingActivitiesClient;
 import com._37coins.activities.MessagingActivitiesClientImpl;
 import com._37coins.bcJsonRpc.pojo.Transaction;
@@ -35,7 +33,6 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	private final int confirmationPeriod = 3500;
     BitcoindActivitiesClient bcdClient = new BitcoindActivitiesClientImpl();
     MessagingActivitiesClient msgClient = new MessagingActivitiesClientImpl();
-    EposActivitiesClient eposClient = new EposActivitiesClientImpl();
 
 	@Override
 	public void executeCommand(final DataSet data) {
@@ -154,7 +151,6 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 			.setAddress(bcAddress.get())
 			.setAddressType(PaymentType.BTC));
 		msgClient.putAddressCache(data);
-		eposClient.displayCharge(data.getCn(), bcAddress.get());
 	}
 	
 	@Asynchronous

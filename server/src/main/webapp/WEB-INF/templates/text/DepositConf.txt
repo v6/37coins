@@ -1,4 +1,12 @@
 <#setting locale=locale>
+<#if fiatPriceProvider??>
+<#assign tick = fiatPriceProvider.getLocalCurValue(payload.amount,getTo().getPhoneNumber())!"error">
+</#if>
+<#if tick?? & tick != "error">
+<#assign fiat = " ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")">
+<#else>
+<#assign fiat = "">
+</#if>
 <#if payload.msgDest??>
 <#assign from = payload.msgDest.address>
 </#if>
@@ -11,12 +19,12 @@
 </#if>
 <#if from??>
 <#if comment??>	
-${resBundle("DepositConfSndrMsg",payload.miliAmount?string("#,##0.#####"),from,comment)}
+${resBundle("DepositConfSndrMsg",payload.miliAmount?string("#,##0.#####"),fiat,from,comment)}
 <#else>
-${resBundle("DepositConfSndr",payload.miliAmount?string("#,##0.#####"),from)}
+${resBundle("DepositConfSndr",payload.miliAmount?string("#,##0.#####"),fiat,from)}
 </#if>		
 <#else>
-${resBundle("DepositConf",payload.miliAmount?string("#,##0.#####"))}
+${resBundle("DepositConf",payload.miliAmount?string("#,##0.#####"),fiat)}
 </#if>
 <#if payload.balance??>
 <#include "Balance.txt">

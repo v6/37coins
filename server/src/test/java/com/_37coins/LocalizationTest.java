@@ -188,10 +188,12 @@ public class LocalizationTest {
 	@Test
 	public void test37coinsReiceiveNot() throws IOException, TemplateException {
 		rsp.setAction(Action.DEPOSIT_NOT)
+			.setFiatPriceProvider(new FiatPriceProvider(null))
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("1.25"))
 				.setAmount(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
+		System.out.println(s);
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -229,6 +231,7 @@ public class LocalizationTest {
 	@Test
 	public void test37coinsWithdrawalReq() throws IOException, TemplateException {
 		rsp.setAction(Action.WITHDRAWAL_CONF)
+			.setFiatPriceProvider(new FiatPriceProvider(null))
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("0.23"))
 				.setAmount(new BigDecimal("0.01"))

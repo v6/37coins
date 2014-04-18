@@ -1,2 +1,10 @@
 <#setting locale=locale>
-${resBundle("DepositNotify",payload.miliAmount?string("#,##0.#####"))}
+<#if fiatPriceProvider??>
+<#assign tick = fiatPriceProvider.getLocalCurValue(payload.amount,getTo().getPhoneNumber())!"error">
+</#if>
+<#if tick?? & tick != "error">
+<#assign fiat = " ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")">
+<#else>
+<#assign fiat = "">
+</#if>
+${resBundle("DepositNotify",payload.miliAmount?string("#,##0.#####"),fiat)}

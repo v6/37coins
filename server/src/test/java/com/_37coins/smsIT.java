@@ -162,7 +162,7 @@ public class smsIT {
 	public void testEnvayaHelpKorean() throws InterruptedException, JsonParseException, JsonMappingException, IOException {
 		exec("%EB%8F%84%EC%9B%80"); //도움
 		String message = om.readValue(read(), Command.class).getMessages().get(0).getMessage();
-		Assert.assertEquals("37Coins 명령: 잔액조회, 주소, 송금/요청 <금액> <받는이> [서술], 확인 <언급>", message);
+		Assert.assertEquals("37coins 명령: 잔액조회, 주소, 송금/요청 <금액> <받는이> [서술], 확인 <언급>", message);
 		Assert.assertTrue(message.length()<160);
 	}
 	

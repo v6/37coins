@@ -3,7 +3,8 @@
 <#assign tick = fiatPriceProvider.getLocalCurValue(payload.balance,getTo().getPhoneNumber())!"error">
 </#if>
 <#if tick?? & tick != "error">
-${resBundle("Balance",payload.miliBalance?string("#,##0.#####")," ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")")}
+<#assign fiat = " ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")">
 <#else>
-${resBundle("Balance",payload.miliBalance?string("#,##0.#####"),"")}
+<#assign fiat = "">
 </#if>
+${resBundle("Balance",payload.miliBalance?string("#,##0.#####"),fiat)}
