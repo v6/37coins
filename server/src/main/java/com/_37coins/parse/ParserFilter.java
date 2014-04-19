@@ -261,6 +261,8 @@ public class ParserFilter implements Filter {
 				FiatPriceProvider fpp = new FiatPriceProvider(cache);
 				PriceTick pt = fpp.getLocalCurValue(null, money.getCurrencyUnit());
 				val = money.getAmount().divide(pt.getLast(),8,RoundingMode.HALF_UP); 
+			}else{
+				val = val.divide(new BigDecimal(1000));
 			}
 			w.setAmount(val);
 			return true;

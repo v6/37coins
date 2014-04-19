@@ -51,6 +51,9 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
 import com.google.inject.Inject;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
@@ -166,11 +169,13 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
-			    params.put("from", "+4971150888362");
+				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+				phoneUtil.getSupportedRegions();
+				String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(Locale.US.getCountry(), PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
+			    params.put("from", from.substring(0,from.length()-4)+"3737");
 			    params.put("to", rsp.getTo().getAddress());
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+sanitizedCn+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
 			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/hangup/"+workflowId);
-			    params.put("caller_name", "37 Coins");
 			    Call response = restAPI.makeCall(params);
 			    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
 			    	throw new PlivoException(response.message);
