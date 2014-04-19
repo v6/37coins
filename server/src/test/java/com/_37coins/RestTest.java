@@ -124,7 +124,7 @@ public class RestTest {
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039842742", "+821027423984", "send 0.1 +821039842743", 8087,
+		parserClient.start("+821039842742", "+821027423984", "send 100 +821039842743", 8087,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
@@ -243,7 +243,7 @@ public class RestTest {
 	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", "+821027423984", "send 0.1 jangkim321@gmail.com", 8087,
+		parserClient.start("+821039841234", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
@@ -271,7 +271,7 @@ public class RestTest {
 	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+491039841234", "+821027423984", "send 0.1 +821123723984", 8087,
+		parserClient.start("+491039841234", "+821027423984", "send 1 +821123723984", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
@@ -601,7 +601,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "test@test.com")
 			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 0.01 +821053215679")
+			.formParam("message", "send 10 +821053215679")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -775,7 +775,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "test@test.com")
 			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 0.01 +821012345678")
+			.formParam("message", "send 10 +821012345678")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -790,7 +790,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "test@test.com")
 			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send .01 +821012345678")
+			.formParam("message", "send 10 +821012345678")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -849,7 +849,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "test@test.com")
 			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 0.01 01012345678")
+			.formParam("message", "send 10 01012345678")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -862,7 +862,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 01087654321")
+			.formParam("message", "send 10 01087654321")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -900,7 +900,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 +491607654321")
+			.formParam("message", "send 10 +491607654321")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -916,7 +916,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.01 +639177639690")
+			.formParam("message", "send 10 +639177639690")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -928,7 +928,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "req 0.01")
+			.formParam("message", "req 10")
 		.expect()
 			.statusCode(200)
 		.when()
@@ -1009,7 +1009,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821099999999")
 			.formParam("gateway", "+821027423984")
-			.formParam("message", "send 0.0001 +821012345678")
+			.formParam("message", "send 0.1 +821012345678")
 		.expect()
 			.statusCode(200)
 		.when()
