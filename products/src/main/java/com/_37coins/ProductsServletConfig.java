@@ -1,6 +1,7 @@
 package com._37coins;
 
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
@@ -20,15 +21,24 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
 public class ProductsServletConfig extends GuiceServletContextListener {
+	
 	public static String hmacToken;
+	public static String plivoKey;
+	public static String plivoSecret;
+	public static String basePath;
 	public static Logger log = LoggerFactory.getLogger(ProductsServletConfig.class);
 	public static Injector injector;
+	private ServletContext servletContext;
 	static {
 		hmacToken = System.getProperty("hmacToken");
+		plivoKey = System.getProperty("plivoKey");
+		plivoSecret = System.getProperty("plivoSecret");
+		basePath = System.getProperty("pBasePath");
 	}
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
+		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
 		log.info("ServletContextListener started");
 	}
@@ -45,6 +55,11 @@ public class ProductsServletConfig extends GuiceServletContextListener {
         	public String provideHmacToken(){
         		return ProductsServletConfig.hmacToken;
         	}
+        	
+			@Provides @Singleton @SuppressWarnings("unused")
+			public MessageFactory provideMessageFactory() {
+				return new MessageFactory(servletContext);
+			}
         
             @Named("day")
         	@Provides @Singleton @SuppressWarnings("unused")
