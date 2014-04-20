@@ -32,10 +32,15 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
                     var view = new MerchantSuccessView({
                         'apiToken':data.apiToken,
                         'apiSecret':data.apiSecret,
-                        'delivery':self.app.getParameterByName('delivery'),
-                        'deliveryParam':self.app.getParameterByName('deliveryParam')
+			'delivery':data.delivery,
+			'deliveryParam':data.deliveryParam
                     });
                     Communicator.mediator.trigger('app:show', view);
+		    var obj = { '@class' : 'com._37coins.web.MerchantSession',
+			'sessionToken' : self.ticket,
+			'action' : 'logout'
+		    };
+		    self.socketio.json.send(obj);
                 }
                 if (data.action === 'error'){
                     self.$('#disabledInput').val('');

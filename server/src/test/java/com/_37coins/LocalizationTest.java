@@ -38,7 +38,7 @@ public class LocalizationTest {
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("fr"))
+		.setLocale(new Locale("en"))
 		.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setPayload(new PaymentAddress()
 			.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))

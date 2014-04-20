@@ -527,7 +527,10 @@ public class PlivoResource {
 								a.put("description",parserApiToken);
 								a.put("departmentNumber",parserApiSecret);
 								try{
-									ctx.modifyAttributes("cn="+sanitizedMobile+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);
+									InitialLdapContext ctx2 = null;
+									AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
+									ctx2 = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
+									ctx2.modifyAttributes("cn="+sanitizedMobile+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);
 								}catch(NamingException e){
 									log.error("ldap exception ",e);
 									e.printStackTrace();
@@ -574,7 +577,13 @@ public class PlivoResource {
 					return;
 				}
 			}else{
-				server.getRoomOperations(sessionToken+"/"+sessionToken).sendJsonObject(new MerchantSession().setAction("success").setApiToken(apiToken).setApiSecret(apiSecret));
+				server.getRoomOperations(sessionToken+"/"+sessionToken).sendJsonObject(
+						new MerchantSession()
+							.setAction("success")
+							.setApiToken(apiToken)
+							.setApiSecret(apiSecret)
+							.setDelivery(ms.getDelivery())
+							.setDeliveryParam(ms.getDeliveryParam()));
 			}
 		}
 	}

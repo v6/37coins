@@ -73,6 +73,7 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -246,8 +247,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		if (data.getAction().equals("verify")){
         			//verify data
         			String phone = data.getPhoneNumber();
+				PhoneNumber phoneNumber=null;
         			if (null!=phone){
-        				PhoneNumber phoneNumber;
 						try {
 							phoneNumber = PhoneNumberUtil.getInstance().parse(phone, "ZZ");
 							phone = PhoneNumberUtil.getInstance().format(phoneNumber,PhoneNumberFormat.E164);
@@ -279,11 +280,12 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	    				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	    				
 	    				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
-	    			    params.put("from", "+4971150888362");
+					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+					String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(phoneUtil.getRegionCodeForCountryCode(phoneNumber.getCountryCode()), PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
+				    params.put("from", from.substring(0,from.length()-4)+"3737");
 	    			    params.put("to", phone);
 	    			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/merchant/req/"+data.getSessionToken()+"/"+ms.getSessionToken()+"/"+Locale.US.toString());
 	    			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/merchant/hangup/"+data.getSessionToken());
-	    			    params.put("caller_name", "37 Coins");
 	    			    Call response = restAPI.makeCall(params);
 	    			    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
 	    			    	throw new PlivoException(response.message);

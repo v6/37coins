@@ -63,8 +63,8 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	if (balance.get().compareTo(amount.add(fee).add(bcFee).setScale(8))<0){
     		//balance not sufficient
     		data.setPayload(new Withdrawal()
-    				.setAmount(amount.add(fee).add(bcFee).setScale(8))
-    				.setBalance(balance.get()))
+				.setAmount(amount.setScale(8))
+				.setBalance(balance.get().subtract(fee)))
     			.setAction(Action.INSUFISSIENT_FUNDS);
     		Promise<Void> fail = msgClient.sendMessage(data);
     		fail(fail, "insufficient funds");
