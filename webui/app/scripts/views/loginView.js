@@ -83,7 +83,10 @@ function(Backbone, Communicator, LoginTmpl) {
                     error.insertAfter(element);
                 }
             });
-
+	    //for display in android
+	    if (window.Android){
+		window.Android.loadComplete();
+	    }
         }
     });
 });

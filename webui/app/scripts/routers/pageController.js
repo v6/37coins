@@ -112,8 +112,19 @@ define(['backbone',
         if (Controller.loginStatus.get('mobile') && Controller.loginStatus.get('fee')){
             var layout = new GatewayLayout();
             Communicator.mediator.trigger('app:show', layout);
-            var configView = new GatewayView({model:Controller.loginStatus});
-            layout.conf.show(configView);
+	    if (!window.Android){
+		var configView = new GatewayView({model:Controller.loginStatus});
+		layout.conf.show(configView);
+	    }else{
+		window.Android.setConfig({
+		    basePath: Controller.loginStatus.get('basePath'),
+		    cn: Controller.loginStatus.get('cn'),
+		    mobile: Controller.loginStatus.get('mobile'),
+		    apiSecret: Controller.loginStatus.get('envayaToken'),
+		    servicePath: Controller.loginStatus.get('srvcPath'),
+		    password: Controller.loginStatus.credentials.password
+		});
+	    }
             var balance = new BalanceModel();
             var balanceView = new BalanceView({model:balance});
             layout.bal.show(balanceView);

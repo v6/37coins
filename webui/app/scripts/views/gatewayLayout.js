@@ -11,7 +11,14 @@ function( Backbone, GatewayLayout) {
 	        bal: '#balView',
 	        fee: '#feeView',
 	        conf: '#confView'
+	    },
+	onShow:function () {
+			//for display in android
+	    if (window.Android){
+		window.Android.loadComplete();
+		this.$('div#confView').remove();
 	    }
+	}
 	});
 
 });

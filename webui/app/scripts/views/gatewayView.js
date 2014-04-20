@@ -2,10 +2,10 @@ define([
     'backbone',
     'hbs!tmpl/configView_tmpl'
 ],
-function(Backbone, GatewayTmpl) {
+function(Backbone, ConfigTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
-        template: GatewayTmpl,
+	template: ConfigTmpl,
         className: 'gwLayout'
     });
 });
