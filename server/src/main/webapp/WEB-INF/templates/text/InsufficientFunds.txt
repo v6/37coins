@@ -1,2 +1,16 @@
 <#setting locale=locale>
-${resBundle("InsufficientFunds",payload.miliBalance?string("#,##0.#####"),payload.miliAmount?string("#,##0.#####"))}
+<#if fiatPriceProvider??>
+<#assign balTick = fiatPriceProvider.getLocalCurValue(payload.balance,locale)!"error">
+<#assign amtTick = fiatPriceProvider.getLocalCurValue(payload.amount,locale)!"error">
+</#if>
+<#if balTick?? & balTick != "error">
+<#assign balFiat = " ("+balTick.getLastFactored()?string.currency+")">
+<#else>
+<#assign balFiat = "">
+</#if>
+<#if amtTick?? & amtTick != "error">
+<#assign amtFiat = " ("+amtTick.getLastFactored()?string.currency+")">
+<#else>
+<#assign amtFiat = "">
+</#if>
+${resBundle("InsufficientFunds",payload.miliBalance?string("#,##0.###"),balFiat,payload.miliAmount?string("#,##0.###"),amtFiat)}

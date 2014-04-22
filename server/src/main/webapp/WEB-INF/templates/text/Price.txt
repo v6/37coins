@@ -1,2 +1,5 @@
 <#setting locale=locale>
-1 BTC = ${payload.last} ${payload.curCode} 
+<#function mili x>
+  <#return x / 1000>
+</#function>
+1mBTC = ${mili(payload.last)?string.currency} 

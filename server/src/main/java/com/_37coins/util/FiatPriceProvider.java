@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Locale.Builder;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import com._37coins.web.PriceTick;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class FiatPriceProvider {
 	public static final String TICKER_URL = "http://api.bitcoinaverage.com/ticker/global/";
@@ -48,8 +47,8 @@ public class FiatPriceProvider {
 		this.url = url;
 	}
 	
-	public PriceTick getLocalCurValue(PhoneNumber pn){
-		return getLocalCurValue(null, pn);
+	public PriceTick getLocalCurValue(Locale locale){
+		return getLocalCurValue(null, locale);
 	}
 	
 	public PriceTick getLocalCurValue(BigDecimal btcValue, CurrencyUnit cu){
@@ -89,7 +88,7 @@ public class FiatPriceProvider {
 		}
 		PriceTick pt = (PriceTick)e.getObjectValue();
 		if (btcValue!=null){
-			btcValue.setScale(8);
+			btcValue.setScale(8,RoundingMode.HALF_DOWN);
 			BigDecimal price = pt.getLast().setScale(cu.getDecimalPlaces(),RoundingMode.HALF_DOWN);
 			pt.setLastFactored(btcValue.multiply(price));
 		}
@@ -97,21 +96,17 @@ public class FiatPriceProvider {
 		return pt;		
 	}
 	
-	public PriceTick getLocalCurValue(BigDecimal btcValue, PhoneNumber pn){
-		if (null!=pn){
-			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-			String cc = phoneUtil.getRegionCodeForCountryCode(pn.getCountryCode());
-			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(cc).build());
+	public PriceTick getLocalCurValue(BigDecimal btcValue, Locale locale){
+		if (null!=locale){
+			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(locale.getCountry()).build());
 			return getLocalCurValue(btcValue, cu);
 		}
 		return null;
 	}
 	
-	public String getLocalCurCode(PhoneNumber pn){
-		if (null!=pn){
-			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-			String cc = phoneUtil.getRegionCodeForCountryCode(pn.getCountryCode());
-			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(cc).build());
+	public String getLocalCurCode(Locale locale){
+		if (null!=locale){
+			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(locale.getCountry()).build());
 			return cu.getCode();
 		}
 		return null;

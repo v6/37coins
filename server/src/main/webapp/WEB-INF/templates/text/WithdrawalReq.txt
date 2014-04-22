@@ -1,19 +1,19 @@
 <#setting locale=locale>
 <#if fiatPriceProvider??>
-<#assign tick = fiatPriceProvider.getLocalCurValue(payload.amount,getTo().getPhoneNumber())!"error">
+<#assign tick = fiatPriceProvider.getLocalCurValue(payload.amount,locale)!"error">
 </#if>
 <#if tick?? & tick != "error">
-<#assign fiat = " ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")">
+<#assign fiat = " ("+tick.getLastFactored()?string.currency+")">
 <#else>
 <#assign fiat = "">
 </#if>
 <#if payload.msgDest??>
 <#if payload.msgDest.address?length &lt; 12>
-${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.#####"),fiat,payload.msgDest.address)}
+${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.###"),fiat,payload.msgDest.address)}
 <#else>
-${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.#####"),fiat,payload.msgDest.address?substring(0,9)+"..")}
+${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.###"),fiat,payload.msgDest.address?substring(0,9)+"..")}
 </#if>
 <#else>
-${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.#####"),fiat,payload.payDest.address?substring(0,9)+"..")}
+${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.###"),fiat,payload.payDest.address?substring(0,9)+"..")}
 </#if>
 ${resBundle("WithdrawalReqIstr",payload.confKey)}

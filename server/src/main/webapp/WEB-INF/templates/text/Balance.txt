@@ -1,10 +1,10 @@
 <#setting locale=locale>
 <#if fiatPriceProvider??>
-<#assign tick = fiatPriceProvider.getLocalCurValue(payload.balance,getTo().getPhoneNumber())!"error">
+<#assign tick = fiatPriceProvider.getLocalCurValue(payload.balance,locale)!"error">
 </#if>
 <#if tick?? & tick != "error">
-<#assign fiat = " ("+tick.getLastFactored()?string("#,##0.##")+tick.getCurCode()+")">
+<#assign fiat = " ("+tick.getLastFactored()?string.currency+")">
 <#else>
 <#assign fiat = "">
 </#if>
-${resBundle("Balance",payload.miliBalance?string("#,##0.#####"),fiat)}
+${resBundle("Balance",payload.miliBalance?string("#,##0.###"),fiat)}

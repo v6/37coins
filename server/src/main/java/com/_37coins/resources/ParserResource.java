@@ -475,7 +475,7 @@ public class ParserResource {
 	@Path("/Price")
 	public Response getPrice(){
 		DataSet data = responseList.get(0);
-		data.setPayload(fiatPriceProvider.getLocalCurValue(data.getTo().getPhoneNumber()));
+		data.setPayload(fiatPriceProvider.getLocalCurValue(data.getLocale()));
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {

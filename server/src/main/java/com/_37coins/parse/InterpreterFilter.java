@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Singleton;
 import javax.naming.NameNotFoundException;
@@ -35,6 +36,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Singleton
 public class InterpreterFilter implements Filter {
@@ -83,6 +87,21 @@ public class InterpreterFilter implements Filter {
 				gwCn = (gw2Atts.get("cn")!=null)?(String)gw2Atts.get("cn").get():null;
 				//update the user
 				toModify.put("manager", "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn);
+			}
+			//check locale
+			Locale newLocale = null;
+			if (null!=locale && locale.length()<3 && (responseData.getTo().getAddressType() == MsgType.SMS)){
+				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+				PhoneNumber pn;
+				try {
+					pn = phoneUtil.parse(gwMobile, "ZZ");
+					newLocale =  new Locale(locale,phoneUtil.getRegionCodeForNumber(pn));
+					toModify.put("preferredLanguage", newLocale.toString());
+					locale = newLocale.toString();
+				} catch (NumberParseException e) {
+					e.printStackTrace();
+				}
+				
 			}
 			responseData.setGwFee(gwFee);			
 			responseData.getTo().setGateway((responseData.getTo().getAddressType() == MsgType.SMS)?gwCn:gwMail);

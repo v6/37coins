@@ -38,7 +38,7 @@ public class LocalizationTest {
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("en"))
+		.setLocale(new Locale("en","US"))
 		.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setPayload(new PaymentAddress()
 			.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
@@ -64,7 +64,7 @@ public class LocalizationTest {
 	
     @Test
     public void testXml() throws IOException, TemplateException, JAXBException{
-    	DataSet ds = new DataSet().setLocaleString("ru")
+    	DataSet ds = new DataSet().setLocaleString("ru_RU")
     			.setPayload(", 1 ,2 ,3 , 4");
     	String text = ef.getText("VoiceRegister",ds);
     	com._37coins.plivo.Response rv = new com._37coins.plivo.Response().add(new Speak()
@@ -250,6 +250,7 @@ public class LocalizationTest {
 	@Test
 	public void test37coinsBalance() throws IOException, TemplateException {
 		rsp.setAction(Action.BALANCE)
+		   .setLocale(new Locale("kz","DE"))
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("0.05")));
 		System.out.println("BALANCE:");
@@ -282,7 +283,7 @@ public class LocalizationTest {
 	public void test37coinsBalanceNoTickerResponse() throws IOException, TemplateException {
 		rsp =  new DataSet()
 			.setService("37coins")
-			.setLocale(new Locale("de"))
+			.setLocale(new Locale("de","DE"))
 			.setFiatPriceProvider(new FiatPriceProvider(null,"http://somehttperror.net/"))
 			.setPayload(new PaymentAddress()
 				.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
@@ -349,14 +350,14 @@ public class LocalizationTest {
 	@Test
 	public void testInsuficcientFundsDe() throws IOException, TemplateException {
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
-			.setLocale(new Locale("de"))
+			.setLocale(new Locale("de","DE"))
 			.setPayload(new Withdrawal()
-				.setAmount(new BigDecimal("1000.0511"))
-				.setBalance(new BigDecimal("0.5123456789")));
+				.setAmount(new BigDecimal("5.123456789"))
+				.setBalance(new BigDecimal("1.0511")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1.000.051,1"));
-		Assert.assertTrue(s.contains("512,34568"));
+		Assert.assertTrue(s.contains("1.051,1"));
+		Assert.assertTrue(s.contains("5.123,457"));
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -395,8 +396,8 @@ public class LocalizationTest {
 	@Test
 	public void testPrice() throws IOException, TemplateException {
 		rsp.setAction(Action.PRICE)
-			.setLocale(new Locale("en"))
-			.setPayload(new PriceTick().setLast(new BigDecimal("1000.01")).setCurCode("EUR"));
+			.setLocale(new Locale("en","US"))
+			.setPayload(new PriceTick().setLast(new BigDecimal("500.01")).setCurCode("EUR"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
