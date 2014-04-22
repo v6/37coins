@@ -110,15 +110,6 @@ public class AccountResource {
 		localPort = httpReq.getLocalPort();
 	}
 	
-	
-	private String getRemoteAddress(){
-		String addr = httpReq.getHeader("X-Forwarded-For");
-		if (null==addr || addr.length()<7){
-			addr = httpReq.getRemoteAddr();
-		}
-		return addr;
-	}
-	
 	/**
 	 * allow front-end to notify user about taken account 
 	 * @param email
@@ -131,7 +122,7 @@ public class AccountResource {
 			return "false"; //email not valid
 		}
 		//how to avoid account fishing?
-		Element e = cache.get(getRemoteAddress());
+		Element e = cache.get(IndexResource.getRemoteAddress(httpReq));
 		if (e!=null){
 			if (e.getHitCount()>50){
 				return "false"; //to many requests

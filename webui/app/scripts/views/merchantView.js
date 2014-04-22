@@ -3,9 +3,10 @@ define([
     'hbs!tmpl/merchantView_tmpl',
     'socketio',
     'communicator',
-    'views/merchantSuccessView'
+    'views/merchantSuccessView',
+    'models/merchantModel'
 ],
-function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
+function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, MerchantModel) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: MerchantTmpl,
@@ -18,45 +19,44 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView) {
                 window.lpnLoaded = true;
                 self.onShow();
             });
-            Communicator.mediator.on('app:message', function(data) {
-                console.dir(data);
-                if (data.action === 'started'){
-                    self.$('#disabledInput').val(data.sessionToken);
-                    self.$('#merchStatus').html('Press '+data.sessionToken+' during the call.');
-                    self.$('#merchStatus').attr('class','bg-success');
-                }
-                if (data.action === 'success'){
-                    self.$('#merchStatus').html('Phone successfully verified.');
-                    self.$('#merchStatus').attr('class','bg-success');
-                    console.log('token ' + data.apiToken + ', secret ' + data.apiSecret);
-                    var view = new MerchantSuccessView({
-                        'apiToken':data.apiToken,
-                        'apiSecret':data.apiSecret,
-			'delivery':data.delivery,
-			'deliveryParam':data.deliveryParam
-                    });
-                    Communicator.mediator.trigger('app:show', view);
-		    var obj = { '@class' : 'com._37coins.web.MerchantSession',
-			'sessionToken' : self.ticket,
-			'action' : 'logout'
-		    };
-		    self.socketio.json.send(obj);
-                }
-                if (data.action === 'error'){
-                    self.$('#disabledInput').val('');
-                    self.$('button.btn-inverse').button('reset');
-                    self.$('#merchStatus').html('Error! Please retry.');
-                    self.$('#merchStatus').attr('class','bg-danger');
-                }
-            });
             if (!this.socketio){
                 var ioPath = (window.opt.ioPath)?window.opt.ioPath:window.opt.basePath.split(':8')[0]+':443';
                 var socketio = io.connect(ioPath);
                 this.socketio = socketio;
                 socketio.on('message', function (data) {
-                    Communicator.mediator.trigger('app:message', data);
-                    //new events: charge  pay
-                    //data return for txns
+                    if (data.action === 'started'){
+                        self.$('#disabledInput').val(data.sessionToken);
+                        self.$('#merchStatus').html('Press '+data.sessionToken+' during the call.');
+                        self.$('#merchStatus').attr('class','bg-success');
+                    }
+                    if (data.action === 'success'){
+                        self.$('#merchStatus').html('Phone successfully verified.');
+                        self.$('#merchStatus').attr('class','bg-success');
+                        console.log('token ' + data.apiToken + ', secret ' + data.apiSecret);
+                        var merchantModel = new MerchantModel({
+                            ticket:self.ticket
+                        });
+                        var view = new MerchantSuccessView({
+                            model:merchantModel,
+                            apiToken:data.apiToken,
+                            apiSecret:data.apiSecret,
+                            delivery:data.delivery,
+                            deliveryParam:data.deliveryParam,
+                            displayName:data.displayName
+                        });
+                        Communicator.mediator.trigger('app:show', view);
+                        var obj = { '@class' : 'com._37coins.web.MerchantSession',
+                            'sessionToken' : self.ticket,
+                            'action' : 'logout'
+                        };
+                        self.socketio.json.send(obj);
+                    }
+                    if (data.action === 'error'){
+                        self.$('#disabledInput').val('');
+                        self.$('button.btn-inverse').button('reset');
+                        self.$('#merchStatus').html('Error! Please retry.');
+                        self.$('#merchStatus').attr('class','bg-danger');
+                    }
                 });
                 socketio.on('error', function(data) {
                     self.$('#merchStatus').html('Connection lost. Please reload.<br>'+data);

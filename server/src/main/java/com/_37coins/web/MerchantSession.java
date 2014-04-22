@@ -5,6 +5,8 @@ public class MerchantSession {
 	
 	private String phoneNumber;
 	
+	private String displayName;
+	
 	private String sessionToken;
 	
 	private String action;
@@ -26,6 +28,17 @@ public class MerchantSession {
 
 	public MerchantSession setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+		return this;
+	}
+	
+	
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public MerchantSession setDisplayName(String displayName) {
+		this.displayName = displayName;
 		return this;
 	}
 

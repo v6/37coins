@@ -8,8 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.SearchControls;
 import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +51,7 @@ import com._37coins.MessagingServletConfig;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dto.Transaction;
+import com._37coins.web.MerchantSession;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -124,13 +129,70 @@ public class MerchantResource {
 		return Response.ok(rsp, MediaType.TEXT_HTML_TYPE).build();
 	}
 	
-	public void authenticate(String apiToken, Withdrawal withdrawal, String path, String sig){
+	/**
+	 * allow front-end to notify user about taken account 
+	 * @param email
+	 */
+	@GET
+	@Path("/check")
+	public String checkDisplayName(@QueryParam("displayName") String displayName){
+		//how to avoid account fishing?
+		Element e = cache.get(IndexResource.getRemoteAddress(httpReq));
+		if (e!=null){
+			if (e.getHitCount()>50){
+				return "false"; //to many requests
+			}
+		}
+		//check it's not taken already
+		try{
+			ctx.setRequestControls(null);
+			SearchControls searchControls = new SearchControls();
+			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			searchControls.setTimeLimit(100);
+			NamingEnumeration<?> namingEnum = null;
+			String sanitizedname = BasicAccessAuthFilter.escapeLDAPSearchFilter(displayName);
+			namingEnum = ctx.search("ou=accounts,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(displayName="+sanitizedname+"))", searchControls);
+			if (namingEnum.hasMore()){
+				return "false";//email used
+			}
+		} catch (IllegalStateException | NamingException e1) {
+			log.error("check email exception",e1);
+			e1.printStackTrace();
+			return "false";//ldap error
+		}
+		return "true";
+	}
+	
+	@POST
+	@Path("/name")
+	public void setDisplayName(MerchantSession merchantSession){
+		if (null==merchantSession.getSessionToken()||null==merchantSession.getDisplayName()){
+			throw new WebApplicationException(Response.Status.BAD_REQUEST);
+		}
+		Element el = cache.get("merchant"+ merchantSession.getSessionToken());
+		MerchantSession ms = (MerchantSession)el.getObjectValue();
+		if (null==ms || null==ms.getDisplayName()){
+			throw new WebApplicationException("not verified merchant", Response.Status.FORBIDDEN);
+		}
+		try {
+			Attributes a = new BasicAttributes();
+			a.put("displayName", merchantSession.getDisplayName());
+			ctx.modifyAttributes("cn="+ms.getPhoneNumber().replace("+", "")+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);
+		} catch (IllegalStateException | NamingException ex) {
+			log.error("display name error",ex);
+			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	public String authenticate(String apiToken, Withdrawal withdrawal, String path, String sig){
 		String apiSecret = null;
+		String displayName = null;
 		try{
 			//read the user
 			String sanitizedToken = BasicAccessAuthFilter.escapeLDAPSearchFilter(apiToken);
 			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(description="+sanitizedToken+"))", ctx).getAttributes();
 			apiSecret = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
+			displayName = (atts.get("displayName")!=null)?(String)atts.get("displayName").get():null;
 		}catch(NamingException e){
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -153,6 +215,7 @@ public class MerchantResource {
 		if (null==sig || null==calcSig || !calcSig.equals(sig)){
 			throw new WebApplicationException("signatures don't match",Response.Status.UNAUTHORIZED);
 		}
+		return displayName;
 	}
 
 	@POST
@@ -163,16 +226,18 @@ public class MerchantResource {
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo,
 			@Suspended final AsyncResponse asyncResponse){
+		String dispName=null;
 		try{
-			authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
+			dispName = authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
 		}catch (Exception e) {
 			asyncResponse.resume(e);
 		}
 		String from = null;
 		String gateway = null;
 		from = BasicAccessAuthFilter.escapeLDAPSearchFilter(phone);
+		Attributes atts = null;
 		try{
-			Attributes atts = ctx.getAttributes("cn="+ from + ",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"manager"});
+			atts = ctx.getAttributes("cn="+ from + ",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"manager","displayName"});
 			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
 			Attributes gwAtts = ctx.getAttributes(gwDn,new String[]{"mobile"});
 			gateway = (gwAtts.get("mobile")!=null)?(String)gwAtts.get("mobile").get():null;
@@ -183,6 +248,7 @@ public class MerchantResource {
 		if (null==from || null==gateway){
 			asyncResponse.resume(new WebApplicationException(Response.Status.NOT_FOUND));
 		}
+		final String displayName = dispName;
 		parserClient.start(from, gateway, "send "+withdrawal.getAmount().multiply(new BigDecimal(1000))+" "+withdrawal.getPayDest().getAddress(), localPort,
 		new ParserAction() {
 			@Override
@@ -191,7 +257,7 @@ public class MerchantResource {
 				Transaction t = new Transaction().setKey(Transaction.generateKey()).setState(Transaction.State.STARTED);
 				cache.put(new Element(t.getKey(), t));
 				withdrawalFactory.getClient(t.getKey()).executeCommand(data);
-				asyncResponse.resume(Response.ok().build());
+				asyncResponse.resume(Response.ok("{\"displayName\":\""+displayName+"\"}", MediaType.APPLICATION_JSON).build());
 			}
 			@Override
 			public void handleResponse(DataSet data) {
@@ -214,7 +280,7 @@ public class MerchantResource {
 			@PathParam("apiToken") String apiToken,
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo){
-		authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
+		String displayName = authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+"/charge");
@@ -229,7 +295,9 @@ public class MerchantResource {
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
-				return Response.ok(rsp.getEntity().getContent(), MediaType.APPLICATION_JSON).build();
+				ObjectMapper om = new ObjectMapper();
+				Withdrawal w = om.readValue(rsp.getEntity().getContent(), Withdrawal.class);
+				return Response.ok("{\"displayName\":\""+displayName+"\",\"token\":\""+w.getTxId()+"\"}", MediaType.APPLICATION_JSON).build();
 			}else{
 				throw new WebApplicationException("received status: "+rsp.getStatusLine().getStatusCode(),Response.Status.INTERNAL_SERVER_ERROR);
 			}

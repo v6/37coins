@@ -470,8 +470,10 @@ public class PlivoResource {
 			@PathParam("sessionToken") String sessionToken){
 		Element e = cache.get("merchant"+sessionToken);
 		MerchantSession ms = (MerchantSession)e.getObjectValue();
+		String displayName = null;
 		if (ms.getApiToken()==null){
 			server.getRoomOperations(sessionToken+"/"+sessionToken).sendJsonObject(new MerchantSession().setAction("error"));
+			return;
 		}else{
 			String apiToken = ms.getApiToken();
 			String apiSecret = ms.getApiSecret();
@@ -485,10 +487,11 @@ public class PlivoResource {
 				final String sanitizedMobile = BasicAccessAuthFilter.escapeLDAPSearchFilter(ms.getPhoneNumber().replace("+", ""));
 				namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+sanitizedMobile+"))", searchControls);
 				if (namingEnum.hasMore()){
+					SearchResult result = (SearchResult) namingEnum.next();
+					Attributes atts = result.getAttributes();
+					displayName = (atts.get("displayName")!=null)?(String)atts.get("displayName").get():null;
 					boolean found = false;
 					if (ms.getCallAction()==null || ms.getCallAction().equals("get")){
-						SearchResult result = (SearchResult) namingEnum.next();
-						Attributes atts = result.getAttributes();
 						String ldapApiToken = (atts.get("description")!=null)?(String)atts.get("description").get():null;
 						String ldapApiSecret = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
 						namingEnum.close();
@@ -550,7 +553,11 @@ public class PlivoResource {
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 			}
 
-
+			if (null==displayName){
+				displayName = "merchant"+apiToken.split("-")[0];
+			}
+			ms.setDisplayName(displayName);
+			cache.put(new Element("merchant"+sessionToken,ms));
 			//execute callback
 			if (ms.getDelivery().equals("callback")){
 				if (!ms.getDeliveryParam().contains("https")){
@@ -566,7 +573,9 @@ public class PlivoResource {
 					req.setEntity(entity);
 					CloseableHttpResponse rsp = httpclient.execute(req);
 					if (rsp.getStatusLine().getStatusCode()>=200 && rsp.getStatusLine().getStatusCode()<=300){
-						server.getRoomOperations(sessionToken+"/"+sessionToken).sendJsonObject(new MerchantSession().setAction("success"));
+						server.getRoomOperations(sessionToken+"/"+sessionToken).sendJsonObject(new MerchantSession()
+							.setDisplayName(ms.getDisplayName())
+							.setAction("success"));
 					}else{
 						throw new RuntimeException("post failed");
 					}
@@ -583,6 +592,7 @@ public class PlivoResource {
 							.setApiToken(apiToken)
 							.setApiSecret(apiSecret)
 							.setDelivery(ms.getDelivery())
+							.setDisplayName(ms.getDisplayName())
 							.setDeliveryParam(ms.getDeliveryParam()));
 			}
 		}
