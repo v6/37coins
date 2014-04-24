@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,8 +15,9 @@ import org.restnucleus.filter.HmacFilter;
 
 import com._37coins.resources.MerchantResource;
 import com._37coins.workflow.pojo.PaymentAddress;
-import com._37coins.workflow.pojo.Withdrawal;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
+import com._37coins.workflow.pojo.Withdrawal;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MerchantTester {
@@ -41,7 +43,7 @@ public class MerchantTester {
 		req.setEntity(entity);
 		CloseableHttpResponse rsp = httpclient.execute(req);
 		if (rsp.getStatusLine().getStatusCode()==200){
-			System.out.println(new ObjectMapper().writeValueAsString(new ObjectMapper().readValue(rsp.getEntity().getContent(), Withdrawal.class)));
+			System.out.println(new ObjectMapper().writeValueAsString(new ObjectMapper().readValue(rsp.getEntity().getContent(), new TypeReference<Map<String,String>>() {})));
 		}else{
 			System.out.println("received status: "+rsp.getStatusLine().getStatusCode()+convertStreamToString(rsp.getEntity().getContent()));
 		}

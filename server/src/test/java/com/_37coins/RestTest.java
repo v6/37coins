@@ -560,8 +560,9 @@ public class RestTest {
 			.statusCode(200)
 		.when()
 			.post(embeddedJetty.getBaseUri() + MerchantResource.PATH+"/charge/test");
-    	w = new ObjectMapper().readValue(r.asInputStream(), Withdrawal.class);
-    	System.out.println(w.getTxId());
+    	Map<String,String> m = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>() {});
+    	Assert.assertTrue(m.containsKey("displayName"));
+    	Assert.assertTrue(m.containsKey("token"));
     }
 	
 	@Test
