@@ -37,6 +37,7 @@ import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
 import com._37coins.web.AccountRequest;
+import com._37coins.web.MerchantRequest;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -548,14 +549,14 @@ public class RestTest {
      */
     @Test
     public void testMerchant() throws JsonParseException, JsonMappingException, IOException, NoSuchAlgorithmException{
-    	Withdrawal w = new Withdrawal().setAmount(new BigDecimal("0.5")).setComment("bla");
+    	MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
     	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
-    	w.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), MessagingServletConfig.hmacToken);
+    	req.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
+		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
     	Response r = given()
     		.contentType(ContentType.JSON)
     		.header("X-Request-Signature", sig)
-    		.body(json(w))
+    		.body(json(req))
 		.expect()
 			.statusCode(200)
 		.when()

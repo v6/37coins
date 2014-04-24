@@ -1,6 +1,17 @@
 package com._37coins.web;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * Used for socketIo communication and MerchantResource.
+ * 
+ * @author johann
+ *
+ */
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class MerchantSession {
 	
 	private String phoneNumber;

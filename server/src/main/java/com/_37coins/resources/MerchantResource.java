@@ -51,6 +51,8 @@ import com._37coins.MessagingServletConfig;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dto.Transaction;
+import com._37coins.web.MerchantRequest;
+import com._37coins.web.MerchantResponse;
 import com._37coins.web.MerchantSession;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
@@ -184,7 +186,7 @@ public class MerchantResource {
 		}
 	}
 	
-	public String authenticate(String apiToken, Withdrawal withdrawal, String path, String sig){
+	public String authenticate(String apiToken, MerchantRequest withdrawal, String path, String sig){
 		String apiSecret = null;
 		String displayName = null;
 		try{
@@ -220,7 +222,7 @@ public class MerchantResource {
 
 	@POST
 	@Path("/charge/{apiToken}/to/{phone}")
-	public void chargePhone(Withdrawal withdrawal,
+	public void chargePhone(MerchantRequest request,
 			@PathParam("apiToken") String apiToken,
 			@PathParam("phone") String phone,
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
@@ -228,9 +230,12 @@ public class MerchantResource {
 			@Suspended final AsyncResponse asyncResponse){
 		String dispName=null;
 		try{
-			dispName = authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
+			dispName = authenticate(apiToken, request, uriInfo.getPath(), sig);
 		}catch (Exception e) {
 			asyncResponse.resume(e);
+		}
+		if (null!=request.getCallbackUrl()||null!=request.getConversion()||null!=request.getTimeout()){
+			asyncResponse.resume(Response.status(Response.Status.NOT_IMPLEMENTED).build());
 		}
 		String from = null;
 		String gateway = null;
@@ -249,7 +254,7 @@ public class MerchantResource {
 			asyncResponse.resume(new WebApplicationException(Response.Status.NOT_FOUND));
 		}
 		final String displayName = dispName;
-		parserClient.start(from, gateway, "send "+withdrawal.getAmount().multiply(new BigDecimal(1000))+" "+withdrawal.getPayDest().getAddress(), localPort,
+		parserClient.start(from, gateway, "send "+request.getAmount().multiply(new BigDecimal(1000))+" "+request.getPayDest().getAddress(), localPort,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
@@ -257,7 +262,7 @@ public class MerchantResource {
 				Transaction t = new Transaction().setKey(Transaction.generateKey()).setState(Transaction.State.STARTED);
 				cache.put(new Element(t.getKey(), t));
 				withdrawalFactory.getClient(t.getKey()).executeCommand(data);
-				asyncResponse.resume(Response.ok("{\"displayName\":\""+displayName+"\"}", MediaType.APPLICATION_JSON).build());
+				asyncResponse.resume(new MerchantResponse().setDisplayName(displayName));
 			}
 			@Override
 			public void handleResponse(DataSet data) {
@@ -276,14 +281,22 @@ public class MerchantResource {
 
 	@POST
 	@Path("/charge/{apiToken}")
-	public Response charge(Withdrawal withdrawal,
+	public MerchantResponse charge(MerchantRequest request,
 			@PathParam("apiToken") String apiToken,
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo){
-		String displayName = authenticate(apiToken, withdrawal, uriInfo.getPath(), sig);
+		String displayName = authenticate(apiToken, request, uriInfo.getPath(), sig);
+		if (null!=request.getCallbackUrl()||null!=request.getConversion()){
+			throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
+		}
 		try{
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+"/charge");
+			Withdrawal withdrawal = new Withdrawal()
+				.setAmount(request.getAmount())
+				.setConfLink(request.getCallbackUrl())
+				.setComment(request.getOrderName())
+				.setPayDest(request.getPayDest());
 			String reqValue = mapper.writeValueAsString(withdrawal);
 			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");
@@ -297,7 +310,7 @@ public class MerchantResource {
 			if (rsp.getStatusLine().getStatusCode()==200){
 				ObjectMapper om = new ObjectMapper();
 				Withdrawal w = om.readValue(rsp.getEntity().getContent(), Withdrawal.class);
-				return Response.ok("{\"displayName\":\""+displayName+"\",\"token\":\""+w.getTxId()+"\"}", MediaType.APPLICATION_JSON).build();
+				return new MerchantResponse().setDisplayName(displayName).setTimout(3600L).setToken(w.getTxId());
 			}else{
 				throw new WebApplicationException("received status: "+rsp.getStatusLine().getStatusCode(),Response.Status.INTERNAL_SERVER_ERROR);
 			}
