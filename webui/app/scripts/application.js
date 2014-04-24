@@ -46,7 +46,7 @@ function( Backbone, Communicator, HeaderView, FooterView) {
 	/* Add initializers here */
 	App.addInitializer( function (options) {
         if (!App.getParameterByName('noHead')){
-            App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath})}));
+            App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
             App.footer.show(new FooterView());
         }else{
             $('div#header').remove();

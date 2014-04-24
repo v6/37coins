@@ -1,70 +1,69 @@
-<div class="container">
-  <div class="jumbotron">
-    <div class="mainMsg">
-      <img src="{{resPath}}/images/37coins_header.png" class="img-responsive" alt="37Coins">
-      <p class="lead">37Coins is your global Bitcoin wallet. <br>It makes financial transactions as simple as sending a text.</p>
-      <div id="searchrow" class="row">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-6">
-          <form class="form-horizontal">
-            <div class="control-group form-inline">
-              <input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
-            </div>
-          </form>
-        </div>
-        <div id="button" class="col-sm-2">
-          <button class="btn btn-inverse" type="submit" disabled="disabled">Join</button>
-        </div>
-        <div class="col-sm-2"></div>
-      </div>
+<div class="jumbotron">
+  <div class="row">
+    <div class="col-sm-12">
+      <br>
+      <br>
+      <br>
     </div>
-    <div id="donate">
-    <p>
-    Do you like what we do? <a href="bitcoin:19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh" title="tips routed to: 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh">19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh</a><p></div>
+    <div class="col-sm-6">.col-xs-6</div>
+    <div class="col-sm-6">
+      <h1>Money without borders or barriers, as easy as sending an SMS.</h1>
+      <p class="lead">Send and receive bitcoin anywhere in the world. Sign-up to be an SMSwallet beta user.</p>
+      <input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
+      <p>Country Mobile Number</p>
+    </div>
   </div>
+</div>
 
-  <div class="row marketing">
-    <div class="col-sm-6 wbox">
-      <h3>Commands:</h3>
+<div class="row">
+  <div class="col-sm-12">
+    <h2>SMSwallet Commands</h2>
+  </div>
+  <div class="col-sm-6">
       <span>These commands are understood by any gateway and are sent by users simply by typing the SMS. No smartphone or internet needed.</span>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Command</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>help</td><td>list available commands.</td></tr>
-          <tr><td>addr</td><td>get the receiving address for your wallet.</td></tr>
-          <tr><td>bal</td><td>receive your wallet's balance.</td></tr>
-          <tr><td>send &lt;amount&gt; &lt;to&gt; [comment]</td><td>send bitcoins to email, phone number or bitcoin address.</td></tr>
-          <tr><td>req ..</td><td>like send, but requesting payment.</td></tr>
-          <tr><td>txns</td><td>list the last 3 transactions.</td></tr>
-          <tr><td>buy</td><td>list Bitcoin sellers in same country.</td></tr>
-          <tr><td>sell &lt;price&gt;</td><td>enlist as Bitcoin seller.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="col-sm-6 wbox intl-tel-input">
-      <h3>Gateways:</h3>
-      <span>Gateways are operated by individuals with interest to earn transaction fees. A dedicated Android phone and internet required.</span>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th><i class="fa fa-flag"></i></th>
-            <th>Number</th>
-            <th>Fee</th>
-            <th><i class="fa fa-star"></i></th>
-          </tr>
-        </thead>
-        <tbody id="gwTable">
-          
-        </tbody>
-      </table>
-      <p><a class="btn btn-default" href="#gateways">Open a Gateway &raquo;</a></p>
-      <span>Or have a peek at the <a href="#example">configuration example</a></span>
-    </div>
+  </div>
+  <div class="col-sm-6">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>help</td><td>list available commands.</td></tr>
+        <tr><td>addr</td><td>get the receiving address for your wallet.</td></tr>
+        <tr><td>bal</td><td>receive your wallet's balance.</td></tr>
+        <tr><td>send &lt;amount&gt; &lt;to&gt; [comment]</td><td>send bitcoins to email, phone number or bitcoin address.</td></tr>
+        <tr><td>req ..</td><td>like send, but requesting payment.</td></tr>
+        <tr><td>txns</td><td>list the last 3 transactions.</td></tr>
+        <tr><td>buy</td><td>list Bitcoin sellers in same country.</td></tr>
+        <tr><td>sell &lt;price&gt;</td><td>enlist as Bitcoin seller.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="row blue">
+  <div class="col-sm-12">
+    <h2>SMSgateways</h2>
+  </div>
+  <div class="col-sm-6">
+    <span>Gateways are operated by individuals with interest to earn transaction fees. A dedicated Android phone and internet required.</span>
+    <p><a class="btn btn-default" href="#gateways">Open a Gateway &raquo;</a></p>
+    <span>Or have a peek at the <a href="#example">configuration example</a></span>
+  </div>
+  <div class="col-sm-6 intl-tel-input">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th><i class="fa fa-flag"></i></th>
+          <th>Number</th>
+          <th>Fee</th>
+        </tr>
+      </thead>
+      <tbody id="gwTable">
+        
+      </tbody>
+    </table>
   </div>
 </div>

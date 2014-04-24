@@ -9,7 +9,8 @@ define(['backbone','communicator' ,'hbs!tmpl/header'], function(Backbone, Commun
 			});
 		},
         template: HeaderTmpl,
-        className: 'transp',
+        className: 'navbar navbar-inverse navbar-fixed-top navbar-absolute',
+        tagName: 'div role="navigation"',
         events: {
 			'click #aLogout':'handleLogout'
 		},
@@ -29,7 +30,6 @@ define(['backbone','communicator' ,'hbs!tmpl/header'], function(Backbone, Commun
 			Communicator.mediator.trigger('app:logout');
 		},
 		onShow: function() {
-			this.setButton();
 			this.$('ul.nav').tab();
         }
     });

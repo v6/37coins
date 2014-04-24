@@ -24,7 +24,7 @@
         <!-- endbuild -->
         <script type="text/javascript">
           window.opt = {
-              resPath: 'http://192.168.111.222:9000',
+              resPath: 'http://localhost:9000',
               lng: 'en-US',
               gaTrackingId: 'UA-29543456-1',
               ioPath: 'http://127.0.0.1:8081',
@@ -38,13 +38,11 @@
 
     <body>
       <!-- Wrap all page content here -->
-      <div id="wrap">
+      <div id="wrap" class="container">
           <div id="header"></div>
           <div id="content"></div>
-          <div id="push"></div>
+          <div id="footer"></div>
       </div>
-      <div id="footer"></div>
-      <div id="bg"></div>
 
         <!-- build:js scripts/main.js -->
         <script data-main="scripts/init" src="bower_components/requirejs/require.js"></script>
