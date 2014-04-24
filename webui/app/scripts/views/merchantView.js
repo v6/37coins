@@ -32,9 +32,8 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, Merchant
                     if (data.action === 'success'){
                         self.$('#merchStatus').html('Phone successfully verified.');
                         self.$('#merchStatus').attr('class','bg-success');
-                        console.log('token ' + data.apiToken + ', secret ' + data.apiSecret);
                         var merchantModel = new MerchantModel({
-                            ticket:self.ticket
+                            sessionToken:self.ticket
                         });
                         var view = new MerchantSuccessView({
                             model:merchantModel,

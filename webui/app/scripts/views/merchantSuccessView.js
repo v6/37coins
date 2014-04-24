@@ -24,16 +24,18 @@ function(Backbone, MerchantSuccessTmpl) {
         onError: function(){
             this.$('.alert').css('display','');
             this.$('.alert').addClass('in');
-            this.$('button.btn-primary').button('reset');
+            this.$('button.btn-lg').button('reset');
         },
         onSuccess: function(){
             this.$('#instructions').html('Display Name applied.');
+            this.$('button.btn-lg').button('reset');
+            this.$('.alert').css('display', 'none');
             var displayName = this.$('input[name="displayName"]').val();
             window.parent.window.postMessage(
                 {'func':'setDisplayName','params':[{'displayName':displayName}]},'*');
         },
         handleRegister: function() {
-            this.$('button.btn-primary').button('loading');
+            this.$('button.btn-lg').button('loading');
             var displayName = this.$('input[name="displayName"]').val();
             this.model.set('displayName',displayName);
             this.model.save();
@@ -45,6 +47,7 @@ function(Backbone, MerchantSuccessTmpl) {
             }else{
                 this.$('#instructions').html('Configuration has been applied to POS automatically.');
             }
+            this.$('.alert').css('display', 'none');
             var jForm = this.$('form');
             var self = this;
             jForm.validate({
