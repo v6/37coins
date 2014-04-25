@@ -296,9 +296,11 @@ public class MerchantResource {
 				.setAmount(request.getAmount())
 				.setConfLink(request.getCallbackUrl())
 				.setComment(request.getOrderName())
-				.setPayDest(request.getPayDest().setDisplayName(displayName))
-				.setRate(request.getConversion().getAsk().doubleValue())
+				.setPayDest(request.getPayDest().setDisplayName(displayName));
+			if (request.getConversion()!=null){
+				withdrawal.setRate(request.getConversion().getAsk().doubleValue())
 				.setCurrencyCode(request.getConversion().getCurCode());
+			}
 			String reqValue = mapper.writeValueAsString(withdrawal);
 			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");

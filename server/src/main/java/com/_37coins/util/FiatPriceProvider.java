@@ -121,7 +121,11 @@ public class FiatPriceProvider {
 	}
 	
 	public String getLocalCurCode(){
-		return cu.getCode();
+		if (null!=cu){
+			return cu.getCode();
+		}else{
+			return null;
+		}
 	}
 
 }

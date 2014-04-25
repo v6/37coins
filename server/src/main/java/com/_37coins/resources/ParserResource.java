@@ -403,7 +403,11 @@ public class ParserResource {
 		if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
 			return null;
 		}
-		w.setAmount(charge.getAmount());
+		w.setAmount(charge.getAmount())
+		 .setComment(charge.getComment())
+		 .setConfLink(charge.getConfLink())
+		 .setCurrencyCode(charge.getCurrencyCode())
+		 .setRate(charge.getRate());
 		data.setPayload(w);
 		return withdrawalReq();
 	}
@@ -475,7 +479,12 @@ public class ParserResource {
 	@Path("/Price")
 	public Response getPrice(){
 		DataSet data = responseList.get(0);
-		data.setPayload(fiatPriceProvider.getLocalCurValue(data.getLocale()));
+		Withdrawal w = (Withdrawal)data.getPayload();
+		if (null!=w){
+			data.setPayload(fiatPriceProvider.getLocalCurValue(w.getAmount(),data.getLocale()));
+		}else{
+			data.setPayload(fiatPriceProvider.getLocalCurValue(new BigDecimal("1"),data.getLocale()));
+		}
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {

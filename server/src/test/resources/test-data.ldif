@@ -74,6 +74,7 @@ objectClass: person
 cn: 821039841235
 sn: 821039841235
 description: test
+displayName: merchant
 departmentNumber: test
 mobile: +821039841235
 mail: bla@bla.com

@@ -36,8 +36,10 @@ import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
+import com._37coins.util.MerchantTester;
 import com._37coins.web.AccountRequest;
 import com._37coins.web.MerchantRequest;
+import com._37coins.web.MerchantResponse;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -561,9 +563,10 @@ public class RestTest {
 			.statusCode(200)
 		.when()
 			.post(embeddedJetty.getBaseUri() + MerchantResource.PATH+"/charge/test");
-    	Map<String,String> m = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>() {});
-    	Assert.assertTrue(m.containsKey("displayName"));
-    	Assert.assertTrue(m.containsKey("token"));
+    	MerchantResponse mr = new ObjectMapper().readValue(r.asInputStream(), MerchantResponse.class);
+    	System.out.println(new ObjectMapper().writeValueAsString(mr));
+    	Assert.assertNotNull(mr.getDisplayName());
+    	Assert.assertNotNull(mr.getToken());
     }
 	
 	@Test

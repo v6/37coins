@@ -353,6 +353,13 @@ public class ParserFilter implements Filter {
 			}
 			data.setPayload(price);
 		}
+		if (data.getAction() == Action.PRICE){
+			if (ca.length>1){
+				Withdrawal w = new Withdrawal();
+				readAmount(w, ca[1]);
+				data.setPayload(w);
+			}
+		}
 		return data;
 	}
 }
