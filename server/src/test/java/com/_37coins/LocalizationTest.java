@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.joda.money.CurrencyUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -213,6 +215,86 @@ public class LocalizationTest {
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
+	
+	@Test
+	public void test37coinsSendDispName() throws IOException, TemplateException {
+		rsp.setAction(Action.WITHDRAWAL_REQ)
+			.setPayload(new Withdrawal()
+				.setConfKey("a1234")
+				.setAmount(new BigDecimal("0.01"))
+				.setPayDest(new PaymentAddress()
+					.setAddress("1CBtg1bs2e7s4mWRGPCUwaSFFH2dDfnHf3")
+					.setAddressType(PaymentType.BTC)
+					.setDisplayName("johann")));
+		System.out.println("DEPOSIT CONFIRM:");
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue(s.contains("johann"));
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsSendAddr() throws IOException, TemplateException {
+		rsp.setAction(Action.WITHDRAWAL_REQ)
+			.setPayload(new Withdrawal()
+				.setConfKey("a1234")
+				.setAmount(new BigDecimal("0.01"))
+				.setPayDest(new PaymentAddress()
+					.setAddress("1CBtg1bs2e7s4mWRGPCUwaSFFH2dDfnHf3")
+					.setAddressType(PaymentType.BTC)));
+		System.out.println("DEPOSIT CONFIRM:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue(s.contains("1CBtg1"));
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsPayOrder() throws IOException, TemplateException {
+		rsp.setAction(Action.WITHDRAWAL_REQ)
+			.setPayload(new Withdrawal()
+				.setConfKey("a1234")
+				.setComment("apple")
+				.setAmount(new BigDecimal("0.01"))
+				.setPayDest(new PaymentAddress()
+					.setAddress("1CBtg1bs2e7s4mWRGPCUwaSFFH2dDfnHf3")
+					.setAddressType(PaymentType.BTC)
+					.setDisplayName("johann")));
+		System.out.println("DEPOSIT CONFIRM:");
+		String s = ef.constructTxt(rsp);
+		System.out.println(s);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue(s.contains("johann"));
+		Assert.assertTrue(s.contains("apple"));
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}
+	
+	@Test
+	public void test37coinsPayAtRate() throws IOException, TemplateException {
+		rsp.setAction(Action.WITHDRAWAL_REQ)
+			.setFiatPriceProvider(new FiatPriceProvider(new BigDecimal("1000"), CurrencyUnit.EUR))
+			.setPayload(new Withdrawal()
+				.setConfKey("a1234")
+				.setComment("apple")
+				.setAmount(new BigDecimal("0.01"))
+				.setPayDest(new PaymentAddress()
+					.setAddress("1CBtg1bs2e7s4mWRGPCUwaSFFH2dDfnHf3")
+					.setAddressType(PaymentType.BTC)
+					.setDisplayName("johann")));
+		System.out.println("DEPOSIT CONFIRM:");
+		String s = ef.constructTxt(rsp);
+		ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		Assert.assertTrue(s.contains("johann"));
+		Assert.assertTrue(s.contains("apple"));
+		Assert.assertTrue(s.contains("10EUR"));
+		Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	}	
+
 	
 	@Test
 	public void test37coinsReq() throws IOException, TemplateException {
