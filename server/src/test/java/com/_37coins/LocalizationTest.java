@@ -478,8 +478,9 @@ public class LocalizationTest {
 	@Test
 	public void testPrice() throws IOException, TemplateException {
 		rsp.setAction(Action.PRICE)
+			.setGwFee(new BigDecimal("1"))
 			.setLocale(new Locale("en","US"))
-			.setPayload(new PriceTick().setLast(new BigDecimal("500.01")).setCurCode("EUR"));
+			.setPayload(new PriceTick().setLast(new BigDecimal("500.01")).setLastFactored(new BigDecimal("250")).setCurCode("EUR"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);

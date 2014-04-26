@@ -182,7 +182,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-				String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(mf.getLocale(rsp).getCountry(), PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
+				String regionCode = phoneUtil.getRegionCodeForNumber(rsp.getTo().getPhoneNumber());
+				String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(regionCode, PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
 			    params.put("from", from.substring(0,from.length()-4)+"3737");
 			    params.put("to", rsp.getTo().getAddress());
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+sanitizedCn+"/"+workflowId+"/"+mf.getLocale(rsp).toString());

@@ -481,9 +481,12 @@ public class ParserResource {
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
 		if (null!=w){
+			data.setGwFee(w.getAmount());
 			data.setPayload(fiatPriceProvider.getLocalCurValue(w.getAmount(),data.getLocale()));
 		}else{
-			data.setPayload(fiatPriceProvider.getLocalCurValue(new BigDecimal("1"),data.getLocale()));
+			BigDecimal one = new BigDecimal("1");
+			data.setGwFee(one);
+			data.setPayload(fiatPriceProvider.getLocalCurValue(one,data.getLocale()));
 		}
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();

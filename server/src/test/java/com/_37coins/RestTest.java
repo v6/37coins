@@ -653,7 +653,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+491601234567")
 			.formParam("gateway", "+491602742398")
-			.formParam("message", "preis")
+			.formParam("message", "preis 5eur")
 		.expect()
 			.statusCode(200)
 		.when()

@@ -1,5 +1,5 @@
 <#setting locale=locale>
 <#function mili x>
-  <#return x / 1000>
+  <#return x * 1000>
 </#function>
-1mBTC = ${mili(payload.last)?string.currency} 
+${mili(getGwFee())}mBTC = ${payload.getLastFactored()?string.currency} 
