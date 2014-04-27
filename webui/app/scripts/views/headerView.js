@@ -9,7 +9,7 @@ define(['backbone','communicator' ,'hbs!tmpl/header'], function(Backbone, Commun
 			});
 		},
         template: HeaderTmpl,
-        className: 'navbar navbar-inverse navbar-fixed-top navbar-absolute',
+        className: 'navbar navbar-37',
         tagName: 'div role="navigation"',
         events: {
 			'click #aLogout':'handleLogout'

@@ -68,6 +68,15 @@ define(['backbone',
                 }else {
                     $(document).attr('title', '37 Coins');
                 }
+                var items = $('.navbar .nav li a');
+                _.each(items, function(item){
+                    var href = $(item).attr('href').replace('#','');
+                    if (href===fragment && $(item).hasClass('dropdown-toggle')){
+                        $(item).parent().addClass('active');
+                    }else{
+                        $(item).parent().removeClass('active');
+                    }
+                });
                 //set meta tag
                 $('meta[name=description]').remove();
                 $('head').append( '<meta name="description" content="this is new">' );

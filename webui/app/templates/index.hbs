@@ -1,16 +1,15 @@
-<div class="jumbotron">
+<div class="jumbotron" style="background: url('{{resPath}}/images/r_bg_coins.jpg') no-repeat center center; background-size: cover;">
+  <div class="topLeft"><h1>SMSwallet</h1></div>
   <div class="row">
-    <div class="col-sm-12">
-      <br>
-      <br>
-      <br>
-    </div>
-    <div class="col-sm-6">.col-xs-6</div>
     <div class="col-sm-6">
-      <h1>Money without borders or barriers, as easy as sending an SMS.</h1>
-      <p class="lead">Send and receive bitcoin anywhere in the world. Sign-up to be an SMSwallet beta user.</p>
+      <img src="{{resPath}}/images/x_hero_phones.png">
+    </div>
+    <div class="col-sm-6">
+      <h2>No borders or barriers, just send an SMS.</h2>
+      <p class="lead">Send and receive bitcoin anywhere in the world via SMS. No internet or smartphone required.</p>
+      <label>Sign-up to be an SMSwallet beta user.</label>
       <input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
-      <p>Country Mobile Number</p>
+      <div class="inputDesc"><label>Country</label><label>Mobile Number</label></div>
     </div>
   </div>
 </div>
@@ -20,10 +19,16 @@
     <h2>SMSwallet Commands</h2>
   </div>
   <div class="col-sm-6">
-      <span>These commands are understood by any gateway and are sent by users simply by typing the SMS. No smartphone or internet needed.</span>
+    <p>After setting up your account, you will receive an automated text message from a gateway. To control your account, send any of these commands to that phone number via SMS, no smartphone or internet required.</p>
+    <div class="panel panel-default">
+      <div class="panel-heading">Become an SMSwallet beta user</div>
+      <div class="panel-body">
+        <a class="btn btn-default" href="#gateways">Open a Wallet &raquo;</a>
+      </div>
+    </div>
   </div>
   <div class="col-sm-6">
-    <table class="table table-hover">
+    <table class="table table-striped">
       <thead>
         <tr>
           <th>Command</th>
@@ -31,14 +36,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>help</td><td>list available commands.</td></tr>
-        <tr><td>addr</td><td>get the receiving address for your wallet.</td></tr>
-        <tr><td>bal</td><td>receive your wallet's balance.</td></tr>
-        <tr><td>send &lt;amount&gt; &lt;to&gt; [comment]</td><td>send bitcoins to email, phone number or bitcoin address.</td></tr>
-        <tr><td>req ..</td><td>like send, but requesting payment.</td></tr>
-        <tr><td>txns</td><td>list the last 3 transactions.</td></tr>
-        <tr><td>buy</td><td>list Bitcoin sellers in same country.</td></tr>
-        <tr><td>sell &lt;price&gt;</td><td>enlist as Bitcoin seller.</td></tr>
+        <tr><td>HELP</td><td>List available commands</td></tr>
+        <tr><td>PIN</td><td>Setup spending PIN</td></tr>
+        <tr><td>BAL</td><td>See balance in mBTC</td></tr>
+        <tr><td>SEND</td><td>Send bitcoins to phone number, bitcoin address.</td></tr>
+        <tr><td>TRANS</td><td>List the last 3 transactions</td></tr>
       </tbody>
     </table>
   </div>
@@ -48,9 +50,17 @@
     <h2>SMSgateways</h2>
   </div>
   <div class="col-sm-6">
-    <span>Gateways are operated by individuals with interest to earn transaction fees. A dedicated Android phone and internet required.</span>
-    <p><a class="btn btn-default" href="#gateways">Open a Gateway &raquo;</a></p>
-    <span>Or have a peek at the <a href="#example">configuration example</a></span>
+    <p>Decentralized, open-source Android app that bridges between SMS and Bitcoin for low-end Android phones. In other words, connect any country to the global economy.</p>
+    <p>Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:<ul>
+    <li>Dedicated Android phone</li>
+    <li>Text messaging plan</li>
+    <li>Internet connection</li></ul></p>
+    <div class="panel panel-default">
+      <div class="panel-heading">Become an SMSgateway partner</div>
+      <div class="panel-body">
+        <a class="btn btn-default" href="#gateways">Open a Gateway &raquo;</a>
+      </div>
+    </div>
   </div>
   <div class="col-sm-6 intl-tel-input">
     <table class="table table-hover">

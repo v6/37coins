@@ -14,7 +14,7 @@ function( Backbone, Communicator, HeaderView, FooterView) {
     App.addRegions({
         header: '#header',
         content: '#content',
-        footer: '#footer'
+        footer: 'footer'
     });
 
     // marionette app events...
