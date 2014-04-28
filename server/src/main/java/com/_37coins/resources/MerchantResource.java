@@ -286,7 +286,7 @@ public class MerchantResource {
 			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo){
 		String displayName = authenticate(apiToken, request, uriInfo.getPath(), sig);
-		if (null!=request.getCallbackUrl()||null!=request.getConversion()){
+		if (null!=request.getCallbackUrl()){
 			throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
 		}
 		try{
@@ -296,7 +296,11 @@ public class MerchantResource {
 				.setAmount(request.getAmount())
 				.setConfLink(request.getCallbackUrl())
 				.setComment(request.getOrderName())
-				.setPayDest(request.getPayDest());
+				.setPayDest(request.getPayDest().setDisplayName(displayName));
+			if (request.getConversion()!=null){
+				withdrawal.setRate(request.getConversion().getAsk().doubleValue())
+				.setCurrencyCode(request.getConversion().getCurCode());
+			}
 			String reqValue = mapper.writeValueAsString(withdrawal);
 			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");

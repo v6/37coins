@@ -2,9 +2,13 @@
 <#if fiatPriceProvider??>
 <#assign tick = fiatPriceProvider.getLocalCurValue(payload.balance,locale)!"error">
 </#if>
-<#if tick?? & tick != "error">
+<#if tick?? & tick != "error" & !fiatPriceProvider.getLocalCurCode()??>
 <#assign fiat = " ("+tick.getLastFactored()?string.currency+")">
 <#else>
 <#assign fiat = "">
 </#if>
-${resBundle("Balance",payload.miliBalance?string("#,##0.###"),fiat)}
+<#assign bal = payload.miliBalance>
+<#if bal < 0>
+<#assign bal = 0>
+</#if>
+${resBundle("Balance",bal?string("#,##0.###"),fiat)}

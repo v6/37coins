@@ -1,7 +1,7 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/login',
+    'hbs!tmpl/loginView_tmpl',
     'jqueryValidation'
 ],
 function(Backbone, Communicator, LoginTmpl) {

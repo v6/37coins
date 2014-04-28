@@ -60,10 +60,13 @@ public class ParserFilter implements Filter {
 	public static final String BC_ADDR_REGEX = "^[mn13][1-9A-Za-z][^OIl]{20,40}";
 	
 	private final Cache cache;
+	private final FiatPriceProvider fiatPriceProvider;
 	
 	@Inject
-	public ParserFilter(Cache cache){
+	public ParserFilter(Cache cache,
+			FiatPriceProvider fiatPriceProvider){
 		this.cache = cache;
+		this.fiatPriceProvider = fiatPriceProvider;
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -258,8 +261,7 @@ public class ParserFilter implements Filter {
 			BigMoney money = BigMoney.parse(amount);
 			BigDecimal val = money.getAmount().setScale(8, RoundingMode.HALF_UP); 
 			if (money.getCurrencyUnit()!=CurrencyUnit.getInstance("BTC")){
-				FiatPriceProvider fpp = new FiatPriceProvider(cache);
-				PriceTick pt = fpp.getLocalCurValue(null, money.getCurrencyUnit());
+				PriceTick pt = fiatPriceProvider.getLocalCurValue(null, money.getCurrencyUnit());
 				val = money.getAmount().divide(pt.getLast(),8,RoundingMode.HALF_UP); 
 			}else{
 				val = val.divide(new BigDecimal(1000));
@@ -352,6 +354,13 @@ public class ParserFilter implements Filter {
 				log.error("parse float failed",e);
 			}
 			data.setPayload(price);
+		}
+		if (data.getAction() == Action.PRICE){
+			if (ca.length>1){
+				Withdrawal w = new Withdrawal();
+				readAmount(w, ca[1]);
+				data.setPayload(w);
+			}
 		}
 		return data;
 	}

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,10 +13,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.filter.HmacFilter;
 
 import com._37coins.resources.MerchantResource;
+import com._37coins.web.MerchantRequest;
+import com._37coins.web.PriceTick;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
-import com._37coins.workflow.pojo.Withdrawal;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MerchantTester {
@@ -29,24 +28,24 @@ public class MerchantTester {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
-		Withdrawal withdrawal = new Withdrawal().setAmount(new BigDecimal("0.005")).setPayDest(new PaymentAddress().setAddress("address").setAddressType(PaymentType.BTC));
+		MerchantRequest request = new MerchantRequest()
+			.setAmount(new BigDecimal("0.002"))
+			.setPayDest(new PaymentAddress().setAddress("1CBtg1bs2e7s4mWRGPCUwaSFFH2dDfnHf3").setAddressType(PaymentType.BTC))
+			.setOrderName("product")
+			.setConversion(new PriceTick().setAsk(new BigDecimal("1000")).setCurCode("EUR"));
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpPost req = new HttpPost("https://www.37coins.com"+MerchantResource.PATH+"/charge/token");
-		String reqValue = new ObjectMapper().writeValueAsString(withdrawal);
+		HttpPost req = new HttpPost("https://www.37coins.com"+MerchantResource.PATH+"/charge/test");
+		String reqValue = new ObjectMapper().writeValueAsString(request);
 		StringEntity entity = new StringEntity(reqValue, "UTF-8");
 		entity.setContentType("application/json");
 		String reqSig = HmacFilter.calculateSignature(
-				"https://www.37coins.com"+MerchantResource.PATH+"/charge/token",
+				"https://www.37coins.com"+MerchantResource.PATH+"/charge/test",
 				HmacFilter.parseJson(reqValue.getBytes()),
-				"secret");
+				"pw");
 		req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
 		req.setEntity(entity);
 		CloseableHttpResponse rsp = httpclient.execute(req);
-		if (rsp.getStatusLine().getStatusCode()==200){
-			System.out.println(new ObjectMapper().writeValueAsString(new ObjectMapper().readValue(rsp.getEntity().getContent(), new TypeReference<Map<String,String>>() {})));
-		}else{
-			System.out.println("received status: "+rsp.getStatusLine().getStatusCode()+convertStreamToString(rsp.getEntity().getContent()));
-		}
+		System.out.println(convertStreamToString(rsp.getEntity().getContent()));
 	}
 
 	static String convertStreamToString(java.io.InputStream is) {

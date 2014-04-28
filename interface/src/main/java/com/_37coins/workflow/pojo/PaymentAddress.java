@@ -14,6 +14,8 @@ public class PaymentAddress {
 	private String address;
 	
 	private PaymentType addressType;
+	
+	private String displayName;
 
 	public String getAddress() {
 		return address;
@@ -30,6 +32,15 @@ public class PaymentAddress {
 
 	public PaymentAddress setAddressType(PaymentType addressType) {
 		this.addressType = addressType;
+		return this;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public PaymentAddress setDisplayName(String displayName) {
+		this.displayName = displayName;
 		return this;
 	}
 

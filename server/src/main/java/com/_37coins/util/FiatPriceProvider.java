@@ -35,11 +35,19 @@ public class FiatPriceProvider {
 	
 	final private Cache cache;
 	private String url;
+	private BigDecimal rate;
+	private CurrencyUnit cu;
 	
 	@Inject
 	public FiatPriceProvider(Cache cache){
 		this.cache = cache;
 		this.url = TICKER_URL;
+	}
+	
+	public FiatPriceProvider(BigDecimal rate, CurrencyUnit cu){
+		this.rate = rate;
+		this.cu = cu;
+		this.cache = null;
 	}
 	
 	public FiatPriceProvider(Cache cache, String url){
@@ -97,7 +105,10 @@ public class FiatPriceProvider {
 	}
 	
 	public PriceTick getLocalCurValue(BigDecimal btcValue, Locale locale){
-		if (null!=locale){
+		if (null!=btcValue){
+			if (null!=rate&&null!=cu){
+				return new PriceTick().setLastFactored(btcValue.multiply(rate)).setCurCode(cu.getCode()).setLast(rate);
+			}
 			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(locale.getCountry()).build());
 			return getLocalCurValue(btcValue, cu);
 		}
@@ -105,11 +116,16 @@ public class FiatPriceProvider {
 	}
 	
 	public String getLocalCurCode(Locale locale){
-		if (null!=locale){
-			CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(locale.getCountry()).build());
+		CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(locale.getCountry()).build());
+		return cu.getCode();
+	}
+	
+	public String getLocalCurCode(){
+		if (null!=cu){
 			return cu.getCode();
+		}else{
+			return null;
 		}
-		return null;
 	}
 
 }

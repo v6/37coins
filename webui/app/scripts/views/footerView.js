@@ -1,7 +1,11 @@
-define(['backbone', 'hbs!tmpl/footer'], function(Backbone, FooterTmpl) {
+define([
+	'backbone',
+	'hbs!tmpl/footerView_tmpl'
+],
+function(Backbone, FooterTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: FooterTmpl,
-        className: 'transp'
+        className: 'container'
     });
 });

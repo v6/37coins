@@ -1,7 +1,7 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/index',
+    'hbs!tmpl/indexView_tmpl',
     'views/gatewayPreView',
     'webfinger',
     'intlTelInput'
@@ -12,7 +12,7 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput
         itemView: GatewayView,
         itemViewContainer: '#gwTable',
         template: IndexTmpl,
-        className: 'container',
+        className: 'main',
         events: {
             'click button.btn-inverse': 'handleJoin',
         },
@@ -108,6 +108,7 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput
                 this.$('button.btn-inverse').attr('disabled', false);
                 var country = (!window.opt.country||window.opt.country==='undefined')?'de':window.opt.country.toLowerCase();
                 this.$('[name="search"]').intlTelInput({preferredCountries:[],defaultCountry:country});
+                this.$('div.intl-tel-input.inside').append('<input class="inside" type="submit" value="Go!">');
                 var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
                 var example = phoneUtil.format(phoneUtil.getExampleNumberForType(country,window.i18n.phonenumbers.PhoneNumberType.MOBILE),window.i18n.phonenumbers.PhoneNumberFormat.E164);
                 this.$('[name="search"]').attr('placeholder',example);

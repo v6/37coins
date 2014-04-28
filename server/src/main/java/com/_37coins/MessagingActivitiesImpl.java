@@ -87,7 +87,15 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
 		try {
-			rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+			if (rsp.getPayload() instanceof Withdrawal){
+				Withdrawal w = (Withdrawal)rsp.getPayload();
+				if (w.getRate()!=null && w.getCurrencyCode()!=null){
+					rsp.setFiatPriceProvider(new FiatPriceProvider(new BigDecimal(w.getRate()),CurrencyUnit.of(w.getCurrencyCode())));
+				}
+			}
+			if (rsp.getFiatPriceProvider()==null){
+				rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+			}
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 				mt.sendMessage(rsp);
 		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
@@ -129,7 +137,11 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			Withdrawal w = (Withdrawal)rsp.getPayload();
 			w.setConfKey(tt.getKey());
 			w.setConfLink(confLink);
-			rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+			if (w.getRate()!=null && w.getCurrencyCode()!=null){
+				rsp.setFiatPriceProvider(new FiatPriceProvider(new BigDecimal(w.getRate()),CurrencyUnit.of(w.getCurrencyCode())));
+			}else{
+				rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+			}
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 		        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(taskToken);
@@ -170,7 +182,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
 				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-				String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(mf.getLocale(rsp).getCountry(), PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
+				String regionCode = phoneUtil.getRegionCodeForNumber(rsp.getTo().getPhoneNumber());
+				String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(regionCode, PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
 			    params.put("from", from.substring(0,from.length()-4)+"3737");
 			    params.put("to", rsp.getTo().getAddress());
 			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/answer/"+sanitizedCn+"/"+workflowId+"/"+mf.getLocale(rsp).toString());
