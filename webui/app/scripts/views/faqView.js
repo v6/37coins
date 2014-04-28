@@ -1,4 +1,8 @@
-define(['backbone', 'hbs!tmpl/faq'], function(Backbone, FaqTmpl) {
+define([
+    'backbone',
+    'hbs!tmpl/faqView_tmpl'
+],
+function(Backbone, FaqTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: FaqTmpl,

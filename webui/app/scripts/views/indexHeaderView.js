@@ -1,18 +1,15 @@
 define([
-    'backbone',
-    'communicator',
-    'hbs!tmpl/indexView_tmpl',
-    'views/gatewayPreView',
+	'backbone',
+	'communicator',
+	'hbs!tmpl/indexHeaderView_tmpl',
     'webfinger',
     'intlTelInput'
 ],
-function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput) {
+function(Backbone, Communicator, IndexHeaderTmpl, webfinger) {
     'use strict';
-    return Backbone.Marionette.CompositeView.extend({
-        itemView: GatewayView,
-        itemViewContainer: '#gwTable',
-        template: IndexTmpl,
-        className: 'main',
+    return Backbone.Marionette.ItemView.extend({
+        template: IndexHeaderTmpl,
+        className: 'static',
         events: {
             'click button.btn-inverse': 'handleJoin',
         },
@@ -122,5 +119,6 @@ function(Backbone, Communicator, IndexTmpl, GatewayView, webfinger, intlTelInput
                 self.onShow();
             });
         }
+
     });
 });

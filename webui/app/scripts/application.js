@@ -2,16 +2,18 @@ define([
 	'backbone',
 	'communicator',
 	'views/headerView',
+    'views/navView',
 	'views/footerView'
 ],
 
-function( Backbone, Communicator, HeaderView, FooterView) {
+function( Backbone, Communicator, HeaderView, NavView, FooterView) {
     'use strict';
 
 	var App = new Backbone.Marionette.Application();
 
     // these regions correspond to #ID's in the index.html 
     App.addRegions({
+        nav: '#nav',
         header: '#header',
         content: '#content',
         footer: 'footer'
@@ -27,7 +29,12 @@ function( Backbone, Communicator, HeaderView, FooterView) {
         }
     });
 
-	Communicator.mediator.on('app:show', function(appView) {
+	Communicator.mediator.on('app:show', function(appView,headerView) {
+        if (headerView){
+            App.header.show(headerView);
+        }else{
+            App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath})}));
+        }
         App.content.show(appView);
     });
 
@@ -46,13 +53,13 @@ function( Backbone, Communicator, HeaderView, FooterView) {
 	/* Add initializers here */
 	App.addInitializer( function (options) {
         if (!App.getParameterByName('noHead')){
-            App.header.show(new HeaderView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
+            App.nav.show(new NavView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
             App.footer.show(new FooterView());
         }else{
+            $('div#nav').remove();
             $('div#header').remove();
             $('div#content').css('padding-top','5px');
             $('div#footer').remove();
-            $('div#push').remove();
         }
         this.router = new options.pageController.Router({
             controller: options.pageController, // wire-up the start method

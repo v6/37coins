@@ -1,4 +1,9 @@
-define(['backbone','communicator' ,'hbs!tmpl/header'], function(Backbone, Communicator, HeaderTmpl) {
+define([
+	'backbone',
+	'communicator' ,
+	'hbs!tmpl/navView_tmpl'
+],
+function(Backbone, Communicator, NavTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
 		initialize: function() {
@@ -8,7 +13,7 @@ define(['backbone','communicator' ,'hbs!tmpl/header'], function(Backbone, Commun
 				self.setButton();
 			});
 		},
-        template: HeaderTmpl,
+        template: NavTmpl,
         className: 'navbar navbar-37',
         tagName: 'div role="navigation"',
         events: {

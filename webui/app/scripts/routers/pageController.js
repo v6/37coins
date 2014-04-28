@@ -10,10 +10,11 @@ define(['backbone',
     'models/feeModel',
     'collections/gatewayCollection',
     'views/indexView',
+    'views/indexHeaderView',
     'views/loginView',
     'views/gatewayView',
     'views/faqView',
-    'views/contactView',
+    'views/aboutView',
     'views/verifyView',
     'views/validateView',
     'views/captchaView',
@@ -26,10 +27,9 @@ define(['backbone',
     'views/feeView',
     'views/gatewayLayout',
     'views/notFoundView',
-    'views/exampleView',
     'routeFilter',
     'views/merchantView',
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, LoginView, GatewayView, FaqView, ContactView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, ExampleView, io, MerchantView) {
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -48,11 +48,10 @@ define(['backbone',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
             'reset': 'showReset',
-            'contact': 'showContact',
+            'about': 'showAbout',
             'signUp': 'showSignUp',
             'logout': 'showLogout',
             'merchant': 'showMerchant',
-            'example': 'showExample',
             'notFound': 'showNotFound'
         },
         before:{
@@ -71,7 +70,7 @@ define(['backbone',
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
                     var href = $(item).attr('href').replace('#','');
-                    if (href===fragment && $(item).hasClass('dropdown-toggle')){
+                    if (href===fragment){
                         $(item).parent().addClass('active');
                     }else{
                         $(item).parent().removeClass('active');
@@ -151,8 +150,9 @@ define(['backbone',
         if (!this.gateways){
             this.gateways = new GatewayCollection();
         }
+        var header = new IndexHeaderView({model:new Backbone.Model({resPath:window.opt.resPath})});
         var view = new IndexView({collection:this.gateways,model:new Backbone.Model({resPath:window.opt.resPath})});
-        Communicator.mediator.trigger('app:show', view);
+        Communicator.mediator.trigger('app:show', view, header);
         if (this.gateways.length<1){
             //load dependency manually
             var script = document.createElement('script');
@@ -178,8 +178,8 @@ define(['backbone',
         Communicator.mediator.trigger('app:show', view);
     };
 
-    Controller.showContact = function() {
-        var view = new ContactView();
+    Controller.showAbout = function() {
+        var view = new AboutView({model:new Backbone.Model({resPath:window.opt.resPath})});
         Communicator.mediator.trigger('app:show', view);
     };
 
@@ -218,10 +218,6 @@ define(['backbone',
     };
     Controller.showNotFound = function() {
         var contentView = new NotFoundView();
-        Communicator.mediator.trigger('app:show',contentView);
-    };
-    Controller.showExample = function() {
-        var contentView = new ExampleView();
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showSignUp = function() {

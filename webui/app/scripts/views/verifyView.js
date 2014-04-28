@@ -2,7 +2,7 @@ define([
     'backbone',
     'communicator',
     'views/validateView',
-    'hbs!tmpl/verify'
+    'hbs!tmpl/verifyView_tmpl'
 ],
 function(Backbone, Communicator, ValidateView, VerifyTmpl) {
     'use strict';

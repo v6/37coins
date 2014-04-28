@@ -1,7 +1,7 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/validate'
+    'hbs!tmpl/validateView_tmpl'
 ],
 function(Backbone, Communicator, ValidateTmpl) {
     'use strict';
