@@ -21,6 +21,8 @@ define(['backbone',
     'views/logoutView',
     'views/signupView',
     'views/resetView',
+    'views/headerSendView',
+    'views/commandSendView',
     'views/resetConfView',
     'views/signupConfView',
     'views/balanceView',
@@ -29,7 +31,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -47,6 +49,7 @@ define(['backbone',
             'faq': 'showFaq',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
+            'commands/send': 'showCommandSend',
             'reset': 'showReset',
             'about': 'showAbout',
             'signUp': 'showSignUp',
@@ -215,6 +218,11 @@ define(['backbone',
             script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
             document.getElementsByTagName('head')[0].appendChild(script);
         }
+    };
+    Controller.showCommandSend = function() {
+        var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var contentView = new CommandSendView();
+        Communicator.mediator.trigger('app:show',contentView, headerView);
     };
     Controller.showNotFound = function() {
         var contentView = new NotFoundView();

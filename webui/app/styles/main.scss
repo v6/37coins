@@ -306,6 +306,89 @@ $baseFontFamily: 'Helvetica';
 .intl-tel-input.outside input[type="text"], .intl-tel-input.outside input[type="tel"] { border: none; margin-left: 38px; }
 
 
+/* Chat and bubbles */
+
+$shadow_radius: 6px;
+$nose_size: 12px;
+$shadow: 0 1px $shadow_radius #B2B2B2;
+$border:  1px solid #bbb;
+
+.chat {
+    font-size:  small;
+    width:		50%;
+    min-width:	200px;
+    padding:    10px;
+    margin: 	0 auto;
+}
+
+.bubble {
+    color: 			  #0070C3;
+    background-color: #F2F2F2;
+    border-radius:    5px;
+    border:           $border;
+    box-shadow:       $shadow;
+    display:          block;
+    padding:          10px 18px;
+    margin:           1em ($shadow_radius + $nose_size);
+    position:         relative;
+    vertical-align:   top;
+}
+
+.tail {
+    position: absolute;
+    height:  ($shadow_radius + $nose_size);
+    width:   ($shadow_radius + $nose_size);
+    overflow: hidden;
+
+    &:before {
+        border:            $border;
+        background-color:  #F2F2F2;
+        box-shadow:        $shadow;
+        content:           "\00a0";
+
+        display:           block;
+        position:          absolute;
+        top:               0px;
+        height:            $nose_size;
+        width:             $nose_size;
+    }
+}
+
+
+.bubble.left {
+    text-align: left;
+
+    .tail {
+        top:      $nose_size;
+        left:   -($shadow_radius + $nose_size);
+
+        &:before {
+            left:              $nose_size;
+            -webkit-transform: skewX( -45deg );
+            -moz-transform:    skewX( -45deg );
+            -o-transform:      skewX( -45deg );
+        }
+    }
+}
+
+
+.bubble.right {
+    text-align: right;
+    
+    .tail {
+        top:      $nose_size;
+        right:   -($shadow_radius + $nose_size);
+
+        &:before {
+            right:              $nose_size;
+            -webkit-transform: skewX( 45deg );
+            -moz-transform:    skewX( 45deg );
+            -o-transform:      skewX( 45deg );
+        }
+    }
+}
+
+
 /* Extra small devices (phones, less than 768px) */
 .jumbotron {
   .clippedImg{
@@ -331,7 +414,7 @@ h2, h1 {
   .container {
     max-width: $screen-md;
   }
-  div#wrap.container{
+  div#content{
     .row {
       .col-sm-6 {
         padding-left: 40px;
