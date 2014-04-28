@@ -16,6 +16,7 @@ module.exports = function (grunt) {
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
     // show elapsed time at the end
     require('time-grunt')(grunt);
+    require('jit-grunt')(grunt);
 
     // configurable paths
     var yeomanConfig = {
@@ -47,6 +48,7 @@ module.exports = function (grunt) {
                 ],
                 tasks: ['exec'],
                 options: {
+		    nospawn: true,
                     livereload: true
                 }
             }
