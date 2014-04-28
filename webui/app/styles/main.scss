@@ -474,15 +474,18 @@ $navbar-37-toggle-border-color:        #333 !default;
 
 
 // 37coins navbar
-
 .navbar-37 {
   background:rgba(255,255,255,0.2);
-  margin-bottom: -52px;
+  border: 0px;
+  margin-bottom: -66px; //jz - adjust to match height...
   .navbar-brand {
     color: $navbar-37-brand-color;
     font-family: 'sofia_pro_ultralightregular';
-    font-size: 30px;
-    padding-top: 12px;
+    font-size: 24px;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-bottom: 10px;
+    height: 46px;
     &:hover,
     &:focus {
       color: $navbar-37-brand-hover-color;
@@ -511,21 +514,26 @@ $navbar-37-toggle-border-color:        #333 !default;
   }
 
   .navbar-nav {
+    > ul {
+    }
     > li {
       > .dropdown-menu {
         margin-top: 6px;
       }
       > a {
-	    height: 45px;
 	    color: $navbar-37-link-color;
-	    border-bottom: 2px solid transparent;
+        margin-top: 6px;
+        padding-top: 7px;
+        padding-bottom: 3px;
+        margin-bottom: 10px;
+	    border-bottom: 2px solid transparent; 
 	    img {
           margin-top:-5px;
 	  	}
         &:hover,
         &:focus {
           background-color: transparent;
-          border-bottom-color: $navbar-37-border;
+          border-bottom-color: $navbar-37-border; //< underline color
         }
 	  }
     }
