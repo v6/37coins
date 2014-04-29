@@ -396,9 +396,18 @@ $border:  1px solid #bbb;
     width: 210px;
     margin: 0 auto;
     float: center;
-
+    background-size: cover;
+    position:relative;
   }
-  .col-sm-6{
+  .phoneGradient{
+    position:absolute;
+    margin-top: 0px;
+    height: 170px;
+    width:210px;
+    z-index: 1000;
+    background-size:contain;
+  }
+  .col-sm-7{
     text-align: center;
   }
   .inputDesc{
@@ -412,11 +421,15 @@ $border:  1px solid #bbb;
     margin-left: 15px;
   }
   .jumbotron{
-.clippedImg, .headerImg{
+.clippedImg{
       height: 271px;
       width: 180px;
-margin: 0 auto;
+      margin: 0 auto;
       float: center;
+      background-size: contain;
+    }
+    .col-sm-7{
+    text-align: left;
     }
   h2 {
     font-size: 19pt;
@@ -438,13 +451,14 @@ h2, h1 {
     max-width: $screen-md;
   }
    .jumbotron {
-    .clippedImg, .headerImg{
+    .clippedImg{
       height: 416px;
       width: 277px;
+      background-size: contain;
     }
-    .headerText{
-    //text-align: inherit;
-        padding-right: 60px;
+    .col-sm-7{
+    text-align: left;
+     padding-right: 60px;
     }
     h2 {
       font-size: 23pt;
