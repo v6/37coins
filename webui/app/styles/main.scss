@@ -471,7 +471,10 @@ $border:  1px solid #bbb;
     background-color: $pantone-black-m;
 }
 .navbar37-blue{
-    background-color: $stage-darkgrey;
+    background-color: $pantone-blue-300;
+}
+.navbar-37 {
+   margin-bottom: 0;
 }
 
 @media (min-width: $screen-sm-min) {
@@ -483,6 +486,9 @@ $border:  1px solid #bbb;
   }
   .wrap{
     background-color: $stage-darkgrey;
+  }
+  .navbar-37 {
+       margin-bottom: -50px;
   }
   .navbar > .container .navbar-brand {
     margin-left: 15px;
@@ -547,7 +553,6 @@ h2, h1 {
   background:rgba(255,255,255,0.2);
   border: 0px;
   min-height: 46px;
-  margin-bottom: -50px; 
   border-radius: 0;
   .navbar-brand {
     color: $navbar-37-brand-color;
@@ -807,9 +812,13 @@ h2, h1 {
 	  }
 	}
 	.blue {
-	  background-color: #0070C3; 
+	  background-color: $pantone-blue-300; 
 	  color: white;
-
+      tr{
+        &:hover {
+            color: $pantone-black-m;
+        }
+      }
 	}
 }
 
