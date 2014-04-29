@@ -407,6 +407,7 @@ $border:  1px solid #bbb;
 
 h2, h1 {
   font-family: 'sofia_pro_ultralightregular';
+  text-align: center;
 }
 
 /* Customize container */
@@ -451,13 +452,13 @@ h2, h1 {
 // Reset inverted navbar basics
 $navbar-37-color:                      $gray-light !default;
 $navbar-37-bg:                         #222 !default;
-$navbar-37-border:                     darken($navbar-37-bg, 10%) !default;
+$navbar-37-border:                     white; //prev: darken($navbar-37-bg, 10%) !default;
 
 // Inverted navbar links
 $navbar-37-link-color:                 #fff !default;
 $navbar-37-link-hover-color:           $gray-light !default;
 $navbar-37-link-hover-bg:              transparent !default;
-$navbar-37-link-active-color:          $navbar-37-link-hover-color !default;
+$navbar-37-link-active-color:          white;
 $navbar-37-link-active-bg:             darken($navbar-37-bg, 10%) !default;
 $navbar-37-link-disabled-color:        #444 !default;
 $navbar-37-link-disabled-bg:           transparent !default;
@@ -470,22 +471,23 @@ $navbar-37-brand-hover-bg:             transparent !default;
 // Inverted navbar toggle
 $navbar-37-toggle-hover-bg:            #0070C3 !default;
 $navbar-37-toggle-icon-bar-bg:         #fff !default;
-$navbar-37-toggle-border-color:        #333 !default;
+$navbar-37-toggle-border-color:        white;
 
 
 // 37coins navbar
 .navbar-37 {
   background:rgba(255,255,255,0.2);
   border: 0px;
-  margin-bottom: -66px; //jz - adjust to match height...
+  min-height: 46px;
+  margin-bottom: -50px; //jz - adjust to match height...
+  border-radius: 0;
   .navbar-brand {
     color: $navbar-37-brand-color;
     font-family: 'sofia_pro_ultralightregular';
-    font-size: 24px;
+    font-size: 24px; 
     padding-top: 10px;
     padding-left: 15px;
-    padding-bottom: 10px;
-    height: 46px;
+    padding-bottom: 0px;
     &:hover,
     &:focus {
       color: $navbar-37-brand-hover-color;
@@ -509,11 +511,14 @@ $navbar-37-toggle-border-color:        #333 !default;
     }
   }
 
+  .navbar {
+  }
+
   .navbar-text {
     color: $navbar-37-color;
   }
 
-  .navbar-nav {
+.navbar-nav {
     > ul {
     }
     > li {
@@ -524,9 +529,10 @@ $navbar-37-toggle-border-color:        #333 !default;
 	    color: $navbar-37-link-color;
         margin-top: 6px;
         padding-top: 7px;
-        padding-bottom: 3px;
-        margin-bottom: 10px;
-	    border-bottom: 2px solid transparent; 
+        padding-bottom: 2px;
+        border-bottom: 2px solid transparent; 
+        margin-bottom: 9px;
+	    
 	    img {
           margin-top:-5px;
 	  	}
@@ -538,11 +544,11 @@ $navbar-37-toggle-border-color:        #333 !default;
 	  }
     }
     > .active > a {
-      border-bottom-color: #fff;
+      border-bottom-color: white;
       &,
       &:hover,
       &:focus {
-        color: #fff;
+        color: white;
   		border-bottom-color: $navbar-37-toggle-border-color;
       }
     }
