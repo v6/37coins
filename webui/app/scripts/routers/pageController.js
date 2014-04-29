@@ -9,10 +9,11 @@ define(['backbone',
     'models/balanceModel',
     'models/feeModel',
     'collections/gatewayCollection',
-    'views/indexView',
+    'views/indexLayout',
     'views/indexHeaderView',
     'views/loginView',
     'views/gatewayView',
+    'views/gatewayCollectionView',
     'views/faqView',
     'views/aboutView',
     'views/accountLayout',
@@ -34,7 +35,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderView, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -175,8 +176,11 @@ define(['backbone',
 
     Controller.showIndex = function() {
 	var header = new IndexHeaderView({router: Controller.app.router, model:new Backbone.Model({resPath:window.opt.resPath})});
-        var view = new IndexView({collection:this.gateways,model:new Backbone.Model({resPath:window.opt.resPath})});
-        Communicator.mediator.trigger('app:show', view, header);
+	var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+	Communicator.mediator.trigger('app:show', layout, header);
+	layout.gateways.show(new GatewayCollectionView({collection:this.gateways}));
+	var commands = new CommandsView();
+	layout.commands.show(commands);
     };
 
     Controller.showAccount = function(mobile) {

@@ -23,7 +23,12 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
 		    self.handleJoin(opt.mobile);
 		});
 	    }else{
-		this.hasdleJoin(opt.mobile);
+		this.handleJoin(opt.mobile);
+	    }
+	},
+	onShow: function(){
+	    if (this.model){
+		this.header.show(new AccountHeadlineView({model:this.model}));
 	    }
 	},
 	handleJoin: function(mobile) {
@@ -38,9 +43,9 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
 	    try{
 		number = this.phoneUtil.parseAndKeepRawInput(val);
 		isValid = this.phoneUtil.isValidNumber(number);
-		var output = self.phoneUtil.format(number, pnf.NATIONAL);
-		var model = new Backbone.Model({mobile:output});
-		this.header.show(new AccountHeadlineView({model:model}));
+		var output = this.phoneUtil.format(number, pnf.NATIONAL);
+		this.model = new Backbone.Model({mobile:output});
+		this.header.show(new AccountHeadlineView({model:this.model}));
 	    }catch(err){
 	    }
 	    if (isValid) {
@@ -64,11 +69,9 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
 		}
 	    }
 	    if (!isValid){
-		this.$()
 		this.$('#donate').empty();
 		this.$('#donate').append('<p>Please enter a valid mobile number.</p>');
 	    }
-
 	},
 	submitInvite: function(data){
 	    var cn;
