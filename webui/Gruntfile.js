@@ -24,6 +24,8 @@ module.exports = function (grunt) {
         dist: 'dist'
     };
 
+    grunt.loadNpmTasks('grunt-contrib-compass');
+
     grunt.initConfig({
         yeoman: yeomanConfig,
 
@@ -147,6 +149,11 @@ module.exports = function (grunt) {
                 importPath: 'app/bower_components',
                 relativeAssets: true
             },
+	    scss: {
+		options: {
+		    sourcemap: true
+		}
+	    },
             dist: {},
             server: {
                 options: {
