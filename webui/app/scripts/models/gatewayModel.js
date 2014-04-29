@@ -6,9 +6,6 @@ function( Backbone) {
 
 	/* Return a model class definition */
 	return Backbone.Model.extend({
-		initialize: function() {
-			console.log('initialize a Gateway model');
-		},
 		parse: function(response) {
             if (response){
 				var lc = response.locale.substring(1,3).toLowerCase();

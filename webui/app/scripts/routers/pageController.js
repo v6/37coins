@@ -16,6 +16,7 @@ define(['backbone',
     'views/faqView',
     'views/aboutView',
     'views/accountView',
+    'views/accountHeaderView',
     'views/verifyView',
     'views/validateView',
     'views/captchaView',
@@ -32,7 +33,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountView, AccountHeaderView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -60,6 +61,8 @@ define(['backbone',
             'notFound': 'showNotFound'
         },
         before:{
+	    '': 'loadLibPhone',
+	    'account/:mobile': 'loadLibPhone',
             'signUp': 'getTicket',
             'reset': 'getTicket',
             'gateways': 'showLogin',
@@ -89,6 +92,24 @@ define(['backbone',
                 next();
             }
         },
+	loadLibPhone: function(fragment, args, next){
+	    var ctl = this.options.controller;
+	    if (!ctl.gateways){
+		ctl.gateways = new GatewayCollection();
+	    }
+	    if (ctl.gateways.length<1){
+		//load dependency manually
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.onload = function(){
+		    Communicator.mediator.trigger('app:init');
+		    ctl.gateways.fetch({reset: true});
+		};
+		script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
+		document.getElementsByTagName('head')[0].appendChild(script);
+	    }
+	    next();
+	},
         getTicket: function(fragment, args, next) {
             if (!this.options.controller.ticket){
                 // var view = new MerchantConnectingView();
@@ -152,32 +173,15 @@ define(['backbone',
     });
 
     Controller.showIndex = function() {
-        if (!this.gateways){
-            this.gateways = new GatewayCollection();
-        }
 	var header = new IndexHeaderView({router: Controller.app.router, model:new Backbone.Model({resPath:window.opt.resPath})});
         var view = new IndexView({collection:this.gateways,model:new Backbone.Model({resPath:window.opt.resPath})});
         Communicator.mediator.trigger('app:show', view, header);
-        if (this.gateways.length<1){
-            //load dependency manually
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            var self = this;
-            script.onload = function(){
-                console.log('fetched');
-                Communicator.mediator.trigger('app:init');
-                self.gateways.fetch({reset: true});
-            };
-
-            script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
-            document.getElementsByTagName('head')[0].appendChild(script);
-        }
     };
 
     Controller.showAccount = function(mobile) {
-	console.log('fragment: '+mobile);
+	var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
 	var view = new AccountView({mobile:mobile});
-	Communicator.mediator.trigger('app:show', view);
+	Communicator.mediator.trigger('app:show', view, header);
     };
 
     Controller.showGateway = function() {

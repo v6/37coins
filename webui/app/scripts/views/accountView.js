@@ -1,7 +1,7 @@
 define([
-	'backbone',
-	'hbs!tmpl/accountView_tmpl',
-	'webfinger',
+    'backbone',
+    'hbs!tmpl/accountView_tmpl',
+    'webfinger',
 ],
 function(Backbone, AccountTmpl, webfinger) {
     'use strict';

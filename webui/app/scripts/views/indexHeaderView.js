@@ -1,7 +1,7 @@
 define([
-	'backbone',
-	'communicator',
-	'hbs!tmpl/indexHeaderView_tmpl',
+    'backbone',
+    'communicator',
+    'hbs!tmpl/indexHeaderView_tmpl',
     'intlTelInput'
 ],
 function(Backbone, Communicator, IndexHeaderTmpl) {
@@ -21,7 +21,7 @@ function(Backbone, Communicator, IndexHeaderTmpl) {
 		var errorMsg = $('#error-msg');
 		var validMsg = $('#valid-msg');
 		var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
-		telInput.intlTelInput({preferredCountries:[],defaultCountry:country,validationScript:window.opt.resPath + '/scripts/vendor/libphonenumbers.js'});
+		telInput.intlTelInput({preferredCountries:[],defaultCountry:country});
 		telInput.blur(function(){
 		    if ($.trim(telInput.val())) {
 			if (telInput.intlTelInput('isValidNumber')) {
@@ -76,7 +76,6 @@ function(Backbone, Communicator, IndexHeaderTmpl) {
 			    validMsg.addClass('hide');
 			}
 		    }
-
 		});
 		var example = phoneUtil.format(phoneUtil.getExampleNumberForType(country,window.i18n.phonenumbers.PhoneNumberType.MOBILE),window.i18n.phonenumbers.PhoneNumberFormat.E164);
 		this.$('[name="search"]').attr('placeholder',example);
