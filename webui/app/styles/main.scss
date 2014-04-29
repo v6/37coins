@@ -309,6 +309,7 @@ $baseFontFamily: 'Helvetica';
 //COLORS
 $pantone-blue-300:                     #0070C3 !default;
 $pantone-black-m:                      #403935 !default;
+$stage-darkgrey:                       #656565 !default;
 
 
 // Inverted navbar
@@ -458,7 +459,10 @@ $border:  1px solid #bbb;
     background-color: #0E0A06;
   }
   .stage-blue {
-    background-color: #656565;
+    background-color: $stage-darkgrey;
+  }
+  .wrap{
+    background-color: $stage-darkgrey;
   }
   .navbar > .container .navbar-brand {
     margin-left: 15px;
@@ -529,7 +533,7 @@ h2, h1 {
   background:rgba(255,255,255,0.2);
   border: 0px;
   min-height: 46px;
-  margin-bottom: -50px; //jz - adjust to match height...
+  margin-bottom: -50px; 
   border-radius: 0;
   .navbar-brand {
     color: $navbar-37-brand-color;
@@ -624,8 +628,7 @@ h2, h1 {
     }
   }
 
-  .navbar-collapse,
-  .navbar-form {
+  .navbar-collapse, .navbar-form {
     border-color: darken($navbar-37-bg, 7%);
   }
 
@@ -703,6 +706,12 @@ h2, h1 {
 //FAQ
 .panel-body {
     text-align: left;
+}
+
+//Highlight box
+.panel-button{
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .container {
