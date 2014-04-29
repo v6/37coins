@@ -54,7 +54,7 @@ function( Backbone, Communicator, HeaderView, NavView, FooterView) {
 	App.addInitializer( function (options) {
         if (!App.getParameterByName('noHead')){
             App.nav.show(new NavView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
-            App.footer.show(new FooterView());
+            App.footer.show(new FooterView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
         }else{
             $('div#nav').remove();
             $('div#header').remove();
