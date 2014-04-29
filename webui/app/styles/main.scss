@@ -423,11 +423,12 @@ $border:  1px solid #bbb;
 
 
 /* Extra small devices (phones, less than 768px) */
+
 .container{
     padding: 0;
 }
 .jumbotron {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
   .clippedImg{
     height: 170px;
     width: 210px;
@@ -447,11 +448,30 @@ $border:  1px solid #bbb;
   .col-sm-7{
     text-align: center;
   }
-
   .inputDesc{
     padding-right: 123px;
     min-width: 250px;
   }
+}
+
+@media (max-width: $screen-xs-max) {
+    .navbar37-background {
+        background-color: $pantone-blue-300;
+        position: absolute;
+        top: 0px;
+        height: 192px;
+        width: 100%;
+        z-index: -1;
+    }
+    .navbar-37 {
+        margin-bottom: 0px; 
+    }
+}
+.navbar37-brown {
+    background-color: $pantone-black-m;
+}
+.navbar37-blue{
+    background-color: $stage-darkgrey;
 }
 
 @media (min-width: $screen-sm-min) {
@@ -467,24 +487,18 @@ $border:  1px solid #bbb;
   .navbar > .container .navbar-brand {
     margin-left: 15px;
   }
-  .jumbotron{
-      .clippedImg{
-         height: 271px;
+  .jumbotron {
+    .clippedImg {
+        height: 271px;
         width: 180px;
         margin: 0 auto;
-      float: center;
-      background-size: contain;
+        float: center;
+        background-size: contain;
     }
-    .col-sm-7{
-    text-align: left;
-    }
-  h2 {
-    font-size: 19pt;
-  }
-  p{
-     font-size: 14pt;
-  }
-}
+    .col-sm-7 {text-align: left;}
+    h2 {font-size: 19pt;}
+    p {font-size: 14pt;}
+   }
 }
 
 h2, h1 {
@@ -801,7 +815,7 @@ h2, h1 {
 
 footer {
 	color: $navbar-37-toggle-hover-bg;
-	hr {
+    hr {
 	  border-top: 2px solid #bbb;
 	  margin-bottom: 10px;
 	}
