@@ -390,7 +390,11 @@ $border:  1px solid #bbb;
 
 
 /* Extra small devices (phones, less than 768px) */
+.container{
+    padding: 0;
+}
 .jumbotron {
+    margin-bottom: 0px;
   .clippedImg{
     height: 170px;
     width: 210px;
@@ -417,14 +421,17 @@ $border:  1px solid #bbb;
 }
 
 @media (min-width: $screen-sm-min) {
+  .stage {
+    background-color: #403935;
+  }
   .navbar > .container .navbar-brand {
     margin-left: 15px;
   }
   .jumbotron{
-.clippedImg{
-      height: 271px;
-      width: 180px;
-      margin: 0 auto;
+      .clippedImg{
+         height: 271px;
+        width: 180px;
+        margin: 0 auto;
       float: center;
       background-size: contain;
     }
