@@ -8,8 +8,9 @@
       <p class="lead hidden-xs">Send and receive bitcoin anywhere in the world via SMS. No internet or smartphone required.</p>
       <label class="hidden-xs">Sign-up to be an SMSwallet beta user.</label>
       <div class="form-group">
-      <input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
-      <div class="inputDesc"><label>Country</label><label>Mobile Number</label></div>
+	<input id="searchInput" type="tel" name="search" class="form-control" placeholder="+XXYYYYYYYY" disabled>
+	<div class="inputDesc"><label for="searchInput">Country</label><label for="searchInput">Mobile Number</label></div>
+	<span id="error-msg" class="hide">Invalid number</span><span id="valid-msg" class="hide">✓ Valid</span>
       </div>
     </div>
   </div>

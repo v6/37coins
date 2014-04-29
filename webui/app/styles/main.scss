@@ -655,6 +655,16 @@ $navbar-37-toggle-border-color:        white;
     border-radius: 0px;
     background-color: $navbar-37-toggle-hover-bg;
     color: white;
+    input {
+      &.disabled,
+      &[disabled],
+      fieldset[disabled] & {
+	cursor: not-allowed;
+	pointer-events: none;
+	color: $btn-link-disabled-color;
+	background-color: gray;
+      }
+    }
     .topLeft {
       margin-left: -10px;
     }

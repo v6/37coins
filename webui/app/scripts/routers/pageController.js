@@ -15,6 +15,7 @@ define(['backbone',
     'views/gatewayView',
     'views/faqView',
     'views/aboutView',
+    'views/accountView',
     'views/verifyView',
     'views/validateView',
     'views/captchaView',
@@ -31,7 +32,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -50,6 +51,7 @@ define(['backbone',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
             'commands/send': 'showCommandSend',
+	    'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
             'signUp': 'showSignUp',
@@ -153,7 +155,7 @@ define(['backbone',
         if (!this.gateways){
             this.gateways = new GatewayCollection();
         }
-        var header = new IndexHeaderView({model:new Backbone.Model({resPath:window.opt.resPath})});
+	var header = new IndexHeaderView({router: Controller.app.router, model:new Backbone.Model({resPath:window.opt.resPath})});
         var view = new IndexView({collection:this.gateways,model:new Backbone.Model({resPath:window.opt.resPath})});
         Communicator.mediator.trigger('app:show', view, header);
         if (this.gateways.length<1){
@@ -170,6 +172,12 @@ define(['backbone',
             script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
             document.getElementsByTagName('head')[0].appendChild(script);
         }
+    };
+
+    Controller.showAccount = function(mobile) {
+	console.log('fragment: '+mobile);
+	var view = new AccountView({mobile:mobile});
+	Communicator.mediator.trigger('app:show', view);
     };
 
     Controller.showGateway = function() {
@@ -191,14 +199,6 @@ define(['backbone',
         var view = new BalanceView({model:balance});
         Communicator.mediator.trigger('app:show', view);
         balance.fetch();
-    };
-
-    Controller.showLogin = function(fragment, args, next) {
-        if (!this.loginStatus){
-            this.loginStatus = new LoginModel();
-        }
-        var view = new LoginView({model:this.loginStatus,next:next});
-        Communicator.mediator.trigger('app:show', view);
     };
     Controller.showLogout = function() {
         var contentView = new LogoutView();
