@@ -772,10 +772,13 @@ h2, h1 {
 	input#searchInput {
 	  width: 250px;
 	}
-	div.flag-dropdown {
+	.flag-dropdown {
 	  border-right-style: outset;
 	  border-right-width: 1px;
 	}
+   .country-list{
+        color:black;
+    }
 	input.inside {
 	  position: absolute;
 	  top: 0;
