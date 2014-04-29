@@ -306,6 +306,38 @@ $baseFontFamily: 'Helvetica';
 .intl-tel-input.outside input[type="text"], .intl-tel-input.outside input[type="tel"] { border: none; margin-left: 38px; }
 
 
+//COLORS
+$pantone-blue-300:                     #0070C3 !default;
+$pantone-black-m:                      #403935 !default;
+
+
+// Inverted navbar
+// Reset inverted navbar basics
+$navbar-37-color:                      $gray-light !default;
+$navbar-37-bg:                         #222 !default;
+$navbar-37-border:                     white; //prev: darken($navbar-37-bg, 10%) !default;
+
+// Inverted navbar links
+$navbar-37-link-color:                 #fff !default;
+$navbar-37-link-hover-color:           $gray-light !default;
+$navbar-37-link-hover-bg:              transparent !default;
+$navbar-37-link-active-color:          white;
+$navbar-37-link-active-bg:             darken($navbar-37-bg, 10%) !default;
+$navbar-37-link-disabled-color:        #444 !default;
+$navbar-37-link-disabled-bg:           transparent !default;
+
+// Inverted navbar brand label
+$navbar-37-brand-color:                $navbar-37-link-color !default;
+$navbar-37-brand-hover-color:          $gray-light !default;
+$navbar-37-brand-hover-bg:             transparent !default;
+
+// Inverted navbar toggle
+$navbar-37-toggle-hover-bg:            #0070C3 !default;
+$navbar-37-toggle-icon-bar-bg:         #fff !default;
+$navbar-37-toggle-border-color:        white;
+
+
+
 /* Chat and bubbles */
 
 $shadow_radius: 6px;
@@ -414,6 +446,7 @@ $border:  1px solid #bbb;
   .col-sm-7{
     text-align: center;
   }
+
   .inputDesc{
     padding-right: 123px;
     min-width: 250px;
@@ -423,6 +456,9 @@ $border:  1px solid #bbb;
 @media (min-width: $screen-sm-min) {
   .stage {
     background-color: #0E0A06;
+  }
+  .stage-blue {
+    background-color: $pantone-blue-300;
   }
   .navbar > .container .navbar-brand {
     margin-left: 15px;
@@ -487,33 +523,6 @@ h2, h1 {
     }
   }
 }
-
-
-// Inverted navbar
-// Reset inverted navbar basics
-$navbar-37-color:                      $gray-light !default;
-$navbar-37-bg:                         #222 !default;
-$navbar-37-border:                     white; //prev: darken($navbar-37-bg, 10%) !default;
-
-// Inverted navbar links
-$navbar-37-link-color:                 #fff !default;
-$navbar-37-link-hover-color:           $gray-light !default;
-$navbar-37-link-hover-bg:              transparent !default;
-$navbar-37-link-active-color:          white;
-$navbar-37-link-active-bg:             darken($navbar-37-bg, 10%) !default;
-$navbar-37-link-disabled-color:        #444 !default;
-$navbar-37-link-disabled-bg:           transparent !default;
-
-// Inverted navbar brand label
-$navbar-37-brand-color:                $navbar-37-link-color !default;
-$navbar-37-brand-hover-color:          $gray-light !default;
-$navbar-37-brand-hover-bg:             transparent !default;
-
-// Inverted navbar toggle
-$navbar-37-toggle-hover-bg:            #0070C3 !default;
-$navbar-37-toggle-icon-bar-bg:         #fff !default;
-$navbar-37-toggle-border-color:        white;
-
 
 // 37coins navbar
 .navbar-37 {
