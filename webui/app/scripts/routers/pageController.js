@@ -15,8 +15,9 @@ define(['backbone',
     'views/gatewayView',
     'views/faqView',
     'views/aboutView',
-    'views/accountView',
+    'views/accountLayout',
     'views/accountHeaderView',
+    'views/commandsView',
     'views/verifyView',
     'views/validateView',
     'views/captchaView',
@@ -33,7 +34,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-    ], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountView, AccountHeaderView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexView, IndexHeaderView, LoginView, GatewayView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -180,8 +181,10 @@ define(['backbone',
 
     Controller.showAccount = function(mobile) {
 	var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
-	var view = new AccountView({mobile:mobile});
-	Communicator.mediator.trigger('app:show', view, header);
+	var layout = new AccountLayout({mobile:mobile});
+	Communicator.mediator.trigger('app:show', layout, header);
+	var commands = new CommandsView();
+	layout.commands.show(commands);
     };
 
     Controller.showGateway = function() {

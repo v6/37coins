@@ -1,36 +1,52 @@
 define([
     'backbone',
-    'hbs!tmpl/accountView_tmpl',
+    'communicator',
+    'hbs!tmpl/accountLayout_tmpl',
+    'views/commandsView',
+    'views/accountHeadlineView',
     'webfinger',
 ],
-function(Backbone, AccountTmpl, webfinger) {
+function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger) {
     'use strict';
-    return Backbone.Marionette.ItemView.extend({
-	template: AccountTmpl,
-	className: 'static',
+    return Backbone.Marionette.Layout.extend({
+	template: AccountLayout,
+
+	regions: {
+	    commands: '#smsCommands',
+	    header: '#accountHeadline'
+	},
 	initialize: function(opt){
 	    console.log(opt.mobile);
+	    var self = this;
+	    if (!window.i18n){
+		Communicator.mediator.on('app:init', function() {
+		    self.handleJoin(opt.mobile);
+		});
+	    }else{
+		this.hasdleJoin(opt.mobile);
+	    }
 	},
-	handleJoin: function(e) {
-	    e.preventDefault();
-	    this.$('input.inside').button('loading');
-	    var val = $('#searchInput').val();
-	    var phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
+	handleJoin: function(mobile) {
+	    this.phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
+	    var val = '+'+mobile;
+
 	    var isValid = false;
+	    var pnf = window.i18n.phonenumbers.PhoneNumberFormat;
+	    var pnt = window.i18n.phonenumbers.PhoneNumberType;
+	    var self = this;
 	    var number;
 	    try{
-		number = phoneUtil.parseAndKeepRawInput(val);
-		isValid = phoneUtil.isValidNumber(number);
+		number = this.phoneUtil.parseAndKeepRawInput(val);
+		isValid = this.phoneUtil.isValidNumber(number);
+		var output = self.phoneUtil.format(number, pnf.NATIONAL);
+		var model = new Backbone.Model({mobile:output});
+		this.header.show(new AccountHeadlineView({model:model}));
 	    }catch(err){
 	    }
 	    if (isValid) {
-		var PNT = window.i18n.phonenumbers.PhoneNumberType;
-		var numberType = phoneUtil.getNumberType(number);
-		if (numberType === PNT.MOBILE || numberType === PNT.FIXED_LINE_OR_MOBILE) {
-		    var PNF = window.i18n.phonenumbers.PhoneNumberFormat;
-		    var strIntlNumber = phoneUtil.format(number, PNF.E164);
-		    console.log(strIntlNumber);
-		    var self = this;
+		var numberType = this.phoneUtil.getNumberType(number);
+		if (numberType === pnt.MOBILE || numberType === pnt.FIXED_LINE_OR_MOBILE) {
+		    var strIntlNumber = this.phoneUtil.format(number, pnf.E164);
 		    $.ajax({
 			type: 'POST',
 			contentType: 'application/json',
@@ -48,9 +64,9 @@ function(Backbone, AccountTmpl, webfinger) {
 		}
 	    }
 	    if (!isValid){
+		this.$()
 		this.$('#donate').empty();
 		this.$('#donate').append('<p>Please enter a valid mobile number.</p>');
-		this.$('input.inside').button('reset');
 	    }
 
 	},
@@ -86,11 +102,10 @@ function(Backbone, AccountTmpl, webfinger) {
 	    }
 	},
 	handleAddress: function(err,p){
-	    this.$('button.btn-inverse').button('reset');
 	    if (!err) {
 		var data = JSON.parse(p.JRD).links[0].href.split(':')[1];
 		this.$('#donate').append('<p><img id="'+data+'" width="200px;" src="https://chart.googleapis.com/chart?cht=qr&chs=400x400&chl=bitcoin:'+data+'&chld=H|0" /></p>');
-		this.$('#donate').append( '<a href="bitcoin:'+data+'">bitcoin:'+data+'</a>');
+		this.$('#donate').append( '<a href="bitcoin:'+data+'">'+data+'</a>');
 		this.attemts = 0;
 	    }else{
 		this.submitInvite({status:200});

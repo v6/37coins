@@ -29,7 +29,7 @@ function(Backbone, Communicator, GatewayCollection, AccountHeaderTmpl) {
 		type = this.phoneUtil.getNumberType(this.mobile);
 	    }catch(err){}
 	    if (!this.mobile || !this.phoneUtil.isValidNumber(this.mobile)||
-		(type!==pnt.MOBILE && type!==pnt.FIXED_LINE_OR_MOBILE)){
+	    (type!==pnt.MOBILE && type!==pnt.FIXED_LINE_OR_MOBILE)){
 		console.log('error');
 		return;
 	    }
