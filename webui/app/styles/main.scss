@@ -395,6 +395,8 @@ $border:  1px solid #bbb;
     height: 170px;
     width: 210px;
     margin: 0 auto;
+    float: center;
+
   }
   .col-sm-6{
     text-align: center;
@@ -403,6 +405,26 @@ $border:  1px solid #bbb;
     padding-right: 123px;
     min-width: 250px;
   }
+}
+
+@media (min-width: $screen-sm-min) {
+  .navbar > .container .navbar-brand {
+    margin-left: 15px;
+  }
+  .jumbotron{
+.clippedImg, .headerImg{
+      height: 271px;
+      width: 180px;
+margin: 0 auto;
+      float: center;
+    }
+  h2 {
+    font-size: 19pt;
+  }
+  p{
+     font-size: 14pt;
+  }
+}
 }
 
 h2, h1 {
@@ -415,6 +437,24 @@ h2, h1 {
   .container {
     max-width: $screen-md;
   }
+   .jumbotron {
+    .clippedImg, .headerImg{
+      height: 416px;
+      width: 277px;
+    }
+    .headerText{
+    //text-align: inherit;
+        padding-right: 60px;
+    }
+    h2 {
+      font-size: 23pt;
+      margin-top: 10px;
+      display: block;
+    }
+    p{
+       padding-right: 100px;
+    }
+    }
   div#content{
     .row {
       .col-sm-6 {
@@ -424,26 +464,6 @@ h2, h1 {
       margin-left: 90px;
       margin-right: 90px;
     }
-  }
-}
-
-@media (min-width: $screen-sm-min) {
-  .navbar > .container .navbar-brand {
-    margin-left: 15px;
-  }
-  .jumbotron {
-    .clippedImg{
-      height: 416px;
-      width: 277px;
-    }
-    .col-sm-6{
-      text-align: inherit;
-    }
-	h1 {
-	  font-size: 20px;
-	  margin-left: -30px;
-	  margin-top: 10px;
-	}
   }
 }
 
@@ -485,7 +505,7 @@ $navbar-37-toggle-border-color:        white;
     color: $navbar-37-brand-color;
     font-family: 'sofia_pro_ultralightregular';
     font-size: 24px; 
-    padding-top: 10px;
+    padding-top: 12px;
     padding-left: 15px;
     padding-bottom: 0px;
     &:hover,
@@ -590,7 +610,7 @@ $navbar-37-toggle-border-color:        white;
       }
     }
   .open .dropdown-menu {
-    background-color:transparent;
+    background-color: transparent;
     background:rgba(255,255,255,0.2);
     li > a {
       color: $navbar-37-link-color;
