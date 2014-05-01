@@ -24,6 +24,7 @@ define(['backbone',
     'views/captchaView',
     'views/logoutView',
     'views/signupView',
+    'views/signupWallet',
     'views/resetView',
     'views/headerSendView',
     'views/commandSendView',
@@ -35,7 +36,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderView, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderView, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -54,10 +55,11 @@ define(['backbone',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
             'commands/send': 'showCommandSend',
-	    'account/:mobile': 'showAccount',
+	        'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
             'signUp': 'showSignUp',
+            'signupWallet':'showSignupWallet',
             'logout': 'showLogout',
             'merchant': 'showMerchant',
             'notFound': 'showNotFound'
@@ -244,6 +246,12 @@ define(['backbone',
         var contentView = new SignupView({model:accountRequest});
         Communicator.mediator.trigger('app:show',contentView);
     };
+    Controller.showSignupWallet = function() {
+        var contentView = new SignupWalletView();
+        Communicator.mediator.trigger('app:show',contentView);
+    };
+
+
     Controller.confirmSignUp = function(token) {
         var model = new SignupConf({token:token});
         var contentView = new SignupConfView({model: model});
