@@ -459,7 +459,7 @@ $border:  1px solid #bbb;
         background-color: $pantone-blue-300;
         position: absolute;
         top: 0px;
-        height: 232px;
+        height: 272px;
         width: 100%;
         z-index: -1;
     }
@@ -567,6 +567,9 @@ h2, h1 {
       background-color: $navbar-37-brand-hover-bg;
     }
   }
+
+.highlight-box{
+}
 
   .nav {
     li {
