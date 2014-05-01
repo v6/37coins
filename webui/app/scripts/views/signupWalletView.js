@@ -1,11 +1,11 @@
 define([
 	'backbone',
-	'hbs!tmpl/signupWallet_tmpl'
+	'hbs!tmpl/signupWalletView_tmpl'
 ],
-function(Backbone, AboutTmpl) {
+function(Backbone, SignupTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
-        template: AboutTmpl,
+        template: SignupTmpl,
         className: 'static'
     });
 });
