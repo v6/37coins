@@ -69,7 +69,7 @@ require.config({
         socketio: '../bower_components/socket.io-client/dist/socket.io',
         intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput'
     },
-
+    waitSeconds: 0,
     config: {
         'GA': {
             'id' : 'UA-29543456-1'
