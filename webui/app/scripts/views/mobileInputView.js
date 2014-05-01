@@ -10,8 +10,7 @@ function(Backbone, Communicator, MobileInputTmpl) {
         template: MobileInputTmpl,
         className: 'static',
         handleJoin: function(mobile){
-
-            this.router.navigate('account/'+mobile, {trigger: true});
+            Backbone.history.navigate('account/'+mobile, {trigger: true});
         },
         onShow: function(){
             if (window.lpnLoaded){

@@ -24,7 +24,8 @@ define(['backbone',
     'views/captchaView',
     'views/logoutView',
     'views/signupView',
-    'views/signupWalletView',
+    'views/signupWalletLayout',
+    'views/signinWalletLayout',
     'views/resetView',
     'views/headerSendView',
     'views/commandSendView',
@@ -37,7 +38,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -61,6 +62,7 @@ define(['backbone',
             'about': 'showAbout',
             'signUp': 'showSignUp',
             'signupWallet':'showSignupWallet',
+            'signinWallet':'showSigninWallet',
             'logout': 'showLogout',
             'merchant': 'showMerchant',
             'notFound': 'showNotFound'
@@ -68,6 +70,8 @@ define(['backbone',
         before:{
             '': 'loadLibPhone',
             'account/:mobile': 'loadLibPhone',
+            'signupWallet': 'loadLibPhone',
+            'signinWallet': 'loadLibPhone',
             'signUp': 'getTicket',
             'reset': 'getTicket',
             'gateways': 'showLogin',
@@ -250,11 +254,17 @@ define(['backbone',
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showSignupWallet = function() {
-        var contentView = new SignupWalletView();
-        Communicator.mediator.trigger('app:show',contentView);
+        var layout = new SignupWalletLayout();
+        Communicator.mediator.trigger('app:show',layout);
+        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        layout.mobileInput.show(mobileInput);
     };
-
-
+    Controller.showSigninWallet = function() {
+        var layout = new SigninWalletLayout();
+        Communicator.mediator.trigger('app:show',layout);
+        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        layout.mobileInput.show(mobileInput);
+    };
     Controller.confirmSignUp = function(token) {
         var model = new SignupConf({token:token});
         var contentView = new SignupConfView({model: model});
