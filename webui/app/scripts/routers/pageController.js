@@ -10,7 +10,7 @@ define(['backbone',
     'models/feeModel',
     'collections/gatewayCollection',
     'views/indexLayout',
-    'views/indexHeaderView',
+    'views/indexHeaderLayout',
     'views/loginView',
     'views/gatewayView',
     'views/gatewayCollectionView',
@@ -32,11 +32,12 @@ define(['backbone',
     'views/signupConfView',
     'views/balanceView',
     'views/feeView',
+    'views/mobileInputView',
     'views/gatewayLayout',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderView, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletView, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -55,7 +56,7 @@ define(['backbone',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
             'commands/send': 'showCommandSend',
-	        'account/:mobile': 'showAccount',
+            'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
             'signUp': 'showSignUp',
@@ -65,8 +66,8 @@ define(['backbone',
             'notFound': 'showNotFound'
         },
         before:{
-	    '': 'loadLibPhone',
-	    'account/:mobile': 'loadLibPhone',
+            '': 'loadLibPhone',
+            'account/:mobile': 'loadLibPhone',
             'signUp': 'getTicket',
             'reset': 'getTicket',
             'gateways': 'showLogin',
@@ -96,24 +97,24 @@ define(['backbone',
                 next();
             }
         },
-	loadLibPhone: function(fragment, args, next){
-	    var ctl = this.options.controller;
-	    if (!ctl.gateways){
-		ctl.gateways = new GatewayCollection();
-	    }
-	    if (ctl.gateways.length<1){
-		//load dependency manually
-		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.onload = function(){
-		    Communicator.mediator.trigger('app:init');
-		    ctl.gateways.fetch({reset: true});
-		};
-		script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
-		document.getElementsByTagName('head')[0].appendChild(script);
-	    }
-	    next();
-	},
+        loadLibPhone: function(fragment, args, next){
+            var ctl = this.options.controller;
+            if (!ctl.gateways){
+                ctl.gateways = new GatewayCollection();
+            }
+            if (ctl.gateways.length<1){
+                //load dependency manually
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.onload = function(){
+                    Communicator.mediator.trigger('app:init');
+                    ctl.gateways.fetch({reset: true});
+                };
+                script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
+                document.getElementsByTagName('head')[0].appendChild(script);
+            }
+            next();
+        },
         getTicket: function(fragment, args, next) {
             if (!this.options.controller.ticket){
                 // var view = new MerchantConnectingView();
@@ -177,20 +178,22 @@ define(['backbone',
     });
 
     Controller.showIndex = function() {
-	var header = new IndexHeaderView({router: Controller.app.router, model:new Backbone.Model({resPath:window.opt.resPath})});
-	var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
-	Communicator.mediator.trigger('app:show', layout, header);
-	layout.gateways.show(new GatewayCollectionView({collection:this.gateways}));
-	var commands = new CommandsView();
-	layout.commands.show(commands);
+        var header = new IndexHeaderLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        Communicator.mediator.trigger('app:show', layout, header);
+        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        header.mobileInput.show(mobileInput);
+        layout.gateways.show(new GatewayCollectionView({collection:this.gateways}));
+        var commands = new CommandsView();
+        layout.commands.show(commands);
     };
 
     Controller.showAccount = function(mobile) {
-	var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
-	var layout = new AccountLayout({mobile:mobile});
-	Communicator.mediator.trigger('app:show', layout, header);
-	var commands = new CommandsView();
-	layout.commands.show(commands);
+        var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
+        var layout = new AccountLayout({mobile:mobile});
+        Communicator.mediator.trigger('app:show', layout, header);
+        var commands = new CommandsView();
+        layout.commands.show(commands);
     };
 
     Controller.showGateway = function() {
