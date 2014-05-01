@@ -420,6 +420,9 @@ public class AccountResource {
 		if (null!=e){
 			accountRequest = (AccountRequest)e.getObjectValue();
 			String sanitizedMail = BasicAccessAuthFilter.escapeDN(accountRequest.getEmail());
+			if (checkEmail(sanitizedMail).equals("false")){
+				throw new WebApplicationException("account created already", Response.Status.BAD_REQUEST);
+			}
 			//build a new user and same
 			Attributes attributes=new BasicAttributes();
 			Attribute objectClass=new BasicAttribute("objectClass");
@@ -436,6 +439,7 @@ public class AccountResource {
 			attributes.put("userPassword", accountRequest.getPassword());
 			try{
 				ctx.createSubcontext("cn="+cnString+",ou=gateways,"+MessagingServletConfig.ldapBaseDn, attributes);
+				cache.remove("create"+accountRequest.getToken());
 			}catch(NamingException ex){
 				throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 			}
