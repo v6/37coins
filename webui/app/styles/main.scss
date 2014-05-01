@@ -459,7 +459,7 @@ $border:  1px solid #bbb;
         background-color: $pantone-blue-300;
         position: absolute;
         top: 0px;
-        height: 192px;
+        height: 232px;
         width: 100%;
         z-index: -1;
     }
@@ -840,7 +840,14 @@ footer {
 	  border-top: 2px solid #bbb;
 	  margin-bottom: 10px;
 	}
-	.navbar-nav > li > a {
-	  padding: 0 20px 0 0;
-	}
+	.navbar-nav{
+        margin-left:0;
+        > li > a {
+	       padding: 0 20px 0 0;
+	   }
+    }
+    .row{
+        margin-left:0;
+        margin-right:0;
+    }
 }
