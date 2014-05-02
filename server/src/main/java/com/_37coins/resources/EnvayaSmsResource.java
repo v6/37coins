@@ -52,13 +52,19 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl;
-import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.inject.Injector;
 
 import freemarker.template.TemplateException;
+
+/**
+ * local service, service, exposed to gateways
+ *
+ * @author johann
+ *
+ */
 
 @Path(EnvayaSmsResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -80,8 +86,6 @@ public class EnvayaSmsResource {
 	
 	private final Cache cache;
 	
-	private final GoogleAnalytics ga;
-	
 	private int localPort;
 	
 	@Inject public EnvayaSmsResource(ServletRequest request,
@@ -91,8 +95,7 @@ public class EnvayaSmsResource {
 			Cache cache,
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
-			AmazonSimpleWorkflow swfService,
-			GoogleAnalytics ga) {
+			AmazonSimpleWorkflow swfService) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
 		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
@@ -102,7 +105,6 @@ public class EnvayaSmsResource {
 		this.parserClient = parserClient;
 		this.nonTxFactory = nonTxFactory;
 		this.withdrawalFactory = withdrawalFactory;
-		this.ga = ga;
 	}
 	
 	@POST
@@ -117,9 +119,16 @@ public class EnvayaSmsResource {
 			String dn = "cn="+sanitizedCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
 			Attributes atts = ctx.getAttributes(dn,new String[]{"departmentNumber"});
 			String envayaToken = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
+			boolean isSame = false;
 			String url = MessagingServletConfig.basePath + uriInfo.getPath();
 			String calcSig = calculateSignature(url, params, envayaToken);
-			if (!sig.equals(calcSig)){
+			isSame = (sig.equals(calcSig))?true:false;
+			if (!isSame){
+				url = MessagingServletConfig.srvcPath + uriInfo.getPath();
+				calcSig = calculateSignature(url, params, envayaToken);
+				isSame = (sig.equals(calcSig))?true:false;
+			}
+			if (!isSame){
 				throw new WebApplicationException("signature missmatch",
 						javax.ws.rs.core.Response.Status.UNAUTHORIZED);
 			}

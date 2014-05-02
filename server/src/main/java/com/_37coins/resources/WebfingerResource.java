@@ -14,17 +14,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com._37coins.BasicAccessAuthFilter;
-import com._37coins.imap.JavaPushMailAccount;
 import com._37coins.web.WebfingerLink;
 import com._37coins.web.WebfingerResponse;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
@@ -60,10 +61,11 @@ public class WebfingerResource {
 	}
 	
 	@GET
-	public Response getWebfinger(@QueryParam("resource") String resource){
+	public void getWebfinger(@QueryParam("resource") String resource,
+			@Suspended final AsyncResponse asyncResponse){
 		String[] email = resource.split("acct:");
 		if (null == email[1]){
-			throw new WebApplicationException("wrong format",Response.Status.BAD_REQUEST);
+			asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
 		}
 		String mobile = email[1].split("@")[0];
 		
@@ -74,13 +76,13 @@ public class WebfingerResource {
 		} catch (IllegalStateException | NamingException e1) {
 			log.error("webfinger exception",e1);
 			e1.printStackTrace();
-			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
+			asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
 		}
 
 		Element e = cache.get("address"+cn);
 		Element e2 = cache.get("addressReq"+cn);
 		if (null!=e && !e.isExpired()){
-			return sendResponse(resource, (String)e.getObjectValue());
+			sendResponse(resource, (String)e.getObjectValue(), asyncResponse);
 		}
 		if (null==e2 || e2.isExpired()){
 			DataSet data = new DataSet()
@@ -89,7 +91,7 @@ public class WebfingerResource {
 			nonTxFactory.getClient(data.getAction()+"-"+cn).executeCommand(data);
 			cache.put(new Element("addressReq"+cn, true));
 		}
-		for (int i = 0;i<15;i++){
+		for (int i = 0;i<35;i++){
 			e = cache.get("address"+cn);
 			if (null==e){
 				try {
@@ -97,16 +99,16 @@ public class WebfingerResource {
 				} catch (InterruptedException e1) {
 					log.error("webfinger exception",e1);
 					e1.printStackTrace();
-					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
+					asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 				}
 			}else{
-				return sendResponse(resource, (String)e.getObjectValue());
+				sendResponse(resource, (String)e.getObjectValue(), asyncResponse);
 			}
 		}
 		throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
 	}
 	
-	private Response sendResponse(String resource, String address){
+	private void sendResponse(String resource, String address, final AsyncResponse asyncResponse){
 		List<WebfingerLink> links = new ArrayList<>();
 		links.add(new WebfingerLink()
 			.setType("bitcoin")
@@ -116,9 +118,9 @@ public class WebfingerResource {
 			.setSubject(resource)
 			.setLinks(links);
 		try {
-			return Response.ok(mapper.writeValueAsString(rv), "application/jrd+json").build();
+			asyncResponse.resume(Response.ok(mapper.writeValueAsString(rv), "application/jrd+json").build());
 		} catch (JsonProcessingException ex) {
-			return null;
+			asyncResponse.resume(ex);
 		}
 	}
 
