@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.naming.NameNotFoundException;
@@ -176,11 +175,11 @@ public class ParserResource {
 					NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+countryCode+"*))", searchControls);
 					Element gws = cache.get("gateways");
 					if (null!=gws && !gws.isExpired()){
-						Set<GatewayUser> gateways = (Set<GatewayUser>)gws.getObjectValue();
+						Map<String,GatewayUser> gateways = (Map<String,GatewayUser>)gws.getObjectValue();
 						while (namingEnum.hasMore()){
 							Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
 							gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
-							for (GatewayUser gu: gateways){
+							for (GatewayUser gu: gateways.values()){
 								if (gu.getId().equals(gwCn)){
 									gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
 									gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
