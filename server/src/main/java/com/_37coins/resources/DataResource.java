@@ -1,6 +1,7 @@
 package com._37coins.resources;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,8 +44,8 @@ public class DataResource {
 	public Set<GatewayUser> getGateways(){
 		Element e = cache.get("gateways");
 		if (null!=e && !e.isExpired()){
-			Set<GatewayUser> gateways = (Set<GatewayUser>)e.getObjectValue();
-			return gateways;
+			Map<String,GatewayUser> gateways = (Map<String,GatewayUser>)e.getObjectValue();
+			return new HashSet<GatewayUser>(gateways.values());
 		}
 		throw new WebApplicationException("cache miss", Response.Status.EXPECTATION_FAILED);
 	}

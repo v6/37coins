@@ -511,4 +511,15 @@ public class LocalizationTest {
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 
+
+	@Test
+	public void test37coinsGatewayAlert() throws IOException, TemplateException {
+		rsp.setAction(Action.GW_ALERT);
+		System.out.println("GATEWAY ALERT:");
+		ef.constructTxt(rsp);
+		String s = ef.constructHtml(rsp);
+		ef.constructSubject(rsp);
+		System.out.println(s);
+	}
+
 }

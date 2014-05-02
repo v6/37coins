@@ -51,6 +51,7 @@ public class DataSet {
 		OVERUSE("Overuse"),
 		TX_FAILED("TransactionFailed"),
 		UNAVAILABLE("Unavailable"),
+		GW_ALERT("GatewayAlert"),
 		DST_ERROR("DestinationUnreachable"),
 		TX_CANCELED("TransactionCanceled");
 
