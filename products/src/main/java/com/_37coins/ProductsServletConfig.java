@@ -13,6 +13,9 @@ import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.discovery.DnsDiscovery;
+import com.google.bitcoin.params.MainNetParams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -29,6 +32,7 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	public static Logger log = LoggerFactory.getLogger(ProductsServletConfig.class);
 	public static Injector injector;
 	private ServletContext servletContext;
+	private PeerGroup peerGroup;
 	static {
 		hmacToken = System.getProperty("hmacToken");
 		plivoKey = System.getProperty("plivoKey");
@@ -40,6 +44,9 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
+		
+		System.out.println("Connecting ...");
+		peerGroup = injector.getInstance(PeerGroup.class);
 		log.info("ServletContextListener started");
 	}
 	
@@ -49,6 +56,16 @@ public class ProductsServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/product*").through(HmacFilter.class);
+            	filter("/pwallet/claim").through(HmacFilter.class);
+        	}
+            
+            @Provides @Singleton @SuppressWarnings("unused")
+        	public PeerGroup providePeerGroup(){
+            	peerGroup = new PeerGroup(MainNetParams.get());
+        		peerGroup.setUserAgent("bip38 claimer", "0.1");
+        		peerGroup.addPeerDiscovery(new DnsDiscovery(MainNetParams.get()));
+        		peerGroup.startAsync();
+        		return peerGroup;
         	}
 			
         	@Provides @Singleton @SuppressWarnings("unused")
@@ -97,6 +114,7 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	
     @Override
 	public void contextDestroyed(ServletContextEvent sce) {
+    	peerGroup.stopAndWait();
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");
 	}
