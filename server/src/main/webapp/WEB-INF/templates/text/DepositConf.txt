@@ -26,6 +26,6 @@ ${resBundle("DepositConfSndr",payload.miliAmount?string("#,##0.###"),fiat,from)}
 <#else>
 ${resBundle("DepositConf",payload.miliAmount?string("#,##0.###"),fiat)}
 </#if>
-<#if payload.balance??>
-<#include "Balance.txt">
-</#if>
+<#--<#if payload.balance??>-->
+<#--<#include "Balance.txt">-->
+<#--</#if>-->

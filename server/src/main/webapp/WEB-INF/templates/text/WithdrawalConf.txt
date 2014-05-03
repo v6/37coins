@@ -16,6 +16,6 @@ ${resBundle("WithdrawalConf",payload.miliAmount?string("#,##0.###"),fiat,payload
 <#else>
 ${resBundle("WithdrawalConf",payload.miliAmount?string("#,##0.###"),fiat,payload.payDest.address?substring(0,9)+"..")}
 </#if>
-<#if payload.balance??>
-<#include "Balance.txt">
-</#if>
+<#--<#if payload.balance??>-->
+<#--<#include "Balance.txt">-->
+<#--</#if>-->

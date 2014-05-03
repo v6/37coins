@@ -11,4 +11,4 @@
 <#if bal < 0>
 <#assign bal = 0>
 </#if>
-${resBundle("Balance",bal?string("#,##0.###"),fiat)}
+<#--${resBundle("Balance",bal?string("#,##0.###"),fiat)}-->

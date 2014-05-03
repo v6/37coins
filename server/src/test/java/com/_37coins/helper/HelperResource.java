@@ -1,7 +1,8 @@
 package com._37coins.helper;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.ServletRequest;
@@ -56,9 +57,9 @@ public class HelperResource {
 	@POST
 	@Path("/init")
 	public void init(){
-		Set<GatewayUser> gw = new HashSet<>();
-		gw.add(new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
-		gw.add(new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
+		Map<String,GatewayUser> gw = new HashMap<>();
+		gw.put("DEV4N1JS2Z3476DE",new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
+		gw.put("OZV4N1JS2Z3476NL",new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
 		cache.put(new Element("gateways",gw));
 		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaskToken("taskToken").setEmailToken("bla")));
 	}
