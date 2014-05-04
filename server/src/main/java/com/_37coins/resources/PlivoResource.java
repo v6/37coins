@@ -56,6 +56,7 @@ import com._37coins.plivo.Speak;
 import com._37coins.plivo.Wait;
 import com._37coins.plivo.XmlCharacterHandler;
 import com._37coins.web.MerchantSession;
+import com._37coins.web.StoreRequest;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -598,4 +599,94 @@ public class PlivoResource {
 		}
 	}
 	
+	@POST
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/claim/{cn}/{epk}/{locale}")
+	public Response claim(
+			@PathParam("cn") String cn,
+			@PathParam("epk") String epk,
+			@PathParam("locale") String locale){
+		com._37coins.plivo.Response rv = null;
+		DataSet ds = new DataSet().setLocaleString(locale);
+		try {
+			rv = new com._37coins.plivo.Response()
+				.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
+				.add(new GetDigits()
+					.setAction(MessagingServletConfig.basePath+"/p/claim/conf/"+cn+"/"+epk+"/"+locale)
+					.setNumDigits(NUM_DIGIT)
+					.setRedirect(true)
+					.setSpeak(new Speak()
+						.setText(msgFactory.getText("VoiceMerchantConfirm",ds)).setLanguage(locale)));
+		} catch (IOException | TemplateException e) {
+			log.error("plivo answer exception",e);
+			e.printStackTrace();
+		}
+		try {
+			StringWriter sw = new StringWriter();
+			marshaller.marshal(rv, sw);
+			return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+		} catch (JAXBException e) {
+			return null;
+		}
+	}
+
+	@POST
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/claim/conf/{cn}/{epk}/{locale}")
+	public Response claimConf(
+			@PathParam("cn") String cn,
+			@PathParam("epk") String epk,
+			@PathParam("locale") String locale,
+			@FormParam("Digits") String digits){
+		com._37coins.plivo.Response rv =null;
+	DataSet ds = new DataSet().setLocaleString(locale);
+	int dig = Integer.parseInt(digits);
+			try{
+				CloseableHttpClient httpclient = HttpClients.createDefault();
+				HttpPost req = new HttpPost(MessagingServletConfig.basePath+"/products/pwallet/claim");
+				String reqValue = new ObjectMapper().writeValueAsString(new StoreRequest().setEncPrivKey(epk).setIdentifier(dig).setUri(cn+"@37coins.com"));
+				StringEntity entity = new StringEntity(reqValue, "UTF-8");
+				entity.setContentType("application/json");
+				req.setEntity(entity);
+				CloseableHttpResponse rsp = httpclient.execute(req);
+				if (rsp.getStatusLine().getStatusCode()>=200 && rsp.getStatusLine().getStatusCode()<=300){
+					rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceSuccess",ds)));
+				}else{
+					throw new RuntimeException("post failed");
+				}
+			}catch(Exception ex){
+				log.error("callback exception",ex);
+				ex.printStackTrace();
+			try {
+				rv = new com._37coins.plivo.Response()
+						.add(new Speak().setText(msgFactory.getText("VoiceMismatch",ds)).setLanguage(locale));
+			} catch (IOException | TemplateException e) {
+				log.error("plivo answer exception",e);
+				e.printStackTrace();
+			}
+			}
+		try {
+			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",ds)));
+		} catch (IOException | TemplateException e) {
+			log.error("plivo answer exception",e);
+			e.printStackTrace();
+		}
+
+		try {
+				StringWriter sw = new StringWriter();
+				marshaller.marshal(rv, sw);
+				return Response.ok(sw.toString(), MediaType.APPLICATION_XML).build();
+			} catch (JAXBException e) {
+				return null;
+			}
+	}
+
+	@POST
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/claim/hangup")
+	public void merchantHangup(){
+
+	}
+
+
 }

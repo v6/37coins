@@ -38,6 +38,7 @@ public class CommandParser {
 			Action.RESTORE,
 			Action.WITHDRAWAL_REQ, 
 			Action.CHARGE,
+			Action.CLAIM,
 			Action.PRODUCT);
 	
 	private Map<String, Pair<Action,Locale>> wordMap = new HashMap<>();

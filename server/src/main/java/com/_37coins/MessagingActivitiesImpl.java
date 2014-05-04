@@ -84,6 +84,9 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	@ManualActivityCompletion
 	public void sendMessage(DataSet rsp) {
+		if (rsp.getLocale()!=null && rsp.getLocale().getCountry()==null){
+			rsp.setLocale(new Locale(rsp.getLocale().getLanguage(),"US"));
+		}
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
 		try {

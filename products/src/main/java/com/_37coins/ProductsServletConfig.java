@@ -1,6 +1,13 @@
 package com._37coins;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.util.Calendar;
+import java.util.Random;
+
+import javax.inject.Inject;
 import javax.inject.Named;
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -9,13 +16,25 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.PersistenceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fruitcat.bitcoin.BIP38;
+import com.google.bitcoin.core.AddressFormatException;
+import com.google.bitcoin.core.BlockChain;
+import com.google.bitcoin.core.DumpedPrivateKey;
+import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.discovery.DnsDiscovery;
 import com.google.bitcoin.params.MainNetParams;
+import com.google.bitcoin.store.BlockStore;
+import com.google.bitcoin.store.BlockStoreException;
+import com.google.bitcoin.store.MemoryBlockStore;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -33,6 +52,9 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	public static Injector injector;
 	private ServletContext servletContext;
 	private PeerGroup peerGroup;
+	private BlockChain chain;
+	private BlockStore blockStore;
+	private Wallet wallet;
 	static {
 		hmacToken = System.getProperty("hmacToken");
 		plivoKey = System.getProperty("plivoKey");
@@ -46,7 +68,7 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 		super.contextInitialized(servletContextEvent);
 		
 		System.out.println("Connecting ...");
-		peerGroup = injector.getInstance(PeerGroup.class);
+		wallet = injector.getInstance(Wallet.class);
 		log.info("ServletContextListener started");
 	}
 	
@@ -56,16 +78,50 @@ public class ProductsServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/product*").through(HmacFilter.class);
-            	filter("/pwallet/claim").through(HmacFilter.class);
+		filter("/pwallet*").through(PersistenceFilter.class);
+		//filter("/pwallet/claim").through(HmacFilter.class);
         	}
             
+			@Provides @Singleton @SuppressWarnings("unused")
+			PersistenceManagerFactory providePersistence(){
+				PersistenceConfiguration pc = new PersistenceConfiguration();
+				pc.createEntityManagerFactory();
+				return pc.getPersistenceManagerFactory();
+			}
+
             @Provides @Singleton @SuppressWarnings("unused")
         	public PeerGroup providePeerGroup(){
+		NetworkParameters params = MainNetParams.get();
+		blockStore = new MemoryBlockStore(params);
+		try {
+					chain = new BlockChain(params, blockStore);
+				} catch (BlockStoreException e) {
+					e.printStackTrace();
+				}
             	peerGroup = new PeerGroup(MainNetParams.get());
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, -1);
+		long now = cal.getTimeInMillis() / 1000;
+		peerGroup.setFastCatchupTimeSecs(now);
         		peerGroup.setUserAgent("bip38 claimer", "0.1");
         		peerGroup.addPeerDiscovery(new DnsDiscovery(MainNetParams.get()));
-        		peerGroup.startAsync();
-        		return peerGroup;
+		return peerGroup;
+		}
+
+	    @Provides @Singleton @SuppressWarnings("unused")
+		public Wallet provideWallet(PeerGroup peerGroup){
+		NetworkParameters params = MainNetParams.get();
+		wallet=new Wallet(params);
+			String dk;
+		peerGroup.addWallet(wallet);
+		peerGroup.startAsync();
+		//peerGroup.downloadBlockChain();
+		return wallet;
+	    }
+
+	    @Provides @Singleton @SuppressWarnings("unused")
+		public Random provideRandom(){
+			return new Random();
         	}
 			
         	@Provides @Singleton @SuppressWarnings("unused")

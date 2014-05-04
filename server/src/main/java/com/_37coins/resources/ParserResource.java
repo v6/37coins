@@ -1,9 +1,11 @@
 package com._37coins.resources;
 
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.BasicAccessAuthFilter;
+import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
@@ -65,7 +68,11 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.plivo.helper.api.client.RestAPI;
+import com.plivo.helper.api.response.call.Call;
+import com.plivo.helper.exception.PlivoException;
 
 @Path(ParserResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -77,11 +84,13 @@ public class ParserResource {
 	final private ObjectMapper mapper;
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
+	final private MessageFactory mf;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
-			Cache cache, FiatPriceProvider fiatPriceProvider) {
+			Cache cache, FiatPriceProvider fiatPriceProvider,
+			MessageFactory mf) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -90,6 +99,7 @@ public class ParserResource {
 			responseList.add(ds);
 		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
 		this.fiatPriceProvider = fiatPriceProvider;
+		this.mf = mf;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -505,6 +515,32 @@ public class ParserResource {
 		}
 	}
 	
+	@POST
+	@Path("/Claim")
+	public Response claimKey(){
+		DataSet data = responseList.get(0);
+		// nothing, just start workflow in parser client
+		try {
+			RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
+
+			LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+			String regionCode = phoneUtil.getRegionCodeForNumber(data.getTo().getPhoneNumber());
+			String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(regionCode, PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
+		    params.put("from", from.substring(0,from.length()-4)+"3737");
+		    params.put("to", data.getTo().getAddress());
+		    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/claim/"+data.getTo().getAddress().replace("+", "")+"/"+data.getPayload()+"/"+mf.getLocale(data).toString());
+		    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/claim/hangup/");
+		    Call response = restAPI.makeCall(params);
+		    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
+			throw new PlivoException(response.message);
+		    }
+			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+		} catch (JsonProcessingException | PlivoException | MalformedURLException e) {
+			return null;
+		}
+	}
+
 	@POST
 	@Path("/UnknownCommand")
 	public Response unknown(){

@@ -36,7 +36,6 @@ import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
-import com._37coins.util.MerchantTester;
 import com._37coins.web.AccountRequest;
 import com._37coins.web.MerchantRequest;
 import com._37coins.web.MerchantResponse;
@@ -216,6 +215,27 @@ public class RestTest {
 		Assert.assertNotNull(ds.getCn());
     }
     
+    @Test
+	public void testClaim() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+	final DataSet ds = new DataSet();
+	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+		parserClient.start("+821039841235", "+821027423984", "claim MultimillionaireWheelwrightImpersonator", 8087,
+		new ParserAction() {
+			@Override
+			public void handleResponse(DataSet data) {
+				ds.setAction(data.getAction());
+			}
+			@Override
+			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+			@Override
+			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+		});
+		parserClient.join();
+		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CLAIM);
+    }
+
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();

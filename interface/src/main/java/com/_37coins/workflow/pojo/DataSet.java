@@ -25,6 +25,7 @@ public class DataSet {
 		PRODUCT("Product"), // like charge, but 24h cache
 		PAY("Pay"), // do a payment
 		RESTORE("Restore"), //from one account to the other
+		CLAIM("Claim"), //swipe private key
 		VOICE("Voice"), //set up voice second factor
 		WITHDRAWAL_CONF("WithdrawalConf"), // confirm a payment
 		BALANCE("Balance"), // request the balance
