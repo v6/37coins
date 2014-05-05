@@ -93,7 +93,7 @@ public class RestTest {
         rv.add(new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setFee(new BigDecimal("0.002")).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")));
         rv.add(new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setFee(new BigDecimal("0.002")).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT")));
         List<Account> ac = new ArrayList<>();
-        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setCn("821039841235").setOwner(gw).setApiSecret("test").setApiToken("test"));
+        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw).setApiSecret("test").setApiToken("test"));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
         data.put(Gateway.class, rv);
         data.put(Account.class, ac);
@@ -216,27 +216,6 @@ public class RestTest {
 		Assert.assertEquals("+821039841235",ds.getTo().getAddress());
 		Assert.assertEquals(new Locale("ko","KR"),ds.getLocale());
 		Assert.assertNotNull(ds.getCn());
-    }
-    
-    @Test
-	public void testClaim() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
-	final DataSet ds = new DataSet();
-	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841235", "+821027423984", "claim MultimillionaireWheelwrightImpersonator", 8087,
-		new ParserAction() {
-			@Override
-			public void handleResponse(DataSet data) {
-				ds.setAction(data.getAction());
-			}
-			@Override
-			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
-		});
-		parserClient.join();
-		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CLAIM);
     }
 
     @Test

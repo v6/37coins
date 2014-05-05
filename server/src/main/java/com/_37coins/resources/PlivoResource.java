@@ -184,6 +184,7 @@ public class PlivoResource {
 		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
 		int pin = Integer.parseInt(digits);
 		if (pin == a.getPin()){
+		    a.setPinWrongCount(0);
 			Element e = cache.get(workflowId);
 			Transaction tx = (Transaction) e.getObjectValue();
 			tx.setState(State.CONFIRMED);
@@ -199,9 +200,10 @@ public class PlivoResource {
                 throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
             }
 		}else{
+		    a.setPinWrongCount(a.getPinWrongCount()+1);
 			String callText;
 			try{
-				if (a.isLocked()!=null && a.isLocked()==true){
+				if (a.getPinWrongCount()>=3){
 					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
 					rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(callText).setLanguage(locale));

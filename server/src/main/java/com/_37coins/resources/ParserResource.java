@@ -205,10 +205,9 @@ public class ParserResource {
 		}
 		if (null!=gwDn){
 			//create new user
-	        cnString = recipient.getAddress().replace("+", "");
+		    cnString = recipient.getAddress().replace("+", "");
 	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
 		    Account newUser = new Account()
-		        .setCn(cnString)
 		        .setOwner(gwDn)
 		        .setMobile(recipient.getAddress())
 		        .setLocale(uLocale);
@@ -249,7 +248,7 @@ public class ParserResource {
 			try{
 			    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
 			    Account a = dao.queryEntity(q, Account.class);
-				cn = a.getCn();
+				cn = a.getMobile().replace("+", "");
 			}catch(JDOException e){
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){

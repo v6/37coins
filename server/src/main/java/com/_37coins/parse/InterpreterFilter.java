@@ -28,9 +28,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 @Singleton
 public class InterpreterFilter implements Filter {
@@ -47,12 +44,12 @@ public class InterpreterFilter implements Filter {
 		Account a = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getAddress()), Account.class,false);
 		if (null!=a){
 			//check if account is disabled
-			if (null!=a.isLocked()&&a.isLocked()==true){
+			if (null!=a.getPinWrongCount()&&a.getPinWrongCount()>=3){
 				responseData.setAction(Action.ACCOUNT_BLOCKED);
 				respond(responseList,response);
 				return;
 			}
-			responseData.setCn(a.getCn());
+			responseData.setCn(a.getMobile().replace("+", ""));
 			//read the gateway
 			Gateway g = a.getOwner();
 
@@ -79,14 +76,12 @@ public class InterpreterFilter implements Filter {
 		}else{//new user
 			if (responseData.getAction()!=Action.SIGNUP){
 			    Gateway g = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getGateway()), Gateway.class);
-			    String cnString = responseData.getTo().getAddress().replace("+", "");
 			    a = new Account()
-			        .setCn(cnString)
 			        .setMobile(responseData.getTo().getAddress())
 			        .setOwner(g);
 			    dao.add(a);
 			    responseData.getTo().setGateway(g.getCn());
-			    responseData.setCn(cnString).setGwCn(g.getCn()).setGwFee(g.getFee());
+			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getFee());
 			    //respond to new user with welcome message
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)

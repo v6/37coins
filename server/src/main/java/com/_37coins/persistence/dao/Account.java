@@ -24,12 +24,6 @@ public class Account extends Model {
 	private Integer pin;
 	
 	@Persistent
-	private String cn;
-	
-	@Persistent
-	private Boolean isBlocked;
-	
-	@Persistent
 	@Index
 	@Unique
 	private String mobile;
@@ -66,24 +60,6 @@ public class Account extends Model {
 
     public Gateway getOwner() {
         return owner;
-    }
-
-    public String getCn() {
-        return cn;
-    }
-
-    public Account setCn(String cn) {
-        this.cn = cn;
-        return this;
-    }
-
-    public Boolean isLocked() {
-        return isBlocked;
-    }
-
-    public Account setIsBlocked(Boolean isBlocked) {
-        this.isBlocked = isBlocked;
-        return this;
     }
 
     public String getApiToken() {

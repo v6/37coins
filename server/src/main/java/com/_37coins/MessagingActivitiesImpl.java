@@ -160,7 +160,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			tt.setState(State.STARTED);
 			cache.put(new Element(workflowId,tt));
 			Account a = dao.queryEntity(new RNQuery().addFilter("cn", rsp.getCn()), Account.class);
-			if (null!=a.isLocked() && a.isLocked()==false){
+			if (null!=a.getPinWrongCount()&& a.getPinWrongCount()<3){
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
 				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
