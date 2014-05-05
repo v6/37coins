@@ -8,7 +8,7 @@ define(['backbone','communicator'], function(Backbone, Communicator) {
             id: (!sessionStorage.getItem('id')||sessionStorage.getItem('id')==='undefined')?undefined:sessionStorage.getItem('id'),
             locale: window.opt.lng,
             basePath: window.opt.basePath,
-            srvcPath: window.opt.srvcPath,
+            srvcPath: (window.opt.srvcPath)?window.opt.srvcPath.split('://')[1]:undefined,
             cn: (!sessionStorage.getItem('cn')||sessionStorage.getItem('cn')==='undefined')?undefined:sessionStorage.getItem('cn'),
             roles: (!sessionStorage.getItem('roles')||sessionStorage.getItem('roles')==='undefined')?undefined:[sessionStorage.getItem('roles')],
             mobile: (!sessionStorage.getItem('mobile')||sessionStorage.getItem('mobile')==='undefined')?undefined:sessionStorage.getItem('mobile'),

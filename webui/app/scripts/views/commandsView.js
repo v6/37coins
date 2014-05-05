@@ -6,8 +6,6 @@ function(Backbone, CommandsTmpl) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
 	template: CommandsTmpl,
-	className: 'static',
-	initialize: function(){
-	}
+	className: 'static'
     });
 });
