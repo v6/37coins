@@ -29,6 +29,7 @@ define(['backbone',
     'views/resetView',
     'views/headerSendView',
     'views/commandSendView',
+    'views/commandHelpView',
     'views/resetConfView',
     'views/signupConfView',
     'views/balanceView',
@@ -38,7 +39,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -57,6 +58,7 @@ define(['backbone',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
             'commands/send': 'showCommandSend',
+            'commands/help': 'showCommandHelp',
             'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
@@ -243,6 +245,10 @@ define(['backbone',
         var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath})});
         var contentView = new CommandSendView();
         Communicator.mediator.trigger('app:show',contentView, headerView);
+    };
+    Controller.showCommandHelp = function() {
+        var contentView = new CommandHelpView();
+        Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showNotFound = function() {
         var contentView = new NotFoundView();
