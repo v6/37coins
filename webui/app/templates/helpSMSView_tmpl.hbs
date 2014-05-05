@@ -1,6 +1,7 @@
 <div class="row">
 <div class="col-sm-12 wbox">
-<h1>FAQ:</h1>
+<h1>SMSwallet Help</h1>
+<div id="smsCommands" class="col-sm-6"></div>
 <div class="panel-group" id="accordion">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -113,7 +114,7 @@
     <div id="collapseFour" class="panel-collapse collapse in">
       <div class="panel-body">
         <p>SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in spending-PIN protected transactions. </p>
-        <div class="alert alert-warning">However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted.</div>
+        <div class="alert alert-warning">IHowever, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted.</div>
       </div>
     </div>
   </div>
