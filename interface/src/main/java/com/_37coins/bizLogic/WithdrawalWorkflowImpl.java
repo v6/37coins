@@ -81,9 +81,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	}else{
     		//balance sufficient, now secure transaction authenticity 
 			final Promise<Action> response;
-			if (w.getConfKey()!=null){
-				response = msgClient.otpConfirmation(data.getCn(), w.getConfKey(),data.getLocale());
-			}else if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("100.0"))) > 0){
+			if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("100.0"))) > 0){
 				response = msgClient.phoneConfirmation(data,contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
 				w.setConfKey(WithdrawalWorkflow.VOICE_VER_TOKEN);
 			}else {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -13,7 +14,8 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
-import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
 import com._37coins.envaya.QueueClient;
@@ -61,15 +63,15 @@ public class TestServletConfig extends GuiceServletContextListener {
 		 injector = Guice.createInjector(new ServletModule(){
 	            @Override
 	            protected void configureServlets(){
-	            	filter("/envayasms/*").through(DirectoryFilter.class);
+	            	filter("/envayasms/*").through(PersistenceFilter.class);
 	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-	            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
+	            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
 	            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
-	            	filter("/account*").through(DirectoryFilter.class); //allow directory access
-	            	filter("/merchant/*").through(DirectoryFilter.class);
-	            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
+	            	filter("/account*").through(PersistenceFilter.class); //allow directory access
+	            	filter("/merchant/*").through(PersistenceFilter.class);
+	            	filter("/email/*").through(PersistenceFilter.class); //allow directory access
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());
 	            	bind(ParserClient.class);
 	            	bind(QueueClient.class);
@@ -82,15 +84,12 @@ public class TestServletConfig extends GuiceServletContextListener {
 				  return new CommandParser();
 				}
 				
-				@Provides @Singleton @SuppressWarnings("unused")
-				public JndiLdapContextFactory provideLdapClientFactory(){
-					JndiLdapContextFactory jlc = new JndiLdapContextFactory();
-					jlc.setUrl(MessagingServletConfig.ldapUrl);
-					jlc.setAuthenticationMechanism("simple");
-					jlc.setSystemUsername(MessagingServletConfig.ldapUser);
-					jlc.setSystemPassword(MessagingServletConfig.ldapPw);
-					return jlc;
-				}
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            PersistenceManagerFactory providePersistence(){
+	                PersistenceConfiguration pc = new PersistenceConfiguration();
+	                pc.createEntityManagerFactory();
+	                return pc.getPersistenceManagerFactory();
+	            }
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				AccountPolicy providePolicy(){

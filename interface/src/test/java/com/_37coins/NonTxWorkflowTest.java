@@ -3,7 +3,6 @@ package com._37coins;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.mail.internet.AddressException;
 
@@ -23,7 +22,6 @@ import com._37coins.workflow.NonTxWorkflowClientFactory;
 import com._37coins.workflow.NonTxWorkflowClientFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
@@ -115,21 +113,6 @@ public class NonTxWorkflowTest {
 			}
 			@Override
 			public void putAddressCache(DataSet rsp) {
-			}
-			@Override
-		    public String emailVerification(EmailFactor ef, Locale locale){
-				trace.add(new DataSet().setPayload(ef));
-				return null;
-			}
-			@Override
-		    public void emailConfirmation(String emailServiceToken, Locale locale){
-			}
-			@Override
-		    public void emailOtpCreation(String cn, String email, Locale locale){	
-			}
-			@Override
-			public Action otpConfirmation(String cn, String otp, Locale locale){
-				return null;
 			}
 			@Override
 			public BigDecimal readAccountFee(String cn) {

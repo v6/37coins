@@ -7,8 +7,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.Inet4Address;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,15 +23,18 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restnucleus.dao.Model;
 import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.test.DbHelper;
+import org.restnucleus.test.EmbeddedJetty;
 
 import com._37coins.helper.HelperResource;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dto.Account;
+import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.resources.AccountResource;
-import com._37coins.resources.EmailServiceResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.MerchantResource;
@@ -43,7 +47,6 @@ import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.EmailFactor;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -59,11 +62,9 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-import com.unboundid.ldap.listener.InMemoryDirectoryServer;
-import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
-import com.unboundid.ldap.listener.InMemoryListenerConfig;
 
-public class RestTest {	
+public class RestTest {
+    public static List<Gateway> list = null;
 	static String address = "821038492849";
 	static String pw = "test9900";
 	static Account acc1;
@@ -81,21 +82,23 @@ public class RestTest {
         	}
         };
         embeddedJetty.start();
-        // Create the configuration to use for the server.
-        InMemoryDirectoryServerConfig config =
-             new InMemoryDirectoryServerConfig("dc=37coins,dc=com");
-        config.addAdditionalBindCredentials("cn=admin", "test9900");
-        InMemoryListenerConfig lc = new InMemoryListenerConfig("test", Inet4Address.getByName("127.0.0.1"), 51382, null,null,null);
-        config.setListenerConfigs(lc);
 
-        // Create the directory server instance, populate it with data from the
-        // "test-data.ldif" file, and start listening for client connections.
-        InMemoryDirectoryServer ds = new InMemoryDirectoryServer(config);
-        ds.importFromLDIF(true, "src/test/resources/test-data.ldif");
-        ds.startListening();
         GoogleAnalyticsConfig gac = new GoogleAnalyticsConfig();
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
+	      //prepare data
+		Gateway gw = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setFee(new BigDecimal("0.0007")).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+        List<Gateway> rv = new ArrayList<>();
+        rv.add(gw);
+        rv.add(new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setFee(new BigDecimal("0.002")).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")));
+        rv.add(new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setFee(new BigDecimal("0.002")).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT")));
+        List<Account> ac = new ArrayList<>();
+        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setCn("821039841235").setOwner(gw).setApiSecret("test").setApiToken("test"));
+        Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
+        data.put(Gateway.class, rv);
+        data.put(Account.class, ac);
+        RestTest.list = rv;
+        new DbHelper(embeddedJetty.getDao()).persist(data);
 	}
     
     @AfterClass
@@ -211,7 +214,7 @@ public class RestTest {
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.VOICE);
 		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
 		Assert.assertEquals("+821039841235",ds.getTo().getAddress());
-		Assert.assertEquals(Locale.forLanguageTag("kr"),ds.getLocale());
+		Assert.assertEquals(new Locale("ko","KR"),ds.getLocale());
 		Assert.assertNotNull(ds.getCn());
     }
     
@@ -369,41 +372,6 @@ public class RestTest {
 			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
     }
     
-    
-    @Test
-    public void testEmailActivation() throws IOException {
-    	//find the id
-    	String id = given()
-			.contentType(ContentType.JSON)
-			.queryParam("mobile", "+821039841235")
-		.when()
-			.get(embeddedJetty.getBaseUri() + AccountResource.PATH+"/find").asString();
-    	System.out.println("id:"+id);
-    	//create request
-    	EmailFactor ef = new EmailFactor()
-    		.setEmail("alex@test.com")
-    		.setEmailToken("1234")
-    		.setCn(id);
-    	
-    	Response r = given()
-    		.contentType(ContentType.JSON)
-    		.headers("Accept-Language", "en, en-gb;q=0.8")
-    		.body(json(ef))
-    	.expect()
-    		.statusCode(200)
-    	.when()
-    		.post(embeddedJetty.getBaseUri() + EmailServiceResource.PATH+"/verify");
-    	EmailFactor ver = new ObjectMapper().readValue(r.asInputStream(), EmailFactor.class);
-    	//confirm request
-    	given()
-        	.contentType(ContentType.JSON)
-        	.body(json(new EmailFactor().setEmailToken(ver.getEmailToken())))
-        .expect()
-        	.statusCode(204)
-        .when()
-        	.post(embeddedJetty.getBaseUri() + EmailServiceResource.PATH+"/confirm");    	
-    }
-    
     @Test
     public void testTicket() throws IOException {
     	//flush
@@ -543,7 +511,7 @@ public class RestTest {
     	rv = new ObjectMapper().readValue(r.asInputStream(), new TypeReference<Map<String,String>>(){});
     	//register
     	given()
-    		.body(json(request.setTicket(rv.get("value")).setEmail("test3@bp.org")))
+    		.body(json(request.setTicket(rv.get("value")).setEmail("test3@37coins.com")))
     		.contentType(ContentType.JSON)
 		.expect()
 			.statusCode(204)
@@ -598,8 +566,8 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
 		//ask help
 		Response r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "help")
 		.expect()
 			.statusCode(200)
@@ -607,13 +575,13 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Help");
 		List<DataSet> rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
-		Assert.assertEquals("test@test.com", rv.get(0).getCn());
-		Assert.assertEquals("mail@37coins.com", rv.get(0).getTo().getGateway());
+		Assert.assertEquals("821027423983", rv.get(0).getCn());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get btc address
 		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "deposit")
 		.expect()
 			.statusCode(200)
@@ -624,8 +592,8 @@ public class RestTest {
 		Assert.assertEquals(Action.DEPOSIT_REQ, rv.get(0).getAction());
 		//send money, new user, same country
 		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "send 10 +821053215679")
 		.expect()
 			.statusCode(200)
@@ -637,8 +605,8 @@ public class RestTest {
 		Withdrawal w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821053215679", w.getPayDest().getAddress());
 		Assert.assertEquals(new BigDecimal("0.01").setScale(8), w.getAmount());
-		Assert.assertEquals(new BigDecimal("0.0001").setScale(8), w.getFee());
-		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821053215679", rv.get(1).getCn());
@@ -796,40 +764,10 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.BALANCE, rv.get(0).getAction());
-		//send money from email to mobile
-		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 10 +821012345678")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
-		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
-		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
-		//send money use dot notation
-		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 10 +821012345678")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
-		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
-		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		//prevent sending zero
 		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "send 0.0 +821012345678")
 		.expect()
 			.statusCode(200)
@@ -840,8 +778,8 @@ public class RestTest {
 		Assert.assertEquals(Action.BELOW_FEE, rv.get(0).getAction());
 		//send all money to other user
 		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "send all +821012345678")
 		.expect()
 			.statusCode(200)
@@ -852,12 +790,12 @@ public class RestTest {
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
-		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(BigDecimal.ZERO, w.getAmount());
 		//use currency code for sending
 		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
+			.formParam("from", "+821027423983")
+			.formParam("gateway", "+821027423984")
 			.formParam("message", "send eur20 +821012345678")
 		.expect()
 			.statusCode(200)
@@ -869,20 +807,7 @@ public class RestTest {
 		w = (Withdrawal)rv.get(0).getPayload();
 		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
 		Assert.assertTrue(w.getAmount()!=null);
-		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
-		//send money from email to local number
-		r = given()
-			.formParam("from", "test@test.com")
-			.formParam("gateway", "mail@37coins.com")
-			.formParam("message", "send 10 01012345678")
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
-		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
-		Assert.assertEquals("size expected",1, rv.size());
-		Assert.assertEquals(Action.FORMAT_ERROR, rv.get(0).getAction());
-		Assert.assertEquals("test@test.com", rv.get(0).getTo().getEmail().getAddress());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		//send money, new user, same country
 		r = given()
 			.formParam("from", "+821012345678")

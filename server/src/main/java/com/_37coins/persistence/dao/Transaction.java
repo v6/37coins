@@ -1,4 +1,4 @@
-package com._37coins.persistence.dto;
+package com._37coins.persistence.dao;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

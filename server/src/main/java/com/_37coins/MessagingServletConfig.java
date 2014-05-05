@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -21,13 +22,14 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
-import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.CorsFilter;
+import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,10 +117,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String plivoSecret;
 	public static String resPath;
 	public static String merchantResPath;
-	public static String ldapUrl;
-	public static String ldapUser;
-	public static String ldapPw;
-	public static String ldapBaseDn;
 	public static String captchaPubKey;
 	public static String captchaSecKey;
 	public static String elasticSearchHost;
@@ -154,10 +152,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");
 		merchantResPath = System.getProperty("merchantResPath");
-		ldapUrl = System.getProperty("ldapUrl");
-		ldapUser = System.getProperty("ldapUser");
-		ldapPw = System.getProperty("ldapPw");
-		ldapBaseDn = System.getProperty("ldapBaseDn");
 		captchaPubKey = System.getProperty("captchaPubKey");
 		captchaSecKey = System.getProperty("captchaSecKey");
 		elasticSearchHost = System.getProperty("elasticSearchHost");
@@ -331,20 +325,20 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             protected void configureServlets(){
             	filter("/*").through(CorsFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
-            	filter("/envayasms/*").through(DirectoryFilter.class);
-            	filter("/.well-known*").through(DirectoryFilter.class);
-            	filter("/api/*").through(DirectoryFilter.class);
+            	filter("/envayasms/*").through(PersistenceFilter.class);
+            	filter("/.well-known*").through(PersistenceFilter.class);
+            	filter("/api/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
-            	filter("/account*").through(DirectoryFilter.class); //allow directory access
-            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/plivo/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/data/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/merchant/*").through(DirectoryFilter.class);
-            	filter("/healthcheck/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/account*").through(PersistenceFilter.class); //allow directory access
+            	filter("/email/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/plivo/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/data/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/merchant/*").through(PersistenceFilter.class);
+            	filter("/healthcheck/*").through(PersistenceFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class);
         		bind(ParserClient.class);
@@ -500,15 +494,12 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				return new MessageFactory(servletContext);
 			}
 			
-			@Provides @Singleton @SuppressWarnings("unused")
-			public JndiLdapContextFactory provideLdapClientFactory(){
-				JndiLdapContextFactory jlc = new JndiLdapContextFactory();
-				jlc.setUrl(ldapUrl);
-				jlc.setAuthenticationMechanism("simple");
-				jlc.setSystemUsername(ldapUser);
-				jlc.setSystemPassword(ldapPw);
-				return jlc;
-			}
+	        @Provides @Singleton @SuppressWarnings("unused")
+            PersistenceManagerFactory providePersistence(){
+                PersistenceConfiguration pc = new PersistenceConfiguration();
+                pc.createEntityManagerFactory();
+                return pc.getPersistenceManagerFactory();
+            }
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public Client provideElasticSearch(){

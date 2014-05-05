@@ -14,13 +14,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
+import javax.jdo.JDOException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.servlet.ServletRequest;
@@ -40,12 +34,14 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.WithdrawRequest;
@@ -70,7 +66,7 @@ public class GatewayResource {
 	public static Logger log = LoggerFactory.getLogger(GatewayResource.class);
 	private static final BigDecimal FEE = new BigDecimal("0.0007").setScale(8);
 	
-	final private InitialLdapContext ctx;
+	private final GenericRepository dao;
 	final private Cache cache;
 	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	final private MessageFactory messageFactory;
@@ -81,7 +77,7 @@ public class GatewayResource {
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			MessageFactory messageFactory) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
-		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.nonTxFactory = nonTxFactory;
 		this.messageFactory = messageFactory;
 		this.mailClient = mailClient;
@@ -104,19 +100,18 @@ public class GatewayResource {
 			}
 		}
 		try{
+		    RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+	        Gateway existing = dao.queryEntity(q, Gateway.class);
 			gu.setId(context.getUserPrincipal().getName());
-			Attributes atts = ctx.getAttributes(gu.getId(),new String[]{"mobile", "description","preferedLocale","departmentNumber"});
-			gu.setMobile((atts.get("mobile")!=null)?(String)atts.get("mobile").get():null);
+			gu.setMobile(existing.getMobile());
 			gu.setCode("");
-			if (atts.get("preferedLocale")!=null){
-				gu.setLocaleString((String)atts.get("preferedLocale").get());
+			if (existing.getLocale()!=null){
+				gu.setLocale(existing.getLocale());
 			}
 			//some abuses here: description -> fee and departementNumber -> envayaToken
-			gu.setFee((atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null);
-			gu.setEnvayaToken((atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null);
-		}catch(IllegalStateException | NamingException e){
-			log.error("login exception",e);
-			e.printStackTrace();
+			gu.setFee((existing.getFee()!=null)?existing.getFee():null);
+			gu.setEnvayaToken((existing.getApiSecret()!=null)?existing.getApiSecret():null);
+		}catch(JDOException e){
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		return gu;
@@ -127,31 +122,18 @@ public class GatewayResource {
 	public GatewayUser confirm(@Context SecurityContext context,GatewayUser gu){
 		GatewayUser rv = null;
 		//fish user from directory
-		String mobile = null;
-		BigDecimal fee = null;
-		try{
-			Attributes atts = ctx.getAttributes(context.getUserPrincipal().getName(),new String[]{"mobile", "description","preferedLocale","departmentNumber"});
-			mobile = (atts.get("mobile")!=null)?(String)atts.get("mobile").get():null;
-			fee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
-		}catch(IllegalStateException | NamingException e){
-			log.error("gateway exception",e);
-			e.printStackTrace();
-			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
-		}
+        RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+        Gateway existing = dao.queryEntity(q, Gateway.class);
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-		if (mobile ==null && gu.getCode()==null && null!=gu.getMobile()){
+		if (existing.getMobile() ==null && gu.getCode()==null && null!=gu.getMobile()){
 			//start validation for received mobile number
 			try {
 				// parse the number
 				PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
 				// check if it exists
-				try{
-					SearchResult sr = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mobile={0}))", ctx);
-					if (sr!=null)
-						throw new WebApplicationException("gateway with phone" + pn + " exists already.", Response.Status.CONFLICT);
-				}catch(NameNotFoundException e){
-					//ok
-				}
+		        Gateway phantom = dao.queryEntity(q, Gateway.class,false);
+		        if (phantom!=null)
+					throw new WebApplicationException("gateway with phone" + pn + " exists already.", Response.Status.CONFLICT);
 		        //create code
 		        String code = RandomStringUtils.random(5, "0123456789");
 		        //save code + number + dn
@@ -169,7 +151,7 @@ public class GatewayResource {
 			    	throw new PlivoException(response.message);
 			    }
 			    System.out.println("code: "+code);
-			} catch (NumberParseException | IllegalStateException | NamingException | PlivoException | MalformedURLException e) {
+			} catch (NumberParseException | IllegalStateException | PlivoException | MalformedURLException e) {
 				log.error("gateway exception",e);
 				e.printStackTrace();
 				throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
@@ -207,37 +189,21 @@ public class GatewayResource {
 				throw new WebApplicationException(gu.getCode()+" not correct", Response.Status.NOT_FOUND);
 			}
 			PhoneNumber pn = (PhoneNumber)e.getObjectValue();
-			try {
-				Attributes a = new BasicAttributes();
-				a.put("preferredLanguage", gu.getLocaleString());
-				a.put("mobile",phoneUtil.format(pn, PhoneNumberFormat.E164));
-				//some abuses here: description -> fee and departementNumber -> envayapw
-				a.put("description",FEE.toString());
-				String envayaToken = RandomStringUtils.random(12, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
-				a.put("departmentNumber",envayaToken);
-				ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
-				rv = new GatewayUser()
-					.setLocale(gu.getLocale())
-					.setFee(FEE)
-					.setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
-					.setEnvayaToken(envayaToken);
-			} catch (IllegalStateException | NamingException e1) {
-				log.error("gateway exception",e1);
-				e1.printStackTrace();
-				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
-			}
-		}else if (mobile.equalsIgnoreCase(gu.getMobile()) && gu.getFee()!=null) {
+			String envayaToken = RandomStringUtils.random(12, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+			existing
+			  .setLocale(gu.getLocale())
+			  .setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
+			  .setFee(FEE)
+			  .setApiSecret(envayaToken);
+			rv = new GatewayUser()
+				.setLocale(gu.getLocale())
+				.setFee(FEE)
+				.setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
+				.setEnvayaToken(envayaToken);
+		}else if (existing.getMobile().equalsIgnoreCase(gu.getMobile()) && gu.getFee()!=null) {
 			//set/update fee
-			if (gu.getFee().compareTo(fee)!=0){
-				try {
-					Attributes a = new BasicAttributes("description",gu.getFee().toString());
-					ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
-					rv = new GatewayUser().setFee(gu.getFee());
-				} catch (IllegalStateException | NamingException e1) {
-					log.error("gateway exception",e1);
-					e1.printStackTrace();
-					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
-				}
+			if (gu.getFee().compareTo(existing.getFee())!=0){
+				existing.setFee(gu.getFee());
 			}
 		}else{
 			throw new WebApplicationException("unexpected state", Response.Status.BAD_REQUEST);
@@ -251,17 +217,12 @@ public class GatewayResource {
 	public GatewayUser setFee(@Context SecurityContext context, GatewayUser gu){
 		GatewayUser rv = null;
 		if (gu.getFee().compareTo(new BigDecimal("0.001"))>0){
-			throw new WebApplicationException("fee to high", Response.Status.BAD_REQUEST);
+			throw new WebApplicationException("fee too high", Response.Status.BAD_REQUEST);
 		}
-		try {
-			Attributes a = new BasicAttributes("description",gu.getFee().toString());
-			ctx.modifyAttributes(context.getUserPrincipal().getName(), DirContext.REPLACE_ATTRIBUTE, a);
-			rv = new GatewayUser().setFee(gu.getFee());
-		} catch (IllegalStateException | NamingException e1) {
-			log.error("set fee exception",e1);
-			e1.printStackTrace();
-			throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+	    RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+        Gateway existing = dao.queryEntity(q, Gateway.class);
+        existing.setFee(gu.getFee());
+        rv = new GatewayUser().setFee(gu.getFee());
 		return rv;
 	}
 	

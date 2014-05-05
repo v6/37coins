@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 
-import com._37coins.persistence.dto.Transaction;
+import com._37coins.persistence.dao.Transaction;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient;
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory;
