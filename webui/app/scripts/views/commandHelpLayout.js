@@ -9,6 +9,12 @@ function(Backbone, HelpTmpl) {
         regions: {
 	        commands: '#smsCommands'
 	    },
-        className: 'static'
+        className: 'static',
+        onShow:function () {
+			this.$('.collapse').collapse({
+			    parent: '#accordion',
+			    toggle: true
+			});
+        }
     });
 });
