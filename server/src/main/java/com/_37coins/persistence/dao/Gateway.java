@@ -46,6 +46,10 @@ public class Gateway extends Model {
 	private String password;
 	
 	@Persistent
+    @NotNull
+	private byte[] salt;
+	
+	@Persistent
 	@Index
 	@NotNull
 	@Unique
@@ -156,7 +160,16 @@ public class Gateway extends Model {
 		return this;
 	}
 
-	@Override
+	public byte[] getSalt() {
+        return salt;
+    }
+
+    public Gateway setSalt(byte[] salt) {
+        this.salt = salt;
+        return this;
+    }
+
+    @Override
 	public void update(Model newInstance) {
 		Gateway n = (Gateway) newInstance;
 		if (null != n.getFee())this.setFee(n.getFee());

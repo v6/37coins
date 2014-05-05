@@ -1,6 +1,7 @@
 package com._37coins.resources;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
@@ -272,11 +274,20 @@ public class AccountResource {
 			if (checkEmail(accountRequest.getEmail()).equals("false")){
 				throw new WebApplicationException("account created already", Response.Status.BAD_REQUEST);
 			}
-	         String cnString = RandomStringUtils.random(16, "ABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+	        String cnString = RandomStringUtils.random(16, "ABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+	        byte[] salt = new byte[CryptoUtils.DEFAULT_SALT_SIZE];
+	        CryptoUtils.RANDOM.nextBytes(salt);
+	        String pw=null;
+	        try{
+	            pw = CryptoUtils.getSaltedPassword(accountRequest.getPassword().getBytes(), salt);
+	        }catch(NoSuchAlgorithmException ex){
+	            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+	        }
 			Gateway a = new Gateway()
                 .setEmail(accountRequest.getEmail())
                 .setCn(cnString)
-                .setPassword(accountRequest.getPassword());
+                .setSalt(salt)
+                .setPassword(pw);
             dao.add(a);
 			cache.remove("create"+accountRequest.getToken());
 		}else{

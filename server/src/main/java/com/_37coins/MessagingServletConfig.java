@@ -28,6 +28,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
@@ -44,6 +45,7 @@ import com._37coins.bizLogic.WithdrawalWorkflowImpl;
 import com._37coins.envaya.QueueClient;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
+import com._37coins.ldap.JdoRequestHandler;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
@@ -91,6 +93,8 @@ import com.maxmind.geoip.LookupService;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
 import com.plivo.helper.exception.PlivoException;
+import com.unboundid.ldap.listener.LDAPListener;
+import com.unboundid.ldap.listener.LDAPListenerConfig;
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -167,6 +171,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	private JavaPushMailAccount jPM;
 	public SocketIOServer server;
 	private ServiceLevelThread slt;
+	private LDAPListener listener;
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -294,6 +299,13 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	        }
 	    });
 		server.start();
+		//start ldap
+		listener = i.getInstance(LDAPListener.class);
+		try {
+            listener.startListening();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 		log.info("ServletContextListener started");
 	}
 	
@@ -400,6 +412,13 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return workflowWorker;
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public LDAPListener getLdapListener(GenericRepository dao){
+			    LDAPListenerConfig config = new LDAPListenerConfig(1389, new JdoRequestHandler(dao));
+			    LDAPListener listener = new LDAPListener(config);
+			    return listener;
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -546,6 +565,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		}
 		if (null!=server){
 			server.stop();
+		}
+		if (null!=listener){
+		    listener.shutDown(true);
 		}
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");
