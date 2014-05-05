@@ -34,6 +34,7 @@ public class Account extends Model {
 	
 	@Persistent
 	@Index
+	@Unique
 	private String displayName;
 	
 	@Persistent

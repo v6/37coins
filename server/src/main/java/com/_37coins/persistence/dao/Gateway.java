@@ -20,11 +20,13 @@ public class Gateway extends Model {
 	private static final long serialVersionUID = -1031604697212697657L;
 	
 	@Persistent
+	@NotNull
 	private String cn;
 
 	@Persistent
 	@NotNull
 	@Unique
+	@Index
 	private String email;
 	
     @Persistent
@@ -37,17 +39,16 @@ public class Gateway extends Model {
 	
 	@Persistent
 	@Index
-	private String address;
-	
-	@Persistent
-	@Index
 	private Integer countryCode;
 	
 	@Persistent
+	@NotNull
 	private String password;
 	
 	@Persistent
 	@Index
+	@NotNull
+	@Unique
 	private String mobile;
 	
 	@Persistent
@@ -119,10 +120,6 @@ public class Gateway extends Model {
 		return this;
 	}
 
-	public String getAddress() {
-		return address;
-	}
-
 	public String getApiToken() {
         return apiToken;
     }
@@ -140,11 +137,6 @@ public class Gateway extends Model {
         this.apiSecret = apiSecret;
         return this;
     }
-
-    public Gateway setAddress(String address) {
-		this.address = address;
-		return this;
-	}
 	
 	public Integer getCountryCode() {
 		return countryCode;
@@ -167,7 +159,6 @@ public class Gateway extends Model {
 	@Override
 	public void update(Model newInstance) {
 		Gateway n = (Gateway) newInstance;
-		if (null != n.getAddress())this.setAddress(n.getAddress());
 		if (null != n.getFee())this.setFee(n.getFee());
 		if (null != n.getCountryCode())this.setCountryCode(n.getCountryCode());
 	}

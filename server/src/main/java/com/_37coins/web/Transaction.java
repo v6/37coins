@@ -1,27 +1,15 @@
-package com._37coins.persistence.dao;
+package com._37coins.web;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import javax.jdo.annotations.Column;
-import javax.jdo.annotations.Discriminator;
-import javax.jdo.annotations.DiscriminatorStrategy;
-import javax.jdo.annotations.Index;
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.Unique;
-
 import org.apache.commons.lang3.RandomStringUtils;
-import org.restnucleus.dao.Model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-@PersistenceCapable
-@Discriminator(strategy = DiscriminatorStrategy.CLASS_NAME)
-public class Transaction extends Model {
-	private static final long serialVersionUID = 2463534722502497789L;
+public class Transaction{
 	
 	public enum State {
 		//REQUESTS
@@ -61,16 +49,10 @@ public class Transaction extends Model {
 		return RandomStringUtils.random(1, "adgjmptw")+RandomStringUtils.random(4, "0123456789");
 	}
 	
-	@Persistent
-	@Unique
-	@Index
 	private String key;
 	
-	@Persistent
-	@Column(jdbcType = "CLOB")
 	private String taskToken;
 	
-	@Persistent
 	private State state;
 	
 	public String getKey() {
@@ -107,11 +89,6 @@ public class Transaction extends Model {
 	public Transaction setState(State state) {
 		this.state = state;
 		return this;
-	}
-
-	@Override
-	public void update(Model newInstance) {
-		// TODO Auto-generated method stub
 	}
 	
 }

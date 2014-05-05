@@ -42,7 +42,7 @@ import com._37coins.envaya.QueueClient;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Gateway;
-import com._37coins.persistence.dao.Transaction;
+import com._37coins.web.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
