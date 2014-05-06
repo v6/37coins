@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-sm-12 wbox">
-  <h1>SMSwallet FAQ</h1>
+  <h1>SMSwallet Help</h1>
   <h2>Quick Reference</h2>
     <div id="smsCommands" class="col-sm-12"></div>
   </div>
@@ -11,7 +11,7 @@
  <p>Commands are not case-sensitve and are sent to the gateways via SMS/text.</p>
   <div class="col-sm-12 wbox"></div>
     <div class="panel-group" id="accordion">
-        
+      <!--address--> 
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>
-
+      <!--balance-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -38,7 +38,7 @@
         </div>
         <div id="BALANCE" class="panel-collapse collapse in">
           <div class="panel-body">
-            <p>The balance command returns the current bitcoin value of your SMSwallet.</p>
+            <p>The BALANCE command returns the current bitcoin value of your SMSwallet.</p>
             <p>The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of bitcoins that you can transfer to another person.</p>
             <table class="table table-striped">
               <thead>
@@ -57,7 +57,7 @@
           </div>
         </div>
       </div>
-
+      <!--send-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -68,7 +68,7 @@
         </div>
         <div id="SEND" class="panel-collapse collapse in">
           <div class="panel-body">
-            <p>The SEND command send bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.</p>
+            <p>The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.</p>
             </p>The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notiﬁed.</p>
             <p><strong>Ensure that you typed the recipients phone number or bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong></p>
             
@@ -149,7 +149,7 @@
           </div>
         </div>
       </div>
-
+      <!--transaction-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
@@ -160,17 +160,17 @@
         </div>
         <div id="TRANSACTION" class="panel-collapse collapse in">
           <div class="panel-body">
-            <p>The transaction command returns the history of your last three transactions.</p>
+            <p>The TRANSACTION command returns the history of your last three transactions.</p>
             <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): transactions, txns, trans, tran</div>
           </div>
         </div>
       </div>
-
+      <!--pin-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion" href="#PIN">
-              PIN
+              PIN:<br/> Setup your Secret PIN
             </a>
           </h4>
         </div>
@@ -183,12 +183,12 @@
           </div>
         </div>
       </div>
-<!--Commented out until fixed
+      <!--Commented out until fixed price   
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion" href="#PRICE">
-              PRICE Command
+              PRICE
             </a>
           </h4>
         </div>
@@ -198,7 +198,7 @@
           </div>
         </div>
       </div>
--->
+      -->
     </div>
   </div>
 </div>
@@ -207,22 +207,23 @@
 <div class="row">
   <div class="col-sm-12 wbox">
     <h2>SMSwallet FAQ</h2>
-      <div class="panel-group" id="accordion">
+      <div class="panel-group" id="accordion">     
+        <!--What is 'SMSwallet'?-->
         <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
+            <div class="panel-heading">
+              <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion" href="#SMSwalletFAQ1">
                 What is ‘SMSwallet’?
               </a>
-            </h4>
-          </div>
-          <div id="SMSwalletFAQ1" class="panel-collapse collapse in">
-            <div class="panel-body">
-              <p>‘SMSwallet’ is a simple way to send bitcoins to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use bitcoin! You can send your bitcoin to anyone who has a phone number no matter where they are!</p>
+              </h4>
             </div>
-          </div>
+            <div id="SMSwalletFAQ1" class="panel-collapse collapse in">
+              <div class="panel-body">
+                <p>‘SMSwallet’ is a simple way to send bitcoins to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use bitcoin! You can send your bitcoin to anyone who has a phone number no matter where they are!</p>
+              </div>
+            </div>
         </div>
-
+        <!--Is there a fee?-->
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -241,7 +242,7 @@
             </div>
           </div>
         </div>
-
+        <!--Negative balance?-->
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -257,7 +258,7 @@
             </div>
           </div>
         </div>
-
+        <!--SMSwallet and SMSgateway?-->
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -273,7 +274,7 @@
             </div>
           </div>
         </div>
-
+        <!--What if I get hacked?-->
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
