@@ -67,16 +67,14 @@ require.config({
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         webfinger: 'vendor/webfinger',
         socketio: '../bower_components/socket.io-client/dist/socket.io',
-        intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput'
+        intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
+        userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
     waitSeconds: 0,
+    locale: 'en',
     config: {
         'GA': {
             'id' : 'UA-29543456-1'
         }
-    },
-
-    hbs: {
-        disableI18n: true
     }
 });

@@ -1,15 +1,16 @@
 define([
-	'backbone',
-	'communicator',
-	'views/headerView',
+    'backbone',
+    'communicator',
+    'views/headerView',
     'views/navView',
-	'views/footerView'
+    'views/footerView',
+    'userVoice'
 ],
 
 function( Backbone, Communicator, HeaderView, NavView, FooterView) {
     'use strict';
 
-	var App = new Backbone.Marionette.Application();
+    var App = new Backbone.Marionette.Application();
 
     // these regions correspond to #ID's in the index.html 
     App.addRegions({
@@ -29,7 +30,7 @@ function( Backbone, Communicator, HeaderView, NavView, FooterView) {
         }
     });
 
-	Communicator.mediator.on('app:show', function(appView,headerView) {
+    Communicator.mediator.on('app:show', function(appView,headerView) {
         if (headerView){
             App.header.show(headerView);
         }else{
@@ -50,11 +51,17 @@ function( Backbone, Communicator, HeaderView, NavView, FooterView) {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     };
 
-	/* Add initializers here */
-	App.addInitializer( function (options) {
+    /* Add initializers here */
+    App.addInitializer( function (options) {
         if (!App.getParameterByName('noHead')){
             App.nav.show(new NavView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
             App.footer.show(new FooterView({model:new Backbone.Model({resPath:window.opt.resPath, basePath:window.opt.basePath})}));
+            window.UserVoice.push(['addTrigger', {
+                mode: 'contact',
+                trigger_color: 'white',
+                trigger_background_color: '#0070c3',
+                trigger_position: 'bottom-right'
+            }]);
         }else{
             $('div#nav').remove();
             $('div#header').remove();
@@ -71,13 +78,13 @@ function( Backbone, Communicator, HeaderView, NavView, FooterView) {
             // Get the anchor href and protcol
             var href = $(this).attr('href');
             // Ensure the protocol is not part of URL, meaning its relative. Stop the event bubbling to ensure the link will not cause a page refresh.
-            if (href.indexOf('http://') === -1 && href.indexOf('https://') === -1 && href.indexOf('bitcoin:') === -1) {
+            if (href && href.indexOf('http://') === -1 && href.indexOf('help-') === -1 && href.indexOf('https://') === -1 && href.indexOf('bitcoin:') === -1) {
                 evt.preventDefault();
                 // Note by using Backbone.history.navigate, router events will not be triggered.  If this is a problem, change this to navigate on your router.
                 App.router.navigate(href, true);
             }
         });
-	});
+    });
 
-	return App;
+    return App;
 });

@@ -1,0 +1,343 @@
+<div class="row">
+  <div class="col-sm-12 wbox">
+  <h1>SMSwallet Help</h1>
+  <h2>Quick Reference</h2>
+    <div id="smsCommands" class="col-sm-12"></div>
+  </div>
+</div>
+
+<div class="row">
+ <h2>SMSwallet Commands</h2>
+ <p>Commands are not case-sensitve and are sent to the gateways via SMS/text.</p>
+  <div class="col-sm-12 wbox"></div>
+  <div class="panel-group" id="accordion">
+    <!--address--> 
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+         <a data-toggle="collapse" data-parent="#accordion" href="#help-ADDRESS">
+           ADDRESS
+          </a>
+        </h4>
+      </div>
+      <div id="help-ADDRESS" class="panel-collapse collapse in">
+        <div class="panel-body">
+        <div class="row">
+        <div class="col-sm-12 wbox">
+          <p>The ADDRESS command returns the most recent bitcoin address associated to your SMSwallet account. With this bitcoin address, you can deposit bitcoins from another bitcoin wallet. If you don’t have any bitcoins, you can purchase them from <a href="https://localbitcoins.com/buy-bitcoins-online/?ch=1zol">Localbitcoins</a> or <a href="https://coinbase.com/?r=5367c0e6c9f6f52297000082&utm_campaign=user-referral&src=referral-link">Coinbase</a>.</p>
+        </div>
+        </div>  
+
+          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): address, addr, deposit, adr, adress</div>
+        </div>
+      </div>
+    </div>
+    <!--balance-->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-BALANCE">
+            BALANCE
+          </a>
+        </h4>
+      </div>
+      <div id="help-BALANCE" class="panel-collapse collapse in">
+        <div class="panel-body">
+        <div class="row">
+        <div class="col-sm-12 wbox">
+          <p>The BALANCE command returns the current bitcoin value of your SMSwallet.</p>
+          <p>The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of bitcoins that you can transfer to another person.</p>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <td>System response</td><td>Implication</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Balance 12.048mBTC ($5.24)<br/>Reply ADDR, for Bitcoin address</td><td>You can SEND up to 12.048 worth of Bitcoins to another phone number or bitcoin address</td>
+              </tr>
+            </tbody>
+          </table>
+          <label>*Bitcoin to US Dollar values, as of 5/4/2014</label>
+        </div>
+        </div>
+
+          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): balance, bal, blance, balnce</div>
+        </div>
+      </div>
+    </div>
+    <!--send-->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-SEND">
+            SEND
+          </a>
+        </h4>
+      </div>
+      <div id="help-SEND" class="panel-collapse collapse in">
+        <div class="panel-body">
+        <div class="row">
+        <div class="col-sm-12 wbox">
+          <p>The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.</p>
+          </p>The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notiﬁed.</p>
+          <p><strong>Ensure that you typed the recipients phone number or bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong></p>
+
+          <h5>SEND command syntax</h5>
+            <table class="table table-striped">
+              <thead>
+                <caption>SEND &lt;amount&gt;&lt;address&gt;[comment]</caption>
+              </thead>
+              <tbody>
+                 <tr>
+                  <td>&lt;amount&gt;</td><td>The amount to send to the recipient. Use 12 to indicate 12mBTC, use 5USD to indicate sending bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)</td>
+                </tr>
+                 <tr>
+                  <td>&lt;address&gt;</td><td>The destination address to send the bitcoins. Can be either a phone number or a bitcoin address. Phone numbers may have spaces or not.</td>
+                </tr>
+                <tr>
+                  <td>[comment]</td><td>Optional comment, up to 40 characters. Messages that are too long will be shortend.</td>
+                </tr>
+              </tbody>
+            </table> 
+
+          <h5>SEND command examples</h5>
+          <table class="table table-striped">
+            <thead>
+              <caption>Sending bitcoin domestically (assuming a US SMSwallet user)</caption>
+              <tr>
+               <td>Example</td><td>Command explanation</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SEND 1USD 6165551234</td><td>This request the system to send 1 US dollar worth of bitcoin to the US phone number 6165551234</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-striped">
+            <thead>
+              <caption>Sending bitcoin overseas (assuming a US SMSwallet user)</caption>
+              <tr>
+                <td>Example</td><td>Command explanation</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SEND 44PHP +63 912 123 1234</td><td>This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +63 912 555 1234</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-striped">
+            <thead>
+              <caption>Sending with shorthand</caption>
+              <tr>
+                <td>Example</td><td>Command explanation</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>6.3 6165551234</td><td>This requests the system to send 6.3 mBTC to the phone number 6165551234</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-striped">
+            <thead>
+              <caption>Sending to a bitcoin address</caption>
+              <tr>
+                <td>Example</td><td>Command explanation</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SEND 12USD 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh</td><td>This requests the system to send 12USD worth of bitcoin to the bitcoin address 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh</td>
+              </tr>
+            </tbody>
+          </table> 
+          </div>
+          </div>
+
+          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): send, sending, sent
+          </div>        
+        </div>
+      </div>
+    </div>
+    <!--transaction-->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-TRANSACTION">
+            TRANSACTION
+          </a>
+        </h4>
+      </div>
+      <div id="help-TRANSACTION" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-12 wbox">  
+              <p>The TRANSACTION command returns the history of your last three transactions.</p>
+            </div>
+          </div> 
+          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): transactions, txns, trans, tran</div>
+        </div>
+      </div>
+    </div>
+    <!--pin-->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-PIN">
+            PIN
+          </a>
+        </h4>
+      </div>
+      <div id="help-PIN" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-12 wbox">
+              <p>The PIN command sets up the Security PIN for your account.</p>
+              <p>The Security PIN is a 4-digit code that you assign. It protects your account from unauthorized spending.</p>
+              <p>If a Security PIN is not already set up, the system will call you and guide you through the process. If the Security PIN is already set up, the system will call you, confirm your existing Security PIN, and then guide you through setting up a different security PIN.  When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).</p>
+              <p>Currently the Security PIN is required if you try to SEND more than 12mBTC (2014/05/04 $5.25) in one day. In the future, you will be able to adjust this amount.</p>
+            </div>
+          </div>
+          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): pin, voice</div>
+        </div>
+      </div>
+    </div>
+    <!--Commented out until fixed price   
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-PRICE">
+            PRICE
+          </a>
+        </h4>
+      </div>
+      <div id="help-PRICE" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-12 wbox">
+              <p>The PRICE command returns the current bitcoin exchange rate for your region’s common fiat currency. The exchange rate is calculated from <a href="https://bitcoinaverage.com">Bitcoinaverage.com</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    -->
+  </div>
+</div>
+
+
+
+<div class="row">
+  <h2>SMSwallet FAQ</h2>
+  <div class="col-sm-12 wbox"></div>
+  <div class="panel-group" id="accordion">     
+    <!--What is 'SMSwallet'?-->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#help-SMSwalletFAQ1">
+            What is ‘SMSwallet’?
+          </a>
+          </h4>
+        </div>
+        <div id="help-SMSwalletFAQ1" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12 wbox">
+                <p>‘SMSwallet’ is a simple way to send bitcoins to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use bitcoin! You can send your bitcoin to anyone who has a phone number no matter where they are!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Is there a fee?-->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#help-SMSwalletFAQ2">
+              Is there a fee for using the SMSwallet system?
+            </a>
+          </h4>
+        </div>
+        <div id="help-SMSwalletFAQ2" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12 wbox">
+                <strong>Sending between SMSwallet users</strong>
+                <p>Right now there is only a fee for transactions that are initiated with the SEND command. These fees are set by the SMSgateway operators and reflect the cost of operating in their country (and market competition). Currently there is no fee for use of the Security PIN feature.</p>
+                <p>The sender always pays the transaction fee and is assessed from the sender's gateway operator. So, the fee is the same if you send bitcoins to a domestic phone number or an international phone number.</p>
+                <strong>Sending to a Bitcoin address</strong>
+                <p>If sending to an external Bitcoin address, there will be an additional Blockchain transaction fee, in addition to the gateway fee. The Blockchain transaction fee depends on the size of the transaction.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Negative balance?-->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#help-SMSwalletFAQ3">
+              After opening a new SMSwallet, why is my my balance a negative?
+            </a>
+          </h4>
+        </div>
+        <div id="help-SMSwalletFAQ3" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12 wbox">
+               <p>There is a small account activation fee. The fee is 1x the transaction fee of your gateway. Therefore, if the transaction fee of your gateway is 0.1mBTC (2014/05/04: $0.04) per transaction, then your account will start with a negative balance of -0.1mBTC. On your first bitcoin deposit, your total balance will be adjusted to reflect the account activation fee.</p>
+               <p>The account activation fee only happes when you initiate your wallet for the first time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--SMSwallet and SMSgateway?-->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#help-SMSwalletFAQ4">
+              I want to open an SMSwallet, do I need to run an SMSgateway?
+            </a>
+          </h4>
+        </div>
+        <div id="help-SMSwalletFAQ4" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12 wbox">
+                <p>No, if you just want to open a wallet, just choose a gateway from your country and send a text message to it. Opening an SMSgateway will not give you an SMSwallet.</p>
+                <p>If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or <a href="/gateways">sign up</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--What if I get hacked?-->
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#help-SMSwalletFAQ5">
+              How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?
+            </a>
+          </h4>
+        </div>
+        <div id="help-SMSwalletFAQ5" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-sm-12 wbox">
+                <p>SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Instead of confirming the message via SMS/text, you enter a Secret PIN with dial-tones via a voice call. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in Security PIN protected transactions. </p>
+              </div>
+            </div>
+              <div class="alert alert-warning">However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted.</div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+</div>
+

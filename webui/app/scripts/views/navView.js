@@ -35,7 +35,7 @@ function(Backbone, Communicator, NavTmpl) {
 			Communicator.mediator.trigger('app:logout');
 		},
 		onShow: function() {
-			this.$('ul.nav').tab();
+			this.$('.dropdown-toggle').dropdown();
         }
     });
 });

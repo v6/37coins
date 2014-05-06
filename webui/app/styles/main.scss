@@ -666,10 +666,15 @@ h2, h1 {
     }
   .open .dropdown-menu {
     background-color: transparent;
-    background:rgba(255,255,255,0.2);
+    background: #efefef;
+    margin-top:4px;
+    margin-left:-10px;
+    border:0px;
+    padding-top:0px;
     li > a {
-      color: $navbar-37-link-color;
+      color: $pantone-black-m;
       margin-left: 10px;
+      background-color: transparent;
       &:hover {
         background-color: $navbar-37-toggle-hover-bg;
       }
@@ -681,6 +686,7 @@ h2, h1 {
       .open .dropdown-menu {
         background-color:transparent;
         background:rgba(255,255,255,0.2);
+
         > .dropdown-header {
           border-color: $navbar-37-border;
         }
@@ -688,7 +694,8 @@ h2, h1 {
           background-color: $navbar-37-border;
         }
         > li > a {
-          color: $navbar-37-link-color;
+          background-color:white;
+          //color: $navbar-37-link-color;
           &:hover,
           &:focus {
             color: $navbar-37-link-hover-color;

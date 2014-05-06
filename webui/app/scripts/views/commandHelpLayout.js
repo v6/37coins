@@ -1,17 +1,20 @@
 define([
     'backbone',
-    'hbs!tmpl/faqView_tmpl'
+    'hbs!tmpl/commandHelpLayout_tmpl'
 ],
-function(Backbone, FaqTmpl) {
+function(Backbone, HelpTmpl) {
     'use strict';
-    return Backbone.Marionette.ItemView.extend({
-        template: FaqTmpl,
+    return Backbone.Marionette.Layout.extend({
+        template: HelpTmpl,
+        regions: {
+            commands: '#smsCommands'
+        },
         className: 'static',
         onShow:function () {
-			this.$('.collapse').collapse({
-			    parent: '#accordion',
-			    toggle: true
-			});
+            this.$('.collapse').collapse({
+                parent: '#accordion',
+                toggle: true
+            });
             var self = this;
             this.$('.panel-collapse').on('hidden.bs.collapse', function () {
                 if (location.hash){

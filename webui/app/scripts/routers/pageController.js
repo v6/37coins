@@ -29,6 +29,7 @@ define(['backbone',
     'views/resetView',
     'views/headerSendView',
     'views/commandSendView',
+    'views/commandHelpLayout',
     'views/resetConfView',
     'views/signupConfView',
     'views/balanceView',
@@ -38,7 +39,7 @@ define(['backbone',
     'views/notFoundView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -56,7 +57,8 @@ define(['backbone',
             'faq': 'showFaq',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
-            'commands/send': 'showCommandSend',
+            'help/SMSgateway': 'showFaq',
+            'help/SMSwallet': 'showCommandHelp',
             'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
@@ -86,11 +88,18 @@ define(['backbone',
                 }
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
-                    var href = $(item).attr('href').replace('#','');
+                    var href = ($(item).attr('href'))?$(item).attr('href').replace('#',''):undefined;
                     if (href===fragment){
                         $(item).parent().addClass('active');
                     }else{
                         $(item).parent().removeClass('active');
+                    }
+                    if ($(item).attr('id')==='products' && !fragment){
+                        $(item).parent().addClass('active');
+                    }else{
+                        if (!href && !$(item).attr('id') && fragment && fragment.indexOf('help')!==-1){
+                            $(item).parent().addClass('active');
+                        }
                     }
                 });
                 //set meta tag
@@ -243,6 +252,12 @@ define(['backbone',
         var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath})});
         var contentView = new CommandSendView();
         Communicator.mediator.trigger('app:show',contentView, headerView);
+    };
+    Controller.showCommandHelp = function() {
+        var layout = new CommandHelpLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        Communicator.mediator.trigger('app:show',layout);
+        var commands = new CommandsView();
+        layout.commands.show(commands);
     };
     Controller.showNotFound = function() {
         var contentView = new NotFoundView();
