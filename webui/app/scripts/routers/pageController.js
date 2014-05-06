@@ -88,11 +88,16 @@ define(['backbone',
                 }
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
-                    var href = $(item).attr('href').replace('#','');
-                    if (href===fragment){
-                        $(item).parent().addClass('active');
-                    }else{
-                        $(item).parent().removeClass('active');
+                    if ($(item).attr('href')){
+                        var href = $(item).attr('href').replace('#','');
+                        if (href===fragment){
+                            $(item).parent().addClass('active');
+                        }else{
+                            $(item).parent().removeClass('active');
+                        }
+                    }
+                    if (!fragment){
+                        $('#products').parent().addClass('active');
                     }
                 });
                 //set meta tag
