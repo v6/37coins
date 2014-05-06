@@ -88,17 +88,20 @@ define(['backbone',
                 }
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
-                    if ($(item).attr('href')){
-                        var href = $(item).attr('href').replace('#','');
+                    
+                var href;
+                   if ($(item).attr('href')){
+                       href = $(item).attr('href').replace('#','');
+                   }else{
+                       href = '';
+                   }
+
                         if (href===fragment){
                             $(item).parent().addClass('active');
                         }else{
                             $(item).parent().removeClass('active');
                         }
-                    }
-                    if (!fragment){
-                        $('#products').parent().addClass('active');
-                    }
+                   
                 });
                 //set meta tag
                 $('meta[name=description]').remove();
