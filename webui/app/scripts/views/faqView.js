@@ -12,9 +12,13 @@ function(Backbone, FaqTmpl) {
 			    parent: '#accordion',
 			    toggle: true
 			});
-            if (location.hash){
-                this.$(location.hash).collapse('show');
-            }
+            var self = this;
+            this.$('.collapse').on('hidden.bs.collapse', function () {
+                console.log('finished');
+                if (location.hash){
+                    self.$(location.hash).collapse('show');
+                }
+            });
         }
     });
 });
