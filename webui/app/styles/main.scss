@@ -666,13 +666,13 @@ h2, h1 {
     }
   .open .dropdown-menu {
     background-color: transparent;
-    background:rgba(255,255,255,0.8);
+    background: #efefef;
     margin-top:4px;
     margin-left:-10px;
     border:0px;
     padding-top:0px;
     li > a {
-      color: $navbar-37-link-color;
+      color: $pantone-black-m;
       margin-left: 10px;
       background-color: transparent;
       &:hover {
@@ -686,6 +686,7 @@ h2, h1 {
       .open .dropdown-menu {
         background-color:transparent;
         background:rgba(255,255,255,0.2);
+
         > .dropdown-header {
           border-color: $navbar-37-border;
         }
