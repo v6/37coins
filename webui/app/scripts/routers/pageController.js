@@ -57,8 +57,8 @@ define(['backbone',
             'faq': 'showFaq',
             'confSignup/:token': 'confirmSignUp',
             'confReset/:token': 'confirmReset',
-            'commands/send': 'showCommandSend',
-            'commands/help': 'showCommandHelp',
+            'help/SMSgateway': 'showFaq',
+            'help/SMSwallet': 'showCommandHelp',
             'account/:mobile': 'showAccount',
             'reset': 'showReset',
             'about': 'showAbout',
@@ -88,11 +88,18 @@ define(['backbone',
                 }
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
-                    var href = $(item).attr('href').replace('#','');
+                    var href = ($(item).attr('href'))?$(item).attr('href').replace('#',''):undefined;
                     if (href===fragment){
                         $(item).parent().addClass('active');
                     }else{
                         $(item).parent().removeClass('active');
+                    }
+                    if ($(item).attr('id')==='products' && !fragment){
+                        $(item).parent().addClass('active');
+                    }else{
+                        if (!href && !$(item).attr('id') && fragment && fragment.indexOf('help')!==-1){
+                            $(item).parent().addClass('active');
+                        }
                     }
                 });
                 //set meta tag
