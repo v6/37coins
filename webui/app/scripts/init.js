@@ -71,13 +71,10 @@ require.config({
         userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
     waitSeconds: 0,
+    locale: window.opt.lng,
     config: {
         'GA': {
             'id' : 'UA-29543456-1'
         }
-    },
-
-    hbs: {
-        disableI18n: true
     }
 });
