@@ -71,7 +71,7 @@ require.config({
         userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
     waitSeconds: 0,
-    locale: window.opt.lng,
+    locale: 'en',
     config: {
         'GA': {
             'id' : 'UA-29543456-1'

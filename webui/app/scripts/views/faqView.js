@@ -12,6 +12,9 @@ function(Backbone, FaqTmpl) {
 			    parent: '#accordion',
 			    toggle: true
 			});
+            if (location.hash){
+                this.$(location.hash).collapse('show');
+            }
         }
     });
 });

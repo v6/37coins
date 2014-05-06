@@ -15,6 +15,9 @@ function(Backbone, HelpTmpl) {
 			    parent: '#accordion',
 			    toggle: true
 			});
+			if (location.hash){
+                this.$(location.hash).collapse('show');
+            }
         }
     });
 });
