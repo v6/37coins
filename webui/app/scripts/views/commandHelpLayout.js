@@ -16,7 +16,7 @@ function(Backbone, HelpTmpl) {
                 toggle: true
             });
             var self = this;
-            this.$('.collapse').on('hidden.bs.collapse', function () {
+            this.$('.panel-collapse').on('hidden.bs.collapse', function () {
                 if (location.hash){
                     self.$(location.hash).collapse('show');
                 }

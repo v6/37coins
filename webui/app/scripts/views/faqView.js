@@ -13,8 +13,7 @@ function(Backbone, FaqTmpl) {
 			    toggle: true
 			});
             var self = this;
-            this.$('.collapse').on('hidden.bs.collapse', function () {
-                console.log('finished');
+            this.$('.panel-collapse').on('hidden.bs.collapse', function () {
                 if (location.hash){
                     self.$(location.hash).collapse('show');
                 }
