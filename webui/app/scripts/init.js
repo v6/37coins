@@ -67,7 +67,8 @@ require.config({
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         webfinger: 'vendor/webfinger',
         socketio: '../bower_components/socket.io-client/dist/socket.io',
-        intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput'
+        intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
+        userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
     waitSeconds: 0,
     config: {
