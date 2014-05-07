@@ -214,27 +214,6 @@ public class RestTest {
 		Assert.assertEquals(Locale.forLanguageTag("kr"),ds.getLocale());
 		Assert.assertNotNull(ds.getCn());
     }
-    
-    @Test
-	public void testClaim() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
-	final DataSet ds = new DataSet();
-	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841235", "+821027423984", "claim MultimillionaireWheelwrightImpersonator", 8087,
-		new ParserAction() {
-			@Override
-			public void handleResponse(DataSet data) {
-				ds.setAction(data.getAction());
-			}
-			@Override
-			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
-		});
-		parserClient.join();
-		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CLAIM);
-    }
 
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
@@ -669,6 +648,18 @@ public class RestTest {
 		Assert.assertEquals("821012345678", rv.get(0).getCn());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
+        //ask send help
+        r = given()
+            .formParam("from", "+821012345678")
+            .formParam("gateway", "+821027423984")
+            .formParam("message", "send")
+        .expect()
+            .statusCode(200)
+        .when()
+            .post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/WithdrawalReq");
+        rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
+        Assert.assertEquals("size expected",1, rv.size());
+        Assert.assertEquals(Action.HELP_SEND, rv.get(0).getAction());
 		//get price
 		r = given()
 			.formParam("from", "+491601234567")
@@ -683,7 +674,7 @@ public class RestTest {
 		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
 		PriceTick pt = (PriceTick)rv.get(0).getPayload();
 		Assert.assertEquals("EUR", pt.getCurCode());
-		Assert.assertNotNull(pt.getLast());
+		Assert.assertNotNull(pt.getLastFactored());
 		//get price
 		r = given()
 			.formParam("from", "+821012345678")
@@ -699,6 +690,7 @@ public class RestTest {
 		pt = (PriceTick)rv.get(0).getPayload();
 		Assert.assertEquals("KRW", pt.getCurCode());
 		Assert.assertNotNull(pt.getLast());
+		Assert.assertNull(pt.getLastFactored());
 		//test overuse
 		r = given()
 			.formParam("from", "+491601234567")
