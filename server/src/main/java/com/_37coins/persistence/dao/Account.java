@@ -21,7 +21,7 @@ public class Account extends Model {
 	private Locale locale;
 	
 	@Persistent
-	private Integer pin;
+	private String password;
 	
 	@Persistent
 	@Index
@@ -86,12 +86,12 @@ public class Account extends Model {
         return this;
     }
 
-    public Integer getPin() {
-		return pin;
+    public String getPassword() {
+		return password;
 	}
 
-	public Account setPin(Integer pin) {
-		this.pin = pin;
+	public Account setPassword(String password) {
+		this.password = password;
 		return this;
 	}
 
@@ -132,8 +132,6 @@ public class Account extends Model {
 	}
 
 	public void update(Model newInstance) {
-		Account n = (Account) newInstance;
-		if (null != n.getPin())this.setPin(n.getPin());
 	}
 
 }

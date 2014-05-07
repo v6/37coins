@@ -1,15 +1,28 @@
 package com._37coins.resources;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
+import javax.jdo.JDOException;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -25,6 +38,9 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
@@ -111,6 +127,160 @@ public class AccountResource {
             return "false";//ldap error
         }
 		return "true";
+	}
+	
+    @GET
+    @Path("/list/accounts")
+    public List<Account> listaccounts(){
+        return dao.queryList(null, Account.class);
+    }
+    
+    @POST
+    @Path("/list/accounts")
+    public int importAccounts(Map<String,String> body) throws IOException, NamingException, ParseException{
+        String ldapUrl = body.get("ldapUrl");
+        String ldapUser = body.get("ldapUser");
+        String ldapPw = body.get("ldapPw");
+        String ldapBaseDn = body.get("ldapBaseDn");
+        JndiLdapContextFactory jlc = new JndiLdapContextFactory();
+        jlc.setUrl(ldapUrl);
+        jlc.setAuthenticationMechanism("simple");
+        jlc.setSystemUsername(ldapUser);
+        jlc.setSystemPassword(ldapPw);
+        InitialLdapContext ctx = null;
+        AuthenticationToken at = new UsernamePasswordToken(ldapUser, ldapPw);
+        try {
+            ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
+        } catch (IllegalStateException | NamingException e) {
+            throw new IOException(e);
+        }
+        NamingEnumeration<?> namingEnum = null;
+
+        ctx.setRequestControls(null);
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        searchControls.setReturningAttributes(new String[]{"mobile","cn","createTimestamp","departmentNumber","displayName","manager","description","preferredLanguage","userPassword"});
+        namingEnum = ctx.search("ou=accounts," +
+                ldapBaseDn,
+                "(objectClass=person)", searchControls);
+        int count = 0;
+        while (namingEnum.hasMore()) {
+            Attributes atts = ((SearchResult) namingEnum.next())
+                    .getAttributes();
+            String cn = (String) atts.get("cn").get();
+            String displayName = (null!=atts.get("displayName"))?(String) atts.get("displayName").get():null;
+            String manager = (null!=atts.get("manager"))?(String) atts.get("manager").get():null;
+            String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
+            String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
+            String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
+            String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
+            String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
+            String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Date createdDate = sdf.parse(createTimestamp);
+            
+            try{
+                RNQuery q = new RNQuery().addFilter("cn", manager.substring(3, manager.indexOf(",")).toUpperCase());
+                Gateway owner = dao.queryEntity(q, Gateway.class);
+                
+                Account a = new Account()
+                    .setOwner(owner)
+                    .setApiToken(description)
+                    .setApiSecret(departmentNumber)
+                    .setDisplayName(displayName)
+                    .setLocale(DataSet.parseLocaleString(preferredLanguage))
+                    .setPassword(userPassword)
+                    .setMobile(mobile);
+                a.setCreationTime(createdDate);
+                dao.add(a);
+                count++;
+            }catch(JDOException e){
+                System.out.println("failed on "+cn + " ,mobile "+mobile);
+                e.printStackTrace();
+            }
+        }
+        return count;
+    }
+
+	
+	@GET
+	@Path("/list/gateways")
+	public List<Gateway> listGateways(){
+	    return dao.queryList(null, Gateway.class);
+	}
+	
+	@POST
+	@Path("/list/gateways")
+	public int importGateways(Map<String,String> body) throws IOException, NamingException, ParseException{
+	    String ldapUrl = body.get("ldapUrl");
+	    String ldapUser = body.get("ldapUser");
+	    String ldapPw = body.get("ldapPw");
+	    String ldapBaseDn = body.get("ldapBaseDn");
+        JndiLdapContextFactory jlc = new JndiLdapContextFactory();
+        jlc.setUrl(ldapUrl);
+        jlc.setAuthenticationMechanism("simple");
+        jlc.setSystemUsername(ldapUser);
+        jlc.setSystemPassword(ldapPw);
+        InitialLdapContext ctx = null;
+        AuthenticationToken at = new UsernamePasswordToken(ldapUser, ldapPw);
+        try {
+            ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
+        } catch (IllegalStateException | NamingException e) {
+            throw new IOException(e);
+        }
+        NamingEnumeration<?> namingEnum = null;
+
+        ctx.setRequestControls(null);
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        searchControls.setReturningAttributes(new String[]{"mail","mobile","createTimestamp","cn","departmentNumber","description","preferredLanguage","userPassword"});
+        namingEnum = ctx.search("ou=gateways," +
+                ldapBaseDn,
+                "(objectClass=person)", searchControls);
+        int count = 0;
+        while (namingEnum.hasMore()) {
+            Attributes atts = ((SearchResult) namingEnum.next())
+                    .getAttributes();
+            String cn = (String) atts.get("cn").get();
+            //ignore system accounts
+            if (cn.length()<15)
+                continue;
+            String mail = (null!=atts.get("mail"))?(String) atts.get("mail").get():null;
+            String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
+            String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
+            String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
+            String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
+            String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
+            String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Date createdDate = sdf.parse(createTimestamp);
+            if (null==mobile){
+                //System.out.println("not migrated" + cn);
+            }else{
+                NamingEnumeration<?> children = ctx.search("ou=accounts,"
+                        + ldapBaseDn,
+                        "(&(objectClass=person)(manager=cn="+cn+",ou=gateways,"+ldapBaseDn+"))", searchControls);
+                if (!children.hasMore()){
+                    //System.out.println("not migrated" + cn);
+                }else{
+                    Gateway g = new Gateway()
+                        .setCn(cn)
+                        .setApiSecret(departmentNumber)
+                        .setFee(new BigDecimal(description).setScale(8))
+                        .setLocale(DataSet.parseLocaleString(preferredLanguage))
+                        .setPassword(userPassword)
+                        .setEmail(mail)
+                        .setMobile(mobile);
+                    g.setCreationTime(createdDate);
+                    dao.add(g);
+                    count++;
+                }
+                children.close();
+            }
+        }
+        return count;
 	}
 	
 	@GET
@@ -275,18 +445,15 @@ public class AccountResource {
 				throw new WebApplicationException("account created already", Response.Status.BAD_REQUEST);
 			}
 	        String cnString = RandomStringUtils.random(16, "ABCDEFGHJKLMNPQRSTUVWXYZ123456789");
-	        byte[] salt = new byte[CryptoUtils.DEFAULT_SALT_SIZE];
-	        CryptoUtils.RANDOM.nextBytes(salt);
 	        String pw=null;
 	        try{
-	            pw = CryptoUtils.getSaltedPassword(accountRequest.getPassword().getBytes(), salt);
+	            pw = CryptoUtils.getSaltedPassword(accountRequest.getPassword().getBytes());
 	        }catch(NoSuchAlgorithmException ex){
 	            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 	        }
 			Gateway a = new Gateway()
                 .setEmail(accountRequest.getEmail())
                 .setCn(cnString)
-                .setSalt(salt)
                 .setPassword(pw);
             dao.add(a);
 			cache.remove("create"+accountRequest.getToken());

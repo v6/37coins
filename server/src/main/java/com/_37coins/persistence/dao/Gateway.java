@@ -46,10 +46,6 @@ public class Gateway extends Model {
 	private String password;
 	
 	@Persistent
-    @NotNull
-	private byte[] salt;
-	
-	@Persistent
 	@Index
 	@NotNull
 	@Unique
@@ -159,15 +155,6 @@ public class Gateway extends Model {
 		this.password = password;
 		return this;
 	}
-
-	public byte[] getSalt() {
-        return salt;
-    }
-
-    public Gateway setSalt(byte[] salt) {
-        this.salt = salt;
-        return this;
-    }
 
     @Override
 	public void update(Model newInstance) {

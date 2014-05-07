@@ -2,6 +2,8 @@ package com._37coins.resources;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -21,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Element;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
@@ -116,7 +120,7 @@ public class PlivoResource {
 		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
 		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
-		if (a.getPin()!=null){
+		if (a.getPassword()!=null){
 			//only check pin
 			try {
 				rv = new com._37coins.plivo.Response()
@@ -182,42 +186,45 @@ public class PlivoResource {
 			@FormParam("Digits") String digits){
 		com._37coins.plivo.Response rv =null;
 		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
-		int pin = Integer.parseInt(digits);
-		if (pin == a.getPin()){
-		    a.setPinWrongCount(0);
-			Element e = cache.get(workflowId);
-			Transaction tx = (Transaction) e.getObjectValue();
-			tx.setState(State.CONFIRMED);
-			cache.put(e);
-		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
-		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
-			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
-			try{
-			    rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",new DataSet().setLocaleString(locale))));
-            }catch(IOException | TemplateException ex){
-                log.error("plivo exception",ex);
-                ex.printStackTrace();
-                throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-            }
-		}else{
-		    a.setPinWrongCount(a.getPinWrongCount()+1);
-			String callText;
-			try{
-				if (a.getPinWrongCount()>=3){
-					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
-					rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(callText).setLanguage(locale));
-				}else{
-					callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
-					rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(callText).setLanguage(locale))
-					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
-				}
-			}catch(IOException | TemplateException ex){
-				log.error("plivo exception",ex);
-				ex.printStackTrace();
-				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-			}
+		try {
+    		if (CryptoUtils.verifySaltedPassword(digits.getBytes(), a.getPassword())){
+    		    a.setPinWrongCount(0);
+    			Element e = cache.get(workflowId);
+    			Transaction tx = (Transaction) e.getObjectValue();
+    			tx.setState(State.CONFIRMED);
+    			cache.put(e);
+    		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+    		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
+    			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
+    			try{
+    			    rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",new DataSet().setLocaleString(locale))));
+                }catch(IOException | TemplateException ex){
+                    log.error("plivo exception",ex);
+                    ex.printStackTrace();
+                    throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+                }
+    		}else{
+    		    a.setPinWrongCount(a.getPinWrongCount()+1);
+    			String callText;
+    			try{
+    				if (a.getPinWrongCount()>=3){
+    					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
+    					rv = new com._37coins.plivo.Response()
+    					.add(new Speak().setText(callText).setLanguage(locale));
+    				}else{
+    					callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
+    					rv = new com._37coins.plivo.Response()
+    					.add(new Speak().setText(callText).setLanguage(locale))
+    					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
+    				}
+    			}catch(IOException | TemplateException ex){
+    				log.error("plivo exception",ex);
+    				ex.printStackTrace();
+    				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+    			}
+    		}
+		}catch(NoSuchAlgorithmException | UnsupportedEncodingException | IllegalStateException | CacheException | IllegalArgumentException ex){
+		    ex.printStackTrace();
 		}
 		try {
 			StringWriter sw = new StringWriter();
@@ -278,7 +285,7 @@ public class PlivoResource {
 	        if (digits!=null && prev != null && Integer.parseInt(digits)==Integer.parseInt(prev)){
 	        	//set password
 	            Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
-	            a.setPin(Integer.parseInt(digits));
+	            a.setPassword(CryptoUtils.getSaltedPassword(digits.getBytes()));
 	        	//continue transaction
 				Element e = cache.get(workflowId);
 				Transaction tx = (Transaction) e.getObjectValue();
@@ -304,7 +311,7 @@ public class PlivoResource {
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
-        } catch (IOException | TemplateException e) {
+        } catch (IOException | TemplateException | NoSuchAlgorithmException e) {
         	log.error("plivo confirm exception",e);
         	e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);

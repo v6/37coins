@@ -416,7 +416,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public LDAPListener getLdapListener(GenericRepository dao){
-			    LDAPListenerConfig config = new LDAPListenerConfig(1389, new JdoRequestHandler(dao));
+			    LDAPListenerConfig config = new LDAPListenerConfig(2389, new JdoRequestHandler(dao));
 			    LDAPListener listener = new LDAPListener(config);
 			    return listener;
 			}

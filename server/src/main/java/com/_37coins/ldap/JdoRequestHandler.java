@@ -1,5 +1,6 @@
 package com._37coins.ldap;
 
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
@@ -70,13 +71,12 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
         Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", gwDn.substring(3, gwDn.indexOf(","))), Gateway.class, false);
         if (null!=g){
             try {
-                String pw = CryptoUtils.getSaltedPassword(request.getSimplePassword().getValue(), g.getSalt());
-                if (g.getPassword().equals(pw)){
+                if (CryptoUtils.verifySaltedPassword(request.getSimplePassword().getValue(),g.getPassword())){
                     return new LDAPMessage(messageId, new BindResponseProtocolOp(
                             ResultCode.SUCCESS_INT_VALUE, null, null, null, null),
                             Collections.<Control> emptyList());                    
                 }
-            } catch (NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
