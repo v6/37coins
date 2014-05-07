@@ -13,4 +13,9 @@
 <#else>
 <#assign amtFiat = "">
 </#if>
-${resBundle("InsufficientFunds",payload.miliBalance?string("#,##0.###"),balFiat,payload.miliAmount?string("#,##0.###"),amtFiat)}
+<#assign bal = payload.miliBalance>
+<#if bal < 0>
+<#assign bal = 0>
+<#assign balFiat ="">
+</#if>
+${resBundle("InsufficientFunds",bal?string("#,##0.#####"),balFiat,payload.miliAmount?string("#,##0.###"),amtFiat)}
