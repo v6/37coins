@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale.Builder;
 
 import javax.inject.Inject;
 import javax.naming.NameNotFoundException;
@@ -44,6 +45,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.joda.money.CurrencyUnit;
 import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -493,9 +495,8 @@ public class ParserResource {
 			data.setGwFee(w.getAmount());
 			data.setPayload(fiatPriceProvider.getLocalCurValue(w.getAmount(),data.getLocale()));
 		}else{
-			BigDecimal one = new BigDecimal("1");
-			data.setGwFee(one);
-			data.setPayload(fiatPriceProvider.getLocalCurValue(one,data.getLocale()));
+		    CurrencyUnit cu = CurrencyUnit.of(new Builder().setRegion(data.getLocale().getCountry()).build());
+			data.setPayload(fiatPriceProvider.getLocalCurValue(null,cu));
 		}
 		try {
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();

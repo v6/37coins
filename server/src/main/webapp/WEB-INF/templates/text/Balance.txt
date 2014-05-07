@@ -10,5 +10,6 @@
 <#assign bal = payload.miliBalance>
 <#if bal < 0>
 <#assign bal = 0>
+<#assign fiat ="">
 </#if>
-${resBundle("Balance",bal?string("#,##0.###"),fiat)}
+${resBundle("Balance",bal?string("#,##0.#####"),fiat)}
