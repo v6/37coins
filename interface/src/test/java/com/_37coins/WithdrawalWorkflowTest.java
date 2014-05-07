@@ -542,7 +542,7 @@ public class WithdrawalWorkflowTest {
 				&& trace.get(1).getAction()==Action.WITHDRAWAL_CONF
 				&& trace.get(2).getAction()==Action.DEPOSIT_CONF);
 		Withdrawal w = (Withdrawal)trace.get(1).getPayload();
-		Assert.assertEquals(new BigDecimal("2.49940000"),w.getAmount());
+		Assert.assertEquals(new BigDecimal("2.49950000"),w.getAmount());
 	}
 
 }
