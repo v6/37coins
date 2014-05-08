@@ -52,6 +52,7 @@ public class InterpreterFilter implements Filter {
 		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet responseData = responseList.get(0);
 		InitialLdapContext ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+	    String gwCn = httpReq.getParameter("gwCn");
 		//get user from directory
 		try{
 			//read the user
@@ -73,7 +74,7 @@ public class InterpreterFilter implements Filter {
 			BigDecimal gwFee = (gwAtts.get("description")!=null)?new BigDecimal((String)gwAtts.get("description").get()).setScale(8):null;
 			String gwMail = (gwAtts.get("mail")!=null)?(String)gwAtts.get("mail").get():null;
 			String gwMobile = (gwAtts.get("mobile")!=null)?(String)gwAtts.get("mobile").get():null;
-			String gwCn = (gwAtts.get("cn")!=null)?(String)gwAtts.get("cn").get():null;
+			gwCn = (gwAtts.get("cn")!=null)?(String)gwAtts.get("cn").get():null;
 
 			Attributes toModify = new BasicAttributes();
 			//check if gateway changed
@@ -119,7 +120,7 @@ public class InterpreterFilter implements Filter {
 					//search the gateway from directory
 					String searchAtr = (responseData.getTo().getAddressType() == MsgType.SMS)?"mobile":"mail";
 					Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+searchAtr+"="+responseData.getTo().getGateway()+"))", ctx).getAttributes();
-					String gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
+					gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
 					BigDecimal gwFee = (atts.get("description")!=null)?new BigDecimal((String)atts.get("description").get()).setScale(8):null;
 					//build a new user and save
 					Attributes attributes=new BasicAttributes();
@@ -158,6 +159,10 @@ public class InterpreterFilter implements Filter {
 			e.printStackTrace();
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+        if (gwCn!=null){
+            responseData.getTo().setGateway(gwCn);
+            responseData.setGwCn(gwCn);
+        }
 		chain.doFilter(request, response);
 	}
 	

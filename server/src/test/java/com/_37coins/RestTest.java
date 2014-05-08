@@ -257,6 +257,7 @@ public class RestTest {
             public void handleResponse(DataSet data) {
                 ds.setAction(data.getAction());
                 ds.setTo(data.getTo());
+                ds.setGwCn(data.getGwCn());
             }          
             @Override
             public void handleWithdrawal(DataSet data) {}
@@ -642,7 +643,7 @@ public class RestTest {
 		List<DataSet> rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals("test@test.com", rv.get(0).getCn());
-		Assert.assertEquals("mail@37coins.com", rv.get(0).getTo().getGateway());
+		Assert.assertEquals("MAILN1JS2Z34MAIL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get btc address
 		r = given()
@@ -823,6 +824,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "balance")
 		.expect()
 			.statusCode(200)
@@ -960,6 +962,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "send 10 +491607654321")
 		.expect()
 			.statusCode(200)
@@ -988,6 +991,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "req 10")
 		.expect()
 			.statusCode(200)

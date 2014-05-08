@@ -70,8 +70,8 @@ public class ParserFilter implements Filter {
 		// parse parameters
 		String from = httpReq.getParameter("from");
 		String gateway = httpReq.getParameter("gateway");
-		String gwCn = httpReq.getParameter("gwCn");
 		String message = httpReq.getParameter("message");
+		String gwCn = httpReq.getParameter("gwCn");
 		// Parse the locale
 		String acceptLng = httpReq.getHeader("Accept-Language");
 		Locale locale = DataSet.parseLocaleString(acceptLng);
@@ -103,10 +103,6 @@ public class ParserFilter implements Filter {
 			}
 			// parse message into dataset
 			DataSet responseData = process(md, message, locale,Action.fromString(actionString));
-			if (gwCn!=null){
-			    responseData.getTo().setGateway(gwCn);
-			    responseData.setGwCn(gwCn);
-			}
 			List<DataSet> responseList = new ArrayList<>();
 			responseList.add(responseData);
 			//use it
@@ -114,6 +110,10 @@ public class ParserFilter implements Filter {
 				httpReq.setAttribute("dsl", responseList);
 				chain.doFilter(request, response);
 			}else{
+		        if (gwCn!=null){
+		            responseData.getTo().setGateway(gwCn);
+		            responseData.setGwCn(gwCn);
+		        }
 				respond(responseList,response);
 			}
 		} catch (Exception e) {
