@@ -174,7 +174,7 @@ public class ParserResource {
 		String gwLng = null;
 		String cnString = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
-		    if (null == referer && null != gwCn){
+		    if (null == referer && null != gwCn && gwCn.length() > 0){
 		        try {
 		            String prferredDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
                     Attributes gwAtts = ctx.getAttributes(prferredDn,new String[]{"mobile"});

@@ -165,7 +165,7 @@ public class RestTest {
     	//run invite
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", null, null, Action.SIGNUP.toString(), 8087,
+		parserClient.start("+821039841234", null, "", Action.SIGNUP.toString(), 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {
