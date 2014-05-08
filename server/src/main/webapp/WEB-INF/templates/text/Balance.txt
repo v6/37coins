@@ -12,4 +12,9 @@
 <#assign bal = 0>
 <#assign fiat ="">
 </#if>
-${resBundle("Balance",bal?string("#,##0.#####"),fiat)}
+<#if action = "BALANCE">
+<#assign inst = resBundle.BalanceInst>
+<#else>
+<#assign inst = "">
+</#if>
+${resBundle("Balance",bal?string("#,##0.#####"),fiat,inst)}

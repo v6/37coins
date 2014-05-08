@@ -1,2 +1,2 @@
 <#setting locale=locale>
-${resBundle("AccountDeleted","37Coins")}
+${resBundle("AccountDeleted","37coins")}

@@ -1,2 +1,2 @@
 <#setting locale=locale>
-${resBundle("GatewayAlert","37Coins")}
+${resBundle("GatewayAlert","37coins")}
