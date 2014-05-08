@@ -183,40 +183,8 @@ public class RestTest {
 		});
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
-		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
+		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
-    }
-    
-    @Test
-    public void testWebInvitePrefered() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
-        //flush
-        given()
-            .contentType(ContentType.JSON)
-        .when()
-            .post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
-        //run invite
-        final DataSet ds = new DataSet();
-        ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-        parserClient.start("+821039841233", null, "PZV4N1JS2Z3476NM", Action.SIGNUP.toString(), 8087,
-        new ParserAction() {
-            @Override
-            public void handleResponse(DataSet data) {
-                ds.setAction(data.getAction());
-                ds.setTo(data.getTo());
-                ds.setCn(data.getCn());
-            }
-            
-            @Override
-            public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
-            @Override
-            public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
-            @Override
-            public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
-        });
-        parserClient.join();
-        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
-        Assert.assertEquals("PZV4N1JS2Z3476NM",ds.getTo().getGateway());
-        Assert.assertNotNull(ds.getCn());
     }
     
     @Test
@@ -674,7 +642,7 @@ public class RestTest {
 		Assert.assertEquals(new BigDecimal("0.0001").setScale(8), w.getFee());
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
-		Assert.assertEquals("NZV4N1JS2Z3476NK", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821053215679", rv.get(1).getCn());
 		//say hi
 		r = given()

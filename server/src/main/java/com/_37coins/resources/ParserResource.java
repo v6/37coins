@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Locale.Builder;
 
 import javax.inject.Inject;
-import javax.mail.internet.AddressException;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -69,7 +68,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
@@ -154,7 +152,7 @@ public class ParserResource {
 	public Response signup(){
 		DataSet data = responseList.get(0);
 		responseList.clear();
-		Map<String,String> rv = signup(data.getTo(), null, data.getGwCn(), data.getLocaleString(), data.getService());
+		Map<String,String> rv = signup(data.getTo(), null, null, data.getLocaleString(), data.getService());
 		try {
 			if (null==rv){
 				responseList.clear();
@@ -174,18 +172,6 @@ public class ParserResource {
 		String gwLng = null;
 		String cnString = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
-		    if (null == referer && null != gwCn){
-		        try {
-		            String prferredDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-                    Attributes gwAtts = ctx.getAttributes(prferredDn,new String[]{"mobile"});
-                    String mobile = (gwAtts.get("mobile")!=null)?(String)gwAtts.get("mobile").get():null;
-                    referer = MessageAddress.fromString(mobile, (String)null);
-                    referer.setGateway(gwCn);
-                } catch (NamingException | AddressException | NumberParseException e) {
-                    log.error("signup exception",e);
-                    e.printStackTrace();
-                }
-		    }
 			//set gateway from referring user's gateway
 			if (null != referer && referer.getAddressType() == MsgType.SMS 
 					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){

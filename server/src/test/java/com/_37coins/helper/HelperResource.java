@@ -59,9 +59,7 @@ public class HelperResource {
 	public void init(){
 		Map<String,GatewayUser> gw = new HashMap<>();
 		gw.put("DEV4N1JS2Z3476DE",new GatewayUser().setMobile("+491606789123").setId("DEV4N1JS2Z3476DE"));
-		gw.put("NZV4N1JS2Z3476NK",new GatewayUser().setMobile("+821027423933").setId("NZV4N1JS2Z3476NK"));
 		gw.put("OZV4N1JS2Z3476NL",new GatewayUser().setMobile("+821027423984").setId("OZV4N1JS2Z3476NL"));
-		gw.put("PZV4N1JS2Z3476NM",new GatewayUser().setMobile("+821027423985").setId("PZV4N1JS2Z3476NM"));
 		cache.put(new Element("gateways",gw));
 		cache.put(new Element("emailVersmsemail",new EmailFactor().setTaskToken("taskToken").setEmailToken("bla")));
 	}
