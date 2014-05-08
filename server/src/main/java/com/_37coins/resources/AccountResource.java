@@ -34,6 +34,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -57,6 +59,8 @@ import com._37coins.web.PasswordRequest;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
@@ -185,13 +189,12 @@ public class AccountResource {
 	
 	@POST
 	@Path("/invite")
-	public Map<String, String> invite(GatewayUser gu){
+	public void invite(GatewayUser gu, @Suspended final AsyncResponse asyncResponse){
 		final DataSet ds = new DataSet();
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-		String mobile = null;
 		try{
 			PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
-			mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
+			final String mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
 			//check if it's not an account already
 			ctx.setRequestControls(null);
 			SearchControls searchControls = new SearchControls();
@@ -203,7 +206,7 @@ public class AccountResource {
 			if (namingEnum.hasMore()){
 				throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
 			}
-			parserClient.start(mobile, null, null, Action.SIGNUP.toString(), localPort,
+			parserClient.start(mobile, null, gu.getPreferredGateway(), Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
 				@Override
 				public void handleResponse(DataSet data) {
@@ -213,36 +216,39 @@ public class AccountResource {
 					ds.setAction(data.getAction());
 					ds.setCn(data.getCn());
 					ds.setTo(data.getTo());
+			       if (null!=ds && ds.getAction()==Action.SIGNUP){
+			            //the web frontend will call the webfinger resource after this
+			            //make sure it will only search in the cache
+			            cache.put(new Element("addressReq"+mobile.replace("+", ""), true));
+			            Map<String,String> rv = new HashMap<>();
+			            rv.put("cn",ds.getCn());
+			            try {
+                            asyncResponse.resume(Response.ok(new ObjectMapper().writeValueAsString(rv), "application/json").build());
+                        } catch (JsonProcessingException e) {
+                            asyncResponse.resume(e);
+                        }
+			        }else if (null!=ds && ds.getAction()==Action.DST_ERROR){
+			            throw new WebApplicationException("no gateway found",
+			                    javax.ws.rs.core.Response.Status.NOT_FOUND);
+			        }
+			        throw new WebApplicationException("unknown", javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 				}
 				@Override
-				public void handleDeposit(DataSet data) {}
+				public void handleDeposit(DataSet data) {
+				    asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+				}
 				@Override
-				public void handleConfirm(DataSet data) {}
+				public void handleConfirm(DataSet data) {
+				    asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+				}
 				@Override
-				public void handleWithdrawal(DataSet data) {}
+				public void handleWithdrawal(DataSet data) {
+				    asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+				}
 			});
 		}catch(NumberParseException | NamingException e){
-			throw new WebApplicationException("number format issue",
-					javax.ws.rs.core.Response.Status.BAD_REQUEST);
+		    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
 		}
-		try {
-			parserClient.join(1500L);
-		} catch (InterruptedException e2) {
-			throw new WebApplicationException("could not join parser thread",
-					javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (null!=ds && ds.getAction()==Action.SIGNUP){
-			//the web frontend will call the webfinger resource after this
-			//make sure it will only search in the cache
-			cache.put(new Element("addressReq"+mobile.replace("+", ""), true));
-			Map<String,String> rv = new HashMap<>();
-			rv.put("cn",ds.getCn());
-			return rv;
-		}else if (null!=ds && ds.getAction()==Action.DST_ERROR){
-			throw new WebApplicationException("no gateway found",
-					javax.ws.rs.core.Response.Status.NOT_FOUND);
-		}
-		throw new WebApplicationException("unknown", javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 	}
 	
 	
