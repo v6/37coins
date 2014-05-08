@@ -183,7 +183,7 @@ public class RestTest {
 		});
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
-		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
     }
     
@@ -674,7 +674,7 @@ public class RestTest {
 		Assert.assertEquals(new BigDecimal("0.0001").setScale(8), w.getFee());
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
-		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("NZV4N1JS2Z3476NK", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821053215679", rv.get(1).getCn());
 		//say hi
 		r = given()
