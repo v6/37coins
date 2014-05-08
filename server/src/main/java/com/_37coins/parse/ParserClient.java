@@ -37,6 +37,7 @@ public class ParserClient extends Thread {
 	public static Logger log = LoggerFactory.getLogger(ParserClient.class);
 	private String from;
 	private String gateway;
+	private String gwCn;
 	private String message;
 	private int localPort;
 	private final CommandParser commandParser;
@@ -50,9 +51,10 @@ public class ParserClient extends Thread {
 		this.ga = ga;
 	}
 	
-	public void start(String from, String gateway, String message, int localPort, ParserAction pa){
+	public void start(String from, String gateway, String gwCn, String message, int localPort, ParserAction pa){
 		this.from = from;
 		this.gateway = gateway;
+		this.gwCn = gwCn;
 		this.message = message;
 		this.localPort = localPort;
 		this.pa = pa;
@@ -68,6 +70,7 @@ public class ParserClient extends Thread {
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("from", from));
 		nvps.add(new BasicNameValuePair("gateway", gateway));
+		nvps.add(new BasicNameValuePair("gwCn", gwCn));
 		nvps.add(new BasicNameValuePair("message", message));
 		if (null!=locale){
 			req.addHeader("Accept-Language", locale.toString().replace("_", "-"));

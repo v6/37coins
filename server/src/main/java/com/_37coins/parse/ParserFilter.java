@@ -70,6 +70,7 @@ public class ParserFilter implements Filter {
 		// parse parameters
 		String from = httpReq.getParameter("from");
 		String gateway = httpReq.getParameter("gateway");
+		String gwCn = httpReq.getParameter("gwCn");
 		String message = httpReq.getParameter("message");
 		// Parse the locale
 		String acceptLng = httpReq.getHeader("Accept-Language");
@@ -102,6 +103,9 @@ public class ParserFilter implements Filter {
 			}
 			// parse message into dataset
 			DataSet responseData = process(md, message, locale,Action.fromString(actionString));
+			if (gwCn!=null){
+			    responseData.getTo().setGateway(gwCn);
+			}
 			List<DataSet> responseList = new ArrayList<>();
 			responseList.add(responseData);
 			//use it
