@@ -204,7 +204,7 @@ public class AccountResource {
 			String sanitizedMobile = BasicAccessAuthFilter.escapeLDAPSearchFilter(mobile);
 			namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+sanitizedMobile+"))", searchControls);
 			if (namingEnum.hasMore()){
-				throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
+			    asyncResponse.resume(Response.status(Response.Status.CONFLICT).build());
 			}
 			parserClient.start(mobile, null, gu.getPreferredGateway(), Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
@@ -216,7 +216,7 @@ public class AccountResource {
 					ds.setAction(data.getAction());
 					ds.setCn(data.getCn());
 					ds.setTo(data.getTo());
-			       if (null!=ds && ds.getAction()==Action.SIGNUP){
+			        if (null!=ds && ds.getAction()==Action.SIGNUP){
 			            //the web frontend will call the webfinger resource after this
 			            //make sure it will only search in the cache
 			            cache.put(new Element("addressReq"+mobile.replace("+", ""), true));
@@ -228,10 +228,9 @@ public class AccountResource {
                             asyncResponse.resume(e);
                         }
 			        }else if (null!=ds && ds.getAction()==Action.DST_ERROR){
-			            throw new WebApplicationException("no gateway found",
-			                    javax.ws.rs.core.Response.Status.NOT_FOUND);
+			            asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
 			        }
-			        throw new WebApplicationException("unknown", javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+			        asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 				}
 				@Override
 				public void handleDeposit(DataSet data) {
