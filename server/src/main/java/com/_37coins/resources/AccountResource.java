@@ -203,7 +203,7 @@ public class AccountResource {
 			if (namingEnum.hasMore()){
 				throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
 			}
-			parserClient.start(mobile, null, null, Action.SIGNUP.toString(), localPort,
+			parserClient.start(mobile, null, gu.getPreferredGateway(), Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
 				@Override
 				public void handleResponse(DataSet data) {

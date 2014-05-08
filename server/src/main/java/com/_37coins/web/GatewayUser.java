@@ -17,6 +17,7 @@ public class GatewayUser {
 	private List<String> roles;
 	private Locale locale;
 	private String mobile;
+	private String preferredGateway;
 	private String code;
 	private BigDecimal fee;
 	private String envayaToken;
@@ -34,7 +35,16 @@ public class GatewayUser {
 		return locale;
 	}
 	
-	@JsonIgnore
+	public String getPreferredGateway() {
+        return preferredGateway;
+    }
+
+    public GatewayUser setPreferredGateway(String preferredGateway) {
+        this.preferredGateway = preferredGateway;
+        return this;
+    }
+
+    @JsonIgnore
 	public String getLocaleString() {
 		if (null!=locale){
 			return locale.toString().replace("_", "-");

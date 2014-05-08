@@ -105,6 +105,7 @@ public class ParserFilter implements Filter {
 			DataSet responseData = process(md, message, locale,Action.fromString(actionString));
 			if (gwCn!=null){
 			    responseData.getTo().setGateway(gwCn);
+			    responseData.setGwCn(gwCn);
 			}
 			List<DataSet> responseList = new ArrayList<>();
 			responseList.add(responseData);

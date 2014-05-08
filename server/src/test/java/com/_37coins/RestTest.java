@@ -188,6 +188,38 @@ public class RestTest {
     }
     
     @Test
+    public void testWebInvitePrefered() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+        //flush
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
+        //run invite
+        final DataSet ds = new DataSet();
+        ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+        parserClient.start("+821039841233", null, "PZV4N1JS2Z3476NM", Action.SIGNUP.toString(), 8087,
+        new ParserAction() {
+            @Override
+            public void handleResponse(DataSet data) {
+                ds.setAction(data.getAction());
+                ds.setTo(data.getTo());
+                ds.setCn(data.getCn());
+            }
+            
+            @Override
+            public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+        });
+        parserClient.join();
+        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
+        Assert.assertEquals("PZV4N1JS2Z3476NM",ds.getTo().getGateway());
+        Assert.assertNotNull(ds.getCn());
+    }
+    
+    @Test
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
