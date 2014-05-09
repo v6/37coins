@@ -462,12 +462,12 @@ public class AccountResource {
 	@Path("/password/request")
 	public void requestPwReset(PasswordRequest pwRequest){
 		// no ticket, no service
-		Element e = cache.get("ticket"+pwRequest.getTicket());
+		Element e = cache.get(TicketResource.TICKET_SCOPE+pwRequest.getTicket());
 		if (null==e){
 			throw new WebApplicationException("ticket required for this request.", Response.Status.BAD_REQUEST);
 		}else{
 			if (e.getHitCount()>3){
-				cache.remove("ticket"+pwRequest.getTicket());
+				cache.remove(TicketResource.TICKET_SCOPE+pwRequest.getTicket());
 				throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
 			}
 		}
