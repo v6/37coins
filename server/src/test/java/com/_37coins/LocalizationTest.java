@@ -390,6 +390,16 @@ public class LocalizationTest {
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
+   @Test
+    public void testTransactionCanceled() throws IOException, TemplateException {
+        rsp.setAction(Action.TX_CANCELED);
+        String s = ef.constructTxt(rsp);
+        System.out.println(s);
+        ef.constructSubject(rsp);
+        Assert.assertTrue("SMS to long",s.getBytes().length<140);
+    }
+    
+	
 	@Test
 	public void testVoice() throws IOException, TemplateException {
 		rsp.setAction(Action.VOICE);
