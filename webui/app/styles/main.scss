@@ -825,6 +825,11 @@ h2, h1 {
 	    }
 	  }
 	}
+    .legal {
+      h2 {
+        text-align: left;
+      }
+    }
 	.blue {
 	  background-color: $pantone-blue-300; 
 	  color: white;

@@ -37,9 +37,11 @@ define(['backbone',
     'views/mobileInputView',
     'views/gatewayLayout',
     'views/notFoundView',
+    'views/termsView',
+    'views/privacyView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -60,6 +62,8 @@ define(['backbone',
             'help/SMSgateway': 'showFaq',
             'help/SMSwallet': 'showCommandHelp',
             'account/:mobile': 'showAccount',
+            'legal/terms': 'showTerms',
+            'legal/privacy': 'showPrivacy',
             'reset': 'showReset',
             'about': 'showAbout',
             'signUp': 'showSignUp',
@@ -231,6 +235,14 @@ define(['backbone',
     };
     Controller.showLogout = function() {
         var contentView = new LogoutView();
+        Communicator.mediator.trigger('app:show',contentView);
+    };
+    Controller.showTerms = function() {
+        var contentView = new TermsView();
+        Communicator.mediator.trigger('app:show',contentView);
+    };
+    Controller.showPrivacy = function() {
+        var contentView = new PrivacyView();
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showMerchant = function() {
