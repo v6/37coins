@@ -54,12 +54,14 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	Withdrawal w = (Withdrawal)data.getPayload();
     	BigDecimal amount = w.getAmount();
     	BigDecimal fee = w.getFee().setScale(8);
+        if (null!=w.getPayDest() && w.getPayDest().getAddressType()==PaymentType.ACCOUNT){
+            bcFee=BigDecimal.ZERO;
+        }
     	//for withdrawing everything
-    	if (amount.equals(BigDecimal.ZERO) && w.getConfKey()!=null){
+    	if (amount.equals(BigDecimal.ZERO)){
     		amount = balance.get().subtract(fee).subtract(bcFee);
     		w.setAmount(amount);
     	}
-    	
     	if (balance.get().compareTo(amount.add(fee).add(bcFee).setScale(8))<0){
     		//balance not sufficient
     		data.setPayload(new Withdrawal()
@@ -81,9 +83,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	}else{
     		//balance sufficient, now secure transaction authenticity 
 			final Promise<Action> response;
-			if (w.getConfKey()!=null){
-				response = msgClient.otpConfirmation(data.getCn(), w.getConfKey(),data.getLocale());
-			}else if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("100.0"))) > 0){
+			if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("100.0"))) > 0){
 				response = msgClient.phoneConfirmation(data,contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
 				w.setConfKey(WithdrawalWorkflow.VOICE_VER_TOKEN);
 			}else {

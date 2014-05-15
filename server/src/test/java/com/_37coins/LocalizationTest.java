@@ -390,6 +390,16 @@ public class LocalizationTest {
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
+   @Test
+    public void testTransactionCanceled() throws IOException, TemplateException {
+        rsp.setAction(Action.TX_CANCELED);
+        String s = ef.constructTxt(rsp);
+        System.out.println(s);
+        ef.constructSubject(rsp);
+        Assert.assertTrue("SMS to long",s.getBytes().length<140);
+    }
+    
+	
 	@Test
 	public void testVoice() throws IOException, TemplateException {
 		rsp.setAction(Action.VOICE);
@@ -474,17 +484,37 @@ public class LocalizationTest {
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
+
+	
+    @Test
+    public void testPriceNoParam() throws IOException, TemplateException {
+        rsp.setAction(Action.PRICE)
+            .setLocale(new Locale("en","US"))
+            .setPayload(new PriceTick().setLast(new BigDecimal("500.01")));
+        String s = ef.constructTxt(rsp);
+        System.out.println(s);
+        Assert.assertTrue("SMS to long",s.getBytes().length<140);
+    }
 	
 	@Test
 	public void testPrice() throws IOException, TemplateException {
 		rsp.setAction(Action.PRICE)
-			.setGwFee(new BigDecimal("1"))
+			.setGwFee(new BigDecimal("0.5"))
 			.setLocale(new Locale("en","US"))
 			.setPayload(new PriceTick().setLast(new BigDecimal("500.01")).setLastFactored(new BigDecimal("250")).setCurCode("EUR"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
+	
+	   @Test
+	    public void testHelpSend() throws IOException, TemplateException {
+	        rsp.setAction(Action.HELP_SEND)
+	            .setLocale(new Locale("en","US"));
+	        String s = ef.constructTxt(rsp);
+	        System.out.println(s);
+	        Assert.assertTrue("SMS to long",s.getBytes().length<140);
+	    }
 	
 	@Test
 	public void testSell() throws IOException, TemplateException {

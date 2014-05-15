@@ -17,6 +17,7 @@ import net.sf.ehcache.Element;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
@@ -73,7 +74,14 @@ public class FiatPriceProvider {
 		if (null==e){
 			Map<String,PriceTick> temp = null;
 			try{
-				HttpClient client = HttpClientBuilder.create().build();
+			    RequestConfig defaultRequestConfig = RequestConfig.custom()
+			        .setSocketTimeout(500)
+			        .setConnectTimeout(500)
+			        .setConnectionRequestTimeout(500)
+			        .setStaleConnectionCheckEnabled(true)
+			        .build();
+				HttpClient client = HttpClientBuilder.create()
+				    .setDefaultRequestConfig(defaultRequestConfig).build();
 				HttpGet someHttpGet = new HttpGet(url+"/all");
 				URI uri = new URIBuilder(someHttpGet.getURI()).build();
 				HttpRequestBase request = new HttpGet(uri);

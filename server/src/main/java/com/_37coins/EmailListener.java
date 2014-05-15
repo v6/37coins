@@ -65,7 +65,7 @@ public class EmailListener implements MessageCountListener {
 					throw new MessagingException("could not parse from field");
 				}
 				from = ((InternetAddress) m.getFrom()[0]).getAddress();
-				parserClient.start(from, MessagingServletConfig.imapUser, m.getSubject(), MessagingServletConfig.localPort,
+				parserClient.start(from, from, MessagingServletConfig.imapUser, m.getSubject(), MessagingServletConfig.localPort,
 				new ParserAction() {
 					@Override
 					public void handleWithdrawal(DataSet data) {

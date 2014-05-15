@@ -126,7 +126,7 @@ public class RestTest {
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039842742", "+821027423984", "send 100 +821039842743", 8087,
+		parserClient.start("+821039842742", "+821027423984", "+821027423984", "send 100 +821039842743", 8087,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
@@ -165,7 +165,7 @@ public class RestTest {
     	//run invite
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", null, Action.SIGNUP.toString(), 8087,
+		parserClient.start("+821039841234", null, "", Action.SIGNUP.toString(), 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {
@@ -183,15 +183,47 @@ public class RestTest {
 		});
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
-		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
 		Assert.assertNotNull(ds.getCn());
+    }
+    
+    @Test
+    public void testWebInvitePrefered() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+        //flush
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
+        //run invite
+        final DataSet ds = new DataSet();
+        ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+        parserClient.start("+821039841233", null, "PZV4N1JS2Z3476NM", Action.SIGNUP.toString(), 8087,
+        new ParserAction() {
+            @Override
+            public void handleResponse(DataSet data) {
+                ds.setAction(data.getAction());
+                ds.setTo(data.getTo());
+                ds.setCn(data.getCn());
+            }
+            
+            @Override
+            public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+        });
+        parserClient.join();
+        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
+        Assert.assertEquals("PZV4N1JS2Z3476NM",ds.getTo().getGateway());
+        Assert.assertNotNull(ds.getCn());
     }
     
     @Test
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841235", "+821027423984", Action.VOICE.toString(), 8087,
+		parserClient.start("+821039841235", "+821027423984", "+821027423984", Action.VOICE.toString(), 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}			
@@ -216,31 +248,34 @@ public class RestTest {
     }
     
     @Test
-	public void testClaim() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
-	final DataSet ds = new DataSet();
-	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841235", "+821027423984", "claim MultimillionaireWheelwrightImpersonator", 8087,
-		new ParserAction() {
-			@Override
-			public void handleResponse(DataSet data) {
-				ds.setAction(data.getAction());
-			}
-			@Override
-			public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
-		});
-		parserClient.join();
-		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CLAIM);
+    public void testSend() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+        final DataSet ds = new DataSet();
+        ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+        parserClient.start("+821012345678", "+821027423984", "OZV4N1JS2Z3476NL", "send", 8087,
+        new ParserAction() {
+            @Override
+            public void handleResponse(DataSet data) {
+                ds.setAction(data.getAction());
+                ds.setTo(data.getTo());
+                ds.setGwCn(data.getGwCn());
+            }          
+            @Override
+            public void handleWithdrawal(DataSet data) {}
+            @Override
+            public void handleDeposit(DataSet data) {}
+            @Override
+            public void handleConfirm(DataSet data) {}
+        });
+        parserClient.join();
+        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.HELP_SEND);
+        Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
     }
 
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", "+821027423984", "req 0.01", 8087,
+		parserClient.start("+821039841234", "+821027423984", "+821027423984", "req 0.01", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {
@@ -266,7 +301,7 @@ public class RestTest {
 	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
+		parserClient.start("+821039841234", "+821027423984", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
@@ -294,7 +329,7 @@ public class RestTest {
 	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+491039841234", "+821027423984", "send 1 +821123723984", 8087,
+		parserClient.start("+491039841234", "+821027423984", "+821027423984", "send 1 +821123723984", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
@@ -314,7 +349,7 @@ public class RestTest {
 	public void testPayedNumber() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+3940047374", "+393602742398", "some shit here", 8087,
+		parserClient.start("+3940047374", "+393602742398", "+393602742398", "some shit here", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
@@ -608,7 +643,7 @@ public class RestTest {
 		List<DataSet> rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals("test@test.com", rv.get(0).getCn());
-		Assert.assertEquals("mail@37coins.com", rv.get(0).getTo().getGateway());
+		Assert.assertEquals("MAILN1JS2Z34MAIL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get btc address
 		r = given()
@@ -640,7 +675,7 @@ public class RestTest {
 		Assert.assertEquals(new BigDecimal("0.0001").setScale(8), w.getFee());
 		Assert.assertEquals("MAILN1JS2Z34MAIL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
-		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("NZV4N1JS2Z3476NK", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821053215679", rv.get(1).getCn());
 		//say hi
 		r = given()
@@ -683,7 +718,7 @@ public class RestTest {
 		Assert.assertEquals(Action.PRICE, rv.get(0).getAction());
 		PriceTick pt = (PriceTick)rv.get(0).getPayload();
 		Assert.assertEquals("EUR", pt.getCurCode());
-		Assert.assertNotNull(pt.getLast());
+		Assert.assertNotNull(pt.getLastFactored());
 		//get price
 		r = given()
 			.formParam("from", "+821012345678")
@@ -699,6 +734,7 @@ public class RestTest {
 		pt = (PriceTick)rv.get(0).getPayload();
 		Assert.assertEquals("KRW", pt.getCurCode());
 		Assert.assertNotNull(pt.getLast());
+		Assert.assertNull(pt.getLastFactored());
 		//test overuse
 		r = given()
 			.formParam("from", "+491601234567")
@@ -788,6 +824,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "balance")
 		.expect()
 			.statusCode(200)
@@ -925,6 +962,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "send 10 +491607654321")
 		.expect()
 			.statusCode(200)
@@ -953,6 +991,7 @@ public class RestTest {
 		r = given()
 			.formParam("from", "+821012345678")
 			.formParam("gateway", "+821027423984")
+			.formParam("gwCn", "OZV4N1JS2Z3476NL")
 			.formParam("message", "req 10")
 		.expect()
 			.statusCode(200)

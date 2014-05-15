@@ -23,8 +23,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.ehcache.Cache;
-
 import org.btc4all.webfinger.WebfingerClient;
 import org.btc4all.webfinger.pojo.JsonResourceDescriptor;
 import org.btc4all.webfinger.pojo.Link;
@@ -59,13 +57,10 @@ public class ParserFilter implements Filter {
 	public static Logger log = LoggerFactory.getLogger(ParserFilter.class);
 	public static final String BC_ADDR_REGEX = "^[mn13][1-9A-Za-z][^OIl]{20,40}";
 	
-	private final Cache cache;
 	private final FiatPriceProvider fiatPriceProvider;
 	
 	@Inject
-	public ParserFilter(Cache cache,
-			FiatPriceProvider fiatPriceProvider){
-		this.cache = cache;
+	public ParserFilter(FiatPriceProvider fiatPriceProvider){
 		this.fiatPriceProvider = fiatPriceProvider;
 	}
 
@@ -76,6 +71,7 @@ public class ParserFilter implements Filter {
 		String from = httpReq.getParameter("from");
 		String gateway = httpReq.getParameter("gateway");
 		String message = httpReq.getParameter("message");
+		String gwCn = httpReq.getParameter("gwCn");
 		// Parse the locale
 		String acceptLng = httpReq.getHeader("Accept-Language");
 		Locale locale = DataSet.parseLocaleString(acceptLng);
@@ -114,6 +110,10 @@ public class ParserFilter implements Filter {
 				httpReq.setAttribute("dsl", responseList);
 				chain.doFilter(request, response);
 			}else{
+		        if (gwCn!=null){
+		            responseData.getTo().setGateway(gwCn);
+		            responseData.setGwCn(gwCn);
+		        }
 				respond(responseList,response);
 			}
 		} catch (Exception e) {
@@ -283,6 +283,10 @@ public class ParserFilter implements Filter {
 				.setTo(sender);
 
 		if (data.getAction() == Action.WITHDRAWAL_REQ) {
+		    if (ca.length<2){
+		        data.setAction(Action.HELP_SEND);
+		        return data;
+		    }
 			int pos = (ca[1].length() > ca[2].length()) ? 1 : 2;
 			Withdrawal w = new Withdrawal();
 			if (!readReceiver(w, ca[pos], data.getTo())

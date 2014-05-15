@@ -254,7 +254,7 @@ public class MerchantResource {
 			asyncResponse.resume(new WebApplicationException(Response.Status.NOT_FOUND));
 		}
 		final String displayName = dispName;
-		parserClient.start(from, gateway, "send "+request.getAmount().multiply(new BigDecimal(1000))+" "+request.getPayDest().getAddress(), localPort,
+		parserClient.start(from, gateway, gateway, "send "+request.getAmount().multiply(new BigDecimal(1000))+" "+request.getPayDest().getAddress(), localPort,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
