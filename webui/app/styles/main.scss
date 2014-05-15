@@ -862,3 +862,8 @@ footer {
         margin-right:0;
     }
 }
+
+//Uservoice, remove 'powered by uservoice' (This maynot actually be working)
+p.powered-by {
+    display: none;
+}
