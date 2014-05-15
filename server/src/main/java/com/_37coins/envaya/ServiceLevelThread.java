@@ -1,9 +1,9 @@
 package com._37coins.envaya;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Locale.Builder;
 import java.util.Map;
@@ -14,10 +14,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -32,15 +28,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.restnucleus.dao.GenericRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Queue;
@@ -58,10 +53,10 @@ import freemarker.template.TemplateException;
 public class ServiceLevelThread extends Thread {
 	public static Logger log = LoggerFactory
 			.getLogger(ServiceLevelThread.class);
-	final private InitialLdapContext ctx;
 	final private Cache cache;
 	private final MailServiceClient mailClient;
 	private final MessageFactory msgFactory;
+	private final GenericRepository dao;
 
 	boolean isActive = true;
 	Map<String,GatewayUser> buffer = new HashMap<>();
@@ -69,18 +64,14 @@ public class ServiceLevelThread extends Thread {
 	Map<String,GatewayUser> activeNow = new HashMap<>();
 
 	@Inject
-	public ServiceLevelThread(JndiLdapContextFactory jlc,
-			Cache cache,
+	public ServiceLevelThread(Cache cache,
 			MailServiceClient mailClient,
 			MessageFactory msgFactory)
 			throws IllegalStateException, NamingException {
 		this.cache = cache;
+		this.dao = null;
 		this.mailClient = mailClient;
 		this.msgFactory = msgFactory;
-		AuthenticationToken at = new UsernamePasswordToken(
-				MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
-		ctx = (InitialLdapContext) jlc.getLdapContext(at.getPrincipal(),
-				at.getCredentials());
 	}
 
 	@Override
@@ -89,32 +80,21 @@ public class ServiceLevelThread extends Thread {
 			Map<String,GatewayUser> rv = new HashMap<>();
 			NamingEnumeration<?> namingEnum = null;
 			try {
-				ctx.setRequestControls(null);
-				SearchControls searchControls = new SearchControls();
-				searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-				searchControls.setTimeLimit(1000);
-				namingEnum = ctx.search("ou=gateways,"
-						+ MessagingServletConfig.ldapBaseDn,
-						"(objectClass=person)", searchControls);
-				while (namingEnum.hasMore()) {
-					Attributes atts = ((SearchResult) namingEnum.next()).getAttributes();
-					String mobile = (atts.get("mobile") != null) ? (String) atts.get("mobile").get() : null;
-					String mail = (atts.get("mail") != null) ? (String) atts.get("mail").get() : null;
-					String cn = (String) atts.get("cn").get();
-					BigDecimal fee = (atts.get("description") != null) ? new BigDecimal((String) atts.get("description").get()) : null;
-					if (null != mobile && null != fee) {
+			    List<Gateway> gateways = dao.queryList(null, Gateway.class);
+				for (Gateway g: gateways){
+					if (null != g.getMobile() && null != g.getFee()) {
 						PhoneNumberUtil phoneUtil = PhoneNumberUtil
 								.getInstance();
-						PhoneNumber pn = phoneUtil.parse(mobile, "ZZ");
+						PhoneNumber pn = phoneUtil.parse(g.getMobile(), "ZZ");
 						String cc = phoneUtil.getRegionCodeForNumber(pn);
 						GatewayUser gu = new GatewayUser()
 								.setMobile(
 										PhoneNumberUtil.getInstance().format(
 												pn, PhoneNumberFormat.E164))
-								.setFee(fee)
-								.setEnvayaToken(mail)
+								.setFee(g.getFee())
+								.setEnvayaToken(g.getEmail())
 								.setLocale(new Builder().setRegion(cc).build())
-								.setId(cn);
+								.setId(g.getCn());
 						rv.put(gu.getId(), gu);
 					}
 				}

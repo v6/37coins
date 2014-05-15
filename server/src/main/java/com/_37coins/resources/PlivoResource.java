@@ -2,18 +2,11 @@ package com._37coins.resources;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.naming.AuthenticationException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
@@ -30,6 +23,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Element;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,19 +31,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dto.Transaction;
-import com._37coins.persistence.dto.Transaction.State;
+import com._37coins.persistence.dao.Account;
 import com._37coins.plivo.GetDigits;
 import com._37coins.plivo.Redirect;
 import com._37coins.plivo.Speak;
@@ -57,6 +49,8 @@ import com._37coins.plivo.Wait;
 import com._37coins.plivo.XmlCharacterHandler;
 import com._37coins.web.MerchantSession;
 import com._37coins.web.StoreRequest;
+import com._37coins.web.Transaction;
+import com._37coins.web.Transaction.State;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
@@ -77,24 +71,17 @@ public class PlivoResource {
 	public final static String PATH = "/plivo";
 	public static final int NUM_DIGIT = 5;
 	
-	final private InitialLdapContext ctx;
-	
-	final private JndiLdapContextFactory jlc;
-	
-	private final AmazonSimpleWorkflow swfService;
-	
-	private final MessageFactory msgFactory;
-	
+	final private GenericRepository dao;
+	final private AmazonSimpleWorkflow swfService;
+	final private MessageFactory msgFactory;
 	final private Cache cache;
-	
-	private Marshaller marshaller;
-	private final SocketIOServer server;
-	private final NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
-	private final ParserClient parserClient;
+	final private SocketIOServer server;
+	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
+	final private ParserClient parserClient;
 	private int localPort;
+	private Marshaller marshaller;
 	
 	@Inject public PlivoResource(
-			JndiLdapContextFactory jlc,
 			ServletRequest request,
 			AmazonSimpleWorkflow swfService,
 			MessageFactory msgFactory,
@@ -106,11 +93,10 @@ public class PlivoResource {
 		this.server = server;
 		this.nonTxFactory = nonTxFactory;
 		localPort = httpReq.getLocalPort();
-		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.swfService = swfService;
 		this.msgFactory = msgFactory;
 		this.cache = cache;
-		this.jlc = jlc;
 		JAXBContext jc;
 		try {
 			jc = JAXBContext.newInstance(com._37coins.plivo.Response.class);
@@ -133,24 +119,14 @@ public class PlivoResource {
 			@PathParam("locale") String locale){
 		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
-		String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
-		String dn = "cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
-		Object pw = null;
-		try{
-			Attributes atts = ctx.getAttributes(dn,new String[]{"userPassword"});
-			pw = (atts.get("userPassword")!=null)?atts.get("userPassword").get():null;
-		}catch(Exception e){
-			log.error("plivo answer exception",e);
-			e.printStackTrace();
-			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.NOT_FOUND);
-		}
-		if (pw!=null){
+		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+		if (a.getPassword()!=null){
 			//only check pin
 			try {
 				rv = new com._37coins.plivo.Response()
 					.add(new Speak().setText(msgFactory.getText("VoiceHello",ds)).setLanguage(locale))
 					.add(new GetDigits()
-						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+sanitizedCn+"/"+workflowId+"/"+locale)
+						.setAction(MessagingServletConfig.basePath+"/plivo/check/"+cn+"/"+workflowId+"/"+locale)
 						.setNumDigits(NUM_DIGIT)
 						.setRedirect(true)
 						.setSpeak(new Speak()
@@ -209,52 +185,46 @@ public class PlivoResource {
 			@PathParam("locale") String locale,
 			@FormParam("Digits") String digits){
 		com._37coins.plivo.Response rv =null;
-		String dn = "cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn;
+		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
 		try {
-			AuthenticationToken at = new UsernamePasswordToken(dn, digits);
-			jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-			Element e = cache.get(workflowId);
-			Transaction tx = (Transaction) e.getObjectValue();
-			tx.setState(State.CONFIRMED);
-			cache.put(e);
-		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
-		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
-			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
-			rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",new DataSet().setLocaleString(locale))));
-		} catch (AuthenticationException ae){
-			
-			//check if blocked
-			boolean pwLocked = true;
-			try{
-				InitialLdapContext ctx = null;
-				AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
-				ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-				String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
-				Attributes atts = ctx.getAttributes("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"pwdAccountLockedTime", "cn"});
-				pwLocked = (atts.get("pwdAccountLockedTime")!=null)?true:false;
-			}catch(Exception ne){
-			}
-			String callText;
-			try{
-				if (pwLocked){
-					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
-					rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(callText).setLanguage(locale));
-				}else{
-					callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
-					rv = new com._37coins.plivo.Response()
-					.add(new Speak().setText(callText).setLanguage(locale))
-					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
-				}
-			}catch(IOException | TemplateException ex){
-				log.error("plivo exception",ex);
-				ex.printStackTrace();
-				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-			}
-		} catch (IllegalStateException | NamingException | IOException | TemplateException e) {
-			log.error("plivo exception",e);
-			e.printStackTrace();
-			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+    		if (CryptoUtils.verifySaltedPassword(digits.getBytes(), a.getPassword())){
+    		    a.setPinWrongCount(0);
+    			Element e = cache.get(workflowId);
+    			Transaction tx = (Transaction) e.getObjectValue();
+    			tx.setState(State.CONFIRMED);
+    			cache.put(e);
+    		    ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
+    		    ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());		 
+    			manualCompletionClient.complete(Action.WITHDRAWAL_REQ);
+    			try{
+    			    rv = new com._37coins.plivo.Response().add(new Speak().setText(msgFactory.getText("VoiceOk",new DataSet().setLocaleString(locale))));
+                }catch(IOException | TemplateException ex){
+                    log.error("plivo exception",ex);
+                    ex.printStackTrace();
+                    throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+                }
+    		}else{
+    		    a.setPinWrongCount(a.getPinWrongCount()+1);
+    			String callText;
+    			try{
+    				if (a.getPinWrongCount()>=3){
+    					callText = msgFactory.getText("AccountBlocked",new DataSet().setLocaleString(locale));
+    					rv = new com._37coins.plivo.Response()
+    					.add(new Speak().setText(callText).setLanguage(locale));
+    				}else{
+    					callText = msgFactory.getText("VoiceFail",new DataSet().setLocaleString(locale));
+    					rv = new com._37coins.plivo.Response()
+    					.add(new Speak().setText(callText).setLanguage(locale))
+    					.add(new Redirect().setText(MessagingServletConfig.basePath+ "/plivo/answer/"+cn+"/"+workflowId+"/"+locale));
+    				}
+    			}catch(IOException | TemplateException ex){
+    				log.error("plivo exception",ex);
+    				ex.printStackTrace();
+    				throw new WebApplicationException(ex, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
+    			}
+    		}
+		}catch(NoSuchAlgorithmException | UnsupportedEncodingException | IllegalStateException | CacheException | IllegalArgumentException ex){
+		    ex.printStackTrace();
 		}
 		try {
 			StringWriter sw = new StringWriter();
@@ -314,9 +284,8 @@ public class PlivoResource {
         try{
 	        if (digits!=null && prev != null && Integer.parseInt(digits)==Integer.parseInt(prev)){
 	        	//set password
-	        	Attributes toModify = new BasicAttributes();
-	        	toModify.put("userPassword", digits);
-	        	ctx.modifyAttributes("cn="+cn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, toModify);
+	            Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+	            a.setPassword(CryptoUtils.getSaltedPassword(digits.getBytes()));
 	        	//continue transaction
 				Element e = cache.get(workflowId);
 				Transaction tx = (Transaction) e.getObjectValue();
@@ -342,7 +311,7 @@ public class PlivoResource {
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 			}
-        } catch (IOException | TemplateException| NamingException e) {
+        } catch (IOException | TemplateException | NoSuchAlgorithmException e) {
         	log.error("plivo confirm exception",e);
         	e.printStackTrace();
 			throw new WebApplicationException(e, javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
@@ -478,37 +447,24 @@ public class PlivoResource {
 		}else{
 			String apiToken = ms.getApiToken();
 			String apiSecret = ms.getApiSecret();
+			final String cn = ms.getPhoneNumber().replace("+", "");
 			try {			
 				//check if user exists, if not, create
-				ctx.setRequestControls(null);
-				SearchControls searchControls = new SearchControls();
-				searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-				searchControls.setTimeLimit(500);
-				NamingEnumeration<?> namingEnum = null;
-				final String sanitizedMobile = BasicAccessAuthFilter.escapeLDAPSearchFilter(ms.getPhoneNumber().replace("+", ""));
-				namingEnum = ctx.search(MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+sanitizedMobile+"))", searchControls);
-				if (namingEnum.hasMore()){
-					SearchResult result = (SearchResult) namingEnum.next();
-					Attributes atts = result.getAttributes();
-					displayName = (atts.get("displayName")!=null)?(String)atts.get("displayName").get():null;
+			    
+			    Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class,false);
+				if (null!=a){
 					boolean found = false;
 					if (ms.getCallAction()==null || ms.getCallAction().equals("get")){
-						String ldapApiToken = (atts.get("description")!=null)?(String)atts.get("description").get():null;
-						String ldapApiSecret = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
-						namingEnum.close();
-						if (ldapApiSecret!=null){
+						if (a.getApiToken()!=null){
 							found = true;
-							apiToken = ldapApiToken;
-							apiSecret = ldapApiSecret;
+							apiToken = a.getApiToken();
+							apiSecret = a.getApiSecret();
 						}
 					}
 					if (!found||(ms.getCallAction()!=null && ms.getCallAction().equals("reset"))){
 						//update ldap record
-						Attributes a = new BasicAttributes();
-						//some abuses here: description -> token and departementNumber -> secret
-						a.put("description",apiToken);
-						a.put("departmentNumber",apiSecret);
-						ctx.modifyAttributes("cn="+sanitizedMobile+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);		
+					    a.setApiToken(apiToken);
+					    a.setApiSecret(apiSecret);
 					}
 				}else{
 					final String parserApiToken = apiToken;
@@ -526,19 +482,9 @@ public class PlivoResource {
 									return;
 								}
 								//update ldap record
-								Attributes a = new BasicAttributes();
-								//some abuses here: description -> token and departementNumber -> secret
-								a.put("description",parserApiToken);
-								a.put("departmentNumber",parserApiSecret);
-								try{
-									InitialLdapContext ctx2 = null;
-									AuthenticationToken at = new UsernamePasswordToken(MessagingServletConfig.ldapUser, MessagingServletConfig.ldapPw);
-									ctx2 = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-									ctx2.modifyAttributes("cn="+sanitizedMobile+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);
-								}catch(NamingException e){
-									log.error("ldap exception ",e);
-									e.printStackTrace();
-								}
+								Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class,false);
+								a.setApiToken(parserApiToken);
+								a.setApiSecret(parserApiSecret);
 							}
 							@Override
 							public void handleDeposit(DataSet data) {}
@@ -548,7 +494,7 @@ public class PlivoResource {
 							public void handleWithdrawal(DataSet data) {}
 						});
 				}
-			} catch (IllegalStateException | NamingException e1) {
+			} catch (IllegalStateException e1) {
 				log.error("ldap exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);

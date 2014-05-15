@@ -1,11 +1,8 @@
 package com._37coins;
 
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 import java.util.Calendar;
 import java.util.Random;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
@@ -18,15 +15,10 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.HmacFilter;
-import org.restnucleus.filter.PersistenceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fruitcat.bitcoin.BIP38;
-import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.BlockChain;
-import com.google.bitcoin.core.DumpedPrivateKey;
-import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.core.PeerGroup;
 import com.google.bitcoin.core.Wallet;
@@ -78,7 +70,7 @@ public class ProductsServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/product*").through(HmacFilter.class);
-		filter("/pwallet*").through(PersistenceFilter.class);
+		//filter("/pwallet*").through(PersistenceFilter.class);
 		//filter("/pwallet/claim").through(HmacFilter.class);
         	}
             

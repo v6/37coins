@@ -7,19 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
+import javax.jdo.JDOException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -44,13 +36,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
@@ -80,7 +75,7 @@ public class ParserResource {
 	public final static String PATH = "/parser";
 	public static Logger log = LoggerFactory.getLogger(ParserResource.class);
 	final private List<DataSet> responseList;
-	final private InitialLdapContext ctx;
+	private final GenericRepository dao;
 	final private ObjectMapper mapper;
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
@@ -97,7 +92,7 @@ public class ParserResource {
 		DataSet ds = (DataSet)httpReq.getAttribute("create");
 		if (null!=ds)
 			responseList.add(ds);
-		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.fiatPriceProvider = fiatPriceProvider;
 		this.mf = mf;
 		localPort = httpReq.getLocalPort();
@@ -165,81 +160,59 @@ public class ParserResource {
 	
 	@SuppressWarnings("unchecked")
 	public Map<String,String> signup(MessageAddress recipient, MessageAddress referer, String gwCn, String locale, String service){
-		String gwDn = null;
+		Gateway gwDn = null;
 		String gwAddress = null;
-		String gwLng = null;
+		Locale gwLng = null;
 		String cnString = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
 			//set gateway from referring user's gateway
 			if (null != referer && referer.getAddressType() == MsgType.SMS 
 					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){
-				gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
+			    RNQuery q = new RNQuery().addFilter("cn", gwCn);
+			    gwDn = dao.queryEntity(q, Gateway.class);
 				gwAddress = referer.getGateway();
 			}else{//or try to find a gateway in the database
 				try{
-					String countryCode = "+" + recipient.getPhoneNumber().getCountryCode();
-					ctx.setRequestControls(null);
-					SearchControls searchControls = new SearchControls();
-					searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-					searchControls.setTimeLimit(1000);
-					NamingEnumeration<?> namingEnum = ctx.search("ou=gateways,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(mobile="+countryCode+"*))", searchControls);
+					
+					RNQuery q = new RNQuery().addFilter("countryCode", recipient.getPhoneNumber().getCountryCode());
+					List<Gateway> qResults = dao.queryList(q, Gateway.class);
 					Element gws = cache.get("gateways");
 					if (null!=gws && !gws.isExpired()){
 						Map<String,GatewayUser> gateways = (Map<String,GatewayUser>)gws.getObjectValue();
-						while (namingEnum.hasMore()){
-							Attributes attributes = ((SearchResult) namingEnum.next()).getAttributes();
-							gwCn = (attributes.get("cn")!=null)?(String)attributes.get("cn").get():null;
+						for (Gateway g: qResults){
 							for (GatewayUser gu: gateways.values()){
-								if (gu.getId().equals(gwCn)){
-									gwLng = (attributes.get("preferredLanguage")!=null)?(String)attributes.get("preferredLanguage").get():null;
-									gwDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-									gwAddress = gwCn;
+								if (gu.getId().equals(g.getCn())){
+									gwLng = g.getLocale();
+									gwDn = g;
+									gwAddress = g.getCn();
 									break;
 								}
 							}
 							if (null!=gwDn) break;
 						}
 					}
-					namingEnum.close();
 					if (null==gwDn){
 						return null;
 					}
-				}catch (NamingException e1){
+				}catch (Exception e1){
 					log.error("signup exception",e1);
 					e1.printStackTrace();
 					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 				}
 			}
 		}else if (recipient.getAddressType()==MsgType.EMAIL){
-			Attributes atts;
-			try {
-				atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+MessagingServletConfig.imapUser+"))", ctx).getAttributes();
-				gwCn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
-			    gwDn = "cn="+gwCn + ",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-			    gwAddress = (atts.get("mail")!=null)?(String)atts.get("mail").get():null;
-			} catch (IllegalStateException | NamingException e1) {
-				throw new RuntimeException(e1);
-			}
+			throw new RuntimeException("not implemented");
 		}
 		if (null!=gwDn){
 			//create new user
-			Attributes attributes=new BasicAttributes();
-			Attribute objectClass=new BasicAttribute("objectClass");
-			objectClass.add("inetOrgPerson");
-			attributes.put(objectClass);
-			Attribute sn=new BasicAttribute("sn");
-			Attribute cnAtr=new BasicAttribute("cn");
-			cnString = recipient.getAddress().replace("+", "");
-			sn.add(cnString);
-			cnAtr.add(cnString);
-			attributes.put(sn);
-			attributes.put(cnAtr);
-			attributes.put("manager", gwDn);
-			attributes.put((recipient.getAddressType()==MsgType.SMS)?"mobile":"mail", recipient.getAddress());
-			attributes.put("preferredLanguage", locale);
+		    cnString = recipient.getAddress().replace("+", "");
+	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
+		    Account newUser = new Account()
+		        .setOwner(gwDn)
+		        .setMobile(recipient.getAddress())
+		        .setLocale(uLocale);
 			try {
-				String sanitizedCn = BasicAccessAuthFilter.escapeDN(cnString);
-				ctx.createSubcontext("cn="+sanitizedCn+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, attributes);
+			    dao.add(newUser);
 				//and say hi to new user
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)
@@ -248,10 +221,10 @@ public class ParserResource {
 						.setAddressType(recipient.getAddressType())
 						.setGateway(gwAddress))
 					.setCn(cnString)
-					.setLocaleString((null!=gwLng)?gwLng:locale)
+					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);
-			} catch (NamingException e1) {
+			} catch (JDOException e1) {
 				log.error("signup exception",e1);
 				e1.printStackTrace();
 				throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
@@ -273,9 +246,10 @@ public class ParserResource {
 			String cn = null;
 			String gwAddress = null;
 			try{
-				Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)("+((w.getMsgDest().getAddressType()==MsgType.SMS)?"mobile":"mail")+"="+w.getMsgDest().getAddress()+"))", ctx).getAttributes();
-				cn = (atts.get("cn")!=null)?(String)atts.get("cn").get():null;
-			}catch(NameNotFoundException e){
+			    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
+			    Account a = dao.queryEntity(q, Account.class);
+				cn = a.getMobile().replace("+", "");
+			}catch(JDOException e){
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
 					responseList.clear();

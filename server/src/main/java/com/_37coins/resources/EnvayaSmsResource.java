@@ -14,9 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
@@ -34,16 +31,18 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.apache.commons.codec.binary.Base64;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessagingServletConfig;
 import com._37coins.envaya.QueueClient;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dto.Transaction;
+import com._37coins.persistence.dao.Gateway;
+import com._37coins.web.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
@@ -73,19 +72,12 @@ public class EnvayaSmsResource {
 	public static Logger log = LoggerFactory.getLogger(EnvayaSmsResource.class);
 
 	private final QueueClient qc;
-	
 	private final NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
-	
 	private final WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory;
-	
 	private final AmazonSimpleWorkflow swfService;
-	
-	private final InitialLdapContext ctx;
-	
+	private final GenericRepository dao;
 	private final ParserClient parserClient;
-	
 	private final Cache cache;
-	
 	private int localPort;
 	
 	@Inject public EnvayaSmsResource(ServletRequest request,
@@ -98,7 +90,7 @@ public class EnvayaSmsResource {
 			AmazonSimpleWorkflow swfService) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
-		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.qc = qc;
 		this.cache = cache;
 		this.swfService = swfService;
@@ -115,10 +107,8 @@ public class EnvayaSmsResource {
 			@Context UriInfo uriInfo){
 		Map<String, Object> rv = new HashMap<>();
 		try{
-			String sanitizedCn = BasicAccessAuthFilter.escapeDN(cn);
-			String dn = "cn="+sanitizedCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-			Attributes atts = ctx.getAttributes(dn,new String[]{"departmentNumber"});
-			String envayaToken = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
+		    Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", cn), Gateway.class);
+			String envayaToken = g.getApiSecret();
 			boolean isSame = false;
 			String url = MessagingServletConfig.basePath + uriInfo.getPath();
 			String calcSig = calculateSignature(url, params, envayaToken);
@@ -262,7 +252,7 @@ public class EnvayaSmsResource {
 					}
 				break;
 			}
-		}catch(NamingException | NoSuchAlgorithmException | UnsupportedEncodingException | NumberParseException e){
+		}catch(NoSuchAlgorithmException | UnsupportedEncodingException | NumberParseException e){
 			log.warn("envaya call failed", e);
 			e.printStackTrace();
 		}

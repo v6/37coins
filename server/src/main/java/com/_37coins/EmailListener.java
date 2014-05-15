@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dto.Transaction;
 import com._37coins.sendMail.MailTransporter;
+import com._37coins.web.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
