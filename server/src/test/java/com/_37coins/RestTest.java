@@ -36,6 +36,7 @@ import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
+import com._37coins.resources.GatewayResource;
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
@@ -507,6 +508,14 @@ public class RestTest {
 			.statusCode(204)
 		.when()
 			.post(embeddedJetty.getBaseUri() + AccountResource.PATH+"/create");
+    	//login in see if it works
+        given()
+            .auth().basic("test3@37coins.com", "password")
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH);    	
     }
     
     /**

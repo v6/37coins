@@ -14,7 +14,9 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
+import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
@@ -63,6 +65,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 		 injector = Guice.createInjector(new ServletModule(){
 	            @Override
 	            protected void configureServlets(){
+	                filter("/*").through(GuiceShiroFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
 	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
@@ -93,7 +96,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				AccountPolicy providePolicy(){
-					return new AccountPolicy().setEmailMxLookup(true);
+					return new AccountPolicy().setEmailMxLookup(false);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
@@ -180,7 +183,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	        		  manager.addCache(testCache);
 	        		  return testCache;
 	        	}
-			});
+			},new MessagingShiroWebModule(this.servletContext));
 		return injector;
 	}
 
