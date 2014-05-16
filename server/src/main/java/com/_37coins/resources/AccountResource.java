@@ -492,6 +492,7 @@ public class AccountResource {
 		}
 		PasswordRequest pwr = new PasswordRequest().setToken(token).setDn(dn);
 		cache.put(new Element("reset"+token, pwr));
+		cache.put(new Element(TicketResource.TICKET_SCOPE+token,true));
 	}
 	
 	/**
