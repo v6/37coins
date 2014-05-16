@@ -35,7 +35,7 @@ function(Backbone, Communicator, LoginTmpl) {
             this.model.set({
                 locale: window.opt.lng,
                 basePath: window.opt.basePath,
-                srvcPath: window.opt.srvcPath
+                srvcPath: window.opt.srvcPath.split('://')[1]
             });
             sessionStorage.setItem('credentials',JSON.stringify(cred));
             this.model.credentials = cred;
