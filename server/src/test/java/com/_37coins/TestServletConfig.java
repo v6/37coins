@@ -65,6 +65,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            @Override
 	            protected void configureServlets(){
 	                filter("/*").through(GuiceShiroFilter.class);
+	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
 	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset

@@ -14,7 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 
 import com._37coins.resources.HealthCheckResource;
 import com._37coins.resources.ProductResource;
@@ -81,7 +81,7 @@ public class HmacTest {
     public void testAuthFail() throws IOException, NoSuchAlgorithmException{
     	Withdrawal w = new Withdrawal().setAmount(new BigDecimal("0.5")).setComment("bla");
     	String serverUrl = embeddedJetty.getBaseUri() + ProductResource.PATH+"/charge";
-		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), "james124");
+		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), "james124");
     	given()
     		.contentType(ContentType.JSON)
     		.header("X-Request-Signature", sig)
@@ -98,7 +98,7 @@ public class HmacTest {
     	Withdrawal w = new Withdrawal().setAmount(new BigDecimal("0.5")).setComment("bla");
     	String serverUrl = embeddedJetty.getBaseUri() + ProductResource.PATH+"/charge";
     	w.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), ProductsServletConfig.hmacToken);
+		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(w)), ProductsServletConfig.hmacToken);
     	Response r = given()
     		.contentType(ContentType.JSON)
     		.header("X-Request-Signature", sig)
@@ -110,7 +110,7 @@ public class HmacTest {
     	w = new ObjectMapper().readValue(r.asInputStream(), Withdrawal.class);
     	
     	MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
-    	sig = HmacFilter.calculateSignature(serverUrl+"?token="+w.getTxId(), map, ProductsServletConfig.hmacToken);
+    	sig = DigestFilter.calculateSignature(serverUrl+"?token="+w.getTxId(), map, ProductsServletConfig.hmacToken);
     	given()
 			.header("X-Request-Signature", sig)
 			.queryParam("token", w.getTxId())

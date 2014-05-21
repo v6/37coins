@@ -73,16 +73,6 @@ public class AuthorizingRealm extends JdbcRealm {
         }
 	    byte[] hash = CryptoUtils.extractPasswordHash(challenge);
 	    byte[] salt = CryptoUtils.extractSalt(challenge);
-	    String tmp = null;
-	    try {
-            MessageDigest digest = MessageDigest.getInstance("SHA");
-            digest.update("password".getBytes());
-            byte[] hash1 = digest.digest(salt);
-            tmp = ByteSource.Util.bytes(hash1).toHex();
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 	    info = new SimpleAuthenticationInfo(a.getEmail(), hash, ByteSource.Util.bytes(salt), a.getEmail());
 	    return info;
 	}

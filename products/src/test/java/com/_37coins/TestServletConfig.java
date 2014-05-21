@@ -9,7 +9,7 @@ import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.restnucleus.filter.CorsFilter;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,7 +34,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            @Override
 	            protected void configureServlets(){
 	            	filter("/*").through(CorsFilter.class);
-	            	filter("/charges*").through(HmacFilter.class);
+	            	filter("/charges*").through(DigestFilter.class);
 	        	}	            
 	            
 	        	@Provides @Singleton @SuppressWarnings("unused")

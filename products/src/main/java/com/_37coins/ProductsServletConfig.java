@@ -14,7 +14,7 @@ import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.restnucleus.PersistenceConfiguration;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public class ProductsServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
-            	filter("/product*").through(HmacFilter.class);
+            	filter("/product*").through(DigestFilter.class);
 		//filter("/pwallet*").through(PersistenceFilter.class);
 		//filter("/pwallet/claim").through(HmacFilter.class);
         	}

@@ -10,7 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 
 import com._37coins.resources.MerchantResource;
 import com._37coins.web.MerchantRequest;
@@ -38,11 +38,11 @@ public class MerchantTester {
 		String reqValue = new ObjectMapper().writeValueAsString(request);
 		StringEntity entity = new StringEntity(reqValue, "UTF-8");
 		entity.setContentType("application/json");
-		String reqSig = HmacFilter.calculateSignature(
+		String reqSig = DigestFilter.calculateSignature(
 				"https://www.37coins.com"+MerchantResource.PATH+"/charge/test",
-				HmacFilter.parseJson(reqValue.getBytes()),
+				DigestFilter.parseJson(reqValue.getBytes()),
 				"pw");
-		req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
+		req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
 		req.setEntity(entity);
 		CloseableHttpResponse rsp = httpclient.execute(req);
 		System.out.println(convertStreamToString(rsp.getEntity().getContent()));

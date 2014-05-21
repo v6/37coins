@@ -38,7 +38,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -330,11 +330,11 @@ public class ParserResource {
 			String reqValue = new ObjectMapper().writeValueAsString(charge);
 			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");
-			String reqSig = HmacFilter.calculateSignature(
+			String reqSig = DigestFilter.calculateSignature(
 					MessagingServletConfig.paymentsPath+path,
-					HmacFilter.parseJson(reqValue.getBytes()),
+					DigestFilter.parseJson(reqValue.getBytes()),
 					MessagingServletConfig.hmacToken);
-			req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
+			req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){
@@ -364,9 +364,9 @@ public class ParserResource {
 		try{
 			HttpClient client = HttpClientBuilder.create().build();
 			String url = MessagingServletConfig.paymentsPath+"/charge"+"?token="+w.getComment();
-			String sig = HmacFilter.calculateSignature(url, new MultivaluedHashMap<String,String>(), MessagingServletConfig.hmacToken);
+			String sig = DigestFilter.calculateSignature(url, new MultivaluedHashMap<String,String>(), MessagingServletConfig.hmacToken);
 			HttpGet someHttpGet = new HttpGet(url);
-			someHttpGet.setHeader(HmacFilter.AUTH_HEADER, sig);
+			someHttpGet.setHeader(DigestFilter.AUTH_HEADER, sig);
 			URI uri = new URIBuilder(someHttpGet.getURI()).build();
 			HttpRequestBase request = new HttpGet(uri);
 			HttpResponse response = client.execute(request);

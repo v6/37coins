@@ -36,7 +36,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +171,7 @@ public class MerchantResource {
 	    Account a = dao.queryEntity(new RNQuery().addFilter("apiToken", apiToken), Account.class);
 		MultivaluedMap<String,String> mvm = null;
 		try {
-			mvm = HmacFilter.parseJson(mapper.writeValueAsBytes(withdrawal));
+			mvm = DigestFilter.parseJson(mapper.writeValueAsBytes(withdrawal));
 		} catch (IOException e) {
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -181,7 +181,7 @@ public class MerchantResource {
 		String url = MessagingServletConfig.basePath + path;
 		String calcSig = null;
 		try {
-			calcSig = HmacFilter.calculateSignature(url, mvm, a.getApiSecret());
+			calcSig = DigestFilter.calculateSignature(url, mvm, a.getApiSecret());
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -196,7 +196,7 @@ public class MerchantResource {
 	public void chargePhone(MerchantRequest request,
 			@PathParam("apiToken") String apiToken,
 			@PathParam("phone") String phone,
-			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
+			@HeaderParam(DigestFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo,
 			@Suspended final AsyncResponse asyncResponse){
 		String dispName=null;
@@ -245,7 +245,7 @@ public class MerchantResource {
 	@Path("/charge/{apiToken}")
 	public MerchantResponse charge(MerchantRequest request,
 			@PathParam("apiToken") String apiToken,
-			@HeaderParam(HmacFilter.AUTH_HEADER) String sig,
+			@HeaderParam(DigestFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo){
 		String displayName = authenticate(apiToken, request, uriInfo.getPath(), sig);
 		if (null!=request.getCallbackUrl()){
@@ -266,11 +266,11 @@ public class MerchantResource {
 			String reqValue = mapper.writeValueAsString(withdrawal);
 			StringEntity entity = new StringEntity(reqValue, "UTF-8");
 			entity.setContentType("application/json");
-			String reqSig = HmacFilter.calculateSignature(
+			String reqSig = DigestFilter.calculateSignature(
 					MessagingServletConfig.paymentsPath+"/charge",
-					HmacFilter.parseJson(reqValue.getBytes()),
+					DigestFilter.parseJson(reqValue.getBytes()),
 					MessagingServletConfig.hmacToken);
-			req.setHeader(HmacFilter.AUTH_HEADER, reqSig);
+			req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
 			req.setEntity(entity);
 			CloseableHttpResponse rsp = httpclient.execute(req);
 			if (rsp.getStatusLine().getStatusCode()==200){

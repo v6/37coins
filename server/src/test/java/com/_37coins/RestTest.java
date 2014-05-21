@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restnucleus.dao.Model;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.test.DbHelper;
 import org.restnucleus.test.EmbeddedJetty;
 
@@ -533,7 +533,7 @@ public class RestTest {
     	MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
     	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
     	req.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
+		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
     	Response r = given()
     		.contentType(ContentType.JSON)
     		.header("X-Request-Signature", sig)
