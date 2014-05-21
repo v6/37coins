@@ -19,9 +19,8 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
 
 	@Inject
 	public BasicAccessAuthFilter(JndiLdapContextFactory jlc) {
-		this.setApplicationName("Password Self Service");
+		this.setApplicationName(AuthorizingRealm.REALM_NAME);
 		this.setAuthcScheme("B4S1C");
-		this.setAuthzScheme("B4S1C");
 	}
 
 	@Override

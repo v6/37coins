@@ -513,7 +513,7 @@ public class RestTest {
     	//login in see if it works
     	String encoding = Base64.encodeBase64String(("test3@37coins.com" + ":" + "password").getBytes());
         given()
-            .header(new Header("Authorization", "B4S1C "+encoding))
+            .header(new Header("Authorization", "Basic "+encoding))
             .contentType(ContentType.JSON)
         .expect()
             .statusCode(200)

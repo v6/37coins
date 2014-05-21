@@ -32,7 +32,7 @@ import com._37coins.persistence.dao.Gateway;
 import com.google.inject.Inject;
 
 public class AuthorizingRealm extends JdbcRealm {
-	
+	public final static String REALM_NAME = "Password Self Service";
  	private final GenericRepository dao;
  	protected boolean permissionsLookupEnabled = true;
  	
@@ -73,7 +73,7 @@ public class AuthorizingRealm extends JdbcRealm {
         }
 	    byte[] hash = CryptoUtils.extractPasswordHash(challenge);
 	    byte[] salt = CryptoUtils.extractSalt(challenge);
-	    info = new SimpleAuthenticationInfo(a.getEmail(), hash, ByteSource.Util.bytes(salt), a.getEmail());
+	    info = new SimpleAuthenticationInfo(a.getCn(), hash, ByteSource.Util.bytes(salt), REALM_NAME);
 	    return info;
 	}
  	

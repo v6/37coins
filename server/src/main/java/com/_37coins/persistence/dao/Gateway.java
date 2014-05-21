@@ -24,6 +24,7 @@ public class Gateway extends Model {
     }
 	
 	@Persistent
+	@Index
 	@NotNull
 	private String cn;
 
@@ -60,6 +61,12 @@ public class Gateway extends Model {
 	
 	@Persistent
 	private Locale locale;
+	
+	@Persistent
+	private String welcomeMsg;
+	
+	@Persistent
+	private String signupCallback;
 
 	public String getMobile() {
         return mobile;
@@ -157,6 +164,24 @@ public class Gateway extends Model {
 		this.password = password;
 		return this;
 	}
+
+    public String getWelcomeMsg() {
+        return welcomeMsg;
+    }
+
+    public Gateway setWelcomeMsg(String welcomeMsg) {
+        this.welcomeMsg = welcomeMsg;
+        return this;
+    }
+
+    public String getSignupCallback() {
+        return signupCallback;
+    }
+
+    public Gateway setSignupCallback(String signupCallback) {
+        this.signupCallback = signupCallback;
+        return this;
+    }
 
     @Override
 	public void update(Model newInstance) {
