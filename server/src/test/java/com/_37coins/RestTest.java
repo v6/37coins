@@ -18,6 +18,7 @@ import javax.ws.rs.core.Form;
 
 import junit.framework.Assert;
 
+import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -62,6 +63,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 
 public class RestTest {
@@ -509,8 +511,9 @@ public class RestTest {
 		.when()
 			.post(embeddedJetty.getBaseUri() + AccountResource.PATH+"/create");
     	//login in see if it works
+    	String encoding = Base64.encodeBase64String(("test3@37coins.com" + ":" + "password").getBytes());
         given()
-            .auth().basic("test3@37coins.com", "password")
+            .header(new Header("Authorization", "B4S1C "+encoding))
             .contentType(ContentType.JSON)
         .expect()
             .statusCode(200)
