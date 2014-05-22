@@ -61,7 +61,9 @@ require.config({
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         socketio: '../bower_components/socket.io-client/dist/socket.io',
-        qrcode: '../bower_components/qrcode/qrcode'
+        qrcode: '../bower_components/qrcode/qrcode',
+        'cryptojs.core': '../bower_components/cryptojslib/components/core.js',
+        'cryptojs.base64': '../bower_components/cryptojslib/components/enc-base64.js'
     },
 
     config: {

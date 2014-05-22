@@ -1,12 +1,12 @@
 define(['backbone',
     'communicator',
     'GA',
-    'views/merchantFrontView',
     'views/merchantBackView',
     'views/merchantLoginView',
+    'models/chargeModel',
     'routeFilter',
     'socketio'
-    ], function(Backbone, Communicator, GA, MerchantFrontView, MerchantBackView, MerchantLoginView) {
+    ], function(Backbone, Communicator, GA, MerchantBackView, MerchantLoginView, ChargeModel) {
     'use strict';
 
     var Controller = {};
@@ -17,9 +17,8 @@ define(['backbone',
             this.app = opt.app;
         },
         appRoutes: {
-	    '': 'showMerchantFront',
-	    'front': 'showMerchantFront',
-	    'back': 'showMerchantBack'
+            '': 'showMerchantBack',
+            'back': 'showMerchantBack'
         },
         before:{
             '*any': function(fragment, args, next){
@@ -39,14 +38,10 @@ define(['backbone',
         }
     });
 
-    Controller.showMerchantFront = function() {
-        var contentView = new MerchantFrontView();
-        Communicator.mediator.trigger('app:show',contentView);
-    };
-
     Controller.showMerchantBack = function() {
-	var contentView = new MerchantBackView();
-	Communicator.mediator.trigger('app:show',contentView);
+        var model = new ChargeModel();
+        var contentView = new MerchantBackView({model:model});
+        Communicator.mediator.trigger('app:show',contentView);
     };
 
     return Controller;

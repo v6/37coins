@@ -24,7 +24,8 @@
     "flag-icon-css": null,
     "font-awesome": null,
     "socket.io-client": null,
-    "qrcode": "https://github.com/davidshimjs/qrcodejs.git"
+    "qrcode": "https://github.com/davidshimjs/qrcodejs.git",
+    "cryptojslib" : null
   },
   "devDependencies": {},
   "directory": "bower_components"
