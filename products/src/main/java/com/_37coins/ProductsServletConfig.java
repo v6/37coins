@@ -1,6 +1,5 @@
 package com._37coins;
 
-import java.util.Calendar;
 import java.util.Random;
 
 import javax.inject.Named;
@@ -18,15 +17,6 @@ import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.bitcoin.core.BlockChain;
-import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.core.PeerGroup;
-import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.discovery.DnsDiscovery;
-import com.google.bitcoin.params.MainNetParams;
-import com.google.bitcoin.store.BlockStore;
-import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.store.MemoryBlockStore;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -36,19 +26,15 @@ import com.google.inject.servlet.ServletModule;
 
 public class ProductsServletConfig extends GuiceServletContextListener {
 	
-	public static String hmacToken;
+	public static String digestToken;
 	public static String plivoKey;
 	public static String plivoSecret;
 	public static String basePath;
 	public static Logger log = LoggerFactory.getLogger(ProductsServletConfig.class);
 	public static Injector injector;
 	private ServletContext servletContext;
-	private PeerGroup peerGroup;
-	private BlockChain chain;
-	private BlockStore blockStore;
-	private Wallet wallet;
 	static {
-		hmacToken = System.getProperty("hmacToken");
+		digestToken = System.getProperty("digestToken");
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
 		basePath = System.getProperty("pBasePath");
@@ -58,9 +44,6 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
-		
-		System.out.println("Connecting ...");
-		wallet = injector.getInstance(Wallet.class);
 		log.info("ServletContextListener started");
 	}
 	
@@ -70,8 +53,8 @@ public class ProductsServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/product*").through(DigestFilter.class);
-		//filter("/pwallet*").through(PersistenceFilter.class);
-		//filter("/pwallet/claim").through(HmacFilter.class);
+            	//filter("/pwallet*").through(PersistenceFilter.class);
+            	//filter("/pwallet/claim").through(HmacFilter.class);
         	}
             
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -81,44 +64,14 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 				return pc.getPersistenceManagerFactory();
 			}
 
-            @Provides @Singleton @SuppressWarnings("unused")
-        	public PeerGroup providePeerGroup(){
-		NetworkParameters params = MainNetParams.get();
-		blockStore = new MemoryBlockStore(params);
-		try {
-					chain = new BlockChain(params, blockStore);
-				} catch (BlockStoreException e) {
-					e.printStackTrace();
-				}
-            	peerGroup = new PeerGroup(MainNetParams.get());
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -1);
-		long now = cal.getTimeInMillis() / 1000;
-		peerGroup.setFastCatchupTimeSecs(now);
-        		peerGroup.setUserAgent("bip38 claimer", "0.1");
-        		peerGroup.addPeerDiscovery(new DnsDiscovery(MainNetParams.get()));
-		return peerGroup;
-		}
-
-	    @Provides @Singleton @SuppressWarnings("unused")
-		public Wallet provideWallet(PeerGroup peerGroup){
-		NetworkParameters params = MainNetParams.get();
-		wallet=new Wallet(params);
-			String dk;
-		peerGroup.addWallet(wallet);
-		peerGroup.startAsync();
-		//peerGroup.downloadBlockChain();
-		return wallet;
-	    }
-
-	    @Provides @Singleton @SuppressWarnings("unused")
-		public Random provideRandom(){
-			return new Random();
+    	    @Provides @Singleton @SuppressWarnings("unused")
+    		public Random provideRandom(){
+    			return new Random();
         	}
 			
         	@Provides @Singleton @SuppressWarnings("unused")
         	public String provideHmacToken(){
-        		return ProductsServletConfig.hmacToken;
+        		return ProductsServletConfig.digestToken;
         	}
         	
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -162,7 +115,6 @@ public class ProductsServletConfig extends GuiceServletContextListener {
 	
     @Override
 	public void contextDestroyed(ServletContextEvent sce) {
-    	peerGroup.stopAndWait();
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");
 	}

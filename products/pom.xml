@@ -98,11 +98,6 @@
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		    <artifactId>BIP38</artifactId>
-			<groupId>com.fruitcat.bitcoin</groupId>
-			<version>0.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>org.sonatype.sisu</groupId>
 			<artifactId>sisu-guice</artifactId>
 			<version>3.1.8</version>

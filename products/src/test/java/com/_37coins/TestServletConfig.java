@@ -39,9 +39,9 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            
 	        	@Provides @Singleton @SuppressWarnings("unused")
 	        	public String provideHmacToken(){
-	        		return ProductsServletConfig.hmacToken;
+	        		return ProductsServletConfig.digestToken;
 	        	}
-				
+	        					
 	            @Named("day")
 	        	@Provides @Singleton @SuppressWarnings("unused")
 	        	public Cache provideCache(){
