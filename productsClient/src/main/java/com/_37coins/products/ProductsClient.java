@@ -16,8 +16,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
-import org.btc4all.webfinger.HttpClientFactory;
-import org.btc4all.webfinger.util.Util;
 import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +32,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 public class ProductsClient {
     public static final String PHONE_REGEX = "^(\\+|\\d)[0-9]{7,16}$";
     private static final String CHARGE_PATH = "/charge";
+    private static final String PRODUCT_PATH = "/product";
     private static final Logger log = LoggerFactory.getLogger(ProductsClient.class);
 
     private HttpClient httpClient;
@@ -81,6 +80,10 @@ public class ProductsClient {
         return charge(amount, destination, null);
     }
     
+    public String charge(BigDecimal amount, PhoneNumber phoneNumber) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
+        return request(amount, phoneNumber, null, null, CHARGE_PATH);
+    }
+    
     public String charge(BigDecimal amount, String destination, String orderName) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException, NumberParseException {
         if (destination.matches(PHONE_REGEX)) {
             PhoneNumberUtil util = PhoneNumberUtil.getInstance();
@@ -91,12 +94,25 @@ public class ProductsClient {
         }
     }
     
-    public String product(BigDecimal amount, PhoneNumber phoneNumber) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException {        
-        String path = "/product";
-        return request(amount, phoneNumber, null, null, path);
+    public String product(BigDecimal amount, String destination) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException, NumberParseException {
+        return charge(amount, destination, null);
     }
     
-    public String request(BigDecimal amount, PhoneNumber phoneNumber, String address, String orderName, String path) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
+    public String product(BigDecimal amount, PhoneNumber phoneNumber) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
+        return request(amount, phoneNumber, null, null, PRODUCT_PATH);
+    }
+    
+    public String product(BigDecimal amount, String destination, String orderName) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException, NumberParseException {
+        if (destination.matches(PHONE_REGEX)) {
+            PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+            PhoneNumber phoneNumber = util.parse(destination, "ZZ");
+            return request(amount, phoneNumber, null, orderName, PRODUCT_PATH);
+        }else{
+            return request(amount, null, destination, orderName, PRODUCT_PATH);
+        }
+    }
+    
+    protected String request(BigDecimal amount, PhoneNumber phoneNumber, String address, String orderName, String path) throws ProductsClientException, NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
         HttpPost req = new HttpPost(uri + path);
         Withdrawal charge = new Withdrawal().setAmount(amount);
         if (null!=phoneNumber){

@@ -26,6 +26,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.products.ProductsClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
@@ -85,6 +86,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@SuppressWarnings("unused")
 				public CommandParser getMessageProcessor() {
 				  return new CommandParser();
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				ProductsClient provideProductsClient(){
+				    return new ProductsClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
 				}
 				
 	            @Provides @Singleton @SuppressWarnings("unused")

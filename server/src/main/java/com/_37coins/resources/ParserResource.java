@@ -1,8 +1,11 @@
 package com._37coins.resources;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
-import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,26 +22,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
-import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +36,8 @@ import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.products.ProductsClient;
+import com._37coins.products.ProductsClientException;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
@@ -80,12 +72,13 @@ public class ParserResource {
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
 	final private MessageFactory mf;
+	final private ProductsClient productsClient;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
 			Cache cache, FiatPriceProvider fiatPriceProvider,
-			MessageFactory mf) {
+			MessageFactory mf,ProductsClient productsClient) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -95,6 +88,7 @@ public class ParserResource {
 		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.fiatPriceProvider = fiatPriceProvider;
 		this.mf = mf;
+		this.productsClient = productsClient;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -308,51 +302,39 @@ public class ParserResource {
 	@POST
 	@Path("/Charge")
 	public Response charge(){
-		DataSet data = responseList.get(0);
-		return callCache(data, "/charge");
+        DataSet data = responseList.get(0);
+        Withdrawal w = (Withdrawal)data.getPayload();
+        try {
+            w.setComment(productsClient.charge(w.getAmount(), data.getTo().getPhoneNumber()));
+        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            log.error("charge exception",e);
+            e.printStackTrace();
+            return null;
+        }
+        try {
+            return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+        } catch (JsonProcessingException e) {
+            return null;
+        }
 	}
 	
 	@POST
 	@Path("/Product")
 	public Response products(){
 		DataSet data = responseList.get(0);
-		return callCache(data, "/product");
-	}
-	
-	public Response callCache(DataSet data, String path){
 		Withdrawal w = (Withdrawal)data.getPayload();
-		try{
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+path);
-			String pn = PhoneNumberUtil.getInstance().format(data.getTo().getPhoneNumber(), PhoneNumberFormat.E164);
-			pn = pn.replace("+", "");
-			Withdrawal charge = new Withdrawal().setAmount(w.getAmount()).setPayDest(new PaymentAddress().setAddress(pn).setAddressType(PaymentType.ACCOUNT));
-			String reqValue = new ObjectMapper().writeValueAsString(charge);
-			StringEntity entity = new StringEntity(reqValue, "UTF-8");
-			entity.setContentType("application/json");
-			String reqSig = DigestFilter.calculateSignature(
-					MessagingServletConfig.paymentsPath+path,
-					DigestFilter.parseJson(reqValue.getBytes()),
-					MessagingServletConfig.hmacToken);
-			req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
-			req.setEntity(entity);
-			CloseableHttpResponse rsp = httpclient.execute(req);
-			if (rsp.getStatusLine().getStatusCode()==200){
-				Withdrawal c = new ObjectMapper().readValue(rsp.getEntity().getContent(),Withdrawal.class);
-				w.setComment(c.getTxId());
-				try {
-					return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
-				} catch (JsonProcessingException e) {
-					return null;
-				}
-			}else{
-				return null;
-			}
-		}catch(Exception ex){
-			log.error("charge exception",ex);
-			ex.printStackTrace();
-			return null;
-		}		
+		try {
+            w.setComment(productsClient.product(w.getAmount(), data.getTo().getPhoneNumber()));
+        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            log.error("charge exception",e);
+            e.printStackTrace();
+            return null;
+        }
+        try {
+            return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+        } catch (JsonProcessingException e) {
+            return null;
+        }
 	}
 
 	@POST
@@ -361,38 +343,26 @@ public class ParserResource {
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
 		Withdrawal charge = null;
-		try{
-			HttpClient client = HttpClientBuilder.create().build();
-			String url = MessagingServletConfig.paymentsPath+"/charge"+"?token="+w.getComment();
-			String sig = DigestFilter.calculateSignature(url, new MultivaluedHashMap<String,String>(), MessagingServletConfig.hmacToken);
-			HttpGet someHttpGet = new HttpGet(url);
-			someHttpGet.setHeader(DigestFilter.AUTH_HEADER, sig);
-			URI uri = new URIBuilder(someHttpGet.getURI()).build();
-			HttpRequestBase request = new HttpGet(uri);
-			HttpResponse response = client.execute(request);
-			//TODO: also check for product, avoid possible collision of tokens
-			if (response.getStatusLine().getStatusCode()==200){
-				charge = new ObjectMapper().readValue(response.getEntity().getContent(), Withdrawal.class);
-			}else{
-				throw new RuntimeException("not found");
-			}
-		}catch(Exception ex){
-			log.error("pay exception",ex);
-			ex.printStackTrace();
-			return null;
-		}
-		data.setAction(Action.WITHDRAWAL_REQ);
-		w.setPayDest(charge.getPayDest());
-		if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
-			return null;
-		}
-		w.setAmount(charge.getAmount())
-		 .setComment(charge.getComment())
-		 .setConfLink(charge.getConfLink())
-		 .setCurrencyCode(charge.getCurrencyCode())
-		 .setRate(charge.getRate());
-		data.setPayload(w);
-		return withdrawalReq();
+		try {
+            charge = productsClient.getCharge(w.getComment());
+            data.setAction(Action.WITHDRAWAL_REQ);
+            w.setPayDest(charge.getPayDest());
+            if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
+                return null;
+            }
+            w.setAmount(charge.getAmount())
+             .setComment(charge.getComment())
+             .setConfLink(charge.getConfLink())
+             .setCurrencyCode(charge.getCurrencyCode())
+             .setRate(charge.getRate());
+            data.setPayload(w);
+            return withdrawalReq();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException
+                | URISyntaxException | ProductsClientException e) {
+            log.error("pay exception",e);
+            e.printStackTrace();
+            return null;
+        }
 	}
 	
 	@POST
