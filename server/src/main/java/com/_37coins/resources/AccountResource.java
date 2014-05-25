@@ -325,7 +325,7 @@ public class AccountResource {
             if (g!=null){
                 throw new WebApplicationException("exists already.", Response.Status.CONFLICT);
             }
-			parserClient.start(mobile, null, Action.SIGNUP.toString(), localPort,
+			parserClient.start(mobile, null, null, Action.SIGNUP.toString(), localPort,
 			new ParserAction() {
 				@Override
 				public void handleResponse(DataSet data) {
@@ -364,31 +364,9 @@ public class AccountResource {
 				    asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 				}
 			});
-<<<<<<< HEAD
-		}catch(NumberParseException | NamingException e){
-		    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
-=======
 		}catch(NumberParseException e){
 			throw new WebApplicationException("number format issue",
 					javax.ws.rs.core.Response.Status.BAD_REQUEST);
-		}
-		try {
-			parserClient.join(1500L);
-		} catch (InterruptedException e2) {
-			throw new WebApplicationException("could not join parser thread",
-					javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (null!=ds && ds.getAction()==Action.SIGNUP){
-			//the web frontend will call the webfinger resource after this
-			//make sure it will only search in the cache
-			cache.put(new Element("addressReq"+mobile.replace("+", ""), true));
-			Map<String,String> rv = new HashMap<>();
-			rv.put("cn",ds.getCn());
-			return rv;
-		}else if (null!=ds && ds.getAction()==Action.DST_ERROR){
-			throw new WebApplicationException("no gateway found",
-					javax.ws.rs.core.Response.Status.NOT_FOUND);
->>>>>>> origin/webDev
 		}
 	}
 
@@ -495,42 +473,6 @@ public class AccountResource {
 	 */
 	@POST
 	@Path("/password/request")
-<<<<<<< HEAD
-	public void requestPwReset(PasswordRequest pwRequest){
-		// no ticket, no service
-		Element e = cache.get(TicketResource.TICKET_SCOPE+pwRequest.getTicket());
-		if (null==e){
-			throw new WebApplicationException("ticket required for this request.", Response.Status.BAD_REQUEST);
-		}else{
-			if (e.getHitCount()>3){
-				cache.remove(TicketResource.TICKET_SCOPE+pwRequest.getTicket());
-				throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
-			}
-		}
-		//fetch account by email, then send email
-		String dn = null;
-		String sanitizedMail = BasicAccessAuthFilter.escapeLDAPSearchFilter(pwRequest.getEmail());
-		try {
-			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mail="+sanitizedMail+"))", ctx).getAttributes();
-			dn = "cn="+atts.get("cn").get()+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-		} catch (IllegalStateException | NamingException e1) {
-			log.error("password request error", e1);
-			e1.printStackTrace();
-			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
-		}
-		String token = RandomStringUtils.random(14, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
-		try {
-			sendResetEmail(sanitizedMail, token);
-		} catch (MessagingException | IOException| TemplateException e1) {
-			log.error("password request error", e1);
-			e1.printStackTrace();
-			throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		PasswordRequest pwr = new PasswordRequest().setToken(token).setDn(dn);
-		cache.put(new Element("reset"+token, pwr));
-		cache.put(new Element(TicketResource.TICKET_SCOPE+token,true));
-	}
-=======
     public void requestPwReset(PasswordRequest pwRequest){
         // no ticket, no service
         Element e = cache.get("ticket"+pwRequest.getTicket());
@@ -556,7 +498,6 @@ public class AccountResource {
         PasswordRequest pwr = new PasswordRequest().setToken(token).setAccountId(a.getId());
         cache.put(new Element("reset"+token, pwr));
     }
->>>>>>> origin/webDev
 	
     /**
      * a password-request is taken from the cache and executed, then account-changes persisted

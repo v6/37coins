@@ -90,13 +90,17 @@ public class RestTest {
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
-		Gateway gw = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setFee(new BigDecimal("0.0007")).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setFee(new BigDecimal("0.0006")).setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
+	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setFee(new BigDecimal("0.0007")).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setFee(new BigDecimal("0.0008")).setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
         List<Gateway> rv = new ArrayList<>();
-        rv.add(gw);
+        rv.add(gw1);
+        rv.add(gw2);
+        rv.add(gw3);
         rv.add(new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setFee(new BigDecimal("0.002")).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")));
         rv.add(new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setFee(new BigDecimal("0.002")).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT")));
         List<Account> ac = new ArrayList<>();
-        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw).setApiSecret("test").setApiToken("test"));
+        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test"));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
         data.put(Gateway.class, rv);
         data.put(Account.class, ac);
@@ -132,7 +136,7 @@ public class RestTest {
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039842742", "+821027423984", "+821027423984", "send 100 +821039842743", 8087,
+		parserClient.start("+821039842742", "+821027423984", "OZV4N1JS2Z3476NL", "send 100 +821039842743", 8087,
 		new ParserAction() {
 			@Override
 			public void handleWithdrawal(DataSet data) {
@@ -229,7 +233,7 @@ public class RestTest {
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841235", "+821027423984", "+821027423984", Action.VOICE.toString(), 8087,
+		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", Action.VOICE.toString(), 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}			
@@ -257,7 +261,7 @@ public class RestTest {
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
-		parserClient.start("+821039841234", "+821027423984", "+821027423984", "req 0.01", 8087,
+		parserClient.start("+821039841234", "+821027423984", "OZV4N1JS2Z3476NL", "req 0.01", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {
@@ -631,7 +635,7 @@ public class RestTest {
 		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
-		Assert.assertEquals("NZV4N1JS2Z3476NK", rv.get(1).getTo().getGateway());
+		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
 		Assert.assertEquals("821053215679", rv.get(1).getCn());
 		//say hi
 		r = given()

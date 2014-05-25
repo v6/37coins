@@ -7,15 +7,17 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Locale.Builder;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.jdo.JDOException;
+import javax.mail.internet.AddressException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -28,6 +30,7 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
@@ -40,6 +43,7 @@ import com._37coins.persistence.dao.Gateway;
 import com._37coins.products.ProductsClient;
 import com._37coins.products.ProductsClientException;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.util.GatewayPriceComparator;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -161,18 +165,16 @@ public class ParserResource {
 		Locale gwLng = null;
 		String cnString = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
-		    if (null == referer && null != gwCn && gwCn.length() > 0){
-		        try {
-		            String prferredDn = "cn="+gwCn+",ou=gateways,"+MessagingServletConfig.ldapBaseDn;
-                    Attributes gwAtts = ctx.getAttributes(prferredDn,new String[]{"mobile"});
-                    String mobile = (gwAtts.get("mobile")!=null)?(String)gwAtts.get("mobile").get():null;
-                    referer = MessageAddress.fromString(mobile, (String)null);
-                    referer.setGateway(gwCn);
-                } catch (NamingException | AddressException | NumberParseException e) {
-                    log.error("signup exception",e);
-                    e.printStackTrace();
+            if (null == referer && null != gwCn && gwCn.length() > 0){
+                RNQuery q = new RNQuery().addFilter("cn", gwCn);
+                Gateway tmp = dao.queryEntity(q, Gateway.class);
+                try {
+                  referer = MessageAddress.fromString(tmp.getMobile(), (String)null);
+                  referer.setGateway(gwCn);
+                } catch (AddressException | NumberParseException e) {
+                    log.error("invite exception",e);
                 }
-		    }
+            }
 			//set gateway from referring user's gateway
 			if (null != referer && referer.getAddressType() == MsgType.SMS 
 					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){
@@ -183,7 +185,9 @@ public class ParserResource {
 				try{
 					
 					RNQuery q = new RNQuery().addFilter("countryCode", recipient.getPhoneNumber().getCountryCode());
-					List<Gateway> qResults = dao.queryList(q, Gateway.class);
+					List<Gateway> qResultsFixed = dao.queryList(q, Gateway.class);
+					List<Gateway> qResults = new ArrayList<>(qResultsFixed);
+					Collections.sort(qResults, new GatewayPriceComparator());
 					Element gws = cache.get("gateways");
 					if (null!=gws && !gws.isExpired()){
 						Map<String,GatewayUser> gateways = (Map<String,GatewayUser>)gws.getObjectValue();

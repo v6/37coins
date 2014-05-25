@@ -32,7 +32,7 @@ public class ClientTest {
         	}
         };
         embeddedJetty.start();
-        client = new ProductsClient(embeddedJetty.getBaseUri() + ProductResource.PATH, "password");
+        client = new ProductsClient(embeddedJetty.getBaseUri() + ProductResource.PATH, "test");
 	}
     
     @AfterClass
