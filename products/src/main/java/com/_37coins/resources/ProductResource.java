@@ -47,7 +47,8 @@ public class ProductResource {
 		while (null==token){
 			token = RandomStringUtils.random(i, "abcdefghijkmnopqrstuvwxyz123456789");
 			//check collision, if yes, increase length
-			if (null==cache.get("charge"+token)){
+			if (null==dayCache.get("charge"+token)
+			        &&null==hourCache.get("charge"+token)){
 				break;
 			}
 			i++;

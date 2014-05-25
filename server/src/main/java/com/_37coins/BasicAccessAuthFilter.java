@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
 
 	@Inject
 	public BasicAccessAuthFilter(JndiLdapContextFactory jlc) {
-		this.setApplicationName("Password Self Service");
+		this.setApplicationName(AuthorizingRealm.REALM_NAME);
 		this.setAuthcScheme("B4S1C");
 	}
 
@@ -32,6 +33,14 @@ public class BasicAccessAuthFilter extends BasicHttpAuthenticationFilter {
 		} else {
 			return super.isAccessAllowed(request, response, mappedValue);
 		}
+	}
+	
+	@Override
+	protected Subject getSubject(ServletRequest request,
+	        ServletResponse response) {
+	    HttpServletRequest httpReq = (HttpServletRequest) request;
+	    httpReq.getClass();
+	    return super.getSubject(request, response);
 	}
 
 	@Override

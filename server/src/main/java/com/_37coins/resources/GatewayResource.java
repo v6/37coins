@@ -100,18 +100,18 @@ public class GatewayResource {
 			}
 		}
 		try{
-		    RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+		    RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
 	        Gateway existing = dao.queryEntity(q, Gateway.class);
-			gu.setId(context.getUserPrincipal().getName());
+			gu.setId("cn="+existing.getCn()+",ou=gateways,dc=37coins,dc=com");
 			gu.setMobile(existing.getMobile());
 			gu.setCode("");
 			if (existing.getLocale()!=null){
 				gu.setLocale(existing.getLocale());
 			}
-			//some abuses here: description -> fee and departementNumber -> envayaToken
 			gu.setFee((existing.getFee()!=null)?existing.getFee():null);
 			gu.setEnvayaToken((existing.getApiSecret()!=null)?existing.getApiSecret():null);
 		}catch(JDOException e){
+		    e.printStackTrace();
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		return gu;
@@ -122,7 +122,7 @@ public class GatewayResource {
 	public GatewayUser confirm(@Context SecurityContext context,GatewayUser gu){
 		GatewayUser rv = null;
 		//fish user from directory
-        RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+        RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
         Gateway existing = dao.queryEntity(q, Gateway.class);
 		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 		if (existing.getMobile() ==null && gu.getCode()==null && null!=gu.getMobile()){
@@ -130,8 +130,9 @@ public class GatewayResource {
 			try {
 				// parse the number
 				PhoneNumber pn = phoneUtil.parse(gu.getMobile(), "ZZ");
+				String mobile = phoneUtil.format(pn, PhoneNumberFormat.E164);
 				// check if it exists
-		        Gateway phantom = dao.queryEntity(q, Gateway.class,false);
+		        Gateway phantom = dao.queryEntity(new RNQuery().addFilter("mobile", mobile), Gateway.class,false);
 		        if (phantom!=null)
 					throw new WebApplicationException("gateway with phone" + pn + " exists already.", Response.Status.CONFLICT);
 		        //create code
@@ -219,7 +220,7 @@ public class GatewayResource {
 		if (gu.getFee().compareTo(new BigDecimal("0.001"))>0){
 			throw new WebApplicationException("fee too high", Response.Status.BAD_REQUEST);
 		}
-	    RNQuery q = new RNQuery().addFilter("email", context.getUserPrincipal().getName());
+	    RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
         Gateway existing = dao.queryEntity(q, Gateway.class);
         existing.setFee(gu.getFee());
         rv = new GatewayUser().setFee(gu.getFee());
@@ -237,19 +238,7 @@ public class GatewayResource {
 	@Path("/balance")
 	@RolesAllowed({"gateway"})
 	public WithdrawRequest getBalance(@Context SecurityContext context){
-		String cn = null;
-		try{
-			LdapName ln = new LdapName(context.getUserPrincipal().getName());
-			for(Rdn rdn : ln.getRdns()) {
-			    if(rdn.getType().equalsIgnoreCase("CN")) {
-			    	cn = (String) rdn.getValue();
-			    }
-			}
-		}catch(Exception e){
-			log.debug("get balance exception",e);
-			e.printStackTrace();
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		String cn = context.getUserPrincipal().getName();
 		Element e = cache.get("balance"+cn);
 		Element e2 = cache.get("balanceReq"+cn);
 		if (null!=e && !e.isExpired()){
@@ -271,19 +260,7 @@ public class GatewayResource {
 	public WithdrawRequest withdraw(
 			@Context SecurityContext context,
 			WithdrawRequest withdrawalRequest){
-		String cn = null;
-		try{
-			LdapName ln = new LdapName(context.getUserPrincipal().getName());
-			for(Rdn rdn : ln.getRdns()) {
-			    if(rdn.getType().equalsIgnoreCase("CN")) {
-			    	cn = (String) rdn.getValue();
-			    }
-			}
-		}catch(Exception e){
-			log.error("withdrawal exception",e);
-			e.printStackTrace();
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		String cn = context.getUserPrincipal().getName();
 		Element e = cache.get("balance"+cn);
 		BigDecimal newBal = null;
 		if (null!=e){

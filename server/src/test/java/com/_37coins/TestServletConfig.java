@@ -16,7 +16,6 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.restnucleus.PersistenceConfiguration;
-import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
@@ -27,6 +26,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.products.ProductsClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
@@ -66,6 +66,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            @Override
 	            protected void configureServlets(){
 	                filter("/*").through(GuiceShiroFilter.class);
+	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
 	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
@@ -85,6 +86,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@SuppressWarnings("unused")
 				public CommandParser getMessageProcessor() {
 				  return new CommandParser();
+				}
+				
+				@Provides @Singleton @SuppressWarnings("unused")
+				ProductsClient provideProductsClient(){
+				    return new ProductsClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
 				}
 				
 	            @Provides @Singleton @SuppressWarnings("unused")

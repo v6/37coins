@@ -18,8 +18,13 @@ import org.restnucleus.dao.Model;
 @Discriminator(strategy = DiscriminatorStrategy.CLASS_NAME)
 public class Gateway extends Model {
 	private static final long serialVersionUID = -1031604697212697657L;
+    public static String getHostName(String email){
+        String hostName = email.substring(email.indexOf("@") + 1, email.length());
+        return hostName;
+    }
 	
 	@Persistent
+	@Index
 	@NotNull
 	private String cn;
 
@@ -34,7 +39,6 @@ public class Gateway extends Model {
     private String hostName;	
 	
 	@Persistent
-	@NotNull
 	private double fee;
 	
 	@Persistent
@@ -42,12 +46,10 @@ public class Gateway extends Model {
 	private Integer countryCode;
 	
 	@Persistent
-	@NotNull
 	private String password;
 	
 	@Persistent
 	@Index
-	@NotNull
 	@Unique
 	private String mobile;
 	
@@ -59,6 +61,12 @@ public class Gateway extends Model {
 	
 	@Persistent
 	private Locale locale;
+	
+	@Persistent
+	private String welcomeMsg;
+	
+	@Persistent
+	private String signupCallback;
 
 	public String getMobile() {
         return mobile;
@@ -103,6 +111,7 @@ public class Gateway extends Model {
 
     public Gateway setEmail(String email) {
 		this.email = email;
+		this.hostName = getHostName(email);
 		return this;
 	}
 
@@ -155,6 +164,24 @@ public class Gateway extends Model {
 		this.password = password;
 		return this;
 	}
+
+    public String getWelcomeMsg() {
+        return welcomeMsg;
+    }
+
+    public Gateway setWelcomeMsg(String welcomeMsg) {
+        this.welcomeMsg = welcomeMsg;
+        return this;
+    }
+
+    public String getSignupCallback() {
+        return signupCallback;
+    }
+
+    public Gateway setSignupCallback(String signupCallback) {
+        this.signupCallback = signupCallback;
+        return this;
+    }
 
     @Override
 	public void update(Model newInstance) {

@@ -18,13 +18,14 @@ import javax.ws.rs.core.Form;
 
 import junit.framework.Assert;
 
+import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restnucleus.dao.Model;
-import org.restnucleus.filter.HmacFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.test.DbHelper;
 import org.restnucleus.test.EmbeddedJetty;
 
@@ -62,6 +63,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 
 public class RestTest {
@@ -541,8 +543,9 @@ public class RestTest {
 		.when()
 			.post(embeddedJetty.getBaseUri() + AccountResource.PATH+"/create");
     	//login in see if it works
+    	String encoding = Base64.encodeBase64String(("test3@37coins.com" + ":" + "password").getBytes());
         given()
-            .auth().basic("test3@37coins.com", "password")
+            .header(new Header("Authorization", "Basic "+encoding))
             .contentType(ContentType.JSON)
         .expect()
             .statusCode(200)
@@ -562,7 +565,7 @@ public class RestTest {
     	MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
     	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
     	req.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = HmacFilter.calculateSignature(serverUrl, HmacFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
+		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
     	Response r = given()
     		.contentType(ContentType.JSON)
     		.header("X-Request-Signature", sig)
