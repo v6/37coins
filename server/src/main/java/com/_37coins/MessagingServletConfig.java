@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
@@ -21,13 +22,15 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
-import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
+import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +45,7 @@ import com._37coins.bizLogic.WithdrawalWorkflowImpl;
 import com._37coins.envaya.QueueClient;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
+import com._37coins.ldap.JdoRequestHandler;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
@@ -89,6 +93,8 @@ import com.maxmind.geoip.LookupService;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
 import com.plivo.helper.exception.PlivoException;
+import com.unboundid.ldap.listener.LDAPListener;
+import com.unboundid.ldap.listener.LDAPListenerConfig;
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -115,10 +121,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String plivoSecret;
 	public static String resPath;
 	public static String merchantResPath;
-	public static String ldapUrl;
-	public static String ldapUser;
-	public static String ldapPw;
-	public static String ldapBaseDn;
 	public static String captchaPubKey;
 	public static String captchaSecKey;
 	public static String elasticSearchHost;
@@ -154,10 +156,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");
 		merchantResPath = System.getProperty("merchantResPath");
-		ldapUrl = System.getProperty("ldapUrl");
-		ldapUser = System.getProperty("ldapUser");
-		ldapPw = System.getProperty("ldapPw");
-		ldapBaseDn = System.getProperty("ldapBaseDn");
 		captchaPubKey = System.getProperty("captchaPubKey");
 		captchaSecKey = System.getProperty("captchaSecKey");
 		elasticSearchHost = System.getProperty("elasticSearchHost");
@@ -173,6 +171,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	private JavaPushMailAccount jPM;
 	public SocketIOServer server;
 	private ServiceLevelThread slt;
+	private LDAPListener listener;
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -300,6 +299,13 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	        }
 	    });
 		server.start();
+		//start ldap
+		listener = i.getInstance(LDAPListener.class);
+		try {
+            listener.startListening();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 		log.info("ServletContextListener started");
 	}
 	
@@ -331,20 +337,20 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             protected void configureServlets(){
             	filter("/*").through(CorsFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
-            	filter("/envayasms/*").through(DirectoryFilter.class);
-            	filter("/.well-known*").through(DirectoryFilter.class);
-            	filter("/api/*").through(DirectoryFilter.class);
+            	filter("/envayasms/*").through(PersistenceFilter.class);
+            	filter("/.well-known*").through(PersistenceFilter.class);
+            	filter("/api/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-            	filter("/parser/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
-            	filter("/account*").through(DirectoryFilter.class); //allow directory access
-            	filter("/email/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/plivo/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/data/*").through(DirectoryFilter.class); //allow directory access
-            	filter("/merchant/*").through(DirectoryFilter.class);
-            	filter("/healthcheck/*").through(DirectoryFilter.class); //allow directory access
+            	filter("/account*").through(PersistenceFilter.class); //allow directory access
+            	filter("/email/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/plivo/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/data/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/merchant/*").through(PersistenceFilter.class);
+            	filter("/healthcheck/*").through(PersistenceFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class);
         		bind(ParserClient.class);
@@ -406,6 +412,13 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return workflowWorker;
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public LDAPListener getLdapListener(GenericRepository dao){
+			    LDAPListenerConfig config = new LDAPListenerConfig(2389, new JdoRequestHandler(dao));
+			    LDAPListener listener = new LDAPListener(config);
+			    return listener;
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -500,15 +513,12 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				return new MessageFactory(servletContext);
 			}
 			
-			@Provides @Singleton @SuppressWarnings("unused")
-			public JndiLdapContextFactory provideLdapClientFactory(){
-				JndiLdapContextFactory jlc = new JndiLdapContextFactory();
-				jlc.setUrl(ldapUrl);
-				jlc.setAuthenticationMechanism("simple");
-				jlc.setSystemUsername(ldapUser);
-				jlc.setSystemPassword(ldapPw);
-				return jlc;
-			}
+	        @Provides @Singleton @SuppressWarnings("unused")
+            PersistenceManagerFactory providePersistence(){
+                PersistenceConfiguration pc = new PersistenceConfiguration();
+                pc.createEntityManagerFactory();
+                return pc.getPersistenceManagerFactory();
+            }
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public Client provideElasticSearch(){
@@ -555,6 +565,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		}
 		if (null!=server){
 			server.stop();
+		}
+		if (null!=listener){
+		    listener.shutDown(true);
 		}
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");

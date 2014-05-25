@@ -97,7 +97,7 @@ public class ParserFilter implements Filter {
 			if (md.getAddressType() == MsgType.SMS){
 				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
-				locale = DataSet.parseLocaleString(rc);
+				locale = new Locale("",rc);
 			}else if (null==locale){
 				locale = Locale.US;
 			}

@@ -7,60 +7,60 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PasswordRequest {
-	
-	private String token;
-	
-	private String ticket;
-	
-	private String email;
-	
-	private String password;
-	
-	private String dn;
-	
-	public String getDn() {
-		return dn;
-	}
+    
+    private String token;
+    
+    private String ticket;
+    
+    private String email;
+    
+    private String password;
+    
+    private Long accountId;
 
-	public PasswordRequest setDn(String dn) {
-		this.dn = dn;
-		return this;
-	}
+    public String getToken() {
+        return token;
+    }
 
-	public String getToken() {
-		return token;
-	}
+    public PasswordRequest setToken(String token) {
+        this.token = token;
+        return this;
+    }
 
-	public PasswordRequest setToken(String token) {
-		this.token = token;
-		return this;
-	}
+    public String getTicket() {
+        return ticket;
+    }
 
-	public String getTicket() {
-		return ticket;
-	}
+    public PasswordRequest setTicket(String ticket) {
+        this.ticket = ticket;
+        return this;
+    }
 
-	public PasswordRequest setTicket(String ticket) {
-		this.ticket = ticket;
-		return this;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public PasswordRequest setEmail(String email) {
+        this.email = email;
+        return this;
+    }
 
-	public PasswordRequest setEmail(String email) {
-		this.email = email;
-		return this;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public PasswordRequest setPassword(String password) {
+        this.password = password;
+        return this;
+    }
 
-	public PasswordRequest setPassword(String password) {
-		this.password = password;
-		return this;
-	}
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public PasswordRequest setAccountId(Long accountId) {
+        this.accountId = accountId;
+        return this;
+    }
 
 }

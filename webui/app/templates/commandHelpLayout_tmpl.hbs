@@ -95,7 +95,7 @@
                   <td>&lt;amount&gt;</td><td>The amount to send to the recipient. Use 12 to indicate 12mBTC, use 5USD to indicate sending bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)</td>
                 </tr>
                  <tr>
-                  <td>&lt;address&gt;</td><td>The destination address to send the bitcoins. Can be either a phone number or a bitcoin address. Phone numbers may have spaces or not.</td>
+                  <td>&lt;address&gt;</td><td>The destination address to send the bitcoins. Can be either a phone number or a bitcoin address. Phone numbers may not have spaces. If sending internationally, include the country code and the plus (+) sign. I.e. +63 for a Philippines number. </td>
                 </tr>
                 <tr>
                   <td>[comment]</td><td>Optional comment, up to 40 characters. Messages that are too long will be shortend.</td>
@@ -126,7 +126,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>SEND 44PHP +639121231234</td><td>This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +639125551234</td>
+                <td>SEND 44PHP +639125551234</td><td>This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +639125551234</td>
               </tr>
             </tbody>
           </table>

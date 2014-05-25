@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -22,10 +19,13 @@ import javax.ws.rs.core.Response;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._37coins.BasicAccessAuthFilter;
+import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.web.WebfingerLink;
 import com._37coins.web.WebfingerResponse;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
@@ -43,7 +43,7 @@ public class WebfingerResource {
 	public static Logger log = LoggerFactory.getLogger(WebfingerResource.class);
 	
 	final private ObjectMapper mapper;
-	final private InitialLdapContext ctx;
+	final private GenericRepository dao;
 	final private Cache cache;
 	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	
@@ -52,7 +52,7 @@ public class WebfingerResource {
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			Cache cache) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
-		ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.cache = cache;
 		this.nonTxFactory = nonTxFactory;
 		mapper = new ObjectMapper();
@@ -70,10 +70,16 @@ public class WebfingerResource {
 		String mobile = email[1].split("@")[0];
 		
 		String cn = null;
+		RNQuery q = new RNQuery().addFilter("mobile", mobile);
 		try {
-			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(mobile="+mobile+"))", ctx).getAttributes();
-			cn = (String)atts.get("cn").get();
-		} catch (IllegalStateException | NamingException e1) {
+		    Account a = dao.queryEntity(q, Account.class, false);
+		    if (null==a){
+		        Gateway g = dao.queryEntity(q, Gateway.class);
+		        cn = g.getMobile().replace("+","");
+		    }else{
+		        cn = a.getMobile().replace("+",""); 
+		    }
+		} catch (IllegalStateException e1) {
 			log.error("webfinger exception",e1);
 			e1.printStackTrace();
 			asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());

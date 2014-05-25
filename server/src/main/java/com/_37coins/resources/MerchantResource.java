@@ -8,13 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.BasicAttributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.ldap.InitialLdapContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -41,19 +34,22 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.HmacFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com._37coins.BasicAccessAuthFilter;
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dto.Transaction;
+import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.web.MerchantRequest;
 import com._37coins.web.MerchantResponse;
 import com._37coins.web.MerchantSession;
+import com._37coins.web.Transaction;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.Withdrawal;
@@ -68,12 +64,12 @@ public class MerchantResource {
 	public final static String PATH = "/merchant";
 	public static Logger log = LoggerFactory.getLogger(MerchantResource.class);
 	
-	final private MessageFactory htmlFactory;
-	final private ObjectMapper mapper;
-	final private HttpServletRequest httpReq;
-	final private LookupService lookupService;
+	private final MessageFactory htmlFactory;
+	private final ObjectMapper mapper;
+	private final HttpServletRequest httpReq;
+	private final LookupService lookupService;
 	private final ParserClient parserClient;
-	final private InitialLdapContext ctx;
+	private final GenericRepository dao;
 	private final WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory;
 	private final Cache cache;
 	private int localPort;
@@ -93,7 +89,7 @@ public class MerchantResource {
 		this.lookupService = lookupService;
 		this.cache = cache;
 		this.withdrawalFactory = withdrawalFactory;
-		this.ctx = (InitialLdapContext)httpReq.getAttribute("ctx");
+		dao = (GenericRepository)httpReq.getAttribute("gr");
 	}
 	
 	
@@ -146,22 +142,11 @@ public class MerchantResource {
 			}
 		}
 		//check it's not taken already
-		try{
-			ctx.setRequestControls(null);
-			SearchControls searchControls = new SearchControls();
-			searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			searchControls.setTimeLimit(100);
-			NamingEnumeration<?> namingEnum = null;
-			String sanitizedname = BasicAccessAuthFilter.escapeLDAPSearchFilter(displayName);
-			namingEnum = ctx.search("ou=accounts,"+MessagingServletConfig.ldapBaseDn, "(&(objectClass=person)(displayName="+sanitizedname+"))", searchControls);
-			if (namingEnum.hasMore()){
-				return "false";//email used
-			}
-		} catch (IllegalStateException | NamingException e1) {
-			log.error("check email exception",e1);
-			e1.printStackTrace();
-			return "false";//ldap error
-		}
+	    RNQuery q = new RNQuery().addFilter("displayName", displayName);
+	    Account a = dao.queryEntity(q, Account.class, false);
+	    if (null==a){
+	        return "false";
+	    }
 		return "true";
 	}
 	
@@ -176,28 +161,14 @@ public class MerchantResource {
 		if (null==ms || null==ms.getDisplayName()){
 			throw new WebApplicationException("not verified merchant", Response.Status.FORBIDDEN);
 		}
-		try {
-			Attributes a = new BasicAttributes();
-			a.put("displayName", merchantSession.getDisplayName());
-			ctx.modifyAttributes("cn="+ms.getPhoneNumber().replace("+", "")+",ou=accounts,"+MessagingServletConfig.ldapBaseDn, DirContext.REPLACE_ATTRIBUTE, a);
-		} catch (IllegalStateException | NamingException ex) {
-			log.error("display name error",ex);
-			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		RNQuery q = new RNQuery().addFilter("mobile", ms.getPhoneNumber());
+		Account a = dao.queryEntity(q, Account.class);
+		a.setDisplayName(merchantSession.getDisplayName());
 	}
 	
 	public String authenticate(String apiToken, MerchantRequest withdrawal, String path, String sig){
-		String apiSecret = null;
-		String displayName = null;
-		try{
-			//read the user
-			String sanitizedToken = BasicAccessAuthFilter.escapeLDAPSearchFilter(apiToken);
-			Attributes atts = BasicAccessAuthFilter.searchUnique("(&(objectClass=person)(description="+sanitizedToken+"))", ctx).getAttributes();
-			apiSecret = (atts.get("departmentNumber")!=null)?(String)atts.get("departmentNumber").get():null;
-			displayName = (atts.get("displayName")!=null)?(String)atts.get("displayName").get():null;
-		}catch(NamingException e){
-			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		//read the user
+	    Account a = dao.queryEntity(new RNQuery().addFilter("apiToken", apiToken), Account.class);
 		MultivaluedMap<String,String> mvm = null;
 		try {
 			mvm = HmacFilter.parseJson(mapper.writeValueAsBytes(withdrawal));
@@ -210,14 +181,14 @@ public class MerchantResource {
 		String url = MessagingServletConfig.basePath + path;
 		String calcSig = null;
 		try {
-			calcSig = HmacFilter.calculateSignature(url, mvm, apiSecret);
+			calcSig = HmacFilter.calculateSignature(url, mvm, a.getApiSecret());
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		if (null==sig || null==calcSig || !calcSig.equals(sig)){
 			throw new WebApplicationException("signatures don't match",Response.Status.UNAUTHORIZED);
 		}
-		return displayName;
+		return a.getDisplayName();
 	}
 
 	@POST
@@ -239,18 +210,9 @@ public class MerchantResource {
 		}
 		String from = null;
 		String gateway = null;
-		from = BasicAccessAuthFilter.escapeLDAPSearchFilter(phone);
-		Attributes atts = null;
-		try{
-			atts = ctx.getAttributes("cn="+ from + ",ou=accounts,"+MessagingServletConfig.ldapBaseDn,new String[]{"manager","displayName"});
-			String gwDn = (atts.get("manager")!=null)?(String)atts.get("manager").get():null;
-			Attributes gwAtts = ctx.getAttributes(gwDn,new String[]{"mobile"});
-			gateway = (gwAtts.get("mobile")!=null)?(String)gwAtts.get("mobile").get():null;
-		}catch(Exception e){
-			log.error("merchant api error" + from + " not found",e);
-			e.printStackTrace();
-		}
-		if (null==from || null==gateway){
+		RNQuery q = new RNQuery().addFilter("cn", phone);
+		Gateway g = dao.queryEntity(q, Account.class).getOwner();
+		if (null==from || null==g.getMobile()){
 			asyncResponse.resume(new WebApplicationException(Response.Status.NOT_FOUND));
 		}
 		final String displayName = dispName;
