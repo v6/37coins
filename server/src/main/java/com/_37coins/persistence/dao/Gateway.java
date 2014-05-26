@@ -39,7 +39,7 @@ public class Gateway extends Model {
     private String hostName;	
 	
 	@Persistent
-	private double fee;
+	private Double fee;
 	
 	@Persistent
 	@Index
@@ -115,17 +115,22 @@ public class Gateway extends Model {
 		return this;
 	}
 
-	public Gateway setFee(double fee) {
+	public Gateway setFee(Double fee) {
 		this.fee = fee;
 		return this;
 	}
 
 	public BigDecimal getFee() {
-		return new BigDecimal(fee).setScale(8,RoundingMode.HALF_UP);
+	    if (null!=fee){
+	        return new BigDecimal(fee).setScale(8,RoundingMode.HALF_UP);
+	    }else{
+	        return null;
+	    }
 	}
 
 	public Gateway setFee(BigDecimal fee) {
-		this.fee = fee.doubleValue();
+	    if (null!=fee)
+	        this.fee = fee.doubleValue();
 		return this;
 	}
 

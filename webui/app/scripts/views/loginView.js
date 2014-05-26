@@ -24,7 +24,8 @@ function(Backbone, Communicator, LoginTmpl) {
             });
             alert.removeClass('in');
         },
-        handleLogin: function() {
+        handleLogin: function(e) {
+            e.preventDefault();
             this.$('#loginBtn').button('loading');
             var user = $('input:text').val();
             var pw = $('input:password').val();
@@ -76,8 +77,8 @@ function(Backbone, Communicator, LoginTmpl) {
                 },
                 errorElement: 'span',
                 errorClass: 'help-block',
-                submitHandler: function() {
-                    self.handleLogin();
+                submitHandler: function(a,e) {
+                    self.handleLogin(e);
                 },
                 errorPlacement: function(error, element) {
                     error.insertAfter(element);
