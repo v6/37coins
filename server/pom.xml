@@ -26,7 +26,7 @@
 	<beanstalk.keyName>37coinsStaging</beanstalk.keyName>
 	<beanstalk.iamInstanceProfile>37Staging</beanstalk.iamInstanceProfile>
 	<beanstalk.instanceType>m1.small</beanstalk.instanceType>
-	<beanstalk.availabilityZones>us-west-1a, us-west-1b</beanstalk.availabilityZones>
+	<beanstalk.availabilityZones>us-west-1a</beanstalk.availabilityZones> <!-- , us-west-1b  -->
 
 	<!-- NOTE#3 set some basic defaults to make it easier -->
 	<maven.test.skip>true</maven.test.skip>

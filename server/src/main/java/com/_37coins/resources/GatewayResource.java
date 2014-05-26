@@ -159,9 +159,7 @@ public class GatewayResource {
 			}
 		}else if (gu.getCode()!=null && gu.getFee()==null){
 			//create queue in mqs
-			Matcher m = Pattern.compile("[Cc][Nn]=([^,]+),").matcher(context.getUserPrincipal().getName());
-			m.find();
-			String cn = m.group(1);
+			String cn = existing.getCn();
 			ConnectionFactory factory = new ConnectionFactory();
 			Connection conn = null;
 			Channel channel = null;

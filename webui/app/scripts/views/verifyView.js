@@ -31,7 +31,8 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
         events: {
             'click .close': 'handleClose',
         },
-        handleValidate: function() {
+	handleValidate: function(e) {
+	    e.preventDefault();
             this.$('button.btn-primary').button('loading');
             var mobile = this.$('input[name="tel"]').val();
             this.model.set('mobile',mobile);
@@ -67,8 +68,8 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
                 },
                 errorElement: 'span',
                 errorClass: 'help-block',
-                submitHandler: function() {
-                    self.handleValidate();
+		submitHandler: function(a,e) {
+		    self.handleValidate(e);
                 },
                 errorPlacement: function(error, element) {
                     error.insertAfter(element);
