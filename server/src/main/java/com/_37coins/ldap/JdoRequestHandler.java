@@ -15,20 +15,22 @@ import com.unboundid.ldap.protocol.AddRequestProtocolOp;
 import com.unboundid.ldap.protocol.BindRequestProtocolOp;
 import com.unboundid.ldap.protocol.BindResponseProtocolOp;
 import com.unboundid.ldap.protocol.CompareRequestProtocolOp;
-import com.unboundid.ldap.protocol.CompareResponseProtocolOp;
 import com.unboundid.ldap.protocol.DeleteRequestProtocolOp;
-import com.unboundid.ldap.protocol.DeleteResponseProtocolOp;
 import com.unboundid.ldap.protocol.ExtendedRequestProtocolOp;
 import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.ldap.protocol.ModifyDNRequestProtocolOp;
 import com.unboundid.ldap.protocol.ModifyRequestProtocolOp;
 import com.unboundid.ldap.protocol.SearchRequestProtocolOp;
+import com.unboundid.ldap.protocol.SearchResultDoneProtocolOp;
+import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResultEntry;
 
 public class JdoRequestHandler extends LDAPListenerRequestHandler {
     private final GenericRepository dao;
+    private LDAPListenerClientConnection clientConnection;
     
     public JdoRequestHandler(GenericRepository dao){
         this.dao = dao;
@@ -36,7 +38,25 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
 
     @Override
     public LDAPMessage processSearchRequest(final int messageId,final SearchRequestProtocolOp request, final List<Control> controls) {
-        return null;
+        String f = request.getFilter().toString();
+        String dn = f.substring(f.indexOf("=")+1, f.lastIndexOf(")"));
+        if (dn.contains(request.getBaseDN())){
+            Attribute[] aa = {new Attribute("entryDN",dn)};
+            SearchResultEntry entry = new SearchResultEntry(messageId, dn, aa);
+            try {
+                clientConnection.sendSearchResultEntry(messageId, entry);
+            } catch (LDAPException e) {
+                System.err.println(e);
+                e.printStackTrace();
+            }
+            return new LDAPMessage(messageId, new SearchResultDoneProtocolOp(
+                    ResultCode.SUCCESS_INT_VALUE, dn, null, Collections.<String> emptyList()),
+                    Collections.<Control> emptyList());
+        }else{
+            return new LDAPMessage(messageId, new SearchResultDoneProtocolOp(
+                    ResultCode.NO_SUCH_OBJECT_INT_VALUE, dn, null, Collections.<String> emptyList()),
+                    Collections.<Control> emptyList());
+        }
     }
 
     @Override
@@ -56,12 +76,12 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
 
     @Override
     public LDAPMessage processDeleteRequest(final int messageId,final DeleteRequestProtocolOp request, final List<Control> controls) {
-        return new LDAPMessage(messageId, new DeleteResponseProtocolOp(ResultCode.LOCAL_ERROR_INT_VALUE,null,null,null),Collections.<Control> emptyList());
+        return null;
     }
 
     @Override
     public LDAPMessage processCompareRequest(final int messageId,final CompareRequestProtocolOp request, final List<Control> controls) {
-        return new LDAPMessage(messageId, new CompareResponseProtocolOp(ResultCode.LOCAL_ERROR_INT_VALUE,null,null,null),Collections.<Control> emptyList());
+        return null;
     }
 
     @Override
@@ -93,7 +113,8 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
 
     @Override
     public LDAPListenerRequestHandler newInstance(
-            LDAPListenerClientConnection arg0) throws LDAPException {
+            LDAPListenerClientConnection clientConnection) throws LDAPException {
+        this.clientConnection = clientConnection;
         return this;
     }
 }

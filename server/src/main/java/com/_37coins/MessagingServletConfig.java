@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import me.moocar.logbackgelf.GelfAppender;
 import net.sf.ehcache.Cache;
@@ -29,6 +32,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
@@ -45,6 +49,7 @@ import com._37coins.bizLogic.WithdrawalWorkflowImpl;
 import com._37coins.envaya.QueueClient;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
+import com._37coins.ldap.CryptoUtils;
 import com._37coins.ldap.JdoRequestHandler;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
@@ -52,6 +57,7 @@ import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.resources.TicketResource;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
@@ -416,6 +422,21 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public LDAPListener getLdapListener(GenericRepository dao){
+			    RNQuery q = new RNQuery().addFilter("cn", amqpUser);
+			    Gateway g = dao.queryEntity(q, Gateway.class, false);
+			    if (null==g){
+			        String pw=null;
+		            try{
+		                pw = CryptoUtils.getSaltedPassword(amqpPassword.getBytes());
+		            }catch(NoSuchAlgorithmException ex){
+		                throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+		            }
+			        g = new Gateway()
+    	                .setEmail(senderMail)
+    	                .setCn(amqpUser)
+    	                .setPassword(pw);
+    	            dao.add(g);
+			    }
 			    LDAPListenerConfig config = new LDAPListenerConfig(2389, new JdoRequestHandler(dao));
 			    LDAPListener listener = new LDAPListener(config);
 			    return listener;
