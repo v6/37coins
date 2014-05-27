@@ -232,8 +232,8 @@ public final class CryptoUtils {
 
         // Re-create the hash using the password and the extracted salt
         MessageDigest digest = MessageDigest.getInstance("SHA");
-        digest.update(password);
-        byte[] hash = digest.digest(salt);
+        digest.update(salt);
+        byte[] hash = digest.digest(password);
 
         // See if our extracted hash matches what we just re-created
         return Arrays.equals(passwordHash, hash);
