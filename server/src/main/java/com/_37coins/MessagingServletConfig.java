@@ -58,6 +58,7 @@ import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.products.ProductsClient;
 import com._37coins.resources.TicketResource;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
@@ -363,12 +364,15 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		bind(QueueClient.class);
         	}
 			
-			@Provides
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Singleton @SuppressWarnings("unused")
 			public CommandParser getMessageProcessor() {
 				return new CommandParser(servletContext);
 			}
+			
+            @Provides @Singleton @SuppressWarnings("unused")
+            ProductsClient provideProductsClient(){
+                return new ProductsClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
+            }
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			MailServiceClient getMailClient(){
@@ -386,10 +390,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			}
 
 
-			@Provides
-			@Named("nonTx")
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Named("nonTx") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getDepositWorker(AmazonSimpleWorkflow swfClient) {
 				WorkflowWorker workflowWorker = new WorkflowWorker(swfClient,
 						domainName, "deposit-workflow-tasklist");
@@ -403,10 +404,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				return workflowWorker;
 			}
 
-			@Provides
-			@Named("withdrawal")
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Named("withdrawal") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getWithdrawalWorker(AmazonSimpleWorkflow swfClient) {
 				WorkflowWorker workflowWorker = new WorkflowWorker(swfClient,
 						domainName, "withdrawal-workflow-tasklist");
