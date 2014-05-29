@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -44,6 +42,7 @@ import com._37coins.workflow.pojo.DataSet.Action;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -51,8 +50,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import freemarker.template.TemplateException;
 
 public class ServiceLevelThread extends Thread {
-	public static Logger log = LoggerFactory
-			.getLogger(ServiceLevelThread.class);
+	public static Logger log = LoggerFactory.getLogger(ServiceLevelThread.class);
 	final private Cache cache;
 	private final MailServiceClient mailClient;
 	private final MessageFactory msgFactory;
@@ -67,7 +65,7 @@ public class ServiceLevelThread extends Thread {
 	public ServiceLevelThread(Cache cache,
 			MailServiceClient mailClient,
 			MessageFactory msgFactory)
-			throws IllegalStateException, NamingException {
+			throws IllegalStateException {
 		this.cache = cache;
 		this.dao = null;
 		this.mailClient = mailClient;
@@ -78,7 +76,6 @@ public class ServiceLevelThread extends Thread {
 	public void run() {
 		while (isActive) {
 			Map<String,GatewayUser> rv = new HashMap<>();
-			NamingEnumeration<?> namingEnum = null;
 			try {
 			    List<Gateway> gateways = dao.queryList(null, Gateway.class);
 				for (Gateway g: gateways){
@@ -98,17 +95,10 @@ public class ServiceLevelThread extends Thread {
 						rv.put(gu.getId(), gu);
 					}
 				}
-			} catch (Exception ex) {
+			} catch (NumberParseException ex) {
 				log.error("ldap connection failed", ex);
 				continue;
-			} finally {
-				if (null != namingEnum)
-					try {
-						namingEnum.close();
-					} catch (NamingException e1) {
-					}
 			}
-
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider.setCredentials(new AuthScope(
 					MessagingServletConfig.amqpHost, 15672),

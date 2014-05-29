@@ -16,7 +16,7 @@
 		<dependency>
 		    <groupId>com.amazonaws</groupId>
 		    <artifactId>aws-java-sdk</artifactId>
-		    <version>1.7.11</version>
+		    <version>1.7.4</version>
 		    <exclusions>
 				<exclusion>
 					<artifactId>jackson-core</artifactId>
@@ -40,7 +40,6 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3-beta2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -68,7 +67,7 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-			<version>1.7.3</version>
+			<version>1.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.freemarker</groupId>
@@ -137,7 +136,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.4</version>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<goals>
@@ -175,14 +174,14 @@
 				</configuration>
 				<dependencies>
 					<dependency>
-						<groupId>org.aspectj</groupId>
-						<artifactId>aspectjrt</artifactId>
-						<version>1.7.3</version>
+					    <groupId>org.aspectj</groupId>
+					    <artifactId>aspectjrt</artifactId>
+					    <version>1.8.0</version>
 					</dependency>
 					<dependency>
-						<groupId>org.aspectj</groupId>
-						<artifactId>aspectjtools</artifactId>
-						<version>1.7.3</version>
+					    <groupId>org.aspectj</groupId>
+					    <artifactId>aspectjtools</artifactId>
+					    <version>1.8.0</version>
 					</dependency>
 				</dependencies>
 			</plugin>
