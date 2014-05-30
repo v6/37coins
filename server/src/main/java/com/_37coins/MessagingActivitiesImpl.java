@@ -13,7 +13,6 @@ import net.sf.ehcache.Element;
 
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
-import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,7 +158,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			tt.setTaskToken(taskToken);
 			tt.setState(State.STARTED);
 			cache.put(new Element(workflowId,tt));
-			Account a = dao.queryEntity(new RNQuery().addFilter("cn", rsp.getCn()), Account.class);
+			Account a = dao.getObjectById(Long.parseLong(rsp.getCn()), Account.class);
 			if (null!=a.getPinWrongCount()&& a.getPinWrongCount()<3){
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
@@ -192,8 +191,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	}
 	
 	@Override
-	public BigDecimal readAccountFee(String cn) {
-		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+	public BigDecimal readAccountFee(long id) {
+		Account a = dao.getObjectById(id, Account.class);
 		BigDecimal fee = (a.getOwner().getFee()!=null)?a.getOwner().getFee():BigDecimal.ZERO;
 		return fee;
 	}
@@ -207,7 +206,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	public DataSet readMessageAddress(DataSet data) {
 	    try{
-	        Account a = dao.queryEntity(new RNQuery().addFilter("cn", data.getCn()), Account.class);
+	        Account a = dao.getObjectById(Long.parseLong(data.getCn()), Account.class);
 			MessageAddress to =  new MessageAddress()
 				.setAddress(a.getMobile())
 				.setAddressType(MsgType.SMS)

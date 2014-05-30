@@ -20,13 +20,14 @@ import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
 import com._37coins.envaya.QueueClient;
+import com._37coins.helper.MockMerchantClient;
+import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
-import com._37coins.products.ProductsClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
@@ -89,8 +90,8 @@ public class TestServletConfig extends GuiceServletContextListener {
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
-				ProductsClient provideProductsClient(){
-				    return new ProductsClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
+				MerchantClient provideProductsClient(){
+				    return new MockMerchantClient("bla","bla");
 				}
 				
 	            @Provides @Singleton @SuppressWarnings("unused")

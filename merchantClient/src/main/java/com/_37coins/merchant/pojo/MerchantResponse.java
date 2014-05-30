@@ -1,4 +1,4 @@
-package com._37coins.web;
+package com._37coins.merchant.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

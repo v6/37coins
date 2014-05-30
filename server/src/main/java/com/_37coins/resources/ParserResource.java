@@ -38,10 +38,12 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.merchant.MerchantClient;
+import com._37coins.merchant.MerchantClientException;
+import com._37coins.merchant.pojo.Charge;
+import com._37coins.merchant.pojo.PaymentDestination.AddressType;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
-import com._37coins.products.ProductsClient;
-import com._37coins.products.ProductsClientException;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.util.GatewayPriceComparator;
 import com._37coins.web.GatewayUser;
@@ -78,13 +80,13 @@ public class ParserResource {
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
 	final private MessageFactory mf;
-	final private ProductsClient productsClient;
+	final private MerchantClient merchantClient;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
 			Cache cache, FiatPriceProvider fiatPriceProvider,
-			MessageFactory mf,ProductsClient productsClient) {
+			MessageFactory mf,MerchantClient merchantClient) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -94,7 +96,7 @@ public class ParserResource {
 		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.fiatPriceProvider = fiatPriceProvider;
 		this.mf = mf;
-		this.productsClient = productsClient;
+		this.merchantClient = merchantClient;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -323,8 +325,8 @@ public class ParserResource {
         DataSet data = responseList.get(0);
         Withdrawal w = (Withdrawal)data.getPayload();
         try {
-            w.setComment(productsClient.charge(w.getAmount(), data.getTo().getPhoneNumber()));
-        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            w.setComment(merchantClient.charge(w.getAmount(), data.getTo().getPhoneNumber()).getToken());
+        } catch (MerchantClientException | IOException | NoSuchAlgorithmException e) {
             log.error("charge exception",e);
             e.printStackTrace();
             return null;
@@ -342,8 +344,8 @@ public class ParserResource {
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
 		try {
-            w.setComment(productsClient.product(w.getAmount(), data.getTo().getPhoneNumber()));
-        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            w.setComment(merchantClient.product(w.getAmount(), data.getTo().getPhoneNumber()).getToken());
+        } catch (NoSuchAlgorithmException | MerchantClientException | IOException e) {
             log.error("charge exception",e);
             e.printStackTrace();
             return null;
@@ -360,11 +362,11 @@ public class ParserResource {
 	public Response pay(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
-		Withdrawal charge = null;
 		try {
-            charge = productsClient.getCharge(w.getComment());
+            Charge charge = merchantClient.getCharge(w.getComment());
             data.setAction(Action.WITHDRAWAL_REQ);
-            w.setPayDest(charge.getPayDest());
+            w.setPayDest(new PaymentAddress().setAddress(charge.getPayDest().getAddress())
+                    .setAddressType((charge.getPayDest().getAddressType()==AddressType.ACCOUNT)?PaymentType.ACCOUNT:PaymentType.BTC));
             if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
                 return null;
             }
@@ -376,7 +378,7 @@ public class ParserResource {
             data.setPayload(w);
             return withdrawalReq();
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException
-                | URISyntaxException | ProductsClientException e) {
+                | URISyntaxException | MerchantClientException e) {
             log.error("pay exception",e);
             e.printStackTrace();
             return null;

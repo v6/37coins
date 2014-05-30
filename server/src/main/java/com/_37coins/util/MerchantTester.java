@@ -12,11 +12,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.filter.DigestFilter;
 
+import com._37coins.merchant.pojo.MerchantRequest;
+import com._37coins.merchant.pojo.PaymentDestination;
+import com._37coins.merchant.pojo.PaymentDestination.AddressType;
 import com._37coins.resources.MerchantResource;
-import com._37coins.web.MerchantRequest;
-import com._37coins.web.PriceTick;
-import com._37coins.workflow.pojo.PaymentAddress;
-import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MerchantTester {
@@ -31,7 +30,7 @@ public class MerchantTester {
 	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
 		MerchantRequest request = new MerchantRequest()
 			.setAmount(new BigDecimal("0.004"))
-			.setPayDest(new PaymentAddress().setAddress("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh").setAddressType(PaymentType.BTC));
+			.setPayDest(new PaymentDestination().setAddress("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh").setAddressType(AddressType.BTC));
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost req = new HttpPost("https://www.37coins.com"+MerchantResource.PATH+"/charge/token");
 		String reqValue = new ObjectMapper().writeValueAsString(request);

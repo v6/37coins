@@ -9,14 +9,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.jdo.JDOException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;

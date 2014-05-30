@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restnucleus.dao.Model;
-import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.test.DbHelper;
 import org.restnucleus.test.EmbeddedJetty;
 
@@ -39,18 +38,14 @@ import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
 import com._37coins.resources.HealthCheckResource;
-import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
 import com._37coins.web.AccountRequest;
-import com._37coins.web.MerchantRequest;
-import com._37coins.web.MerchantResponse;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.PaymentAddress;
-import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
@@ -556,33 +551,6 @@ public class RestTest {
         .when()
             .get(embeddedJetty.getBaseUri() + GatewayResource.PATH);    	
     }
-    
-    /**
-     * make sure module is started with: mvn jetty:run -Denvironment=test -DhmacToken=
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-    @Test
-    public void testMerchant() throws JsonParseException, JsonMappingException, IOException, NoSuchAlgorithmException{
-    	MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
-    	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
-    	req.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
-    	Response r = given()
-    		.contentType(ContentType.JSON)
-    		.header("X-Request-Signature", sig)
-    		.body(json(req))
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + MerchantResource.PATH+"/charge/test");
-    	MerchantResponse mr = new ObjectMapper().readValue(r.asInputStream(), MerchantResponse.class);
-    	System.out.println(new ObjectMapper().writeValueAsString(mr));
-    	Assert.assertNotNull(mr.getDisplayName());
-    	Assert.assertNotNull(mr.getToken());
-    }
 	
 	@Test
 	public void testUser() throws JsonParseException, JsonMappingException, IOException{
@@ -932,7 +900,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertEquals("491696941382", w.getPayDest().getAddress());
 		Assert.assertEquals("DEV4N1JS2Z3476DE", w.getFeeAccount());
 		//confirm a transaction
 		r = given()

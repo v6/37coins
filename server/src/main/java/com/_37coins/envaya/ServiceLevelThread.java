@@ -76,29 +76,31 @@ public class ServiceLevelThread extends Thread {
 	public void run() {
 		while (isActive) {
 			Map<String,GatewayUser> rv = new HashMap<>();
-			try {
-			    List<Gateway> gateways = dao.queryList(null, Gateway.class);
-				for (Gateway g: gateways){
-					if (null != g.getMobile() && null != g.getFee()) {
-						PhoneNumberUtil phoneUtil = PhoneNumberUtil
-								.getInstance();
-						PhoneNumber pn = phoneUtil.parse(g.getMobile(), "ZZ");
-						String cc = phoneUtil.getRegionCodeForNumber(pn);
-						GatewayUser gu = new GatewayUser()
-								.setMobile(
-										PhoneNumberUtil.getInstance().format(
-												pn, PhoneNumberFormat.E164))
-								.setFee(g.getFee())
-								.setEnvayaToken(g.getEmail())
-								.setLocale(new Builder().setRegion(cc).build())
-								.setId(g.getCn());
-						rv.put(gu.getId(), gu);
-					}
+		    List<Gateway> gateways = dao.queryList(null, Gateway.class);
+			for (Gateway g: gateways){
+				if (null != g.getMobile() && null != g.getFee()) {
+					PhoneNumberUtil phoneUtil = PhoneNumberUtil
+							.getInstance();
+					PhoneNumber pn = null;
+			        try {
+			            pn = phoneUtil.parse(g.getMobile(), "ZZ");
+			        } catch (NumberParseException ex) {
+		                log.error("ldap connection failed", ex);
+		                continue;
+		            }
+					String cc = phoneUtil.getRegionCodeForNumber(pn);
+					GatewayUser gu = new GatewayUser()
+							.setMobile(
+									PhoneNumberUtil.getInstance().format(
+											pn, PhoneNumberFormat.E164))
+							.setFee(g.getFee())
+							.setEnvayaToken(g.getEmail())
+							.setLocale(new Builder().setRegion(cc).build())
+							.setId(g.getCn());
+					rv.put(gu.getId(), gu);
 				}
-			} catch (NumberParseException ex) {
-				log.error("ldap connection failed", ex);
-				continue;
 			}
+
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider.setCredentials(new AuthScope(
 					MessagingServletConfig.amqpHost, 15672),
@@ -139,6 +141,7 @@ public class ServiceLevelThread extends Thread {
 				}
 			}
 			cache.put(new Element("gateways", active));
+			System.err.println("service level succeeded");
 			runAlerts(active);
 			try {
 				Thread.sleep(59000L);

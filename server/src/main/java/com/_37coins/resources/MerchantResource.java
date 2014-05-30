@@ -29,11 +29,6 @@ import javax.ws.rs.core.UriInfo;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.DigestFilter;
@@ -42,17 +37,17 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.merchant.MerchantClient;
+import com._37coins.merchant.pojo.MerchantRequest;
+import com._37coins.merchant.pojo.MerchantResponse;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
-import com._37coins.web.MerchantRequest;
-import com._37coins.web.MerchantResponse;
 import com._37coins.web.MerchantSession;
 import com._37coins.web.Transaction;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
-import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmind.geoip.LookupService;
 
@@ -72,19 +67,21 @@ public class MerchantResource {
 	private final GenericRepository dao;
 	private final WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory;
 	private final Cache cache;
+	private final MerchantClient merchantClient;
 	private int localPort;
 	
 	@Inject
 	public MerchantResource(ServletRequest request,
 			MessageFactory htmlFactory,
 			ParserClient parserClient,
-			Cache cache,
+			Cache cache, MerchantClient merchantClient,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
 			LookupService lookupService){
 		this.httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
 		this.htmlFactory = htmlFactory;
 		this.mapper = new ObjectMapper();
+		this.merchantClient = merchantClient;
 		this.parserClient = parserClient;
 		this.lookupService = lookupService;
 		this.cache = cache;
@@ -252,34 +249,7 @@ public class MerchantResource {
 			throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
 		}
 		try{
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpPost req = new HttpPost(MessagingServletConfig.paymentsPath+"/charge");
-			Withdrawal withdrawal = new Withdrawal()
-				.setAmount(request.getAmount())
-				.setConfLink(request.getCallbackUrl())
-				.setComment(request.getOrderName())
-				.setPayDest(request.getPayDest().setDisplayName(displayName));
-			if (request.getConversion()!=null){
-				withdrawal.setRate(request.getConversion().getAsk().doubleValue())
-				.setCurrencyCode(request.getConversion().getCurCode());
-			}
-			String reqValue = mapper.writeValueAsString(withdrawal);
-			StringEntity entity = new StringEntity(reqValue, "UTF-8");
-			entity.setContentType("application/json");
-			String reqSig = DigestFilter.calculateSignature(
-					MessagingServletConfig.paymentsPath+"/charge",
-					DigestFilter.parseJson(reqValue.getBytes()),
-					MessagingServletConfig.hmacToken);
-			req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
-			req.setEntity(entity);
-			CloseableHttpResponse rsp = httpclient.execute(req);
-			if (rsp.getStatusLine().getStatusCode()==200){
-				ObjectMapper om = new ObjectMapper();
-				Withdrawal w = om.readValue(rsp.getEntity().getContent(), Withdrawal.class);
-				return new MerchantResponse().setDisplayName(displayName).setTimout(3600L).setToken(w.getTxId());
-			}else{
-				throw new WebApplicationException("received status: "+rsp.getStatusLine().getStatusCode(),Response.Status.INTERNAL_SERVER_ERROR);
-			}
+		    return merchantClient.charge(request.getAmount(), request.getPayDest().getAddress(), request.getOrderName()).setDisplayName(displayName);
 		}catch(Exception ex){
 			log.error("merchant exception",ex);
 			throw new WebApplicationException(ex,Response.Status.INTERNAL_SERVER_ERROR);

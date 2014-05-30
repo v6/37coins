@@ -1,8 +1,7 @@
-package com._37coins.web;
+package com._37coins.merchant.pojo;
 
 import java.math.BigDecimal;
 
-import com._37coins.workflow.pojo.PaymentAddress;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -15,11 +14,11 @@ public class MerchantRequest {
 	
 	private String callbackUrl;
 	
-	private PriceTick conversion;
+	private Conversion conversion;
 	
 	private String orderName;
 	
-	private PaymentAddress payDest;
+	private PaymentDestination payDest;
 	
 	private Timeout timeout;
 	
@@ -37,11 +36,11 @@ public class MerchantRequest {
 		return this;
 	}
 
-	public PaymentAddress getPayDest() {
+	public PaymentDestination getPayDest() {
 		return payDest;
 	}
 
-	public MerchantRequest setPayDest(PaymentAddress payAddress) {
+	public MerchantRequest setPayDest(PaymentDestination payAddress) {
 		this.payDest = payAddress;
 		return this;
 	}
@@ -64,11 +63,11 @@ public class MerchantRequest {
 		return this;
 	}
 
-	public PriceTick getConversion() {
+	public Conversion getConversion() {
 		return conversion;
 	}
 
-	public MerchantRequest setConversion(PriceTick conversion) {
+	public MerchantRequest setConversion(Conversion conversion) {
 		this.conversion = conversion;
 		return this;
 	}

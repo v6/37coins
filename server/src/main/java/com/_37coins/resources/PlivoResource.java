@@ -32,7 +32,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
-import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +118,7 @@ public class PlivoResource {
 			@PathParam("locale") String locale){
 		com._37coins.plivo.Response rv = null;
 		DataSet ds = new DataSet().setLocaleString(locale);
-		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+		Account a = dao.getObjectById(Long.parseLong(cn), Account.class);
 		if (a.getPassword()!=null){
 			//only check pin
 			try {
@@ -185,7 +184,7 @@ public class PlivoResource {
 			@PathParam("locale") String locale,
 			@FormParam("Digits") String digits){
 		com._37coins.plivo.Response rv =null;
-		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+		Account a = dao.getObjectById(Long.parseLong(cn), Account.class);
 		try {
     		if (CryptoUtils.verifySaltedPassword(digits.getBytes(), a.getPassword())){
     		    a.setPinWrongCount(0);
@@ -284,7 +283,7 @@ public class PlivoResource {
         try{
 	        if (digits!=null && prev != null && Integer.parseInt(digits)==Integer.parseInt(prev)){
 	        	//set password
-	            Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
+	            Account a = dao.getObjectById(Long.parseLong(cn), Account.class);
 	            a.setPassword(CryptoUtils.getSaltedPassword(digits.getBytes()));
 	        	//continue transaction
 				Element e = cache.get(workflowId);
@@ -451,7 +450,7 @@ public class PlivoResource {
 			try {			
 				//check if user exists, if not, create
 			    
-			    Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class,false);
+			    Account a = (dao.existsObject(Long.parseLong(cn), Account.class))?dao.getObjectById(Long.parseLong(cn), Account.class):null;
 				if (null!=a){
 					boolean found = false;
 					if (ms.getCallAction()==null || ms.getCallAction().equals("get")){
@@ -482,7 +481,7 @@ public class PlivoResource {
 									return;
 								}
 								//update ldap record
-								Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class,false);
+								Account a = (dao.existsObject(Long.parseLong(cn), Account.class))?dao.getObjectById(Long.parseLong(cn), Account.class):null;
 								a.setApiToken(parserApiToken);
 								a.setApiSecret(parserApiSecret);
 							}
