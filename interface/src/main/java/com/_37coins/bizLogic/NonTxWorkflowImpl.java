@@ -36,9 +36,9 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 
 	@Override
 	public void executeCommand(final DataSet data) {
-		new TryCatch() {
-			@Override
-            protected void doTry() throws Throwable {
+//		new TryCatch() {
+//			@Override
+//            protected void doTry() throws Throwable {
 				if (data.getAction()==Action.DEPOSIT_REQ){
 					Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 					respondDepositReq(bcAddress, data);
@@ -50,7 +50,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					respondDataReq(bcAddress, data);
 				}else if (data.getAction()==Action.BALANCE){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-					Promise<BigDecimal> fee = msgClient.readAccountFee(data.getCn());
+					Promise<BigDecimal> fee = msgClient.readAccountFee(Long.parseLong(data.getCn()));
 					respondBalance(balance, fee, data);
 				}else if (data.getAction()==Action.GW_BALANCE){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
@@ -84,7 +84,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					}
 					Promise<BigDecimal> fee = null;
 					if (w.getFee()==null){
-						fee = msgClient.readAccountFee(data.getCn());
+						fee = msgClient.readAccountFee(Long.parseLong(data.getCn()));
 					}
 					if (data.getTo()==null){
 						respondDepositConfMessage(balance, fee, msgClient.readMessageAddress(data));
@@ -96,15 +96,15 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 				}else{
 					throw new RuntimeException("unknown action");
 				}
-			 }
-            @Override
-            protected void doCatch(Throwable e) throws Throwable {
-            	data.setAction(Action.UNAVAILABLE);
-    			msgClient.sendMessage(data);
-    			e.printStackTrace();
-            	cancel(e);
-            }
-		};
+//			 }
+//            @Override
+//            protected void doCatch(Throwable e) throws Throwable {
+//            	data.setAction(Action.UNAVAILABLE);
+//    			msgClient.sendMessage(data);
+//    			e.printStackTrace();
+//            	cancel(e);
+//            }
+//		};
     }
 	
 	@Asynchronous

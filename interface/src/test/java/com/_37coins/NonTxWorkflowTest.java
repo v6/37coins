@@ -115,7 +115,7 @@ public class NonTxWorkflowTest {
 			public void putAddressCache(DataSet rsp) {
 			}
 			@Override
-			public BigDecimal readAccountFee(String cn) {
+			public BigDecimal readAccountFee(long id) {
 				return new BigDecimal("0.0001");
 			}
 			@Override

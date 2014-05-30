@@ -31,9 +31,9 @@ public interface MessagingActivities {
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
     DataSet readMessageAddress(DataSet data);
     
-    @Activity(name = "ReadAccountFee", version = "0.1")
+    @Activity(name = "ReadAccountFee", version = "0.2")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
-    BigDecimal readAccountFee(String cn);
+    BigDecimal readAccountFee(long id);
 
     @Activity(name = "ReadRate", version = "0.1")
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
