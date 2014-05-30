@@ -74,7 +74,7 @@ import freemarker.template.TemplateException;
 @Path(AccountResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountResource {
-	public final static String PATH = "/account";
+	public final static String PATH = "/accounts";
 	public static Logger log = LoggerFactory.getLogger(AccountResource.class);
 	
 	private final Cache cache;

@@ -55,7 +55,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                     $.ajax({
                         type: 'POST',
                         contentType: 'application/json',
-                        url: window.opt.basePath+'/account/invite',
+                        url: window.opt.basePath+'/accounts/invite',
                         data: JSON.stringify({mobile:strIntlNumber}),
                         complete: function(data){
                             self.attempts = 0;
