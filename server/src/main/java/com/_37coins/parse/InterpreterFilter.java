@@ -50,7 +50,7 @@ public class InterpreterFilter implements Filter {
 				respond(responseList,response);
 				return;
 			}
-			responseData.setCn(a.getMobile().replace("+", ""));
+			responseData.setCn(a.getId().toString());
 			//read the gateway
 			Gateway g = a.getOwner();
 

@@ -219,7 +219,6 @@ public class ParserResource {
 		}
 		if (null!=gwDn){
 			//create new user
-		    cnString = recipient.getAddress().replace("+", "");
 	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
 		    Account newUser = new Account()
 		        .setOwner(gwDn)
@@ -227,6 +226,7 @@ public class ParserResource {
 		        .setLocale(uLocale);
 			try {
 			    dao.add(newUser);
+			    cnString = newUser.getId().toString();
 				//and say hi to new user
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)
@@ -234,7 +234,7 @@ public class ParserResource {
 						.setAddress(recipient.getAddressObject())
 						.setAddressType(recipient.getAddressType())
 						.setGateway(gwAddress))
-					.setCn(cnString)
+					.setCn(newUser.getId().toString())
 					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);
@@ -259,11 +259,11 @@ public class ParserResource {
 			Map<String,String> newGw = null;
 			String cn = null;
 			String gwAddress = null;
-			try{
-			    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
-			    Account a = dao.queryEntity(q, Account.class);
-				cn = a.getMobile().replace("+", "");
-			}catch(JDOException e){
+		    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
+		    Account a = dao.queryEntity(q, Account.class, false);
+		    if (null!=a){
+		        cn = a.getId().toString();
+		    }else{
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
 					responseList.clear();
@@ -276,11 +276,7 @@ public class ParserResource {
 				}
 				cn = newGw.get("cn");
 				gwAddress = newGw.get("gwAddress");
-			} catch (Exception e) {
-				log.error("withdrawal req exception",e);
-				e.printStackTrace();
-				throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-			}
+		    }
 			if (cn!=null){
 				//set our payment destination
 				if (null == w.getPayDest()){

@@ -2,6 +2,8 @@ package com._37coins.resources;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,6 +70,9 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import freemarker.template.TemplateException;
 
@@ -196,7 +201,8 @@ public class AccountResource {
                     .setPassword(userPassword)
                     .setMobile(mobile);
                 a.setCreationTime(createdDate);
-                dao.add(a);
+                a.setId(Long.parseLong(mobile.replace("+", "")));
+                dao.getPersistenceManager().makePersistent(a); 
                 count++;
             }catch(JDOException e){
                 System.out.println("failed on "+cn + " ,mobile "+mobile);
@@ -278,6 +284,29 @@ public class AccountResource {
                         .setMobile(mobile);
                     g.setCreationTime(createdDate);
                     dao.add(g);
+                    //create queue in mqs
+                    ConnectionFactory factory = new ConnectionFactory();
+                    Connection conn = null;
+                    Channel channel = null;
+                    try {
+                        factory.setUri(MessagingServletConfig.queueUri);
+                        conn = factory.newConnection();
+                        channel = conn.createChannel();
+                        channel.queueDeclare(cn, true, false, false, null);
+                        channel.queueBind(cn, "amq.direct", cn);
+                        channel.close();
+                        conn.close();
+                    } catch (KeyManagementException | NoSuchAlgorithmException
+                            | URISyntaxException | IOException e1) {
+                        log.error("gateway exception",e1);
+                        e1.printStackTrace();
+                        throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
+                    }finally{
+                        try {
+                            if (null!=channel&&channel.isOpen()) channel.close();
+                            if (null!=conn&&conn.isOpen()) conn.close();
+                        } catch (IOException e1) {}
+                    }
                     count++;
                 }
                 children.close();
