@@ -188,8 +188,8 @@ public final class CryptoUtils {
     public static String getSaltedPassword(byte[] password, byte[] salt)
             throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA");
-        digest.update(salt);
-        byte[] hash = digest.digest(password);
+        digest.update(password);
+        byte[] hash = digest.digest(salt);
 
         // Create an array with the hash plus the salt
         byte[] all = new byte[hash.length + salt.length];
@@ -232,8 +232,8 @@ public final class CryptoUtils {
 
         // Re-create the hash using the password and the extracted salt
         MessageDigest digest = MessageDigest.getInstance("SHA");
-        digest.update(salt);
-        byte[] hash = digest.digest(password);
+        digest.update(password);
+        byte[] hash = digest.digest(salt);
 
         // See if our extracted hash matches what we just re-created
         return Arrays.equals(passwordHash, hash);

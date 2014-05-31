@@ -1,8 +1,6 @@
 package com._37coins;
 
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -17,8 +15,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authc.credential.CredentialsMatcher;
-import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.jdbc.JdbcRealm;
@@ -40,22 +36,9 @@ public class AuthorizingRealm extends JdbcRealm {
  	@Inject
 	public AuthorizingRealm(PersistenceManagerFactory pmf){
  		super();
+ 		setCredentialsMatcher(new CustomCredentialsMatcher());
 		dao = new GenericRepository(pmf);
 	}
- 	
- 	@Override
- 	public CredentialsMatcher getCredentialsMatcher() {
- 	    HashedCredentialsMatcher cm = new HashedCredentialsMatcher("SHA");
- 	    cm.setStoredCredentialsHexEncoded(false);
- 	    return cm;
- 	}
-	
- 	@Override
- 	protected AuthorizationInfo doGetAuthorizationInfo(
- 	        PrincipalCollection principals) {
- 	    // TODO Auto-generated method stub
- 	    return super.doGetAuthorizationInfo(principals);
- 	}
  	
  	
  	@Override
