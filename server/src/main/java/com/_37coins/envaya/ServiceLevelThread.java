@@ -27,6 +27,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -64,10 +65,12 @@ public class ServiceLevelThread extends Thread {
 	@Inject
 	public ServiceLevelThread(Cache cache,
 			MailServiceClient mailClient,
-			MessageFactory msgFactory)
+			MessageFactory msgFactory,
+			GenericRepository dao)
 			throws IllegalStateException {
 		this.cache = cache;
-		this.dao = null;
+		this.dao = dao;
+		dao.getPersistenceManager();
 		this.mailClient = mailClient;
 		this.msgFactory = msgFactory;
 	}
@@ -75,74 +78,78 @@ public class ServiceLevelThread extends Thread {
 	@Override
 	public void run() {
 		while (isActive) {
-			Map<String,GatewayUser> rv = new HashMap<>();
-		    List<Gateway> gateways = dao.queryList(null, Gateway.class);
-			for (Gateway g: gateways){
-				if (null != g.getMobile() && null != g.getFee()) {
-					PhoneNumberUtil phoneUtil = PhoneNumberUtil
-							.getInstance();
-					PhoneNumber pn = null;
-			        try {
-			            pn = phoneUtil.parse(g.getMobile(), "ZZ");
-			        } catch (NumberParseException ex) {
-		                log.error("ldap connection failed", ex);
-		                continue;
-		            }
-					String cc = phoneUtil.getRegionCodeForNumber(pn);
-					GatewayUser gu = new GatewayUser()
-							.setMobile(
-									PhoneNumberUtil.getInstance().format(
-											pn, PhoneNumberFormat.E164))
-							.setFee(g.getFee())
-							.setEnvayaToken(g.getEmail())
-							.setLocale(new Builder().setRegion(cc).build())
-							.setId(g.getCn());
-					rv.put(gu.getId(), gu);
-				}
-			}
-
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope(
-					MessagingServletConfig.amqpHost, 15672),
-					new UsernamePasswordCredentials(
-							MessagingServletConfig.amqpUser,
-							MessagingServletConfig.amqpPassword));
-			HttpClient client = HttpClientBuilder.create()
-					.setDefaultCredentialsProvider(credsProvider).build();
-			Map<String,GatewayUser> active = new HashMap<String,GatewayUser>();
-			for (Entry<String,GatewayUser> gu : rv.entrySet()) {
-				try {
-					HttpGet someHttpGet = new HttpGet("http://"
-							+ MessagingServletConfig.amqpHost
-							+ ":15672/api/queues/%2f/" + gu.getKey());
-					URI uri = new URIBuilder(someHttpGet.getURI()).build();
-					HttpRequestBase request = new HttpGet(uri);
-					HttpResponse response = client.execute(request);
-					if (new ObjectMapper().readValue(
-							response.getEntity().getContent(), Queue.class)
-							.getConsumers() > 0) {
-						MDC.put("hostName", gu.getKey());
-						MDC.put("mobile", gu.getValue().getMobile());
-						MDC.put("event", "check");
-						MDC.put("Online", "true");
-						log.info("{} online", gu.getKey());
-						MDC.clear();
-						active.put(gu.getKey(),gu.getValue());
-					} else {
-						MDC.put("hostName", gu.getKey());
-						MDC.put("mobile", gu.getValue().getMobile());
-						MDC.put("event", "check");
-						MDC.put("Online", "false");
-						log.info("{} offline", gu.getKey());
-						MDC.clear();
-					}
-				} catch (Exception ex) {
-					log.error("AMQP connection failed", ex);
-				}
-			}
-			cache.put(new Element("gateways", active));
-			System.err.println("service level succeeded");
-			runAlerts(active);
+		    try{
+    			Map<String,GatewayUser> rv = new HashMap<>();
+    		    List<Gateway> gateways = dao.queryList(new RNQuery(), Gateway.class);
+    			for (Gateway g: gateways){
+    				if (null != g.getMobile() && null != g.getFee()) {
+    					PhoneNumberUtil phoneUtil = PhoneNumberUtil
+    							.getInstance();
+    					PhoneNumber pn = null;
+    			        try {
+    			            pn = phoneUtil.parse(g.getMobile(), "ZZ");
+    			        } catch (NumberParseException ex) {
+    		                log.error("ldap connection failed", ex);
+    		                continue;
+    		            }
+    					String cc = phoneUtil.getRegionCodeForNumber(pn);
+    					GatewayUser gu = new GatewayUser()
+    							.setMobile(
+    									PhoneNumberUtil.getInstance().format(
+    											pn, PhoneNumberFormat.E164))
+    							.setFee(g.getFee())
+    							.setEnvayaToken(g.getEmail())
+    							.setLocale(new Builder().setRegion(cc).build())
+    							.setId(g.getCn());
+    					rv.put(gu.getId(), gu);
+    				}
+    			}
+    
+    			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    			credsProvider.setCredentials(new AuthScope(
+    					MessagingServletConfig.amqpHost, 15672),
+    					new UsernamePasswordCredentials(
+    							MessagingServletConfig.amqpUser,
+    							MessagingServletConfig.amqpPassword));
+    			HttpClient client = HttpClientBuilder.create()
+    					.setDefaultCredentialsProvider(credsProvider).build();
+    			Map<String,GatewayUser> active = new HashMap<String,GatewayUser>();
+    			for (Entry<String,GatewayUser> gu : rv.entrySet()) {
+    				try {
+    					HttpGet someHttpGet = new HttpGet("http://"
+    							+ MessagingServletConfig.amqpHost
+    							+ ":15672/api/queues/%2f/" + gu.getKey());
+    					URI uri = new URIBuilder(someHttpGet.getURI()).build();
+    					HttpRequestBase request = new HttpGet(uri);
+    					HttpResponse response = client.execute(request);
+    					if (new ObjectMapper().readValue(
+    							response.getEntity().getContent(), Queue.class)
+    							.getConsumers() > 0) {
+    						MDC.put("hostName", gu.getKey());
+    						MDC.put("mobile", gu.getValue().getMobile());
+    						MDC.put("event", "check");
+    						MDC.put("Online", "true");
+    						log.info("{} online", gu.getKey());
+    						MDC.clear();
+    						active.put(gu.getKey(),gu.getValue());
+    					} else {
+    						MDC.put("hostName", gu.getKey());
+    						MDC.put("mobile", gu.getValue().getMobile());
+    						MDC.put("event", "check");
+    						MDC.put("Online", "false");
+    						log.info("{} offline", gu.getKey());
+    						MDC.clear();
+    					}
+    				} catch (Exception ex) {
+    					log.error("AMQP connection failed", ex);
+    				}
+    			}
+    			cache.put(new Element("gateways", active));
+    			runAlerts(active);
+		    }catch(Exception e){
+		        log.error("service level failed", e);
+		        e.printStackTrace();
+		    }
 			try {
 				Thread.sleep(59000L);
 			} catch (InterruptedException e) {
@@ -197,6 +204,7 @@ public class ServiceLevelThread extends Thread {
 
 	public void kill() {
 		isActive = false;
+		dao.closePersistenceManager();
 		this.interrupt();
 	}
 
