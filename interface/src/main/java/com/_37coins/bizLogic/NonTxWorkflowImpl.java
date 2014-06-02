@@ -40,7 +40,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 //			@Override
 //            protected void doTry() throws Throwable {
 				if (data.getAction()==Action.DEPOSIT_REQ){
-					Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+					Promise<String> bcAddress = bcdClient.getNewAddress(data.getTo().getAddress().replace("+", ""));
 					respondDepositReq(bcAddress, data);
 				}else if (data.getAction()==Action.SIGNUP){
 					Promise<Void> done = msgClient.sendMessage(data);
@@ -49,14 +49,14 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
 					respondDataReq(bcAddress, data);
 				}else if (data.getAction()==Action.BALANCE){
-					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-					Promise<BigDecimal> fee = msgClient.readAccountFee(Long.parseLong(data.getCn()));
+					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getTo().getAddress().replace("+", ""));
+					Promise<BigDecimal> fee = msgClient.readAccountFee(data.getTo().getAddress());
 					respondBalance(balance, fee, data);
 				}else if (data.getAction()==Action.GW_BALANCE){
 					Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
 					cacheBalance(balance, data);
 				}else if (data.getAction()==Action.TRANSACTION){
-					Promise<List<Transaction>> transactions = bcdClient.getAccountTransactions(data.getCn());
+					Promise<List<Transaction>> transactions = bcdClient.getAccountTransactions(data.getTo().getAddress().replace("+", ""));
 					respondTransactions(transactions, data);
 				}else if (data.getAction()==Action.VOICE){
 					final Settable<DataSet> confirm = new Settable<>();
@@ -84,7 +84,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 					}
 					Promise<BigDecimal> fee = null;
 					if (w.getFee()==null){
-						fee = msgClient.readAccountFee(Long.parseLong(data.getCn()));
+						fee = msgClient.readAccountFee(data.getCn());
 					}
 					if (data.getTo()==null){
 						respondDepositConfMessage(balance, fee, msgClient.readMessageAddress(data));
@@ -127,7 +127,7 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	
 	@Asynchronous
 	public void createAddress(Promise<Void> done,DataSet data){
-		Promise<String> bcAddress = bcdClient.getNewAddress(data.getCn());
+		Promise<String> bcAddress = bcdClient.getNewAddress(data.getTo().getAddress().replace("+", ""));
 		respondDataReq(bcAddress, data);
 	}
 	

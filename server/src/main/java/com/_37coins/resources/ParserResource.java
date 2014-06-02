@@ -166,6 +166,7 @@ public class ParserResource {
 		String gwAddress = null;
 		Locale gwLng = null;
 		String cnString = null;
+		String mobile = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
             if (null == referer && null != gwCn && gwCn.length() > 0){
                 RNQuery q = new RNQuery().addFilter("cn", gwCn);
@@ -227,6 +228,7 @@ public class ParserResource {
 			try {
 			    dao.add(newUser);
 			    cnString = newUser.getId().toString();
+			    mobile = newUser.getMobile();
 				//and say hi to new user
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)
@@ -247,6 +249,7 @@ public class ParserResource {
 		Map<String,String> rv = new HashMap<>();
 		rv.put("gwAddress",gwAddress);
 		rv.put("cn",cnString);
+		rv.put("mobile", mobile);
 		return rv;
 	}
 	
@@ -262,7 +265,7 @@ public class ParserResource {
 		    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
 		    Account a = dao.queryEntity(q, Account.class, false);
 		    if (null!=a){
-		        cn = a.getId().toString();
+		        cn = a.getMobile();
 		    }else{
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
@@ -274,7 +277,7 @@ public class ParserResource {
 						return null;
 					}
 				}
-				cn = newGw.get("cn");
+				cn = newGw.get("mobile");
 				gwAddress = newGw.get("gwAddress");
 		    }
 			if (cn!=null){
@@ -283,7 +286,7 @@ public class ParserResource {
 					w.setPayDest(new PaymentAddress());
 				}
 				w.getPayDest()
-					.setAddress(cn)
+					.setAddress(cn.replace("+", ""))
 					.setAddressType(PaymentType.ACCOUNT);
 				w.getMsgDest()
 					.setGateway(gwAddress);

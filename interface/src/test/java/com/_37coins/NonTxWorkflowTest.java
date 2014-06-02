@@ -61,7 +61,7 @@ public class NonTxWorkflowTest {
 			}
 			@Override
 			public String getNewAddress(String cn) {
-				if (cn.equalsIgnoreCase("1")){
+				if (cn.equalsIgnoreCase("test@37coins.com")){
 					return "1Nsateouhasontuh234";
 				}else{
 					throw new RuntimeException("not found");
@@ -115,7 +115,7 @@ public class NonTxWorkflowTest {
 			public void putAddressCache(DataSet rsp) {
 			}
 			@Override
-			public BigDecimal readAccountFee(long id) {
+			public BigDecimal readAccountFee(String mobile) {
 				return new BigDecimal("0.0001");
 			}
 			@Override
@@ -152,7 +152,6 @@ public class NonTxWorkflowTest {
 		NonTxWorkflowClient workflow = workflowFactory.getClient();
 		DataSet data = new DataSet()
 			.setAction(Action.SIGNUP)
-			.setCn("1")
 			.setTo(new MessageAddress()
 				.setAddress("test@37coins.com"));
 		Promise<Void> booked = workflow.executeCommand(data);
@@ -255,7 +254,10 @@ public class NonTxWorkflowTest {
 		NonTxWorkflowClient workflow = workflowFactory.getClient();
 		DataSet data = new DataSet()
 			.setAction(Action.BALANCE)
-			.setCn("1");
+			.setCn("1")
+			.setTo(new MessageAddress()
+                .setAddress("+491606941382")
+                .setAddressType(MsgType.SMS));
 		Promise<Void> booked = workflow.executeCommand(data);
 		data.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("2.4999")));
@@ -267,7 +269,9 @@ public class NonTxWorkflowTest {
 		NonTxWorkflowClient workflow = workflowFactory.getClient();
 		DataSet data = new DataSet()
 			.setAction(Action.TRANSACTION)
-			.setCn("1");
+			.setTo(new MessageAddress()
+                .setAddress("+491606941382")
+                .setAddressType(MsgType.SMS));
 		Promise<Void> booked = workflow.executeCommand(data);
 		data.setPayload(list);
 		validate("successfull tx", data, trace, booked);

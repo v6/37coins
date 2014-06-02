@@ -13,6 +13,7 @@ import net.sf.ehcache.Element;
 
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,8 +192,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	}
 	
 	@Override
-	public BigDecimal readAccountFee(long id) {
-		Account a = dao.getObjectById(id, Account.class);
+	public BigDecimal readAccountFee(String mobile) {
+	    mobile = (mobile.contains("+"))?mobile:"+"+mobile;
+	    RNQuery q = new RNQuery().addFilter("mobile", mobile);
+		Account a = dao.queryEntity(q, Account.class);
 		BigDecimal fee = (a.getOwner().getFee()!=null)?a.getOwner().getFee():BigDecimal.ZERO;
 		return fee;
 	}
@@ -206,7 +209,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	public DataSet readMessageAddress(DataSet data) {
 	    try{
-	        Account a = dao.getObjectById(Long.parseLong(data.getCn()), Account.class);
+	        String mobile = data.getCn();
+	        mobile = (mobile.contains("+"))?mobile:"+"+mobile;
+	        RNQuery q = new RNQuery().addFilter("mobile", mobile);
+	        Account a = dao.queryEntity(q, Account.class);
 			MessageAddress to =  new MessageAddress()
 				.setAddress(a.getMobile())
 				.setAddressType(MsgType.SMS)
