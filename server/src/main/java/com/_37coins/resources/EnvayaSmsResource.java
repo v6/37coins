@@ -27,9 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.codec.binary.Base64;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
@@ -38,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.envaya.QueueClient;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
@@ -234,7 +233,7 @@ public class EnvayaSmsResource {
 							@Override
 							public void handleConfirm(DataSet data) {
 								if (data.getAction()==Action.WITHDRAWAL_CONF){
-									Element e = cache.get(data.getPayload());
+									Element e = cache.get(data.getPayload().toString());
 									Transaction tx = (Transaction)e.getObjectValue();
 							        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());

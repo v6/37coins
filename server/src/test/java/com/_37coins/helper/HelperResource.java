@@ -12,12 +12,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.web.GatewayUser;
 import com._37coins.workflow.pojo.EmailFactor;
 

@@ -26,9 +26,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.DigestFilter;
@@ -37,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.merchant.MerchantClient;
 import com._37coins.merchant.pojo.MerchantRequest;
 import com._37coins.merchant.pojo.MerchantResponse;
@@ -102,7 +101,7 @@ public class MerchantResource {
 		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
 		String country = null;
 		try{
-			country = lookupService.getCountry(IndexResource.getRemoteAddress(httpReq)).getCode();
+			country = lookupService.getCountry(TicketResource.getRemoteAddress(httpReq)).getCode();
 			country = (country.equals("--"))?null:country;
 		}catch(Exception e){
 			log.error("geoip exception",e);
@@ -132,11 +131,8 @@ public class MerchantResource {
 	@Path("/check")
 	public String checkDisplayName(@QueryParam("displayName") String displayName){
 		//how to avoid account fishing?
-		Element e = cache.get(IndexResource.getRemoteAddress(httpReq));
-		if (e!=null){
-			if (e.getHitCount()>50){
+	    if (cache.incr(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq))>50){
 				return "false"; //to many requests
-			}
 		}
 		//check it's not taken already
 	    RNQuery q = new RNQuery().addFilter("displayName", displayName);

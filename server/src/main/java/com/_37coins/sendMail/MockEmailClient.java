@@ -3,8 +3,8 @@ package com._37coins.sendMail;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 
 public class MockEmailClient implements MailServiceClient {
 	

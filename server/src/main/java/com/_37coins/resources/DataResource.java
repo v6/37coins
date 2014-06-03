@@ -14,13 +14,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.elasticsearch.AvailabilityThread;
 import com._37coins.elasticsearch.TransactionsThread;
 import com._37coins.web.GatewayUser;

@@ -1,5 +1,7 @@
 package com._37coins.web;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,9 +14,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class MerchantSession {
-	
-	private String phoneNumber;
+public class MerchantSession implements Serializable{
+    private static final long serialVersionUID = -7672427263706793882L;
+
+    private String phoneNumber;
 	
 	private String displayName;
 	

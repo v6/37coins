@@ -8,9 +8,6 @@ import java.util.Locale;
 
 import javax.jdo.JDOException;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
@@ -18,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.activities.MessagingActivities;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.envaya.QueueClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.sendMail.MailTransporter;

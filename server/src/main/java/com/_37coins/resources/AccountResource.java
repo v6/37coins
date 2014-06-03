@@ -37,9 +37,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -51,6 +48,8 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
@@ -123,11 +122,8 @@ public class AccountResource {
             return "false";
         }
         //how to avoid account phishing?
-        Element e = cache.get(IndexResource.getRemoteAddress(httpReq));
-        if (e!=null){
-            if (e.getHitCount()>50){
-                throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
-            }
+        if (cache.incr(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq))>50){
+            throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
         }
         //check it's not taken already
         Gateway g = dao.queryEntity(new RNQuery().addFilter("email", email), Gateway.class, false);
@@ -328,11 +324,8 @@ public class AccountResource {
 	@Path("/find")
 	public String findByEmail(@QueryParam("mobile") String mobile){
 		//how to avoid account fishing?
-		Element e = cache.get(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq));
-		if (e!=null){
-			if (e.getHitCount()>50){
-				throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
-			}
+	    if (cache.incr(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq))>50){
+			throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
 		}
 		//check it's not taken already
 		try{
@@ -517,7 +510,7 @@ public class AccountResource {
         if (null==e){
             throw new WebApplicationException("ticket required for this request.", Response.Status.BAD_REQUEST);
         }else{
-            if (e.getHitCount()>3){
+            if (cache.incr("ticketCount"+pwRequest.getTicket())>3){
                 cache.remove("ticket"+pwRequest.getTicket());
                 throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
             }

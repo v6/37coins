@@ -8,12 +8,11 @@ import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
 import javax.mail.internet.InternetAddress;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.sendMail.MailTransporter;
@@ -91,7 +90,7 @@ public class EmailListener implements MessageCountListener {
 					
 					@Override
 					public void handleConfirm(DataSet data) {
-						Element e = cache.get(data.getPayload());
+						Element e = cache.get(data.getPayload().toString());
 						Transaction tx = (Transaction)e.getObjectValue();
 				        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 				        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());

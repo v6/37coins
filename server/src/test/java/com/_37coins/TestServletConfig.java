@@ -9,7 +9,6 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
@@ -19,6 +18,7 @@ import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
+import com._37coins.cache.Cache;
 import com._37coins.envaya.QueueClient;
 import com._37coins.helper.MockMerchantClient;
 import com._37coins.merchant.MerchantClient;
@@ -181,14 +181,15 @@ public class TestServletConfig extends GuiceServletContextListener {
 	        		//Create a singleton CacheManager using defaults
 	        		CacheManager manager = CacheManager.create();
 	        		//Create a Cache specifying its configuration.
-	        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
+	        		net.sf.ehcache.Cache testCache = new net.sf.ehcache.Cache(new CacheConfiguration("cache", 1000)
 	        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
 	        		    .eternal(false)
 	        		    .timeToLiveSeconds(7200)
 	        		    .timeToIdleSeconds(3600)
 	        		    .diskExpiryThreadIntervalSeconds(0));
 	        		  manager.addCache(testCache);
-	        		  return testCache;
+	        		  
+	        		  return new EhCacheWrapper(testCache);
 	        	}
 			},new MessagingShiroWebModule(this.servletContext));
 		return injector;

@@ -3,6 +3,7 @@ package com._37coins;
 import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.NoSuchAlgorithmException;
@@ -17,11 +18,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import me.moocar.logbackgelf.GelfAppender;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+import net.spy.memcached.MemcachedClient;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
@@ -46,6 +43,8 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 
 import com._37coins.bizLogic.NonTxWorkflowImpl;
 import com._37coins.bizLogic.WithdrawalWorkflowImpl;
+import com._37coins.cache.Cache;
+import com._37coins.cache.MemCacheWrapper;
 import com._37coins.envaya.QueueClient;
 import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
@@ -124,6 +123,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String amqpUser;
 	public static String amqpPassword;
 	public static String amqpHost;
+	public static String cacheHost;
 	public static String plivoKey;
 	public static String plivoSecret;
 	public static String resPath;
@@ -159,6 +159,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		amqpUser = System.getProperty("amqpUser");
 		amqpPassword = System.getProperty("amqpPassword");
 		amqpHost = System.getProperty("amqpHost");
+		cacheHost = System.getProperty("cacheHost");
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");
@@ -221,7 +222,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		server.addJsonObjectListener(MerchantSession.class, new DataListener<MerchantSession>() {
 	        @Override
 	        public void onData(SocketIOClient client, MerchantSession data, AckRequest ackRequest) {
-	        	Cache cache = i.getInstance(Cache.class);
+	            MemcachedClient cache = i.getInstance(MemcachedClient.class);
 	        	if (null==data.getSessionToken()){
         			//add to monitoring list
         			//if exceeded limit, kick
@@ -230,7 +231,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         			return;
 	        	}
         		//verify session
-        		Element e = cache.getQuiet(TicketResource.TICKET_SCOPE+data.getSessionToken());
+        		Object e = cache.get(TicketResource.TICKET_SCOPE+data.getSessionToken());
         		if (null==e){
         			//add to monitoring list
         			//if exceeded limit, kick
@@ -280,7 +281,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         				.setPhoneNumber(phone)
         				.setCallAction(data.getCallAction())
         				.setSessionToken(RandomStringUtils.random(4, "0123456789"));
-        			cache.put(new Element("merchant"+data.getSessionToken(),ms));
+        			cache.add("merchant"+data.getSessionToken(),3600,ms);
         			//initialize call
         			try{
 	    				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
@@ -342,7 +343,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
+                
             	filter("/*").through(CorsFilter.class);
+            	filter("/*").through(HttpsEnforcerFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
             	filter("/envayasms/*").through(PersistenceFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
@@ -549,18 +552,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			}
         
         	@Provides @Singleton @SuppressWarnings("unused")
-        	public Cache provideCache(){
-        		//Create a singleton CacheManager using defaults
-        		CacheManager manager = CacheManager.create();
-        		//Create a Cache specifying its configuration.
-        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
-        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-        		    .eternal(false)
-        		    .timeToLiveSeconds(7200)
-        		    .timeToIdleSeconds(3600)
-        		    .diskExpiryThreadIntervalSeconds(0));
-        		  manager.addCache(testCache);
-        		  return testCache;
+        	public Cache provideCache() throws IOException{
+        	    MemcachedClient client = new MemcachedClient(new InetSocketAddress(MessagingServletConfig.cacheHost, 11211));
+        	    Cache cache = new MemCacheWrapper(client, 3600);
+                return cache;
         	}},new MessagingShiroWebModule(this.servletContext));
         return injector;
     }

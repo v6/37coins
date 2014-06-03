@@ -1,5 +1,6 @@
 package com._37coins.web;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
@@ -11,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class GatewayUser {
-	
-	private String id;
+public class GatewayUser implements Serializable{
+    private static final long serialVersionUID = -7064570967424615487L;
+    private String id;
 	private List<String> roles;
 	private Locale locale;
 	private String mobile;

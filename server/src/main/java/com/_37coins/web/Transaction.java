@@ -1,5 +1,6 @@
 package com._37coins.web;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -9,9 +10,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class Transaction{
-	
-	public enum State {
+public class Transaction implements Serializable{
+    private static final long serialVersionUID = -8244388150818363003L;
+
+    public enum State {
 		//REQUESTS
 		STARTED("started"),
 		CONFIRMED("confirmed"),

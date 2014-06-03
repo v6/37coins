@@ -1,8 +1,11 @@
 package com._37coins.web;
 
-public class Seller {
-	
-	private String mobile;
+import java.io.Serializable;
+
+public class Seller implements Serializable{
+    private static final long serialVersionUID = 8042302137934743066L;
+
+    private String mobile;
 	
 	private float price;
 
