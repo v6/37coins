@@ -1,4 +1,4 @@
-package com._37coins.envaya;
+package com._37coins;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com._37coins.MessageFactory;
-import com._37coins.MessagingServletConfig;
 import com._37coins.cache.Cache;
 import com._37coins.cache.Element;
 import com._37coins.persistence.dao.Gateway;
@@ -106,17 +105,17 @@ public class ServiceLevelThread extends Thread {
     
     			CredentialsProvider credsProvider = new BasicCredentialsProvider();
     			credsProvider.setCredentials(new AuthScope(
-    					MessagingServletConfig.amqpHost, 15672),
+    					MerchantServletConfig.amqpHost, 15672),
     					new UsernamePasswordCredentials(
-    							MessagingServletConfig.amqpUser,
-    							MessagingServletConfig.amqpPassword));
+    							MerchantServletConfig.amqpUser,
+    							MerchantServletConfig.amqpPassword));
     			HttpClient client = HttpClientBuilder.create()
     					.setDefaultCredentialsProvider(credsProvider).build();
     			Map<String,GatewayUser> active = new HashMap<String,GatewayUser>();
     			for (Entry<String,GatewayUser> gu : rv.entrySet()) {
     				try {
     					HttpGet someHttpGet = new HttpGet("http://"
-    							+ MessagingServletConfig.amqpHost
+    							+ MerchantServletConfig.amqpHost
     							+ ":15672/api/queues/%2f/" + gu.getKey());
     					URI uri = new URIBuilder(someHttpGet.getURI()).build();
     					HttpRequestBase request = new HttpGet(uri);
@@ -196,7 +195,7 @@ public class ServiceLevelThread extends Thread {
 		mailClient.send(
 			msgFactory.constructSubject(ds),
 			email,
-			MessagingServletConfig.senderMail,
+			MerchantServletConfig.senderMail,
 			msgFactory.constructTxt(ds),
 			msgFactory.constructHtml(ds));
 	}

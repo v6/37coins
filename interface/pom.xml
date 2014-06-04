@@ -33,6 +33,28 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<artifactId>RestNucleusBoilerplate</artifactId>
+			<groupId>org.restnucleus</groupId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>guava</artifactId>
+					<groupId>com.google.guava</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>2.2.3</version>
@@ -94,6 +116,11 @@
 			<artifactId>javax.mail</artifactId>
 			<version>1.5.0</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.brsanthu</groupId>
+		    <artifactId>google-analytics-java</artifactId>
+		    <version>1.0.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -131,6 +158,23 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
+				<version>4.0.0-m2</version>
+				<configuration>
+					<api>JDO</api>
+					<metadataIncludes>**/dao/*.class</metadataIncludes>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

@@ -98,6 +98,7 @@ public class MerchantResource {
 		data.put("delivery", delivery);
 		data.put("deliveryParam", deliveryParam);
 		data.put("basePath", MessagingServletConfig.basePath);
+		data.put("srvcPath", MessagingServletConfig.srvcPath);
 		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
 		String country = null;
 		try{

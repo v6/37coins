@@ -38,8 +38,6 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -137,14 +135,6 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@Provides @Singleton @SuppressWarnings("unused")
 				MailServiceClient getMailClient(Cache cache){
 					return new MockEmailClient(cache);
-				}
-				
-				@Provides @Singleton @SuppressWarnings("unused")
-				public SocketIOServer provideSocket(){
-				 	Configuration config = new Configuration();
-				    config.setPort(8081);
-				    SocketIOServer server = new SocketIOServer(config);
-				    return server;
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")

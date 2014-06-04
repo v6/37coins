@@ -95,9 +95,11 @@ public class FiatPriceProvider {
 				if (pt.getKey().equalsIgnoreCase(cu.getCode())){
 					e = new Element("price"+pt.getKey(), pt.getValue());
 				}
-				Element te = new Element("price"+pt.getKey(), pt.getValue());
-				if (null!=cache){
-					cache.put(te);
+				if (pt.getValue()!=null){
+    				Element te = new Element("price"+pt.getKey(), pt.getValue());
+    				if (null!=cache){
+    					cache.put(te);
+    				}
 				}
 			}
 		}

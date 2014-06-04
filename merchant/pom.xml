@@ -86,6 +86,21 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+		    <groupId>com.corundumstudio.socketio</groupId>
+		    <artifactId>netty-socketio</artifactId>
+		    <version>1.6.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>net.spy</groupId>
+		    <artifactId>spymemcached</artifactId>
+		    <version>2.11.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.unboundid</groupId>
+		    <artifactId>unboundid-ldapsdk</artifactId>
+		    <version>2.3.6</version>
+		</dependency>
+		<dependency>
 		    <groupId>org.codehaus.groovy</groupId>
 		    <artifactId>groovy-all</artifactId>
 		    <!-- Needs to be the same version that REST Assured depends on -->
