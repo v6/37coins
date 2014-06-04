@@ -31,7 +31,6 @@ public class MemCacheWrapper implements Cache {
     @Override
     public void remove(String key) {
         client.delete(key);
-        client.delete(key+"counter");
     }
 
     @Override

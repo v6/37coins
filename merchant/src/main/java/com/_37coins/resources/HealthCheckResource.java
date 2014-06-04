@@ -29,26 +29,4 @@ public class HealthCheckResource {
 		return rv;
 	}
 	
-	@GET
-	@Path("/start")
-	public void startPlivo(@QueryParam("code")String code, @QueryParam("to") String to) throws PlivoException{
-		RestAPI restAPI = new RestAPI(MerchantServletConfig.plivoKey, MerchantServletConfig.plivoSecret, "v1");
-		LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
-	    params.put("from", "+1201555"+code);
-	    params.put("to", "+1"+to);
-	    params.put("answer_url", MerchantServletConfig.basePath + "/plivo/answer/"+Locale.US.toString());
-	    params.put("hangup_url", MerchantServletConfig.basePath + "/plivo/hangup");
-	    params.put("ring_url", MerchantServletConfig.basePath + "/plivo/ring");
-	    params.put("hangup_on_ring", "3");
-	    params.put("time_limit", "1");
-	    params.put("caller_name", "37 Coins");
-	    Call response = restAPI.makeCall(params);
-	    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
-	    	System.out.println(response.message);
-	    	System.out.println(response.error);
-	    	System.out.println(response.serverCode);
-	    	throw new PlivoException(response.message);
-	    }
-	}
-	
 }

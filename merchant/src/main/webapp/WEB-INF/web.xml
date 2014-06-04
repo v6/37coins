@@ -8,6 +8,7 @@
             <param-value>com._37coins.MerchantApplication</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
         <servlet-name>com._37coins.MerchantApp</servlet-name>

@@ -1,0 +1,27 @@
+<style type="text/css">
+	  body {
+	  	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	  }
+	  article{
+	  	z-index:11;
+	  	font-size: 18px;
+	  	line-height: 24px;
+	  	font-family: serif;
+	  }
+	  h3{
+	  	font-size: 60px;
+	  	position: relative;
+	  	display: inline-block;
+	  	padding: 10px 30px 8px 30px;
+	  	height: 80px;
+	  	line-height: 80px;
+	  	font-family: 'Bitter', 'Trebuchet MS', Arial;
+	  	font-weight: normal;
+	  	margin-top: 0px;
+	  	margin-bottom: 0px;
+	  }
+	  p{
+	  	margin-left: 50px;
+	  	font-family: 'Helvetica Neue',Helvetica, Arial, sans-serif;
+	  }
+</style>

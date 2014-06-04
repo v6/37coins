@@ -67,13 +67,17 @@ public class WebfingerResource {
 			asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
 		}
 		String mobile = email[1].split("@")[0];
-		
+		mobile = (mobile.contains("+"))?mobile:"+"+mobile;
 		String cn = null;
 		RNQuery q = new RNQuery().addFilter("mobile", mobile);
 		try {
 		    Account a = dao.queryEntity(q, Account.class, false);
 		    if (null==a){
-		        Gateway g = dao.queryEntity(q, Gateway.class);
+	            Gateway g = dao.queryEntity(q, Gateway.class, false);
+                if (null==g){
+                    asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
+                    return;
+                }
 		        cn = g.getMobile().replace("+","");
 		    }else{
 		        cn = a.getMobile().replace("+",""); 

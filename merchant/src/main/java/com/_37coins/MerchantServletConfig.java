@@ -25,6 +25,7 @@ import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 import org.restnucleus.filter.DigestFilter;
+import org.restnucleus.filter.PersistenceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +94,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 		digestToken = System.getProperty("digestToken");
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
-		basePath = System.getProperty("pBasePath");
+		basePath = System.getProperty("basePath");
 		cacheHost = System.getProperty("cacheHost");
 		senderMail = System.getProperty("senderMail");
         amqpUser = System.getProperty("amqpUser");
@@ -216,8 +217,8 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets(){
             	filter("/product*").through(DigestFilter.class);
-            	//filter("/pwallet*").through(PersistenceFilter.class);
-            	//filter("/pwallet/claim").through(HmacFilter.class);
+            	filter("/.well-known*").through(PersistenceFilter.class);
+            	filter("/plivo/*").through(PersistenceFilter.class);
         	}
             
 			@Provides @Singleton @SuppressWarnings("unused")

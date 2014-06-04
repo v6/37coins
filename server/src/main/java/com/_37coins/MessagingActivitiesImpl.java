@@ -122,6 +122,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			Element e = cache.get(workflowId);
 			Transaction tt = (Transaction)e.getObjectValue();
 			tt.setTaskToken(taskToken);
+			cache.put(new Element(workflowId+"tt",tt));
 			String confLink = MessagingServletConfig.basePath + "/rest/withdrawal/approve?key="+URLEncoder.encode(tt.getKey(),"UTF-8");
 			Withdrawal w = (Withdrawal)rsp.getPayload();
 			w.setConfKey(tt.getKey());

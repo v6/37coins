@@ -233,7 +233,7 @@ public class EnvayaSmsResource {
 							@Override
 							public void handleConfirm(DataSet data) {
 								if (data.getAction()==Action.WITHDRAWAL_CONF){
-									Element e = cache.get(data.getPayload().toString());
+									Element e = cache.get(data.getPayload()+"tt");
 									Transaction tx = (Transaction)e.getObjectValue();
 							        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
 							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());
