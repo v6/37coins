@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import com._37coins.cache.MemCacheWrapper;
 import com._37coins.ldap.CryptoUtils;
 import com._37coins.ldap.JdoRequestHandler;
+import com._37coins.parse.CommandParser;
+import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
@@ -42,6 +44,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
+import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
@@ -77,6 +80,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
     public static String amqpPassword;
     public static String senderMail;
     public static String amqpHost;
+    public static String gaTrackingId;
 	public static Logger log = LoggerFactory.getLogger(MerchantServletConfig.class);
 	public static Injector injector;
 	private ServletContext servletContext;
@@ -100,6 +104,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
         amqpUser = System.getProperty("amqpUser");
         amqpPassword = System.getProperty("amqpPassword");
         amqpHost = System.getProperty("amqpHost");
+        gaTrackingId = System.getProperty("gaTrackingId");
 	}
     
 	@Override
@@ -219,6 +224,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             	filter("/product*").through(DigestFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/plivo/*").through(PersistenceFilter.class);
+            	bind(ParserClient.class);
         	}
             
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -228,12 +234,24 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 				return pc.getPersistenceManagerFactory();
 			}
 			
+	        @Provides @Singleton @SuppressWarnings("unused")
+	        public CommandParser getMessageProcessor() {
+	            return new CommandParser(servletContext);
+	        }
+			
             @Provides @Singleton @SuppressWarnings("unused")
             public SocketIOServer provideSocket(){
                 Configuration config = new Configuration();
                 config.setPort(8081);
                 SocketIOServer server = new SocketIOServer(config);
                 return server;
+            }
+            
+
+            @Provides @Singleton @SuppressWarnings("unused")
+            public GoogleAnalytics getGoogleAnalytics(){
+                GoogleAnalytics ga = new GoogleAnalytics(MerchantServletConfig.gaTrackingId);
+                return ga;
             }
             
             @Provides @Singleton @SuppressWarnings("unused")

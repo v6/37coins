@@ -25,6 +25,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,8 +149,10 @@ public class PlivoResource {
                     .setAction(MerchantServletConfig.basePath+"/plivo/merchant/"+session+"/"+code+"/"+locale)
                     .setNumDigits(NUM_DIGIT)
                     .setRedirect(true)
+                    .setRetries(2)
                     .setSpeak(new Speak()
-                        .setText(msgFactory.getText("VoiceMerchantConfirm",ds)).setLanguage(locale)));
+                        .setText(msgFactory.getText("VoiceMerchantConfirm",ds)).setLanguage(locale)))
+                .add(new Speak().setText("no dial tones received.").setLanguage(locale));
         } catch (IOException | TemplateException e) {
             log.error("plivo answer exception",e);
             e.printStackTrace();
@@ -226,7 +229,8 @@ public class PlivoResource {
             try {           
                 //check if user exists, if not, create
                 
-                Account a = (dao.existsObject(Long.parseLong(cn), Account.class))?dao.getObjectById(Long.parseLong(cn), Account.class):null;
+                RNQuery q = new RNQuery().addFilter("mobile", ms.getPhoneNumber());
+                Account a = dao.queryEntity(q, Account.class, false);
                 if (null!=a){
                     boolean found = false;
                     if (ms.getCallAction()==null || ms.getCallAction().equals("get")){
@@ -257,7 +261,8 @@ public class PlivoResource {
                                     return;
                                 }
                                 //update ldap record
-                                Account a = (dao.existsObject(Long.parseLong(cn), Account.class))?dao.getObjectById(Long.parseLong(cn), Account.class):null;
+                                RNQuery q = new RNQuery().addFilter("mobile", "+"+cn);
+                                Account a = dao.queryEntity(q, Account.class);
                                 a.setApiToken(parserApiToken);
                                 a.setApiSecret(parserApiSecret);
                             }

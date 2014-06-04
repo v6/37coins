@@ -14,7 +14,7 @@ public class MemCacheWrapper implements Cache {
 
     @Override
     public void put(Element element) {
-        client.add(element.getKey(), lifetime, element.getObjectValue());
+        client.set(element.getKey(), lifetime, element.getObjectValue());
     }
 
     @Override

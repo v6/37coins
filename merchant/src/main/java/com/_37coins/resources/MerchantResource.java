@@ -1,5 +1,8 @@
 package com._37coins.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.DELETE;
@@ -37,7 +40,7 @@ public class MerchantResource {
 	
 	@POST
 	@Path("/{type}")
-	public Withdrawal create(Withdrawal charge, @PathParam("type")String type){
+	public Map<String,String> create(Withdrawal charge, @PathParam("type")String type){
 		Cache cache = type.equals("product")?dayCache:hourCache;
 		if (null == charge || null == charge.getAmount()||null == charge.getPayDest()){
 			throw new WebApplicationException(Response.Status.BAD_REQUEST);
@@ -54,7 +57,9 @@ public class MerchantResource {
 			i++;
 		}
 		cache.put(new Element("charge"+token,charge));
-		return new Withdrawal().setTxId(token);
+		Map<String,String> rv = new HashMap<String,String>();
+		rv.put("token", token);
+		return rv;
 	}
 	
 	@GET

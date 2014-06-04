@@ -18,6 +18,8 @@ public class GetDigits {
 	
 	private String method;
 	
+	private int retries;
+	
 	private boolean redirect;
 
 	public URL getAction() {
@@ -58,12 +60,22 @@ public class GetDigits {
 		this.numDigits = numDigits;
 		return this;
 	}
+	
+    public int getRetries() {
+        return retries;
+    }
+
+    @XmlAttribute
+    public GetDigits setRetries(int retries) {
+        this.retries = retries;
+        return this;
+    }
 
 	public boolean isRedirect() {
 		return redirect;
 	}
 
-	@XmlAttribute
+    @XmlAttribute
 	public GetDigits setRedirect(boolean redirect) {
 		this.redirect = redirect;
 		return this;
