@@ -12,15 +12,16 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com._37coins.products.ProductsClient;
-import com._37coins.products.ProductsClientException;
+import com._37coins.merchant.MerchantClient;
+import com._37coins.merchant.MerchantClientException;
+import com._37coins.merchant.pojo.Charge;
+import com._37coins.merchant.pojo.MerchantResponse;
 import com._37coins.resources.MerchantResource;
-import com._37coins.workflow.pojo.Withdrawal;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 public class ClientTest {	
     private static EmbeddedJetty embeddedJetty;
-    private static ProductsClient client;
+    private static MerchantClient client;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -32,7 +33,7 @@ public class ClientTest {
         	}
         };
         embeddedJetty.start();
-        client = new ProductsClient(embeddedJetty.getBaseUri() + MerchantResource.PATH, "test");
+        client = new MerchantClient(embeddedJetty.getBaseUri() + MerchantResource.PATH, "test");
 	}
     
     @AfterClass
@@ -41,38 +42,38 @@ public class ClientTest {
     }
     
     @Test
-    public void testAuthFail() throws IOException, NoSuchAlgorithmException, NumberParseException, ProductsClientException, URISyntaxException{
+    public void testAuthFail() throws IOException, NoSuchAlgorithmException, NumberParseException, MerchantClientException, URISyntaxException{
         //try it with a wrong password
         try {
-            new ProductsClient(embeddedJetty.getBaseUri() + MerchantResource.PATH, "wrongPw")
+            new MerchantClient(embeddedJetty.getBaseUri() + MerchantResource.PATH, "wrongPw")
                 .charge(new BigDecimal("0.5"), "+491606941382");
             Assert.assertTrue("exception expected", false);
-        }catch(ProductsClientException e){
+        }catch(MerchantClientException e){
             Assert.assertTrue(true);
         }
     }
     
     @Test
-    public void testPhone() throws IOException, NoSuchAlgorithmException, NumberParseException, ProductsClientException, URISyntaxException{
+    public void testPhone() throws IOException, NoSuchAlgorithmException, NumberParseException, MerchantClientException, URISyntaxException{
         //create
-        String token = client.charge(new BigDecimal("0.5"), "+491606941382");
-        Assert.assertNotNull(token);
+        MerchantResponse mr = client.charge(new BigDecimal("0.5"), "+491606941382");
+        Assert.assertNotNull(mr.getToken());
         //retrieve back
-        Withdrawal w = client.getCharge(token);
-        Assert.assertEquals(new BigDecimal("0.5"), w.getAmount());
-        Assert.assertEquals("491606941382", w.getPayDest().getAddress());
+        Charge c = client.getCharge(mr.getToken());
+        Assert.assertEquals(new BigDecimal("0.5"), c.getAmount());
+        Assert.assertEquals("491606941382", c.getPayDest().getAddress());
     }
     	
     @Test
-    public void testAddress() throws IOException, NoSuchAlgorithmException, ProductsClientException, NumberParseException, URISyntaxException{
+    public void testAddress() throws IOException, NoSuchAlgorithmException, MerchantClientException, NumberParseException, URISyntaxException{
         //create
-        String token = client.charge(new BigDecimal("0.5"), "19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh","bla");
+        MerchantResponse mr = client.charge(new BigDecimal("0.5"), "19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh","bla");
     	//retrieve back
-        Withdrawal w = client.getCharge(token);
-        Assert.assertEquals(new BigDecimal("0.5"), w.getAmount());
-        Assert.assertEquals("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh", w.getPayDest().getAddress());
+        Charge c = client.getCharge(mr.getToken());
+        Assert.assertEquals(new BigDecimal("0.5"), c.getAmount());
+        Assert.assertEquals("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh", c.getPayDest().getAddress());
         //delete that one
-        client.deleteCharge(token);
+        client.deleteCharge(mr.getToken());
     }
 
 }

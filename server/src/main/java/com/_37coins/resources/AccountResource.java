@@ -55,6 +55,7 @@ import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.AccountPolicy;
 import com._37coins.web.AccountRequest;
@@ -283,7 +284,8 @@ public class AccountResource {
     	                        Gateway g = new Gateway()
     	                            .setCn(cn)
     	                            .setApiSecret(departmentNumber)
-    	                            .setFee(new BigDecimal(description).setScale(8))
+    	                            .setSettings(new GatewaySettings().setFee(
+    	                                    new BigDecimal(description).setScale(8)))
     	                            .setLocale(DataSet.parseLocaleString(preferredLanguage))
     	                            .setPassword(userPassword)
     	                            .setEmail(mail)

@@ -70,7 +70,7 @@ public class InterpreterFilter implements Filter {
 			}else{
 			    a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
 			}
-			responseData.setGwFee(g.getFee())
+			responseData.setGwFee(g.getSettings().getFee())
 			    .setLocale(a.getLocale())
 			    .getTo().setGateway(g.getCn());
 			responseData.setGwCn(g.getCn());
@@ -82,7 +82,7 @@ public class InterpreterFilter implements Filter {
 			        .setOwner(g);
 			    dao.add(a);
 			    responseData.getTo().setGateway(g.getCn());
-			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getFee());
+			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getSettings().getFee());
 			    //respond to new user with welcome message
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)

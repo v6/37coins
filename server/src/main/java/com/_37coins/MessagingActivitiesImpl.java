@@ -19,6 +19,7 @@ import com._37coins.cache.Cache;
 import com._37coins.cache.Element;
 import com._37coins.envaya.QueueClient;
 import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.Transaction;
@@ -196,7 +197,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	    mobile = (mobile.contains("+"))?mobile:"+"+mobile;
 	    RNQuery q = new RNQuery().addFilter("mobile", mobile);
 		Account a = dao.queryEntity(q, Account.class);
-		BigDecimal fee = (a.getOwner().getFee()!=null)?a.getOwner().getFee():BigDecimal.ZERO;
+		if (a.getOwner().getSettings()==null)
+		    a.getOwner().setSettings(new GatewaySettings());
+		GatewaySettings gs = a.getOwner().getSettings();
+		BigDecimal fee = (gs.getFee()!=null)?gs.getFee():BigDecimal.ZERO;
 		return fee;
 	}
 	

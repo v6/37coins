@@ -80,7 +80,7 @@ public class ServiceLevelThread extends Thread {
     			Map<String,GatewayUser> rv = new HashMap<>();
     		    List<Gateway> gateways = dao.queryList(new RNQuery(), Gateway.class);
     			for (Gateway g: gateways){
-    				if (null != g.getMobile() && null != g.getFee()) {
+    				if (null != g.getMobile() && null != g.getSettings() && null != g.getSettings().getFee()) {
     					PhoneNumberUtil phoneUtil = PhoneNumberUtil
     							.getInstance();
     					PhoneNumber pn = null;
@@ -95,7 +95,7 @@ public class ServiceLevelThread extends Thread {
     							.setMobile(
     									PhoneNumberUtil.getInstance().format(
     											pn, PhoneNumberFormat.E164))
-    							.setFee(g.getFee())
+    							.setFee(g.getSettings().getFee())
     							.setEnvayaToken(g.getEmail())
     							.setLocale(new Builder().setRegion(cc).build())
     							.setId(g.getCn());

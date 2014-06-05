@@ -68,7 +68,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-		    <artifactId>productsClient</artifactId>
+		    <artifactId>merchantClient</artifactId>
 			<groupId>com.37coins</groupId>
 			<version>0.1.0-SNAPSHOT</version>
 		</dependency>

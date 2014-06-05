@@ -1,6 +1,7 @@
 package com._37coins;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -34,6 +35,7 @@ import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
@@ -85,15 +87,22 @@ public class RestTest {
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
-		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setFee(new BigDecimal("0.0006")).setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
-	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setFee(new BigDecimal("0.0007")).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
-	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setFee(new BigDecimal("0.0008")).setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
+		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
+		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")));
+	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+	    gw2.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0007")));
+	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
+	    gw3.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0008")));
+	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE"));
+	    gw4.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
+	    Gateway gw5 = new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT"));
+	    gw5.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
         List<Gateway> rv = new ArrayList<>();
         rv.add(gw1);
         rv.add(gw2);
         rv.add(gw3);
-        rv.add(new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setFee(new BigDecimal("0.002")).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")));
-        rv.add(new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setFee(new BigDecimal("0.002")).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT")));
+        rv.add(gw4);
+        rv.add(gw5);
         List<Account> ac = new ArrayList<>();
         ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test"));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
@@ -549,7 +558,35 @@ public class RestTest {
         .expect()
             .statusCode(200)
         .when()
-            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH);    	
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH); 
+        //get welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");
+        //set welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .body("{\"welcomeMsg\":\"hello123\"}")
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+            .body("welcomeMsg", equalToIgnoringCase(("hello123")))
+        .when()
+            .post(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");
+        //get welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+            .body("welcomeMsg", equalToIgnoringCase(("hello123")))
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");        
+        
     }
 	
 	@Test

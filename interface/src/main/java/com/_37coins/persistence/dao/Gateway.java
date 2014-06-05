@@ -1,7 +1,5 @@
 package com._37coins.persistence.dao;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Locale;
 
 import javax.jdo.annotations.Discriminator;
@@ -36,10 +34,7 @@ public class Gateway extends Model {
 	
     @Persistent
     @NotNull
-    private String hostName;	
-	
-	@Persistent
-	private Double fee;
+    private String hostName;
 	
 	@Persistent
 	@Index
@@ -63,10 +58,7 @@ public class Gateway extends Model {
 	private Locale locale;
 	
 	@Persistent
-	private String welcomeMsg;
-	
-	@Persistent
-	private String signupCallback;
+	private GatewaySettings settings;
 
 	public String getMobile() {
         return mobile;
@@ -115,25 +107,6 @@ public class Gateway extends Model {
 		return this;
 	}
 
-	public Gateway setFee(Double fee) {
-		this.fee = fee;
-		return this;
-	}
-
-	public BigDecimal getFee() {
-	    if (null!=fee){
-	        return new BigDecimal(fee).setScale(8,RoundingMode.HALF_UP);
-	    }else{
-	        return null;
-	    }
-	}
-
-	public Gateway setFee(BigDecimal fee) {
-	    if (null!=fee)
-	        this.fee = fee.doubleValue();
-		return this;
-	}
-
 	public String getApiToken() {
         return apiToken;
     }
@@ -170,29 +143,26 @@ public class Gateway extends Model {
 		return this;
 	}
 
-    public String getWelcomeMsg() {
-        return welcomeMsg;
+    public GatewaySettings getSettings() {
+        return settings;
     }
 
-    public Gateway setWelcomeMsg(String welcomeMsg) {
-        this.welcomeMsg = welcomeMsg;
-        return this;
-    }
-
-    public String getSignupCallback() {
-        return signupCallback;
-    }
-
-    public Gateway setSignupCallback(String signupCallback) {
-        this.signupCallback = signupCallback;
+    public Gateway setSettings(GatewaySettings settings) {
+        this.settings = settings;
         return this;
     }
 
     @Override
 	public void update(Model newInstance) {
 		Gateway n = (Gateway) newInstance;
-		if (null != n.getFee())this.setFee(n.getFee());
+		if (null != n.getApiSecret())this.setApiSecret(n.getApiSecret());
+		if (null != n.getApiToken())this.setApiToken(n.getApiToken());
 		if (null != n.getCountryCode())this.setCountryCode(n.getCountryCode());
+		if (null != n.getCn())this.setCn(n.getCn());
+		if (null != n.getEmail())this.setEmail(n.getEmail());
+		if (null != n.getLocale())this.setLocale(n.getLocale());
+		if (null != n.getMobile())this.setMobile(n.getMobile());
+		if (null != n.getSettings())this.setSettings(n.getSettings());
 	}
 
 }

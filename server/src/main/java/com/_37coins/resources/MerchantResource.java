@@ -189,7 +189,7 @@ public class MerchantResource {
 	@Path("/charge/{apiToken}/to/{phone}")
 	public void chargePhone(MerchantRequest request,
 			@PathParam("apiToken") String apiToken,
-			@PathParam("phone") String phone,
+			@PathParam("phone") String mobile,
 			@HeaderParam(DigestFilter.AUTH_HEADER) String sig,
 			@Context UriInfo uriInfo,
 			@Suspended final AsyncResponse asyncResponse){
@@ -204,7 +204,8 @@ public class MerchantResource {
 		}
 		String from = null;
 		String gateway = null;
-		RNQuery q = new RNQuery().addFilter("cn", phone);
+		mobile = (mobile.contains("+"))?mobile:"+"+mobile;
+		RNQuery q = new RNQuery().addFilter("mobile", mobile);
 		Gateway g = dao.queryEntity(q, Account.class).getOwner();
 		if (null==from || null==g.getMobile()){
 			asyncResponse.resume(new WebApplicationException(Response.Status.NOT_FOUND));

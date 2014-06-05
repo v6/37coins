@@ -8,7 +8,7 @@ public class GatewayPriceComparator implements Comparator<Gateway> {
 
     @Override
     public int compare(Gateway o1, Gateway o2) {
-        return o1.getFee().compareTo(o2.getFee());
+        return o1.getSettings().getFee().compareTo(o2.getSettings().getFee());
     }
 
 }
