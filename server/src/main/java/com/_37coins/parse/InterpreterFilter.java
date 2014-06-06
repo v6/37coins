@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.util.SignupNotifier;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -54,21 +55,35 @@ public class InterpreterFilter implements Filter {
 			//read the gateway
 			Gateway g = a.getOwner();
 
+	        //check locale
+            if (a.getLocale()!=null){
+                if (a.getLocale().getCountry()==null){
+                    a.setLocale(new Locale(a.getLocale().getLanguage(),responseData.getLocale().getCountry()));
+                }else{
+                    a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
+                }
+            }else{
+                a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
+            }            
 			//check if gateway changed
-			if (!(null==responseData.getTo().getGateway()||g.getCn().equalsIgnoreCase(responseData.getTo().getGateway()))){
+			if (null!=responseData.getTo().getGateway()&&!g.getMobile().equalsIgnoreCase(responseData.getTo().getGateway())){
 				//look up the new gateway and overwrite all values
 			    g = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getGateway()), Gateway.class);
 			    a.setOwner(g);
-			}
-			//check locale
-			if (a.getLocale()!=null){
-			    if (a.getLocale().getCountry()==null){
-			        a.setLocale(new Locale(a.getLocale().getLanguage(),responseData.getLocale().getCountry()));
-			    }else{
-			        a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
+			    //notify gateway
+			    if (g.getSettings().getSignupCallback()!=null){
+			        Thread t = new SignupNotifier(g.getSettings().getSignupCallback(), a.getMobile(), SignupNotifier.Source.MOVE);
+			        t.start();
 			    }
-			}else{
-			    a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
+	            //respond to user with welcome message from new gateway.
+                DataSet create = new DataSet()
+                    .setAction(Action.SIGNUP)
+                    .setTo(responseData.getTo())
+                    .setCn(responseData.getCn())
+                    .setLocale(responseData.getLocale())
+                    .setPayload(g.getSettings().getWelcomeMsg())
+                    .setService(responseData.getService());
+                httpReq.setAttribute("create", create);                
 			}
 			responseData.setGwFee(g.getSettings().getFee())
 			    .setLocale(a.getLocale())
@@ -89,6 +104,7 @@ public class InterpreterFilter implements Filter {
 					.setTo(responseData.getTo())
 					.setCn(responseData.getCn())
 					.setLocale(responseData.getLocale())
+					.setPayload(g.getSettings().getWelcomeMsg())
 					.setService(responseData.getService());
 				httpReq.setAttribute("create", create);
 			}

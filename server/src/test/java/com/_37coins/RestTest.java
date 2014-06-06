@@ -1,7 +1,6 @@
 package com._37coins;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -88,7 +87,7 @@ public class RestTest {
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
 		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
-		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")));
+		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")).setWelcomeMsg("PZWelcomeMessage"));
 	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
 	    gw2.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0007")));
 	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
@@ -186,6 +185,7 @@ public class RestTest {
 				ds.setAction(data.getAction());
 				ds.setTo(data.getTo());
 				ds.setCn(data.getCn());
+				ds.setPayload(data.getPayload());
 			}
 			
 			@Override
@@ -198,6 +198,7 @@ public class RestTest {
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
 		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
+		Assert.assertEquals("PZWelcomeMessage",ds.getPayload());
 		Assert.assertNotNull(ds.getCn());
     }
     

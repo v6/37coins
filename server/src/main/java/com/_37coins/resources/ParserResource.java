@@ -45,6 +45,7 @@ import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.util.GatewayPriceComparator;
+import com._37coins.util.SignupNotifier;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -160,29 +161,29 @@ public class ParserResource {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String,String> signup(MessageAddress recipient, MessageAddress referer, String gwCn, String locale, String service){
+	public Map<String,String> signup(MessageAddress recipient, MessageAddress referrer, String gwCn, String locale, String service){
 		Gateway gwDn = null;
 		String gwAddress = null;
 		Locale gwLng = null;
 		String cnString = null;
 		String mobile = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
-            if (null == referer && null != gwCn && gwCn.length() > 0){
+            if (null == referrer && null != gwCn && gwCn.length() > 0){
                 RNQuery q = new RNQuery().addFilter("cn", gwCn);
                 Gateway tmp = dao.queryEntity(q, Gateway.class);
                 try {
-                  referer = MessageAddress.fromString(tmp.getMobile(), (String)null);
-                  referer.setGateway(gwCn);
+                  referrer = MessageAddress.fromString(tmp.getMobile(), (String)null);
+                  referrer.setGateway(gwCn);
                 } catch (AddressException | NumberParseException e) {
                     log.error("invite exception",e);
                 }
             }
 			//set gateway from referring user's gateway
-			if (null != referer && referer.getAddressType() == MsgType.SMS 
-					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){
+			if (null != referrer && referrer.getAddressType() == MsgType.SMS 
+					&& recipient.getPhoneNumber().getCountryCode() == referrer.getPhoneNumber().getCountryCode()){
 			    RNQuery q = new RNQuery().addFilter("cn", gwCn);
 			    gwDn = dao.queryEntity(q, Gateway.class);
-				gwAddress = referer.getGateway();
+				gwAddress = referrer.getGateway();
 			}else{//or try to find a gateway in the database
 				try{
 					
@@ -226,6 +227,12 @@ public class ParserResource {
 		        .setLocale(uLocale);
 			try {
 			    dao.add(newUser);
+			    //notify gateway
+	            if (gwDn.getSettings().getSignupCallback()!=null){
+	                SignupNotifier.Source source = (null==referrer)?SignupNotifier.Source.NEW:SignupNotifier.Source.REFERRED;
+	                Thread t = new SignupNotifier(gwDn.getSettings().getSignupCallback(), newUser.getMobile(), source);
+	                t.start();
+	            }
 			    cnString = newUser.getId().toString();
 			    mobile = newUser.getMobile();
 				//and say hi to new user
@@ -236,6 +243,7 @@ public class ParserResource {
 						.setAddressType(recipient.getAddressType())
 						.setGateway(gwAddress))
 					.setCn(newUser.getId().toString())
+					.setPayload(gwDn.getSettings().getWelcomeMsg())
 					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);
