@@ -11,8 +11,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -60,11 +58,10 @@ public class WebfingerResource {
 	}
 	
 	@GET
-	public void getWebfinger(@QueryParam("resource") String resource,
-			@Suspended final AsyncResponse asyncResponse){
+	public Response getWebfinger(@QueryParam("resource") String resource){
 		String[] email = resource.split("acct:");
 		if (null == email[1]){
-			asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
+		    throw new WebApplicationException("wrong format",Response.Status.BAD_REQUEST);
 		}
 		String mobile = email[1].split("@")[0];
 		mobile = (mobile.contains("+"))?mobile:"+"+mobile;
@@ -75,8 +72,7 @@ public class WebfingerResource {
 		    if (null==a){
 	            Gateway g = dao.queryEntity(q, Gateway.class, false);
                 if (null==g){
-                    asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
-                    return;
+                    throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
                 }
 		        cn = g.getMobile().replace("+","");
 		    }else{
@@ -85,13 +81,13 @@ public class WebfingerResource {
 		} catch (IllegalStateException e1) {
 			log.error("webfinger exception",e1);
 			e1.printStackTrace();
-			asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
+			throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
 		}
 
 		Element e = cache.get("address"+cn);
 		Element e2 = cache.get("addressReq"+cn);
 		if (null!=e && !e.isExpired()){
-			sendResponse(resource, (String)e.getObjectValue(), asyncResponse);
+		    return sendResponse(resource, (String)e.getObjectValue());
 		}
 		if (null==e2 || e2.isExpired()){
 			DataSet data = new DataSet()
@@ -108,16 +104,16 @@ public class WebfingerResource {
 				} catch (InterruptedException e1) {
 					log.error("webfinger exception",e1);
 					e1.printStackTrace();
-					asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+					throw new WebApplicationException(e1,Response.Status.INTERNAL_SERVER_ERROR);
 				}
 			}else{
-				sendResponse(resource, (String)e.getObjectValue(), asyncResponse);
+			    return sendResponse(resource, (String)e.getObjectValue());
 			}
 		}
 		throw new WebApplicationException("account not found", Response.Status.NOT_FOUND);
 	}
 	
-	private void sendResponse(String resource, String address, final AsyncResponse asyncResponse){
+	private Response sendResponse(String resource, String address){
 		List<WebfingerLink> links = new ArrayList<>();
 		links.add(new WebfingerLink()
 			.setType("bitcoin")
@@ -127,9 +123,9 @@ public class WebfingerResource {
 			.setSubject(resource)
 			.setLinks(links);
 		try {
-			asyncResponse.resume(Response.ok(mapper.writeValueAsString(rv), "application/jrd+json").build());
+		    return Response.ok(mapper.writeValueAsString(rv), "application/jrd+json").build();
 		} catch (JsonProcessingException ex) {
-			asyncResponse.resume(ex);
+		    return null;
 		}
 	}
 

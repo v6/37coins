@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
+import javax.jdo.PersistenceManagerFactory;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 
@@ -29,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com._37coins.MessageFactory;
 import com._37coins.cache.Cache;
 import com._37coins.cache.Element;
 import com._37coins.persistence.dao.Gateway;
@@ -54,6 +54,9 @@ public class ServiceLevelThread extends Thread {
 	private final MailServiceClient mailClient;
 	private final MessageFactory msgFactory;
 	private final GenericRepository dao;
+	private final ObjectMapper objectMapper;
+	private final CredentialsProvider credsProvider;
+	private final HttpClient client;
 
 	boolean isActive = true;
 	Map<String,GatewayUser> buffer = new HashMap<>();
@@ -64,11 +67,19 @@ public class ServiceLevelThread extends Thread {
 	public ServiceLevelThread(Cache cache,
 			MailServiceClient mailClient,
 			MessageFactory msgFactory,
-			GenericRepository dao)
+			PersistenceManagerFactory pmf)
 			throws IllegalStateException {
 		this.cache = cache;
-		this.dao = dao;
-		dao.getPersistenceManager();
+        this.credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(new AuthScope(
+                MerchantServletConfig.amqpHost, 15672),
+                new UsernamePasswordCredentials(
+                        MerchantServletConfig.amqpUser,
+                        MerchantServletConfig.amqpPassword));
+        this.client = HttpClientBuilder.create()
+                .setDefaultCredentialsProvider(credsProvider).build();
+		this.dao = new GenericRepository(pmf);
+		this.objectMapper = new ObjectMapper();
 		this.mailClient = mailClient;
 		this.msgFactory = msgFactory;
 	}
@@ -76,9 +87,11 @@ public class ServiceLevelThread extends Thread {
 	@Override
 	public void run() {
 		while (isActive) {
+		    Map<String,GatewayUser> rv = new HashMap<>();
 		    try{
-    			Map<String,GatewayUser> rv = new HashMap<>();
-    		    List<Gateway> gateways = dao.queryList(new RNQuery(), Gateway.class);
+    			System.err.println("started new pull");
+    		    List<Gateway> gateways = dao.queryList(new RNQuery().setRange(0L,200L), Gateway.class);
+    		    System.err.println("fetched " + gateways.size() + " entries");
     			for (Gateway g: gateways){
     				if (null != g.getMobile() && null != g.getSettings() && null != g.getSettings().getFee()) {
     					PhoneNumberUtil phoneUtil = PhoneNumberUtil
@@ -102,26 +115,22 @@ public class ServiceLevelThread extends Thread {
     					rv.put(gu.getId(), gu);
     				}
     			}
-    
-    			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-    			credsProvider.setCredentials(new AuthScope(
-    					MerchantServletConfig.amqpHost, 15672),
-    					new UsernamePasswordCredentials(
-    							MerchantServletConfig.amqpUser,
-    							MerchantServletConfig.amqpPassword));
-    			HttpClient client = HttpClientBuilder.create()
-    					.setDefaultCredentialsProvider(credsProvider).build();
+	         }finally{
+	                dao.closePersistenceManager();
+	         }
+		     try{
+    			System.err.println("starting amqp");
     			Map<String,GatewayUser> active = new HashMap<String,GatewayUser>();
     			for (Entry<String,GatewayUser> gu : rv.entrySet()) {
+    			    HttpGet httpGet = new HttpGet("http://"
+                            + MerchantServletConfig.amqpHost
+                            + ":15672/api/queues/%2f/" + gu.getKey());
     				try {
-    					HttpGet someHttpGet = new HttpGet("http://"
-    							+ MerchantServletConfig.amqpHost
-    							+ ":15672/api/queues/%2f/" + gu.getKey());
-    					URI uri = new URIBuilder(someHttpGet.getURI()).build();
+    					URI uri = new URIBuilder(httpGet.getURI()).build();
     					HttpRequestBase request = new HttpGet(uri);
+    					System.err.println("before client");
     					HttpResponse response = client.execute(request);
-    					if (new ObjectMapper().readValue(
-    							response.getEntity().getContent(), Queue.class)
+    					if (objectMapper.readValue(response.getEntity().getContent(), Queue.class)
     							.getConsumers() > 0) {
     						MDC.put("hostName", gu.getKey());
     						MDC.put("mobile", gu.getValue().getMobile());
@@ -140,8 +149,11 @@ public class ServiceLevelThread extends Thread {
     					}
     				} catch (Exception ex) {
     					log.error("AMQP connection failed", ex);
+    				}finally{
+    				    httpGet.releaseConnection();
     				}
     			}
+    			System.err.println("before cache");
     			cache.put(new Element("gateways", active));
     			runAlerts(active);
 		    }catch(Exception e){
