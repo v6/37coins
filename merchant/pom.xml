@@ -47,7 +47,6 @@
 		<dependency>
 			<artifactId>RestNucleusBoilerplate</artifactId>
 			<groupId>org.restnucleus</groupId>
-			<version>0.2.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.mail</groupId>
@@ -94,11 +93,6 @@
 		    <groupId>net.spy</groupId>
 		    <artifactId>spymemcached</artifactId>
 		    <version>2.11.2</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.unboundid</groupId>
-		    <artifactId>unboundid-ldapsdk</artifactId>
-		    <version>2.3.6</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.codehaus.groovy</groupId>

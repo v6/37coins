@@ -5,6 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 
+import javax.jdo.PersistenceManagerFactory;
+
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
 
@@ -32,8 +34,8 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
     private final GenericRepository dao;
     private LDAPListenerClientConnection clientConnection;
     
-    public JdoRequestHandler(GenericRepository dao){
-        this.dao = dao;
+    public JdoRequestHandler(PersistenceManagerFactory pmf){
+        this.dao = new GenericRepository(pmf);
     }
 
     @Override
@@ -90,8 +92,10 @@ public class JdoRequestHandler extends LDAPListenerRequestHandler {
         String gwDn = request.getBindDN();
         Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", gwDn.substring(3, gwDn.indexOf(","))), Gateway.class, false);
         if (null!=g){
+            String password = g.getPassword();
+            dao.closePersistenceManager();
             try {
-                if (CryptoUtils.verifySaltedPassword(request.getSimplePassword().getValue(),g.getPassword())){
+                if (CryptoUtils.verifySaltedPassword(request.getSimplePassword().getValue(),password)){
                     return new LDAPMessage(messageId, new BindResponseProtocolOp(
                             ResultCode.SUCCESS_INT_VALUE, null, null, null, null),
                             Collections.<Control> emptyList());                    

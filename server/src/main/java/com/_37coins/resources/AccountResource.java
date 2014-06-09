@@ -137,12 +137,6 @@ public class AccountResource {
         }
 		return "true";
 	}
-	
-    @GET
-    @Path("/list/accounts")
-    public List<Account> listaccounts(){
-        return dao.queryList(null, Account.class);
-    }
     
     @POST
     @Path("/list/accounts")
@@ -229,13 +223,6 @@ public class AccountResource {
         ctx.close();
         return total;
     }
-
-	
-	@GET
-	@Path("/list/gateways")
-	public List<Gateway> listGateways(){
-	    return dao.queryList(null, Gateway.class);
-	}
 	
 	@POST
 	@Path("/list/gateways")

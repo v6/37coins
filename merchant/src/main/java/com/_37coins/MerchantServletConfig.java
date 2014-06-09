@@ -2,7 +2,6 @@ package com._37coins;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Random;
@@ -11,8 +10,6 @@ import javax.inject.Named;
 import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -22,19 +19,15 @@ import net.spy.memcached.MemcachedClient;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.restnucleus.PersistenceConfiguration;
-import org.restnucleus.dao.GenericRepository;
-import org.restnucleus.dao.RNQuery;
+import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.cache.MemCacheWrapper;
-import com._37coins.ldap.CryptoUtils;
-import com._37coins.ldap.JdoRequestHandler;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dao.Gateway;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.MerchantSession;
@@ -64,8 +57,6 @@ import com.google.inject.servlet.ServletModule;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
 import com.plivo.helper.exception.PlivoException;
-import com.unboundid.ldap.listener.LDAPListener;
-import com.unboundid.ldap.listener.LDAPListenerConfig;
 
 public class MerchantServletConfig extends GuiceServletContextListener {
     public static AWSCredentials awsCredentials = null;
@@ -85,7 +76,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 	public static Injector injector;
 	private ServletContext servletContext;
 	public SocketIOServer server;
-	private LDAPListener listener;
     private ServiceLevelThread slt;
 	static {
 	    if (null!=System.getProperty("accessKey")){
@@ -201,13 +191,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             }
         });
         server.start();
-        //start ldap
-        listener = i.getInstance(LDAPListener.class);
-        try {
-            listener.startListening();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
             //handle service level thread
             slt = i.getInstance(ServiceLevelThread.class);
@@ -221,6 +204,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
+                filter("/*").through(CorsFilter.class);
             	filter("/product*").through(DigestFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/plivo/*").through(PersistenceFilter.class);
@@ -298,28 +282,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 			public MessageFactory provideMessageFactory() {
 				return new MessageFactory(servletContext);
 			}
-			
-            @Provides @Singleton @SuppressWarnings("unused")
-            public LDAPListener getLdapListener(GenericRepository dao){
-                RNQuery q = new RNQuery().addFilter("cn", MerchantServletConfig.amqpUser);
-                Gateway g = dao.queryEntity(q, Gateway.class, false);
-                if (null==g){
-                    String pw=null;
-                    try{
-                        pw = CryptoUtils.getSaltedPassword(MerchantServletConfig.amqpPassword.getBytes());
-                    }catch(NoSuchAlgorithmException ex){
-                        throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
-                    }
-                    g = new Gateway()
-                        .setEmail(MerchantServletConfig.senderMail)
-                        .setCn(MerchantServletConfig.amqpUser)
-                        .setPassword(pw);
-                    dao.add(g);
-                }
-                LDAPListenerConfig config = new LDAPListenerConfig(2389, new JdoRequestHandler(dao));
-                LDAPListener listener = new LDAPListener(config);
-                return listener;
-            }
         
             @Named("day")
         	@Provides @Singleton @SuppressWarnings("unused")
@@ -366,9 +328,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 	public void contextDestroyed(ServletContextEvent sce) {
         if (null!=server){
             server.stop();
-        }
-        if (null!=listener){
-            listener.shutDown(true);
         }
         if (null!=slt){
             slt.kill();
