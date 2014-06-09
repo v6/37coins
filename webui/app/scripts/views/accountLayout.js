@@ -94,7 +94,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
             }
             if (cn && this.attempts < 7){
                 var self = this;
-                webfinger(cn+'@www.37coins.com', {
+                webfinger(cn+'@37coins.com', {
                     webfist_fallback: false,
                     tls_only: true,
                     uri_fallback: false,
