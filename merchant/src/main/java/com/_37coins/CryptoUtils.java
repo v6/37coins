@@ -1,4 +1,4 @@
-package com._37coins.ldap;
+package com._37coins;
 
 /* 
  JSPWiki - a JSP-based WikiWiki clone.

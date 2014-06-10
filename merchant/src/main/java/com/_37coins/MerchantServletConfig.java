@@ -206,6 +206,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             protected void configureServlets(){
                 filter("/*").through(CorsFilter.class);
             	filter("/product*").through(DigestFilter.class);
+            	filter("/amqp*").through(PersistenceFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/plivo/*").through(PersistenceFilter.class);
             	bind(ParserClient.class);

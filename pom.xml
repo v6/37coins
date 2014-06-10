@@ -15,7 +15,6 @@
 
 	<modules>
 		<module>interface</module>
-		<module>ldap</module>
 		<module>merchantClient</module>
 		<module>merchant</module>
 		<module>server</module>
