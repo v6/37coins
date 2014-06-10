@@ -1,5 +1,6 @@
 package com._37coins.web;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -10,9 +11,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class PriceTick {
-
-	private BigDecimal ask;
+public class PriceTick implements Serializable {
+    private static final long serialVersionUID = 3629300805101564200L;
+    
+    private BigDecimal ask;
 	private BigDecimal bid;
 	private BigDecimal last;
 	private BigDecimal lastFactored;

@@ -46,14 +46,6 @@ public class IndexResource {
 		this.servletContext = servletContext;
 		this.lookupService = lookupService;
 	}
-	
-	public static String getRemoteAddress(HttpServletRequest httpReq){
-		String addr = httpReq.getHeader("X-Forwarded-For");
-		if (null==addr || addr.length()<7){
-			addr = httpReq.getRemoteAddr();
-		}
-		return addr;
-	}
 
 	@GET
 	public Response index(@HeaderParam("Accept-Language") String lng){
@@ -65,7 +57,7 @@ public class IndexResource {
 		data.put("srvcPath", MessagingServletConfig.srvcPath);
 		String country = null;
 		try{
-			country = lookupService.getCountry(IndexResource.getRemoteAddress(httpReq)).getCode();
+			country = lookupService.getCountry(TicketResource.getRemoteAddress(httpReq)).getCode();
 			country = (country.equals("--"))?null:country;
 		}catch(Exception e){
 			log.error("geoip exception",e);

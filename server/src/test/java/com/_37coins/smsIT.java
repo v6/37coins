@@ -16,10 +16,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restnucleus.filter.DigestFilter;
 
 import com._37coins.envaya.Command;
+import com._37coins.merchant.pojo.MerchantRequest;
+import com._37coins.merchant.pojo.MerchantResponse;
+import com._37coins.merchant.pojo.PaymentDestination;
+import com._37coins.merchant.pojo.PaymentDestination.AddressType;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
+import com._37coins.resources.MerchantResource;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactory;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
@@ -31,6 +37,8 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.response.Response;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -136,6 +144,33 @@ public class smsIT {
 		.when()
 			.post(restUrl + EnvayaSmsResource.PATH);
 	}
+	
+	   /**
+     * make sure module is started with: mvn jetty:run -Denvironment=test -DhmacToken=
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    @Test
+    public void testMerchant() throws JsonParseException, JsonMappingException, IOException, NoSuchAlgorithmException{
+        MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
+        String serverUrl = "base path" + MerchantResource.PATH + "/charge/test";
+        req.setPayDest(new PaymentDestination().setAddressType(AddressType.BTC).setAddress("123565"));
+        String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
+        Response r = given()
+            .contentType(ContentType.JSON)
+            .header("X-Request-Signature", sig)
+            .body(new ObjectMapper().writeValueAsString(req))
+        .expect()
+            .statusCode(200)
+        .when()
+            .post("base path" + MerchantResource.PATH+"/charge/test");
+        MerchantResponse mr = new ObjectMapper().readValue(r.asInputStream(), MerchantResponse.class);
+        System.out.println(new ObjectMapper().writeValueAsString(mr));
+        Assert.assertNotNull(mr.getDisplayName());
+        Assert.assertNotNull(mr.getToken());
+    }
 	
 	//#####################################  TESTS
 	

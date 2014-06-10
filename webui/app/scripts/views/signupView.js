@@ -58,7 +58,7 @@ function( Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha) {
 							required: true,
 							email: true,
 							onkeyup: false,
-							remote: window.opt.basePath + '/account/check'
+							remote: window.opt.basePath + '/accounts/check'
 			            },
 			            password1: {
 			                minlength: 6,

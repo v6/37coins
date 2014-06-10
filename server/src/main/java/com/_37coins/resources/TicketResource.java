@@ -13,8 +13,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
 
@@ -24,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 
 @Path(TicketResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,14 +52,13 @@ public class TicketResource {
 	 */
 	@POST
 	public Pair<String,String> getTicket(){
-		Element e = cache.get(REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq));
-		if (e!=null){
-			if (e.getHitCount()>=3){
+	    String token = TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq);
+	    long c = cache.incr(token);
+	    if (c>=3){
 				//TODO: implement turing test
 				throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
-			}
-		}else{
-			cache.put(new Element(REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq),TicketResource.getRemoteAddress(httpReq)));
+		}else if (c==0){
+			cache.put(new Element(token,TicketResource.getRemoteAddress(httpReq)));
 		}
 		String ticket = RandomStringUtils.random(TICKET_LENGTH, TICKET_SCOPE);
 		cache.put(new Element(TICKET_SCOPE+ticket,ticket));

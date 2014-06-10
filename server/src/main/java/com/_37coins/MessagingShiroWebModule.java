@@ -3,6 +3,7 @@ package com._37coins;
 import javax.servlet.ServletContext;
 
 import org.apache.shiro.authc.Authenticator;
+import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
 import org.apache.shiro.guice.web.ShiroWebModule;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -21,6 +22,8 @@ public class MessagingShiroWebModule extends ShiroWebModule {
 	@Override
 	protected void configureShiroWeb() {
 		bindRealm().to(AuthorizingRealm.class).asEagerSingleton();
+		bind(CredentialsMatcher.class).to(CustomCredentialsMatcher.class);
+		bind(CustomCredentialsMatcher.class);
 		bind(Authenticator.class).toInstance(new ModularRealmAuthenticator());
 		Key<BasicAccessAuthFilter> customFilter = Key.get(BasicAccessAuthFilter.class);
 		addFilterChain("/api/**", customFilter);

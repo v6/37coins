@@ -27,9 +27,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
@@ -38,12 +35,17 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
+import com._37coins.merchant.MerchantClient;
+import com._37coins.merchant.MerchantClientException;
+import com._37coins.merchant.pojo.Charge;
+import com._37coins.merchant.pojo.PaymentDestination.AddressType;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
-import com._37coins.products.ProductsClient;
-import com._37coins.products.ProductsClientException;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.util.GatewayPriceComparator;
+import com._37coins.util.SignupNotifier;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -78,13 +80,13 @@ public class ParserResource {
 	final private Cache cache;
 	final private FiatPriceProvider fiatPriceProvider;
 	final private MessageFactory mf;
-	final private ProductsClient productsClient;
+	final private MerchantClient merchantClient;
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
 	@Inject public ParserResource(ServletRequest request,
 			Cache cache, FiatPriceProvider fiatPriceProvider,
-			MessageFactory mf,ProductsClient productsClient) {
+			MessageFactory mf,MerchantClient merchantClient) {
 		this.cache = cache;
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
@@ -94,7 +96,7 @@ public class ParserResource {
 		dao = (GenericRepository)httpReq.getAttribute("gr");
 		this.fiatPriceProvider = fiatPriceProvider;
 		this.mf = mf;
-		this.productsClient = productsClient;
+		this.merchantClient = merchantClient;
 		localPort = httpReq.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
@@ -159,28 +161,29 @@ public class ParserResource {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String,String> signup(MessageAddress recipient, MessageAddress referer, String gwCn, String locale, String service){
+	public Map<String,String> signup(MessageAddress recipient, MessageAddress referrer, String gwCn, String locale, String service){
 		Gateway gwDn = null;
 		String gwAddress = null;
 		Locale gwLng = null;
 		String cnString = null;
+		String mobile = null;
 		if (recipient.getAddressType()==MsgType.SMS){//create a new user
-            if (null == referer && null != gwCn && gwCn.length() > 0){
+            if (null == referrer && null != gwCn && gwCn.length() > 0){
                 RNQuery q = new RNQuery().addFilter("cn", gwCn);
                 Gateway tmp = dao.queryEntity(q, Gateway.class);
                 try {
-                  referer = MessageAddress.fromString(tmp.getMobile(), (String)null);
-                  referer.setGateway(gwCn);
+                  referrer = MessageAddress.fromString(tmp.getMobile(), (String)null);
+                  referrer.setGateway(gwCn);
                 } catch (AddressException | NumberParseException e) {
                     log.error("invite exception",e);
                 }
             }
 			//set gateway from referring user's gateway
-			if (null != referer && referer.getAddressType() == MsgType.SMS 
-					&& recipient.getPhoneNumber().getCountryCode() == referer.getPhoneNumber().getCountryCode()){
+			if (null != referrer && referrer.getAddressType() == MsgType.SMS 
+					&& recipient.getPhoneNumber().getCountryCode() == referrer.getPhoneNumber().getCountryCode()){
 			    RNQuery q = new RNQuery().addFilter("cn", gwCn);
 			    gwDn = dao.queryEntity(q, Gateway.class);
-				gwAddress = referer.getGateway();
+				gwAddress = referrer.getGateway();
 			}else{//or try to find a gateway in the database
 				try{
 					
@@ -217,7 +220,6 @@ public class ParserResource {
 		}
 		if (null!=gwDn){
 			//create new user
-		    cnString = recipient.getAddress().replace("+", "");
 	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
 		    Account newUser = new Account()
 		        .setOwner(gwDn)
@@ -225,6 +227,14 @@ public class ParserResource {
 		        .setLocale(uLocale);
 			try {
 			    dao.add(newUser);
+			    //notify gateway
+	            if (gwDn.getSettings().getSignupCallback()!=null){
+	                SignupNotifier.Source source = (null==referrer)?SignupNotifier.Source.NEW:SignupNotifier.Source.REFERRED;
+	                Thread t = new SignupNotifier(gwDn.getSettings().getSignupCallback(), newUser.getMobile(), source);
+	                t.start();
+	            }
+			    cnString = newUser.getId().toString();
+			    mobile = newUser.getMobile();
 				//and say hi to new user
 				DataSet create = new DataSet()
 					.setAction(Action.SIGNUP)
@@ -232,7 +242,8 @@ public class ParserResource {
 						.setAddress(recipient.getAddressObject())
 						.setAddressType(recipient.getAddressType())
 						.setGateway(gwAddress))
-					.setCn(cnString)
+					.setCn(newUser.getId().toString())
+					.setPayload(gwDn.getSettings().getWelcomeMsg())
 					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);
@@ -245,6 +256,7 @@ public class ParserResource {
 		Map<String,String> rv = new HashMap<>();
 		rv.put("gwAddress",gwAddress);
 		rv.put("cn",cnString);
+		rv.put("mobile", mobile);
 		return rv;
 	}
 	
@@ -257,11 +269,11 @@ public class ParserResource {
 			Map<String,String> newGw = null;
 			String cn = null;
 			String gwAddress = null;
-			try{
-			    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
-			    Account a = dao.queryEntity(q, Account.class);
-				cn = a.getMobile().replace("+", "");
-			}catch(JDOException e){
+		    RNQuery q = new RNQuery().addFilter("mobile", w.getMsgDest().getAddress());
+		    Account a = dao.queryEntity(q, Account.class, false);
+		    if (null!=a){
+		        cn = a.getMobile();
+		    }else{
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
 					responseList.clear();
@@ -272,20 +284,16 @@ public class ParserResource {
 						return null;
 					}
 				}
-				cn = newGw.get("cn");
+				cn = newGw.get("mobile");
 				gwAddress = newGw.get("gwAddress");
-			} catch (Exception e) {
-				log.error("withdrawal req exception",e);
-				e.printStackTrace();
-				throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-			}
+		    }
 			if (cn!=null){
 				//set our payment destination
 				if (null == w.getPayDest()){
 					w.setPayDest(new PaymentAddress());
 				}
 				w.getPayDest()
-					.setAddress(cn)
+					.setAddress(cn.replace("+", ""))
 					.setAddressType(PaymentType.ACCOUNT);
 				w.getMsgDest()
 					.setGateway(gwAddress);
@@ -323,8 +331,8 @@ public class ParserResource {
         DataSet data = responseList.get(0);
         Withdrawal w = (Withdrawal)data.getPayload();
         try {
-            w.setComment(productsClient.charge(w.getAmount(), data.getTo().getPhoneNumber()));
-        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            w.setComment(merchantClient.charge(w.getAmount(), data.getTo().getPhoneNumber()).getToken());
+        } catch (MerchantClientException | IOException | NoSuchAlgorithmException e) {
             log.error("charge exception",e);
             e.printStackTrace();
             return null;
@@ -342,8 +350,8 @@ public class ParserResource {
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
 		try {
-            w.setComment(productsClient.product(w.getAmount(), data.getTo().getPhoneNumber()));
-        } catch (NoSuchAlgorithmException | ProductsClientException | IOException e) {
+            w.setComment(merchantClient.product(w.getAmount(), data.getTo().getPhoneNumber()).getToken());
+        } catch (NoSuchAlgorithmException | MerchantClientException | IOException e) {
             log.error("charge exception",e);
             e.printStackTrace();
             return null;
@@ -360,11 +368,11 @@ public class ParserResource {
 	public Response pay(){
 		DataSet data = responseList.get(0);
 		Withdrawal w = (Withdrawal)data.getPayload();
-		Withdrawal charge = null;
 		try {
-            charge = productsClient.getCharge(w.getComment());
+            Charge charge = merchantClient.getCharge(w.getComment());
             data.setAction(Action.WITHDRAWAL_REQ);
-            w.setPayDest(charge.getPayDest());
+            w.setPayDest(new PaymentAddress().setAddress(charge.getPayDest().getAddress())
+                    .setAddressType((charge.getPayDest().getAddressType()==AddressType.ACCOUNT)?PaymentType.ACCOUNT:PaymentType.BTC));
             if (w.getAmount()!=null && w.getAmount().compareTo(charge.getAmount())!=0){
                 return null;
             }
@@ -376,7 +384,7 @@ public class ParserResource {
             data.setPayload(w);
             return withdrawalReq();
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException
-                | URISyntaxException | ProductsClientException e) {
+                | URISyntaxException | MerchantClientException e) {
             log.error("pay exception",e);
             e.printStackTrace();
             return null;

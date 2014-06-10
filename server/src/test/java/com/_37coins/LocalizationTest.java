@@ -42,8 +42,6 @@ public class LocalizationTest {
 		.setService("37coins")
 		.setLocale(new Locale("en","US"))
 		.setFiatPriceProvider(new FiatPriceProvider(null))
-		.setPayload(new PaymentAddress()
-			.setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"))
 		.setTo(new MessageAddress()
 			.setAddress("+491606941382"));
 	}
@@ -108,6 +106,7 @@ public class LocalizationTest {
 		System.out.println("SIGNUP:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
+		rsp.setPayload(new PaymentAddress().setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"));
 		ef.constructHtml(rsp);
 		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -128,6 +127,7 @@ public class LocalizationTest {
 	public void test37coinsDeposit() throws IOException, TemplateException {
 		rsp.setAction(Action.DEPOSIT_REQ);
 		System.out.println("DEPOSIT REQ:");
+		rsp.setPayload(new PaymentAddress().setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
 		ef.constructHtml(rsp);

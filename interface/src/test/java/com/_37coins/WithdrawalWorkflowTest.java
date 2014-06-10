@@ -53,6 +53,7 @@ public class WithdrawalWorkflowTest {
 	// and outgoing tx volume of 0.2
 	public static Withdrawal USER1 = new Withdrawal()
 			.setMsgDest(new MessageAddress()
+			    .setAddress("+491606941382")
 				.setAddressType(MsgType.SMS))
 			.setPayDest(new PaymentAddress()
 				.setAddress("1")
@@ -65,6 +66,7 @@ public class WithdrawalWorkflowTest {
 	// if this user sends a transaction, he always rejects it later
 	public static Withdrawal USER2 = new Withdrawal()
 		.setMsgDest(new MessageAddress()
+		    .setAddress("+491606941383")
 			.setAddressType(MsgType.SMS))
 		.setPayDest(new PaymentAddress()
 			.setAddress("2")
@@ -78,6 +80,7 @@ public class WithdrawalWorkflowTest {
 	// this user has a block voice pin
 	public static Withdrawal USER4 = new Withdrawal()
 		.setMsgDest(new MessageAddress()
+		    .setAddress("+491606941384")
 			.setAddressType(MsgType.SMS))
 		.setPayDest(new PaymentAddress()
 			.setAddress("4")
@@ -175,7 +178,7 @@ public class WithdrawalWorkflowTest {
 			public void putAddressCache(DataSet rsp) {
 			}
 			@Override
-			public BigDecimal readAccountFee(String cn) {
+			public BigDecimal readAccountFee(String mobile) {
 				return new BigDecimal("0.0001");
 			}
 			@Override

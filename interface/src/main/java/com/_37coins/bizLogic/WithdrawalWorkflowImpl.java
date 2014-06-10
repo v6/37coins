@@ -43,8 +43,8 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     
     @Override
     public void executeCommand(final DataSet data) {
-    	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
-    	Promise<BigDecimal> volume24h = bcdClient.getTransactionVolume(data.getCn(),24);
+    	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getTo().getAddress().replace("+", ""));
+    	Promise<BigDecimal> volume24h = bcdClient.getTransactionVolume(data.getTo().getAddress().replace("+", ""),24);
     	handleAccount(balance, volume24h, data);
     }
     
@@ -133,7 +133,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	    		Promise<String> tx = bcdClient.sendTransaction(
 	    				w.getAmount(), 
 	    				w.getFee(), 
-	    				rsp.get().getCn(), 
+	    				rsp.get().getTo().getAddress().replace("+", ""), 
 	    				toId, 
 	    				toAddress,
 	    				workflowId,
@@ -167,13 +167,13 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
 	    	bcdClient.sendTransaction(
 	    			w.getFee(), 
 	    			BigDecimal.ZERO, 
-	    			data.getCn(), 
+	    			data.getTo().getAddress().replace("+", ""), 
 	    			w.getFeeAccount(), 
 	    			null,
 	    			contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId(),
 	    			"");
     	}
-    	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getCn());
+    	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getTo().getAddress().replace("+", ""));
     	w.setTxId(txId.get());
     	afterSend(balance, data);
     }

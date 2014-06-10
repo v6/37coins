@@ -7,7 +7,7 @@ define(['backbone',
     'models/resetConf',
     'models/signupConf',
     'models/balanceModel',
-    'models/feeModel',
+    'models/settingsModel',
     'collections/gatewayCollection',
     'views/indexLayout',
     'views/indexHeaderLayout',
@@ -41,7 +41,7 @@ define(['backbone',
     'views/privacyView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, FeeModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView) {
     'use strict';
 
     var Controller = {};
@@ -182,9 +182,15 @@ define(['backbone',
             var balance = new BalanceModel();
             var balanceView = new BalanceView({model:balance});
             layout.bal.show(balanceView);
-            var feeModel = new FeeModel({fee:sessionStorage.getItem('fee')});
-            var feeView = new FeeView({model:feeModel});
+            var settingsModel = new SettingsModel({
+                fee:sessionStorage.getItem('fee'),
+                companyName:sessionStorage.getItem('companyName'),
+                welcomeMsg:sessionStorage.getItem('welcomeMsg'),
+                callbackUrl:sessionStorage.getItem('callbackUrl')
+            });
+            var feeView = new FeeView({model:settingsModel});
             layout.fee.show(feeView);
+            settingsModel.fetch();
         }else if (Controller.loginStatus.get('mobile')){
             view = new ValidateView({model:Controller.loginStatus});
             Communicator.mediator.trigger('app:show', view);

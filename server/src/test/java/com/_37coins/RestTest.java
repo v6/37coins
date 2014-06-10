@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restnucleus.dao.Model;
-import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.test.DbHelper;
 import org.restnucleus.test.EmbeddedJetty;
 
@@ -35,22 +34,19 @@ import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
 import com._37coins.resources.HealthCheckResource;
-import com._37coins.resources.MerchantResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
 import com._37coins.web.AccountRequest;
-import com._37coins.web.MerchantRequest;
-import com._37coins.web.MerchantResponse;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.PaymentAddress;
-import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
@@ -90,15 +86,22 @@ public class RestTest {
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
-		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setFee(new BigDecimal("0.0006")).setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
-	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setFee(new BigDecimal("0.0007")).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
-	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setFee(new BigDecimal("0.0008")).setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
+		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
+		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")).setWelcomeMsg("PZWelcomeMessage"));
+	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+	    gw2.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0007")));
+	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
+	    gw3.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0008")));
+	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE"));
+	    gw4.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
+	    Gateway gw5 = new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT"));
+	    gw5.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
         List<Gateway> rv = new ArrayList<>();
         rv.add(gw1);
         rv.add(gw2);
         rv.add(gw3);
-        rv.add(new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setFee(new BigDecimal("0.002")).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")));
-        rv.add(new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setFee(new BigDecimal("0.002")).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT")));
+        rv.add(gw4);
+        rv.add(gw5);
         List<Account> ac = new ArrayList<>();
         ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test"));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
@@ -182,6 +185,7 @@ public class RestTest {
 				ds.setAction(data.getAction());
 				ds.setTo(data.getTo());
 				ds.setCn(data.getCn());
+				ds.setPayload(data.getPayload());
 			}
 			
 			@Override
@@ -194,6 +198,7 @@ public class RestTest {
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
 		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
+		Assert.assertEquals("PZWelcomeMessage",ds.getPayload());
 		Assert.assertNotNull(ds.getCn());
     }
     
@@ -554,34 +559,35 @@ public class RestTest {
         .expect()
             .statusCode(200)
         .when()
-            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH);    	
-    }
-    
-    /**
-     * make sure module is started with: mvn jetty:run -Denvironment=test -DhmacToken=
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     */
-    @Test
-    public void testMerchant() throws JsonParseException, JsonMappingException, IOException, NoSuchAlgorithmException{
-    	MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
-    	String serverUrl = embeddedJetty.getBaseUri() + MerchantResource.PATH + "/charge/test";
-    	req.setPayDest(new PaymentAddress().setAddressType(PaymentType.BTC).setAddress("123565"));
-		String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
-    	Response r = given()
-    		.contentType(ContentType.JSON)
-    		.header("X-Request-Signature", sig)
-    		.body(json(req))
-		.expect()
-			.statusCode(200)
-		.when()
-			.post(embeddedJetty.getBaseUri() + MerchantResource.PATH+"/charge/test");
-    	MerchantResponse mr = new ObjectMapper().readValue(r.asInputStream(), MerchantResponse.class);
-    	System.out.println(new ObjectMapper().writeValueAsString(mr));
-    	Assert.assertNotNull(mr.getDisplayName());
-    	Assert.assertNotNull(mr.getToken());
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH); 
+        //get welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");
+        //set welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .body("{\"welcomeMsg\":\"hello123\"}")
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+            .body("welcomeMsg", equalToIgnoringCase(("hello123")))
+        .when()
+            .post(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");
+        //get welcome message
+        given()
+            .header(new Header("Authorization", "Basic "+encoding))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+            .body("welcomeMsg", equalToIgnoringCase(("hello123")))
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");        
+        
     }
 	
 	@Test
@@ -602,7 +608,7 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + ParserResource.PATH+"/Help");
 		List<DataSet> rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
-		Assert.assertEquals("821027423983", rv.get(0).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(0).getCn())>0);
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get btc address
@@ -630,13 +636,13 @@ public class RestTest {
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		Withdrawal w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821053215679", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertEquals(new BigDecimal("0.01").setScale(8), w.getAmount());
 		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
-		Assert.assertEquals("821053215679", rv.get(1).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(1).getCn())>0);
 		//say hi
 		r = given()
 			.formParam("from", "+821043215678")
@@ -661,7 +667,7 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals(Action.HELP, rv.get(0).getAction());
-		Assert.assertEquals("821012345678", rv.get(0).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(0).getCn())>0);
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		//get price
@@ -818,7 +824,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(BigDecimal.ZERO, w.getAmount());
 		//use currency code for sending
@@ -834,7 +840,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertTrue(w.getAmount()!=null);
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		//send money, new user, same country
@@ -850,13 +856,13 @@ public class RestTest {
 		Assert.assertEquals("size expected",2, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821087654321", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertEquals(new BigDecimal("0.01").setScale(8), w.getAmount());
 		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(1).getTo().getGateway());
-		Assert.assertEquals("821087654321", rv.get(1).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(1).getCn())>0);
 		//restore account
 		r = given()
 			.formParam("from", "+821087654321")
@@ -870,7 +876,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821087654321", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertEquals(BigDecimal.ZERO, w.getAmount());
 		Assert.assertEquals(new BigDecimal("0.0007").setScale(8), w.getFee());
 		Assert.assertEquals("OZV4N1JS2Z3476NL", w.getFeeAccount());
@@ -891,7 +897,7 @@ public class RestTest {
 		Assert.assertEquals(Action.SIGNUP, rv.get(1).getAction());
 		Assert.assertEquals(Locale.GERMANY, rv.get(1).getLocale());
 		Assert.assertEquals("DEV4N1JS2Z3476DE", rv.get(1).getTo().getGateway());
-		Assert.assertEquals("491607654321", rv.get(1).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(1).getCn())>0);
 		//send money, new user, other country, no gateway
 		r = given()
 			.formParam("from", "+821012345678")
@@ -932,7 +938,7 @@ public class RestTest {
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.WITHDRAWAL_REQ, rv.get(0).getAction());
 		w = (Withdrawal)rv.get(0).getPayload();
-		Assert.assertEquals("821012345678", w.getPayDest().getAddress());
+		Assert.assertTrue(Long.parseLong(w.getPayDest().getAddress())>0);
 		Assert.assertEquals("DEV4N1JS2Z3476DE", w.getFeeAccount());
 		//confirm a transaction
 		r = given()
@@ -972,7 +978,7 @@ public class RestTest {
 		rv = mapper.readValue(r.asInputStream(), new TypeReference<List<DataSet>>(){});
 		Assert.assertEquals("size expected",1, rv.size());
 		Assert.assertEquals(Action.SIGNUP, rv.get(0).getAction());
-		Assert.assertEquals("821099999999", rv.get(0).getCn());
+		Assert.assertTrue(Long.parseLong(rv.get(0).getCn())>0);
 		Assert.assertEquals("OZV4N1JS2Z3476NL", rv.get(0).getTo().getGateway());
 		//ask again
 		r = given()

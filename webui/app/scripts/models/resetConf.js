@@ -6,6 +6,6 @@ function( Backbone ) {
 
 	/* Return a model class definition */
 	return Backbone.Model.extend({
-		url: window.opt.basePath+'/account/password/reset'
+		url: window.opt.basePath+'/accounts/password/reset'
     });
 });

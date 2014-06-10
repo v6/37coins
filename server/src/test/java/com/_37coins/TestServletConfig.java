@@ -9,7 +9,6 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
@@ -19,14 +18,16 @@ import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
+import com._37coins.cache.Cache;
 import com._37coins.envaya.QueueClient;
+import com._37coins.helper.MockMerchantClient;
+import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
-import com._37coins.products.ProductsClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
@@ -37,8 +38,6 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -89,8 +88,8 @@ public class TestServletConfig extends GuiceServletContextListener {
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
-				ProductsClient provideProductsClient(){
-				    return new ProductsClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
+				MerchantClient provideProductsClient(){
+				    return new MockMerchantClient("bla","bla");
 				}
 				
 	            @Provides @Singleton @SuppressWarnings("unused")
@@ -139,14 +138,6 @@ public class TestServletConfig extends GuiceServletContextListener {
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
-				public SocketIOServer provideSocket(){
-				 	Configuration config = new Configuration();
-				    config.setPort(8081);
-				    SocketIOServer server = new SocketIOServer(config);
-				    return server;
-				}
-				
-				@Provides @Singleton @SuppressWarnings("unused")
 				public GoogleAnalytics getGoogleAnalytics(){
 					GoogleAnalyticsConfig gac = new GoogleAnalyticsConfig();
 					gac.setEnabled(false);
@@ -180,14 +171,15 @@ public class TestServletConfig extends GuiceServletContextListener {
 	        		//Create a singleton CacheManager using defaults
 	        		CacheManager manager = CacheManager.create();
 	        		//Create a Cache specifying its configuration.
-	        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
+	        		net.sf.ehcache.Cache testCache = new net.sf.ehcache.Cache(new CacheConfiguration("cache", 1000)
 	        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
 	        		    .eternal(false)
 	        		    .timeToLiveSeconds(7200)
 	        		    .timeToIdleSeconds(3600)
 	        		    .diskExpiryThreadIntervalSeconds(0));
 	        		  manager.addCache(testCache);
-	        		  return testCache;
+	        		  
+	        		  return new EhCacheWrapper(testCache);
 	        	}
 			},new MessagingShiroWebModule(this.servletContext));
 		return injector;

@@ -8,9 +8,6 @@ import java.util.Locale;
 
 import javax.jdo.JDOException;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
@@ -18,8 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com._37coins.activities.MessagingActivities;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.envaya.QueueClient;
 import com._37coins.persistence.dao.Account;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.Transaction;
@@ -123,6 +123,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			Element e = cache.get(workflowId);
 			Transaction tt = (Transaction)e.getObjectValue();
 			tt.setTaskToken(taskToken);
+			cache.put(new Element(workflowId+"tt",tt));
 			String confLink = MessagingServletConfig.basePath + "/rest/withdrawal/approve?key="+URLEncoder.encode(tt.getKey(),"UTF-8");
 			Withdrawal w = (Withdrawal)rsp.getPayload();
 			w.setConfKey(tt.getKey());
@@ -159,7 +160,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			tt.setTaskToken(taskToken);
 			tt.setState(State.STARTED);
 			cache.put(new Element(workflowId,tt));
-			Account a = dao.queryEntity(new RNQuery().addFilter("cn", rsp.getCn()), Account.class);
+			Account a = dao.getObjectById(Long.parseLong(rsp.getCn()), Account.class);
 			if (null!=a.getPinWrongCount()&& a.getPinWrongCount()<3){
 				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
 	
@@ -192,9 +193,14 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	}
 	
 	@Override
-	public BigDecimal readAccountFee(String cn) {
-		Account a = dao.queryEntity(new RNQuery().addFilter("cn", cn), Account.class);
-		BigDecimal fee = (a.getOwner().getFee()!=null)?a.getOwner().getFee():BigDecimal.ZERO;
+	public BigDecimal readAccountFee(String mobile) {
+	    mobile = (mobile.contains("+"))?mobile:"+"+mobile;
+	    RNQuery q = new RNQuery().addFilter("mobile", mobile);
+		Account a = dao.queryEntity(q, Account.class);
+		if (a.getOwner().getSettings()==null)
+		    a.getOwner().setSettings(new GatewaySettings());
+		GatewaySettings gs = a.getOwner().getSettings();
+		BigDecimal fee = (gs.getFee()!=null)?gs.getFee():BigDecimal.ZERO;
 		return fee;
 	}
 	
@@ -207,7 +213,10 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	@Override
 	public DataSet readMessageAddress(DataSet data) {
 	    try{
-	        Account a = dao.queryEntity(new RNQuery().addFilter("cn", data.getCn()), Account.class);
+	        String mobile = data.getCn();
+	        mobile = (mobile.contains("+"))?mobile:"+"+mobile;
+	        RNQuery q = new RNQuery().addFilter("mobile", mobile);
+	        Account a = dao.queryEntity(q, Account.class);
 			MessageAddress to =  new MessageAddress()
 				.setAddress(a.getMobile())
 				.setAddressType(MsgType.SMS)

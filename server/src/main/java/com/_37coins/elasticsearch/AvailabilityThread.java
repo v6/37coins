@@ -2,9 +2,6 @@ package com._37coins.elasticsearch;
 
 import java.util.Date;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -16,6 +13,9 @@ import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 
 public class AvailabilityThread extends Thread {
 	public static Logger log = LoggerFactory.getLogger(AvailabilityThread.class);

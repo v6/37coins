@@ -2,6 +2,8 @@ package com._37coins.resources;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +23,10 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.Control;
 import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.PagedResultsControl;
+import javax.naming.ldap.PagedResultsResponseControl;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -35,9 +40,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -49,11 +51,14 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.AccountPolicy;
 import com._37coins.web.AccountRequest;
@@ -64,17 +69,21 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import freemarker.template.TemplateException;
 
 @Path(AccountResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class AccountResource {
-	public final static String PATH = "/account";
+	public final static String PATH = "/accounts";
 	public static Logger log = LoggerFactory.getLogger(AccountResource.class);
 	
 	private final Cache cache;
@@ -118,11 +127,8 @@ public class AccountResource {
             return "false";
         }
         //how to avoid account phishing?
-        Element e = cache.get(IndexResource.getRemoteAddress(httpReq));
-        if (e!=null){
-            if (e.getHitCount()>50){
-                throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
-            }
+        if (cache.incr(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq))>50){
+            throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
         }
         //check it's not taken already
         Gateway g = dao.queryEntity(new RNQuery().addFilter("email", email), Gateway.class, false);
@@ -131,12 +137,6 @@ public class AccountResource {
         }
 		return "true";
 	}
-	
-    @GET
-    @Path("/list/accounts")
-    public List<Account> listaccounts(){
-        return dao.queryList(null, Account.class);
-    }
     
     @POST
     @Path("/list/accounts")
@@ -157,144 +157,181 @@ public class AccountResource {
         } catch (IllegalStateException | NamingException e) {
             throw new IOException(e);
         }
-        NamingEnumeration<?> namingEnum = null;
-
-        ctx.setRequestControls(null);
+        int total = 0;
+        int pageSize = 10;
+        byte[] cookie = null;
+        Control[] ctls = new Control[]{new PagedResultsControl(pageSize,Control.CRITICAL)};
+        ctx.setRequestControls(ctls);
         SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         searchControls.setReturningAttributes(new String[]{"mobile","cn","createTimestamp","departmentNumber","displayName","manager","description","preferredLanguage","userPassword"});
-        namingEnum = ctx.search("ou=accounts," +
-                ldapBaseDn,
-                "(objectClass=person)", searchControls);
-        int count = 0;
-        while (namingEnum.hasMore()) {
-            Attributes atts = ((SearchResult) namingEnum.next())
-                    .getAttributes();
-            String cn = (String) atts.get("cn").get();
-            String displayName = (null!=atts.get("displayName"))?(String) atts.get("displayName").get():null;
-            String manager = (null!=atts.get("manager"))?(String) atts.get("manager").get():null;
-            String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
-            String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
-            String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
-            String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
-            String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
-            String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            Date createdDate = sdf.parse(createTimestamp);
-            
-            try{
-                RNQuery q = new RNQuery().addFilter("cn", manager.substring(3, manager.indexOf(",")).toUpperCase());
-                Gateway owner = dao.queryEntity(q, Gateway.class);
+        do {
+            NamingEnumeration<?> namingEnum = ctx.search("ou=accounts," +ldapBaseDn,"(objectClass=person)", searchControls);
+            while (namingEnum.hasMore()) {
+                Attributes atts = ((SearchResult) namingEnum.next())
+                        .getAttributes();
+                String cn = (String) atts.get("cn").get();
+                String displayName = (null!=atts.get("displayName"))?(String) atts.get("displayName").get():null;
+                String manager = (null!=atts.get("manager"))?(String) atts.get("manager").get():null;
+                String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
+                String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
+                String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
+                String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
+                String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
+                String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+                Date createdDate = sdf.parse(createTimestamp);
                 
-                Account a = new Account()
-                    .setOwner(owner)
-                    .setApiToken(description)
-                    .setApiSecret(departmentNumber)
-                    .setDisplayName(displayName)
-                    .setLocale(DataSet.parseLocaleString(preferredLanguage))
-                    .setPassword(userPassword)
-                    .setMobile(mobile);
-                a.setCreationTime(createdDate);
-                dao.add(a);
-                count++;
-            }catch(JDOException e){
-                System.out.println("failed on "+cn + " ,mobile "+mobile);
-                e.printStackTrace();
+                try{
+                    RNQuery q = new RNQuery().addFilter("cn", manager.substring(3, manager.indexOf(",")).toUpperCase());
+                    Gateway owner = dao.queryEntity(q, Gateway.class);
+                    
+                    Account a = new Account()
+                        .setOwner(owner)
+                        .setApiToken(description)
+                        .setApiSecret(departmentNumber)
+                        .setDisplayName(displayName)
+                        .setLocale(DataSet.parseLocaleString(preferredLanguage))
+                        .setPassword(userPassword)
+                        .setMobile(mobile);
+                    a.setCreationTime(createdDate);
+                    dao.add(a);
+                }catch(JDOException e){
+                    System.out.println("failed on "+cn + " ,mobile "+mobile);
+                    e.printStackTrace();
+                }
             }
-        }
-        return count;
-    }
+            // Examine the paged results control response
+            Control[] controls = ctx.getResponseControls();
+            if (controls != null) {
+                for (int i = 0; i < controls.length; i++) {
+                    if (controls[i] instanceof PagedResultsResponseControl) {
+                        PagedResultsResponseControl prrc =
+                            (PagedResultsResponseControl)controls[i];
+                        total = prrc.getResultSize();
+                        cookie = prrc.getCookie();
+                    } else {
+                        // Handle other response controls (if any)
+                    }
+                }
+            }
 
-	
-	@GET
-	@Path("/list/gateways")
-	public List<Gateway> listGateways(){
-	    return dao.queryList(null, Gateway.class);
-	}
+            // Re-activate paged results
+            ctx.setRequestControls(new Control[]{ new PagedResultsControl(pageSize, cookie, Control.CRITICAL) });
+        } while ((cookie != null) && (cookie.length != 0));
+        ctx.close();
+        return total;
+    }
 	
 	@POST
 	@Path("/list/gateways")
-	public int importGateways(Map<String,String> body) throws IOException, NamingException, ParseException{
-	    String ldapUrl = body.get("ldapUrl");
-	    String ldapUser = body.get("ldapUser");
-	    String ldapPw = body.get("ldapPw");
-	    String ldapBaseDn = body.get("ldapBaseDn");
+	public Map<String,Integer> importGateways(Map<String,String> body){
+	    final String ldapUrl = body.get("ldapUrl");
+	    final String ldapUser = body.get("ldapUser");
+	    final String ldapPw = body.get("ldapPw");
+	    final String ldapBaseDn = body.get("ldapBaseDn");
         JndiLdapContextFactory jlc = new JndiLdapContextFactory();
         jlc.setUrl(ldapUrl);
         jlc.setAuthenticationMechanism("simple");
         jlc.setSystemUsername(ldapUser);
         jlc.setSystemPassword(ldapPw);
+        ConnectionFactory factory = new ConnectionFactory();
+        Connection conn = null;
+        Channel channel = null;
+        try{
+            factory.setUri(MessagingServletConfig.queueUri);
+            conn = factory.newConnection();
+            channel = conn.createChannel();
+        } catch (KeyManagementException | NoSuchAlgorithmException
+                | URISyntaxException | IOException e1) {
+            e1.printStackTrace();
+            throw new WebApplicationException(e1);
+        }
         InitialLdapContext ctx = null;
         AuthenticationToken at = new UsernamePasswordToken(ldapUser, ldapPw);
+        int count = 0;
         try {
             ctx = (InitialLdapContext)jlc.getLdapContext(at.getPrincipal(),at.getCredentials());
-        } catch (IllegalStateException | NamingException e) {
-            throw new IOException(e);
-        }
-        NamingEnumeration<?> namingEnum = null;
+            NamingEnumeration<?> namingEnum = null;
 
-        ctx.setRequestControls(null);
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        searchControls.setReturningAttributes(new String[]{"mail","mobile","createTimestamp","cn","departmentNumber","description","preferredLanguage","userPassword"});
-        namingEnum = ctx.search("ou=gateways," +
-                ldapBaseDn,
-                "(objectClass=person)", searchControls);
-        int count = 0;
-        while (namingEnum.hasMore()) {
-            Attributes atts = ((SearchResult) namingEnum.next())
-                    .getAttributes();
-            String cn = (String) atts.get("cn").get();
-            //ignore system accounts
-            if (cn.length()<15)
-                continue;
-            String mail = (null!=atts.get("mail"))?(String) atts.get("mail").get():null;
-            String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
-            String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
-            String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
-            String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
-            String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
-            String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-            Date createdDate = sdf.parse(createTimestamp);
-            if (null==mobile){
-                //System.out.println("not migrated" + cn);
-            }else{
-                NamingEnumeration<?> children = ctx.search("ou=accounts,"
-                        + ldapBaseDn,
-                        "(&(objectClass=person)(manager=cn="+cn+",ou=gateways,"+ldapBaseDn+"))", searchControls);
-                if (!children.hasMore()){
+            ctx.setRequestControls(null);
+            SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            searchControls.setReturningAttributes(new String[]{"mail","mobile","createTimestamp","cn","departmentNumber","description","preferredLanguage","userPassword"});
+            namingEnum = ctx.search("ou=gateways," + ldapBaseDn,"(objectClass=person)", searchControls);
+            
+            while (namingEnum.hasMore()) {
+                Attributes atts = ((SearchResult) namingEnum.next())
+                        .getAttributes();
+                String cn = (String) atts.get("cn").get();
+                //ignore system accounts
+                if (cn.length()<15)
+                    continue;
+                String mail = (null!=atts.get("mail"))?(String) atts.get("mail").get():null;
+                String departmentNumber = (null!=atts.get("departmentNumber"))?(String) atts.get("departmentNumber").get():null;
+                String description = (null!=atts.get("description"))?(String) atts.get("description").get():null;
+                String preferredLanguage = (null!=atts.get("preferredLanguage"))?(String) atts.get("preferredLanguage").get():null;
+                String userPassword = (null!=atts.get("userPassword"))?new String((byte[]) atts.get("userPassword").get()):null;
+                String mobile = (null!=atts.get("mobile"))?(String) atts.get("mobile").get():null;
+                String createTimestamp = (null!=atts.get("createTimestamp"))?(String) atts.get("createTimestamp").get():null;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+                Date createdDate = sdf.parse(createTimestamp);
+                if (null==mobile){
                     //System.out.println("not migrated" + cn);
                 }else{
-                    Gateway g = new Gateway()
-                        .setCn(cn)
-                        .setApiSecret(departmentNumber)
-                        .setFee(new BigDecimal(description).setScale(8))
-                        .setLocale(DataSet.parseLocaleString(preferredLanguage))
-                        .setPassword(userPassword)
-                        .setEmail(mail)
-                        .setMobile(mobile);
-                    g.setCreationTime(createdDate);
-                    dao.add(g);
-                    count++;
+                    NamingEnumeration<?> children = ctx.search("ou=accounts,"
+                            + ldapBaseDn,
+                            "(&(objectClass=person)(manager=cn="+cn+",ou=gateways,"+ldapBaseDn+"))", searchControls);
+                    if (!children.hasMore()){
+                        //System.out.println("not migrated" + cn);
+                    }else{
+                        Gateway g = new Gateway()
+                            .setCn(cn)
+                            .setApiSecret(departmentNumber)
+                            .setSettings(new GatewaySettings().setFee(
+                                    new BigDecimal(description).setScale(8)))
+                            .setLocale(DataSet.parseLocaleString(preferredLanguage))
+                            .setPassword(userPassword)
+                            .setEmail(mail)
+                            .setMobile(mobile);
+                        g.setCreationTime(createdDate);
+                        dao.add(g);
+                        //create queue in mqs
+                        try{
+                            channel.queueDeclare(cn, true, false, false, null);
+                            channel.queueBind(cn, "amq.direct", cn);
+                            
+                        }catch(Exception e){
+                            e.printStackTrace();
+                            throw new WebApplicationException(e);
+                        }
+                        count++;
+                    }
+                    children.close();
                 }
-                children.close();
             }
+            channel.close();
+            conn.close();
+        } catch (IllegalStateException | NamingException | ParseException | IOException e) {
+            e.printStackTrace();
+            throw new WebApplicationException(e);
+        }finally{
+            try {
+                if (null!=channel&&channel.isOpen()) channel.close();
+                if (null!=conn&&conn.isOpen()) conn.close();
+            } catch (IOException e1) {}
         }
-        return count;
+        return ImmutableMap.of("count", count);
 	}
 	
 	@GET
 	@Path("/find")
 	public String findByEmail(@QueryParam("mobile") String mobile){
 		//how to avoid account fishing?
-		Element e = cache.get(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq));
-		if (e!=null){
-			if (e.getHitCount()>50){
-				throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
-			}
+	    if (cache.incr(TicketResource.REQUEST_SCOPE+TicketResource.getRemoteAddress(httpReq))>50){
+			throw new WebApplicationException("to many requests", Response.Status.FORBIDDEN);
 		}
 		//check it's not taken already
 		try{
@@ -479,7 +516,7 @@ public class AccountResource {
         if (null==e){
             throw new WebApplicationException("ticket required for this request.", Response.Status.BAD_REQUEST);
         }else{
-            if (e.getHitCount()>3){
+            if (cache.incr("ticketCount"+pwRequest.getTicket())>3){
                 cache.remove("ticket"+pwRequest.getTicket());
                 throw new WebApplicationException("to many requests", Response.Status.BAD_REQUEST);
             }

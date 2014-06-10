@@ -9,14 +9,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.jdo.JDOException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -30,9 +26,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.dao.RNQuery;
@@ -41,9 +34,13 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
+import com._37coins.cache.Cache;
+import com._37coins.cache.Element;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.web.GatewayUser;
+import com._37coins.web.SettingsRequest;
 import com._37coins.web.WithdrawRequest;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.pojo.DataSet;
@@ -108,7 +105,8 @@ public class GatewayResource {
 			if (existing.getLocale()!=null){
 				gu.setLocale(existing.getLocale());
 			}
-			gu.setFee((existing.getFee()!=null)?existing.getFee():null);
+			BigDecimal fee = (null!=existing.getSettings())?existing.getSettings().getFee():null;
+			gu.setFee((fee!=null)?fee:null);
 			gu.setEnvayaToken((existing.getApiSecret()!=null)?existing.getApiSecret():null);
 		}catch(JDOException e){
 		    e.printStackTrace();
@@ -189,11 +187,13 @@ public class GatewayResource {
 			}
 			PhoneNumber pn = (PhoneNumber)e.getObjectValue();
 			String envayaToken = RandomStringUtils.random(12, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789");
+			if (null==existing.getSettings())
+			    existing.setSettings(new GatewaySettings());
 			existing
 			  .setLocale(gu.getLocale())
 			  .setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
-			  .setFee(FEE)
 			  .setApiSecret(envayaToken);
+			existing.getSettings().setFee(FEE);
 			rv = new GatewayUser()
 				.setLocale(gu.getLocale())
 				.setFee(FEE)
@@ -201,8 +201,8 @@ public class GatewayResource {
 				.setEnvayaToken(envayaToken);
 		}else if (existing.getMobile().equalsIgnoreCase(gu.getMobile()) && gu.getFee()!=null) {
 			//set/update fee
-			if (gu.getFee().compareTo(existing.getFee())!=0){
-				existing.setFee(gu.getFee());
+			if (gu.getFee().compareTo(existing.getSettings().getFee())!=0){
+				existing.getSettings().setFee(gu.getFee());
 			}
 		}else{
 			throw new WebApplicationException("unexpected state", Response.Status.BAD_REQUEST);
@@ -220,7 +220,9 @@ public class GatewayResource {
 		}
 	    RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
         Gateway existing = dao.queryEntity(q, Gateway.class);
-        existing.setFee(gu.getFee());
+        if (null==existing.getSettings())
+            existing.setSettings(new GatewaySettings());
+        existing.getSettings().setFee(gu.getFee());
         rv = new GatewayUser().setFee(gu.getFee());
 		return rv;
 	}
@@ -283,4 +285,46 @@ public class GatewayResource {
 		return new WithdrawRequest().setBalance(newBal);
 	}
 	
+	@GET
+	@Path("/settings")
+	@RolesAllowed({"gateway"})
+	public SettingsRequest getConfig(@Context SecurityContext context){
+	    RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
+        GatewaySettings gs = dao.queryEntity(q, Gateway.class).getSettings();
+        return (null==gs)?new SettingsRequest():new SettingsRequest()
+            .setCallbackUrl(gs.getSignupCallback())
+            .setCompanyName(gs.getCompanyName())
+            .setFee(gs.getFee())
+            .setWelcomeMsg(gs.getWelcomeMsg());
+	}
+	
+    @POST
+    @Path("/settings")
+    @RolesAllowed({"gateway"})
+    public SettingsRequest setConfig(SettingsRequest data, @Context SecurityContext context){
+        RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
+        Gateway gw = dao.queryEntity(q, Gateway.class);
+        if (gw.getSettings()==null){
+            gw.setSettings(new GatewaySettings());
+        }
+        gw.getSettings()
+            .setCompanyName(data.getCompanyName())
+            .setSignupCallback(data.getCallbackUrl())
+            .setFee(data.getFee())
+            .setWelcomeMsg(data.getWelcomeMsg());
+        GatewaySettings gs = gw.getSettings();
+        return new SettingsRequest()
+            .setCallbackUrl(gs.getSignupCallback())
+            .setFee(gs.getFee())
+            .setWelcomeMsg(gs.getWelcomeMsg())
+            .setCompanyName(gs.getCompanyName());
+    }
+    
+    @PUT
+    @Path("/settings")
+    @RolesAllowed({"gateway"})
+    public SettingsRequest updateConfig(SettingsRequest data, @Context SecurityContext context){
+        return setConfig(data, context);
+    }
+    
 }

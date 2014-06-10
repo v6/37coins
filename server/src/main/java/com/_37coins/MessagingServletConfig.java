@@ -3,10 +3,9 @@ package com._37coins;
 import java.io.File;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.jdo.PersistenceManagerFactory;
@@ -14,13 +13,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import me.moocar.logbackgelf.GelfAppender;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+import net.spy.memcached.MemcachedClient;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -28,7 +22,6 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.PersistenceConfiguration;
-import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
@@ -42,23 +35,22 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 
 import com._37coins.bizLogic.NonTxWorkflowImpl;
 import com._37coins.bizLogic.WithdrawalWorkflowImpl;
+import com._37coins.cache.Cache;
+import com._37coins.cache.MemCacheWrapper;
 import com._37coins.envaya.QueueClient;
-import com._37coins.envaya.ServiceLevelThread;
 import com._37coins.imap.JavaPushMailAccount;
-import com._37coins.ldap.JdoRequestHandler;
+import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
 import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
-import com._37coins.resources.TicketResource;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.SmtpEmailClient;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.web.AccountPolicy;
-import com._37coins.web.MerchantSession;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
 import com.amazonaws.auth.AWSCredentials;
@@ -69,16 +61,6 @@ import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient;
 import com.amazonaws.services.simpleworkflow.flow.ActivityWorker;
 import com.amazonaws.services.simpleworkflow.flow.WorkflowWorker;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
-import com.corundumstudio.socketio.AckRequest;
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.listener.DataListener;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
-import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -90,11 +72,6 @@ import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.maxmind.geoip.LookupService;
-import com.plivo.helper.api.client.RestAPI;
-import com.plivo.helper.api.response.call.Call;
-import com.plivo.helper.exception.PlivoException;
-import com.unboundid.ldap.listener.LDAPListener;
-import com.unboundid.ldap.listener.LDAPListenerConfig;
 
 public class MessagingServletConfig extends GuiceServletContextListener {
 	public static AWSCredentials awsCredentials = null;
@@ -117,6 +94,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String amqpUser;
 	public static String amqpPassword;
 	public static String amqpHost;
+	public static String cacheHost;
 	public static String plivoKey;
 	public static String plivoSecret;
 	public static String resPath;
@@ -152,6 +130,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		amqpUser = System.getProperty("amqpUser");
 		amqpPassword = System.getProperty("amqpPassword");
 		amqpHost = System.getProperty("amqpHost");
+		cacheHost = System.getProperty("cacheHost");
 		plivoKey = System.getProperty("plivoKey");
 		plivoSecret = System.getProperty("plivoSecret");
 		resPath = System.getProperty("resPath");
@@ -169,9 +148,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	private WorkflowWorker depositWorker;
 	private WorkflowWorker withdrawalWorker;
 	private JavaPushMailAccount jPM;
-	public SocketIOServer server;
-	private ServiceLevelThread slt;
-	private LDAPListener listener;
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -204,108 +180,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			jPM.setMessageCounterListerer(i.getInstance(EmailListener.class));
 			jPM.run();
 		}
-		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
-			//handle service level thread
-			slt = i.getInstance(ServiceLevelThread.class);
-			slt.start();
-		}
-		
-		server = i.getInstance(SocketIOServer.class);
-		server.addJsonObjectListener(MerchantSession.class, new DataListener<MerchantSession>() {
-	        @Override
-	        public void onData(SocketIOClient client, MerchantSession data, AckRequest ackRequest) {
-	        	Cache cache = i.getInstance(Cache.class);
-	        	if (null==data.getSessionToken()){
-        			//add to monitoring list
-        			//if exceeded limit, kick
-        			client.sendJsonObject(new MerchantSession().setAction("unauthenticated"));
-        			client.disconnect();
-        			return;
-	        	}
-        		//verify session
-        		Element e = cache.getQuiet(TicketResource.TICKET_SCOPE+data.getSessionToken());
-        		if (null==e){
-        			//add to monitoring list
-        			//if exceeded limit, kick
-        			client.sendJsonObject(new MerchantSession().setAction("unauthenticated"));
-        			client.disconnect();
-        			return;
-        		}else{
-        			client.sendJsonObject(new MerchantSession().setAction("authenticated"));
-        		}
-        		if (data.getAction().equals("subscribe")){
-        			client.joinRoom(data.getSessionToken());
-        			client.sendJsonObject(new MerchantSession().setAction("subscribed"));
-        			return;
-        		}
-        		if (data.getAction().equals("logout")){
-        			client.sendJsonObject(new MerchantSession().setAction("disconnected"));
-        			client.disconnect();
-        			return;
-        		}
-        		if (data.getAction().equals("verify")){
-        			//verify data
-        			String phone = data.getPhoneNumber();
-				PhoneNumber phoneNumber=null;
-        			if (null!=phone){
-						try {
-							phoneNumber = PhoneNumberUtil.getInstance().parse(phone, "ZZ");
-							phone = PhoneNumberUtil.getInstance().format(phoneNumber,PhoneNumberFormat.E164);
-						} catch (NumberParseException e1) {
-							e1.printStackTrace();
-						}
-        			}
-        			if (phone==null){
-        				client.sendJsonObject(new MerchantSession().setAction("error"));
-        				return;
-        			}
-        			String delivery = (data.getDelivery()==null||data.getDelivery().length()<2)?"display":data.getDelivery();
-        			String deliveryParam = (data.getDeliveryParam()==null||data.getDeliveryParam().length()<2)?null:data.getDelivery();
-        			if (!delivery.equals("display")&&(deliveryParam==null||deliveryParam.length()<2)){
-        				client.sendJsonObject(new MerchantSession().setAction("error"));
-        				return;
-        			}
-        			
-        			//create tan
-        			MerchantSession ms = new MerchantSession()
-        				.setDelivery(delivery)
-        				.setDeliveryParam(deliveryParam)
-        				.setPhoneNumber(phone)
-        				.setCallAction(data.getCallAction())
-        				.setSessionToken(RandomStringUtils.random(4, "0123456789"));
-        			cache.put(new Element("merchant"+data.getSessionToken(),ms));
-        			//initialize call
-        			try{
-	    				RestAPI restAPI = new RestAPI(MessagingServletConfig.plivoKey, MessagingServletConfig.plivoSecret, "v1");
-	    				
-	    				LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
-					PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-					String from = PhoneNumberUtil.getInstance().format(phoneUtil.getExampleNumberForType(phoneUtil.getRegionCodeForCountryCode(phoneNumber.getCountryCode()), PhoneNumberType.MOBILE), PhoneNumberFormat.E164);
-				    params.put("from", from.substring(0,from.length()-4)+"3737");
-	    			    params.put("to", phone);
-	    			    params.put("answer_url", MessagingServletConfig.basePath + "/plivo/merchant/req/"+data.getSessionToken()+"/"+ms.getSessionToken()+"/"+Locale.US.toString());
-	    			    params.put("hangup_url", MessagingServletConfig.basePath + "/plivo/merchant/hangup/"+data.getSessionToken());
-	    			    Call response = restAPI.makeCall(params);
-	    			    if (response.serverCode != 200 && response.serverCode != 201 && response.serverCode !=204){
-	    			    	throw new PlivoException(response.message);
-	    			    }
-        			}catch(PlivoException ex){
-        				ex.printStackTrace();
-        				client.sendJsonObject(new MerchantSession().setAction("error"));
-        			}
-        			client.sendJsonObject(new MerchantSession().setAction("started").setSessionToken(ms.getSessionToken()));
-        			return;
-        		}        		        		
-	        }
-	    });
-		server.start();
-		//start ldap
-		listener = i.getInstance(LDAPListener.class);
-		try {
-            listener.startListening();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 		log.info("ServletContextListener started");
 	}
 	
@@ -335,7 +209,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
+                
             	filter("/*").through(CorsFilter.class);
+            	filter("/*").through(HttpsEnforcerFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
             	filter("/envayasms/*").through(PersistenceFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
@@ -357,12 +233,15 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		bind(QueueClient.class);
         	}
 			
-			@Provides
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Singleton @SuppressWarnings("unused")
 			public CommandParser getMessageProcessor() {
 				return new CommandParser(servletContext);
 			}
+			
+            @Provides @Singleton @SuppressWarnings("unused")
+            MerchantClient provideProductsClient(){
+                return new MerchantClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
+            }
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			MailServiceClient getMailClient(){
@@ -380,10 +259,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			}
 
 
-			@Provides
-			@Named("nonTx")
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Named("nonTx") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getDepositWorker(AmazonSimpleWorkflow swfClient) {
 				WorkflowWorker workflowWorker = new WorkflowWorker(swfClient,
 						domainName, "deposit-workflow-tasklist");
@@ -397,10 +273,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				return workflowWorker;
 			}
 
-			@Provides
-			@Named("withdrawal")
-			@Singleton
-			@SuppressWarnings("unused")
+			@Provides @Named("withdrawal") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getWithdrawalWorker(AmazonSimpleWorkflow swfClient) {
 				WorkflowWorker workflowWorker = new WorkflowWorker(swfClient,
 						domainName, "withdrawal-workflow-tasklist");
@@ -412,13 +285,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return workflowWorker;
-			}
-			
-			@Provides @Singleton @SuppressWarnings("unused")
-			public LDAPListener getLdapListener(GenericRepository dao){
-			    LDAPListenerConfig config = new LDAPListenerConfig(2389, new JdoRequestHandler(dao));
-			    LDAPListener listener = new LDAPListener(config);
-			    return listener;
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -466,14 +332,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return cl;
-			}
-			
-			@Provides @Singleton @SuppressWarnings("unused")
-			public SocketIOServer provideSocket(){
-			 	Configuration config = new Configuration();
-			    config.setPort(8081);
-			    SocketIOServer server = new SocketIOServer(config);
-			    return server;
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -530,18 +388,10 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			}
         
         	@Provides @Singleton @SuppressWarnings("unused")
-        	public Cache provideCache(){
-        		//Create a singleton CacheManager using defaults
-        		CacheManager manager = CacheManager.create();
-        		//Create a Cache specifying its configuration.
-        		Cache testCache = new Cache(new CacheConfiguration("cache", 1000)
-        		    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-        		    .eternal(false)
-        		    .timeToLiveSeconds(7200)
-        		    .timeToIdleSeconds(3600)
-        		    .diskExpiryThreadIntervalSeconds(0));
-        		  manager.addCache(testCache);
-        		  return testCache;
+        	public Cache provideCache() throws IOException{
+        	    MemcachedClient client = new MemcachedClient(new InetSocketAddress(MessagingServletConfig.cacheHost, 11211));
+        	    Cache cache = new MemCacheWrapper(client, 3600);
+                return cache;
         	}},new MessagingShiroWebModule(this.servletContext));
         return injector;
     }
@@ -559,15 +409,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		if (null==System.getProperty("environment")||!System.getProperty("environment").equals("test")){
 			Client elasticSearch = injector.getInstance(Client.class);
 			elasticSearch.close();
-		}
-		if (null!=slt){
-			slt.kill();
-		}
-		if (null!=server){
-			server.stop();
-		}
-		if (null!=listener){
-		    listener.shutDown(true);
 		}
 		super.contextDestroyed(sce);
 		log.info("ServletContextListener destroyed");

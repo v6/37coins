@@ -20,7 +20,7 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, Merchant
                 self.onShow();
             });
             if (!this.socketio){
-                var ioPath = (window.opt.ioPath)?window.opt.ioPath:window.opt.basePath.split(':8')[0]+':443';
+                var ioPath = (window.opt.srvcPath)?window.opt.srvcPath:window.opt.basePath.split(':8')[0]+':443';
                 var socketio = io.connect(ioPath);
                 this.socketio = socketio;
                 socketio.on('message', function (data) {
