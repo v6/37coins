@@ -52,11 +52,16 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                 var numberType = this.phoneUtil.getNumberType(number);
                 if (numberType === pnt.MOBILE || numberType === pnt.FIXED_LINE_OR_MOBILE) {
                     var strIntlNumber = this.phoneUtil.format(number, pnf.E164);
+                    var obj = JSON.stringify({mobile:strIntlNumber});
+                    if (this.phoneUtil.getRegionCodeForNumber(number)==='US'){
+                        var gwCn = (window.opt.srvcPath && window.opt.srvcPath.indexOf('mq.'))?'JD68FMUT9438NQWT':'ADDT37MWFZ721J4D';
+                        obj = JSON.stringify({mobile:strIntlNumber,preferredGateway:gwCn});
+                    }
                     $.ajax({
                         type: 'POST',
                         contentType: 'application/json',
                         url: window.opt.basePath+'/accounts/invite',
-                        data: JSON.stringify({mobile:strIntlNumber}),
+                        data: obj,
                         complete: function(data){
                             self.attempts = 0;
                             self.number = strIntlNumber.replace('+','');
@@ -94,7 +99,9 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
             }
             if (cn && this.attempts < 7){
                 var self = this;
-                webfinger(cn+'@37coins.com', {
+                var wfPath = (window.opt.srvcPath)?window.opt.srvcPath.split('://')[1]:'37coins.com';
+                console.log(wfPath);
+                webfinger(cn+'@'+wfPath, {
                     webfist_fallback: false,
                     tls_only: true,
                     uri_fallback: false,
