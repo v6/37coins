@@ -10,7 +10,6 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
-import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +26,14 @@ public class FaucetServletConfig extends GuiceServletContextListener {
 	public static String basePath;
 	public static String envayaToken;
 	public static String blockchainUrl;
+	public static String faucetPath;
 	public static Logger log = LoggerFactory.getLogger(FaucetServletConfig.class);
 	public static Injector injector;
 
 	static {
         basePath = System.getProperty("basePath");
         envayaToken = System.getProperty("envayaToken");
+        faucetPath = System.getProperty("faucetPath");
         try {
             blockchainUrl = URLDecoder.decode(System.getProperty("blockchainUrl"), "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -74,7 +75,7 @@ public class FaucetServletConfig extends GuiceServletContextListener {
             }
             @Provides @Singleton @SuppressWarnings("unused")
             DigestFilter provideDigest(){
-                return new DigestFilter(FaucetServletConfig.envayaToken);
+                return new DigestFilter(FaucetServletConfig.envayaToken, FaucetServletConfig.faucetPath);
             }
             @Provides @Singleton @SuppressWarnings("unused")
             FiatPriceProvider provideFiatPrices(Cache cache){

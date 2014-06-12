@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path(FaucetResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class FaucetResource {
-    public final static String PATH = "/faucet";
+    public final static String PATH = "/callback";
     public static Logger log = LoggerFactory.getLogger(FaucetResource.class);
     
     final private FiatPriceProvider fiatPriceProvider;
