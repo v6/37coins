@@ -29,6 +29,7 @@ import org.restnucleus.test.DbHelper;
 import org.restnucleus.test.EmbeddedJetty;
 
 import com._37coins.helper.HelperResource;
+import com._37coins.ldap.CryptoUtils;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
@@ -47,6 +48,7 @@ import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.PaymentAddress;
+import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
 import com.brsanthu.googleanalytics.GoogleAnalyticsConfig;
@@ -86,13 +88,13 @@ public class RestTest {
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
-		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR"));
+		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
 		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")).setWelcomeMsg("PZWelcomeMessage"));
 	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
 	    gw2.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0007")));
 	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
 	    gw3.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0008")));
-	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE"));
+	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
 	    gw4.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
 	    Gateway gw5 = new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT"));
 	    gw5.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
@@ -198,7 +200,7 @@ public class RestTest {
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.SIGNUP);
 		Assert.assertEquals("NZV4N1JS2Z3476NK",ds.getTo().getGateway());
-		Assert.assertEquals("PZWelcomeMessage",ds.getPayload());
+		Assert.assertEquals("PZWelcomeMessage",((Signup)ds.getPayload()).getWelcomeMessage());
 		Assert.assertNotNull(ds.getCn());
     }
     
@@ -587,7 +589,35 @@ public class RestTest {
             .body("welcomeMsg", equalToIgnoringCase(("hello123")))
         .when()
             .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");        
-        
+    }
+    
+    @Test
+    public void testAdmin() throws IOException {
+        String nonAdmin = Base64.encodeBase64String(("before@gmail.com" + ":" + "password").getBytes());
+        String admin = Base64.encodeBase64String(("johannbarbie@me.com" + ":" + "password").getBytes());
+        given()
+            .header(new Header("Authorization", "Basic "+nonAdmin))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(200)
+        .when()
+            .get(embeddedJetty.getBaseUri() + GatewayResource.PATH+"/settings");
+        //try admin
+        given()
+            .header(new Header("Authorization", "Basic "+nonAdmin))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(403)
+        .when()
+            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/821039841235");
+        //try admin 
+        given()
+            .header(new Header("Authorization", "Basic "+admin))
+            .contentType(ContentType.JSON)
+        .expect()
+            .statusCode(204)
+        .when()
+            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/821039841235");
     }
 	
 	@Test
