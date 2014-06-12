@@ -242,7 +242,8 @@ public class ParserResource {
 					        .setMobile(recipient.getAddress())
 					        .setSource((null!=referrer)?Signup.Source.MOVE:Signup.Source.NEW)
 					        .setSignupCallback(gwDn.getSettings().getSignupCallback())
-					        .setWelcomeMessage(gwDn.getSettings().getWelcomeMsg()))
+					        .setWelcomeMessage(gwDn.getSettings().getWelcomeMsg())
+					        .setDigestToken(gwDn.getApiSecret()))
 					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);

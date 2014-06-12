@@ -82,7 +82,8 @@ public class InterpreterFilter implements Filter {
                         .setMobile(responseData.getTo().getAddress())
                         .setSource(Source.MOVE)
                         .setSignupCallback(g.getSettings().getSignupCallback())
-                        .setWelcomeMessage(g.getSettings().getWelcomeMsg()))
+                        .setWelcomeMessage(g.getSettings().getWelcomeMsg())
+                        .setDigestToken(g.getApiSecret()))
                     .setService(responseData.getService());
                 httpReq.setAttribute("create", create);                
 			}
@@ -115,7 +116,8 @@ public class InterpreterFilter implements Filter {
                         .setMobile(responseData.getTo().getAddress())
                         .setSource(Source.NEW)
                         .setSignupCallback(g.getSettings().getSignupCallback())
-                        .setWelcomeMessage(g.getSettings().getWelcomeMsg()))
+                        .setWelcomeMessage(g.getSettings().getWelcomeMsg())
+                        .setDigestToken(g.getApiSecret()))
 					.setService(responseData.getService());
 				httpReq.setAttribute("create", create);
 			}
