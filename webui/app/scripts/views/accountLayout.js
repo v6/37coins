@@ -54,7 +54,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                     var strIntlNumber = this.phoneUtil.format(number, pnf.E164);
                     var obj = JSON.stringify({mobile:strIntlNumber});
                     if (this.phoneUtil.getRegionCodeForNumber(number)==='US'){
-                        var gwCn = (window.opt.srvcPath && window.opt.srvcPath.indexOf('mq.'))?'JD68FMUT9438NQWT':'ADDT37MWFZ721J4D';
+                        var gwCn = (window.opt.srvcPath && window.opt.srvcPath.indexOf('mq.')!==-1)?'JD68FMUT9438NQWT':'ADDT37MWFZ721J4D';
                         obj = JSON.stringify({mobile:strIntlNumber,preferredGateway:gwCn});
                     }
                     $.ajax({
