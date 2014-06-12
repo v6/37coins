@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.Signup;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.ResourceBundleModel;
@@ -107,8 +108,11 @@ public class MessageFactory {
 	
 	public String constructTxt(DataSet rsp)
 			throws IOException, TemplateException {
-	    if (rsp.getAction()==Action.SIGNUP && rsp.getPayload()!=null){
-	        return (String)rsp.getPayload();
+	    if (rsp.getAction()==Action.SIGNUP && rsp.getPayload()!=null && rsp.getPayload() instanceof Signup){
+	        Signup signup = ((Signup)rsp.getPayload());
+	        if (signup.getWelcomeMessage()!=null && signup.getWelcomeMessage().length()>10){
+	            return signup.getWelcomeMessage();
+	        }
 	    }
 		prepare(rsp);
 		return processTemplate(rsp, TEXT_FOLDER);

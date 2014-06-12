@@ -17,6 +17,7 @@
 		<module>interface</module>
 		<module>merchantClient</module>
 		<module>merchant</module>
+		<module>faucet</module>
 		<module>server</module>
 		<module>bitcoindManager</module>
 	</modules>

@@ -15,10 +15,12 @@ import javax.inject.Inject;
 import javax.jdo.JDOException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -36,6 +38,7 @@ import com._37coins.MessageFactory;
 import com._37coins.MessagingServletConfig;
 import com._37coins.cache.Cache;
 import com._37coins.cache.Element;
+import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailServiceClient;
@@ -115,6 +118,13 @@ public class GatewayResource {
 		return gu;
 	}
 	
+    @DELETE
+    @Path("/admin/{mobile}")
+    @RolesAllowed({"admin"})
+    public void deleteAccount(@PathParam("mobile")String mobile){
+        dao.queryDelete(new RNQuery().addFilter("mobile", "+"+mobile), Account.class);
+    }
+	
 	@PUT
 	@RolesAllowed({"gateway"})
 	public GatewayUser confirm(@Context SecurityContext context,GatewayUser gu){
@@ -192,6 +202,7 @@ public class GatewayResource {
 			existing
 			  .setLocale(gu.getLocale())
 			  .setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
+			  .setCountryCode(pn.getCountryCode())
 			  .setApiSecret(envayaToken);
 			existing.getSettings().setFee(FEE);
 			rv = new GatewayUser()

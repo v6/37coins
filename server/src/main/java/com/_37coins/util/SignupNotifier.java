@@ -1,48 +1,50 @@
 package com._37coins.util;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+import org.restnucleus.filter.DigestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com._37coins.workflow.pojo.Signup;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SignupNotifier extends Thread {
+    private static final Logger log = LoggerFactory.getLogger(SignupNotifier.class);
+    private Signup signup;
+    private CloseableHttpClient httpClient;
     
-    public enum Source {
-        MOVE,
-        REFERRED,
-        NEW
+    public SignupNotifier(Signup signup) {
+        this.signup = signup;
+        httpClient = HttpClients.createDefault();
     }
-    
-    private String mobile;
-    private Source source;
-    private String url;
-    private CloseableHttpClient httpclient;
-    
-    public SignupNotifier(String url, String mobile, Source source){
-        this.mobile = mobile;
-        this.source = source;
-        this.url = url;
-        httpclient = HttpClients.createDefault();
-    }
-    
+
     @Override
     public void run() {
-        HttpPost httpPost = new HttpPost(url);
-        List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-        nvps.add(new BasicNameValuePair("mobile", mobile));
-        nvps.add(new BasicNameValuePair("source", source.toString()));
+        Signup value = new Signup()
+            .setMobile(signup.getMobile())
+            .setReferrer(signup.getReferrer())
+            .setDestination(signup.getDestination());
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-            httpclient.execute(httpPost);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }        
+            String reqValue = new ObjectMapper().writeValueAsString(value);
+            StringEntity entity = new StringEntity(reqValue, "UTF-8");
+            entity.setContentType("application/json");
+            String reqSig = DigestFilter.calculateSignature(
+                    signup.getSignupCallback(),
+                    DigestFilter.parseJson(reqValue.getBytes()),
+                    signup.getDigestToken());
+            HttpPost req = new HttpPost(signup.getSignupCallback());
+            req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
+            req.setEntity(entity);
+            httpClient.execute(req);
+        } catch (IOException | NoSuchAlgorithmException e) {
+            log.error("products client error", e);
+        }
     }
 
 }

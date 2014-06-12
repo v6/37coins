@@ -69,6 +69,10 @@ public class AuthorizingRealm extends JdbcRealm {
  	
  	@Override
  	protected AuthorizationInfo getAuthorizationInfo(PrincipalCollection principals) {
+ 	    String cn = (String)principals.getPrimaryPrincipal();
+ 	    if (MessagingServletConfig.adminCns.contains(cn)){
+ 	       return new SimpleAuthorizationInfo(new HashSet<String>(Arrays.asList("gateway","admin")));
+ 	    }
  		return new SimpleAuthorizationInfo(new HashSet<String>(Arrays.asList("gateway")));
  	}
  	

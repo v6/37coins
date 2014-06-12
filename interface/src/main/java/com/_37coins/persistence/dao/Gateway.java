@@ -65,7 +65,6 @@ public class Gateway extends Model {
     }
 
     public Gateway setMobile(String mobile) {
-        this.countryCode = Integer.parseInt(mobile.substring(1, 3));
         this.mobile = mobile;
         return this;
     }
