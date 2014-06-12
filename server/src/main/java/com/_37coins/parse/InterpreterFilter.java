@@ -22,13 +22,15 @@ import org.slf4j.LoggerFactory;
 
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
-import com._37coins.util.SignupNotifier;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.Signup;
+import com._37coins.workflow.pojo.Signup.Source;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 
 @Singleton
 public class InterpreterFilter implements Filter {
@@ -70,18 +72,17 @@ public class InterpreterFilter implements Filter {
 				//look up the new gateway and overwrite all values
 			    g = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getGateway()), Gateway.class);
 			    a.setOwner(g);
-			    //notify gateway
-			    if (g.getSettings().getSignupCallback()!=null){
-			        Thread t = new SignupNotifier(g.getSettings().getSignupCallback(), a.getMobile(), SignupNotifier.Source.MOVE);
-			        t.start();
-			    }
 	            //respond to user with welcome message from new gateway.
                 DataSet create = new DataSet()
                     .setAction(Action.SIGNUP)
                     .setTo(responseData.getTo())
                     .setCn(responseData.getCn())
                     .setLocale(responseData.getLocale())
-                    .setPayload(g.getSettings().getWelcomeMsg())
+                    .setPayload(new Signup()
+                        .setMobile(responseData.getTo().getAddress())
+                        .setSource(Source.MOVE)
+                        .setSignupCallback(g.getSettings().getSignupCallback())
+                        .setWelcomeMessage(g.getSettings().getWelcomeMsg()))
                     .setService(responseData.getService());
                 httpReq.setAttribute("create", create);                
 			}
@@ -95,6 +96,12 @@ public class InterpreterFilter implements Filter {
 			    a = new Account()
 			        .setMobile(responseData.getTo().getAddress())
 			        .setOwner(g);
+			    if (g.getLocale()==null||g.getLocale().getCountry()==null){
+			        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+	                String rc = phoneUtil.getRegionCodeForNumber(responseData.getTo().getPhoneNumber());
+			        a.setLocale(new Locale("",rc));
+			    }
+			    a.setLocale(g.getLocale());
 			    dao.add(a);
 			    responseData.getTo().setGateway(g.getCn());
 			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getSettings().getFee());
@@ -104,7 +111,11 @@ public class InterpreterFilter implements Filter {
 					.setTo(responseData.getTo())
 					.setCn(responseData.getCn())
 					.setLocale(responseData.getLocale())
-					.setPayload(g.getSettings().getWelcomeMsg())
+					.setPayload(new Signup()
+                        .setMobile(responseData.getTo().getAddress())
+                        .setSource(Source.NEW)
+                        .setSignupCallback(g.getSettings().getSignupCallback())
+                        .setWelcomeMessage(g.getSettings().getWelcomeMsg()))
 					.setService(responseData.getService());
 				httpReq.setAttribute("create", create);
 			}

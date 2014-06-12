@@ -109,11 +109,11 @@ public class EnvayaSmsResource {
 		    Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", cn), Gateway.class);
 			String envayaToken = g.getApiSecret();
 			boolean isSame = false;
-			String url = MessagingServletConfig.basePath + uriInfo.getPath();
+			String url = MessagingServletConfig.basePath + "/" + uriInfo.getPath();
 			String calcSig = calculateSignature(url, params, envayaToken);
 			isSame = (sig.equals(calcSig))?true:false;
 			if (!isSame){
-				url = MessagingServletConfig.srvcPath + uriInfo.getPath();
+				url = MessagingServletConfig.srvcPath + "/" + uriInfo.getPath();
 				calcSig = calculateSignature(url, params, envayaToken);
 				isSame = (sig.equals(calcSig))?true:false;
 			}

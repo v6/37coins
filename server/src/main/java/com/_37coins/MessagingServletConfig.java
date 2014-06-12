@@ -105,6 +105,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String paymentsPath;
 	public static String gaTrackingId;
 	public static String hmacToken;
+	public static String adminCns;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
 	public static int localPort;
@@ -141,6 +142,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		paymentsPath = System.getProperty("paymentsPath");
 		gaTrackingId = System.getProperty("gaTrackingId");
 		hmacToken = System.getProperty("hmacToken");
+		adminCns = System.getProperty("adminCns");
 	}
 	
 	private ServletContext servletContext;

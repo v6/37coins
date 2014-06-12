@@ -45,7 +45,6 @@ import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.util.GatewayPriceComparator;
-import com._37coins.util.SignupNotifier;
 import com._37coins.web.GatewayUser;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
@@ -54,6 +53,7 @@ import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
+import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -227,12 +227,6 @@ public class ParserResource {
 		        .setLocale(uLocale);
 			try {
 			    dao.add(newUser);
-			    //notify gateway
-	            if (gwDn.getSettings().getSignupCallback()!=null){
-	                SignupNotifier.Source source = (null==referrer)?SignupNotifier.Source.NEW:SignupNotifier.Source.REFERRED;
-	                Thread t = new SignupNotifier(gwDn.getSettings().getSignupCallback(), newUser.getMobile(), source);
-	                t.start();
-	            }
 			    cnString = newUser.getId().toString();
 			    mobile = newUser.getMobile();
 				//and say hi to new user
@@ -243,7 +237,12 @@ public class ParserResource {
 						.setAddressType(recipient.getAddressType())
 						.setGateway(gwAddress))
 					.setCn(newUser.getId().toString())
-					.setPayload(gwDn.getSettings().getWelcomeMsg())
+					.setPayload(new Signup()
+					        .setReferrer((null!=referrer)?referrer.getAddress():null)
+					        .setMobile(recipient.getAddress())
+					        .setSource((null!=referrer)?Signup.Source.MOVE:Signup.Source.NEW)
+					        .setSignupCallback(gwDn.getSettings().getSignupCallback())
+					        .setWelcomeMessage(gwDn.getSettings().getWelcomeMsg()))
 					.setLocale(uLocale)
 					.setService(service);
 				responseList.add(create);

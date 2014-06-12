@@ -21,6 +21,10 @@ public class GetDigits {
 	private int retries;
 	
 	private boolean redirect;
+	
+	public GetDigits(){
+	    retries = 2;
+	}
 
 	public URL getAction() {
 		return action;

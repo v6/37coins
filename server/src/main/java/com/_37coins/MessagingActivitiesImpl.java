@@ -22,13 +22,14 @@ import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.util.SignupNotifier;
 import com._37coins.web.Transaction;
 import com._37coins.web.Transaction.State;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
-import com._37coins.workflow.pojo.PaymentAddress;
+import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
 import com.amazonaws.services.simpleworkflow.flow.ActivityExecutionContext;
@@ -109,9 +110,20 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 		cache.put(new Element("balance"+rsp.getCn(), ((Withdrawal)rsp.getPayload()).getBalance()));
 	}
 	
-	@Override
+    @Override
 	public void putAddressCache(DataSet rsp) {
-		cache.put(new Element("address"+rsp.getCn(), ((PaymentAddress)rsp.getPayload()).getAddress()));
+	    if (null!=rsp.getPayload() && rsp.getPayload() instanceof Signup){
+            Signup s = (Signup)rsp.getPayload();
+            String cn = rsp.getTo().getAddress().replace("+", "");
+            cache.put(new Element("address"+cn, s.getDestination().getAddress()));
+            //notify gateway
+            if (s.getSignupCallback()!=null){
+                Thread t = new SignupNotifier(s);
+                t.start();
+            }            
+	    }else{
+	        throw new RuntimeException("not implemented");
+	    }
 	}
 
 	@Override

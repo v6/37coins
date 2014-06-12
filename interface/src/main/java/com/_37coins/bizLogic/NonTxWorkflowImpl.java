@@ -13,7 +13,9 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
+import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
+import com.amazonaws.services.simpleworkflow.flow.ActivityTaskTimedOutException;
 import com.amazonaws.services.simpleworkflow.flow.DecisionContext;
 import com.amazonaws.services.simpleworkflow.flow.DecisionContextProvider;
 import com.amazonaws.services.simpleworkflow.flow.DecisionContextProviderImpl;
@@ -36,9 +38,9 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 
 	@Override
 	public void executeCommand(final DataSet data) {
-//		new TryCatch() {
-//			@Override
-//            protected void doTry() throws Throwable {
+		new TryCatch() {
+			@Override
+            protected void doTry() throws Throwable {
 				if (data.getAction()==Action.DEPOSIT_REQ){
 					Promise<String> bcAddress = bcdClient.getNewAddress(data.getTo().getAddress().replace("+", ""));
 					respondDepositReq(bcAddress, data);
@@ -96,15 +98,25 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 				}else{
 					throw new RuntimeException("unknown action");
 				}
-//			 }
-//            @Override
-//            protected void doCatch(Throwable e) throws Throwable {
-//            	data.setAction(Action.UNAVAILABLE);
-//    			msgClient.sendMessage(data);
-//    			e.printStackTrace();
-//            	cancel(e);
-//            }
-//		};
+			 }
+            @Override
+            protected void doCatch(Throwable e) throws Throwable {
+                if (e instanceof ActivityTaskTimedOutException){
+                    ActivityTaskTimedOutException ae = (ActivityTaskTimedOutException)e;
+                    String s = ae.getActivityType().getName().toLowerCase();
+                    if (s.contains("account")||s.contains("address")){
+                        data.setAction(Action.UNAVAILABLE);
+                        msgClient.sendMessage(data);
+                        e.printStackTrace();
+                        cancel(e);
+                    }else{
+                        throw e;
+                    }
+                }else{
+                    throw e;
+                }
+            }
+		};
     }
 	
 	@Asynchronous
@@ -147,9 +159,10 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	
 	@Asynchronous
 	public void respondDataReq(Promise<String> bcAddress,DataSet data){
-		data.setPayload(new PaymentAddress()
-			.setAddress(bcAddress.get())
-			.setAddressType(PaymentType.BTC));
+	    if (data.getPayload() instanceof Signup){
+	        Signup s = (Signup)data.getPayload();
+	        s.setDestination(new PaymentAddress().setAddress(bcAddress.get()).setAddressType(PaymentType.BTC));
+	    }
 		msgClient.putAddressCache(data);
 	}
 	
