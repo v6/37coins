@@ -29,6 +29,7 @@ import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.MessageAddress.MsgType;
+import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow;
@@ -112,15 +113,22 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
     @Override
 	public void putAddressCache(DataSet rsp) {
-	    if (null!=rsp.getPayload() && rsp.getPayload() instanceof Signup){
-            Signup s = (Signup)rsp.getPayload();
-            String cn = rsp.getTo().getAddress().replace("+", "");
-            cache.put(new Element("address"+cn, s.getDestination().getAddress()));
-            //notify gateway
-            if (s.getSignupCallback()!=null){
-                Thread t = new SignupNotifier(s);
-                t.start();
-            }            
+	    if (null!=rsp.getPayload()){
+	        
+	        if (rsp.getPayload() instanceof Signup){
+	            String cn = rsp.getTo().getAddress().replace("+", "");
+                Signup s = (Signup)rsp.getPayload();
+                cache.put(new Element("address"+cn, s.getDestination().getAddress()));
+                //notify gateway
+                if (s.getSignupCallback()!=null){
+                    Thread t = new SignupNotifier(s);
+                    t.start();
+                }   
+	        }else if (rsp.getPayload() instanceof PaymentAddress){
+	            cache.put(new Element("address"+rsp.getCn(), ((PaymentAddress)rsp.getPayload()).getAddress()));
+	        }else{
+	            throw new RuntimeException("not implemented");
+	        }
 	    }else{
 	        throw new RuntimeException("not implemented");
 	    }

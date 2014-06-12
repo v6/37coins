@@ -163,6 +163,11 @@ public class NonTxWorkflowImpl implements NonTxWorkflow {
 	        Signup s = (Signup)data.getPayload();
 	        s.setDestination(new PaymentAddress().setAddress(bcAddress.get()).setAddressType(PaymentType.BTC));
 	    }
+	    if (data.getPayload()==null){
+	        data.setPayload(new PaymentAddress()
+	            .setAddress(bcAddress.get())
+	            .setAddressType(PaymentType.BTC));
+	    }
 		msgClient.putAddressCache(data);
 	}
 	
