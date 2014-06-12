@@ -202,6 +202,7 @@ public class GatewayResource {
 			existing
 			  .setLocale(gu.getLocale())
 			  .setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
+			  .setCountryCode(pn.getCountryCode())
 			  .setApiSecret(envayaToken);
 			existing.getSettings().setFee(FEE);
 			rv = new GatewayUser()
