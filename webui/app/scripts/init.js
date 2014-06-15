@@ -1,6 +1,6 @@
 require.config({
 
-    baseUrl: "/scripts",
+    baseUrl: '/scripts',
 
     /* starting point for application */
     deps: ['backbone.marionette', 'bootstrap', 'main'],
@@ -15,7 +15,7 @@ require.config({
             exports: 'Backbone'
         },
         'socketio': {
-          exports: 'io'
+            exports: 'io'
         },
         jqueryValidation: {
             deps: [
@@ -35,14 +35,14 @@ require.config({
     },
 
     paths: {
-        jquery: '../bower_components/jquery/jquery',
+        jquery: '../bower_components/jquery/dist/jquery',
         backbone: '../bower_components/backbone-amd/backbone',
         underscore: '../bower_components/underscore-amd/underscore',
 
         /* alias all marionette libs */
         'backbone.marionette': '../bower_components/backbone.marionette/lib/core/amd/backbone.marionette',
-        'backbone.wreqr': '../bower_components/backbone.wreqr/lib/amd/backbone.wreqr',
-        'backbone.babysitter': '../bower_components/backbone.babysitter/lib/amd/backbone.babysitter',
+        'backbone.wreqr': '../bower_components/backbone.wreqr/lib/backbone.wreqr',
+        'backbone.babysitter': '../bower_components/backbone.babysitter/lib/backbone.babysitter',
         'backbone.eventbinder': '../bower_components/backbone.eventbinder/lib/amd/backbone.eventbinder', // amd version
         routeFilter: '../bower_components/backbone-route-filter/backbone-route-filter',
 
@@ -57,7 +57,7 @@ require.config({
         handlebars: '../bower_components/require-handlebars-plugin/Handlebars',
 
         /* require handlebars plugin - Alex Sexton */
-        i18nprecompile: '../bower_components/require-handlebars-plugin/hbs/i18nprecompile',
+        i18n: '../bower_components/requirejs-i18n/i18n',
         json2: '../bower_components/require-handlebars-plugin/hbs/json2',
         hbs: '../bower_components/require-handlebars-plugin/hbs',
         basicauth: '../bower_components/backbone.basicauth/backbone.basicauth',
@@ -66,15 +66,29 @@ require.config({
         EventEmitter: '../bower_components/event-emitter/dist/EventEmitter',
         GA: '../bower_components/requirejs-google-analytics/dist/GoogleAnalytics',
         webfinger: 'vendor/webfinger',
-        socketio: '../bower_components/socket.io-client/dist/socket.io',
+        socketio: 'vendor/socket.io',
         intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
         userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
     waitSeconds: 0,
-    locale: 'en',
     config: {
         'GA': {
             'id' : 'UA-29543456-1'
         }
     }
+});
+window.getLocale = function(){
+    'use strict';
+    var dl = 'en';
+    var ls = localStorage.getItem('locale');
+    var lng = window.opt.lng;
+    var locale = ((ls && ls!==null)?ls:((lng && lng.length>1)?lng.substring(0,2):dl));
+    if (!locale || locale===null || locale.length!==2 || !(locale in window.activeLocales)){
+        locale = dl;
+        localStorage.setItem('locale',locale);
+    }
+    return locale;
+};
+require.config({
+    locale: window.getLocale()
 });

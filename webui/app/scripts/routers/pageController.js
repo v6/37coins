@@ -41,7 +41,8 @@ define(['backbone',
     'views/privacyView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView) {
+    'i18n'
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
     'use strict';
 
     var Controller = {};
@@ -54,27 +55,31 @@ define(['backbone',
         },
         appRoutes: {
             '': 'showIndex',
-            'gateways': 'showGateway',
-            'balance': 'showBalance',
-            'faq': 'showFaq',
-            'confSignup/:token': 'confirmSignUp',
-            'confReset/:token': 'confirmReset',
-            'help/SMSgateway': 'showFaq',
-            'help/SMSwallet': 'showCommandHelp',
-            'account/:mobile': 'showAccount',
-            'legal/terms': 'showTerms',
-            'legal/privacy': 'showPrivacy',
-            'reset': 'showReset',
-            'about': 'showAbout',
-            'signUp': 'showSignUp',
-            'signupWallet':'showSignupWallet',
-            'signinWallet':'showSigninWallet',
-            'logout': 'showLogout',
-            'merchant': 'showMerchant',
-            'notFound': 'showNotFound'
+            ':lng/': 'showIndex',
+            ':lng/gateways': 'showGateway',
+            ':lng/balance': 'showBalance',
+            ':lng/faq': 'showFaq',
+            //'faq': 'showFaq',
+            ':lng/confSignup/:token': 'confirmSignUp',
+            ':lng/confReset/:token': 'confirmReset',
+            ':lng/help/SMSgateway': 'showFaq',
+            ':lng/help/SMSwallet': 'showCommandHelp',
+            ':lng/account/:mobile': 'showAccount',
+            ':lng/legal/terms': 'showTerms',
+            ':lng/legal/privacy': 'showPrivacy',
+            ':lng/reset': 'showReset',
+            ':lng/about': 'showAbout',
+            ':lng/signUp': 'showSignUp',
+            ':lng/signupWallet':'showSignupWallet',
+            ':lng/signinWallet':'showSigninWallet',
+            ':lng/logout': 'showLogout',
+            ':lng/merchant': 'showMerchant',
+            ':lng/*notFound': 'showNotFound',
+            '*notFound': 'showNotFound'
         },
         before:{
             '': 'loadLibPhone',
+            ':lng/': 'loadLibPhone',
             'account/:mobile': 'loadLibPhone',
             'signupWallet': 'loadLibPhone',
             'signinWallet': 'loadLibPhone',
@@ -83,13 +88,22 @@ define(['backbone',
             'gateways': 'showLogin',
             'balance': 'showLogin',
             'merchant': 'getTicket',
+            '*notFound': 'lngRedirect',
             '*any': function(fragment, args, next){
-                //set title
-                if (fragment){
-                    $(document).attr('title', '37 Coins - ' + fragment);
-                }else {
-                    $(document).attr('title', '37 Coins');
+                //capture language
+                var locale = window.getLocale();
+                if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
+                    if(locale !== args[0]) {
+                        localStorage.setItem('locale', args[0]);
+                        location.reload();
+                    }
+                }else{
+                    if(locale !== 'en') {
+                        localStorage.setItem('locale', 'en');
+                        location.reload();
+                    }
                 }
+                //do highlights on navigationbar
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
                     var href = ($(item).attr('href'))?$(item).attr('href').replace('#',''):undefined;
@@ -106,9 +120,6 @@ define(['backbone',
                         }
                     }
                 });
-                //set meta tag
-                $('meta[name=description]').remove();
-                $('head').append( '<meta name="description" content="this is new">' );
                 //track page visit
                 GA.view(fragment);
                 next();
@@ -146,6 +157,16 @@ define(['backbone',
                 });
             }else{
                 next();
+            }
+        },
+        lngRedirect: function(fragment, args, next) {
+            if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
+                next();
+            }else{
+                var locale = window.getLocale();
+                console.log('redirect: '+locale);
+                this.app.router.navigate(locale+'/'+fragment, {trigger: true, replace: true});
+                return false;
             }
         },
         showLogin: function(fragment, args, next) {

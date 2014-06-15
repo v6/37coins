@@ -1,0 +1,4 @@
+define({
+  'key1' : 'This is key 1.',
+  'key2' : 'This is key 2.'
+});
