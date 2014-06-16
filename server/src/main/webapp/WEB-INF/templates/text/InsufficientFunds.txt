@@ -7,7 +7,9 @@
 <#else>
 <#assign balFiat = "">
 </#if>
+<#if fiatPriceProvider??>
 <#assign amtTick = fiatPriceProvider.getLocalCurValue(payload.amount,locale)!"error">
+</#if>
 <#if amtTick?? & amtTick != "error">
 <#assign amtFiat = " ("+amtTick.getLastFactored()?string.currency+")">
 <#else>
