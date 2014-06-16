@@ -6,6 +6,10 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.jdo.PersistenceManagerFactory;
@@ -23,6 +27,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.CorsFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
@@ -50,9 +55,12 @@ import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.SmtpEmailClient;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.util.ResourceBundleClient;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.AccountPolicy;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
+import com._37coins.workflow.pojo.DataSet;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
@@ -104,8 +112,9 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String elasticSearchHost;
 	public static String paymentsPath;
 	public static String gaTrackingId;
-	public static String hmacToken;
+	public static String digestToken;
 	public static String adminCns;
+	public static List<Locale> activeLocales;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
 	public static int localPort;
@@ -141,8 +150,15 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		elasticSearchHost = System.getProperty("elasticSearchHost");
 		paymentsPath = System.getProperty("paymentsPath");
 		gaTrackingId = System.getProperty("gaTrackingId");
-		hmacToken = System.getProperty("hmacToken");
+		digestToken = System.getProperty("hmacToken");
 		adminCns = System.getProperty("adminCns");
+		String locales = System.getProperty("activeLocales");
+		List<String> localeList = Arrays.asList(locales.split(","));
+		activeLocales = new ArrayList<>();
+		for (String localeString : localeList){
+		    Locale locale = DataSet.parseLocaleString(localeString);
+		    activeLocales.add(locale);
+		}
 	}
 	
 	private ServletContext servletContext;
@@ -221,7 +237,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
+            	filter("/parser/*").through(DigestFilter.class); //allow directory access
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	filter("/account*").through(PersistenceFilter.class); //allow directory access
             	filter("/email/*").through(PersistenceFilter.class); //allow directory access
@@ -233,16 +249,17 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		bind(MessagingActivitiesImpl.class);
         		bind(ParserClient.class);
         		bind(QueueClient.class);
+        		bind(MessageFactory.class);
         	}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
-			public CommandParser getMessageProcessor() {
-				return new CommandParser(servletContext);
+			public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
+				return new CommandParser(rbf);
 			}
 			
             @Provides @Singleton @SuppressWarnings("unused")
             MerchantClient provideProductsClient(){
-                return new MerchantClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.hmacToken);
+                return new MerchantClient(MessagingServletConfig.paymentsPath, MessagingServletConfig.digestToken);
             }
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -273,6 +290,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					e.printStackTrace();
 				}
 				return workflowWorker;
+			}
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public DigestFilter getDigestFilter(){
+			    return new DigestFilter(MessagingServletConfig.digestToken);
 			}
 
 			@Provides @Named("withdrawal") @Singleton @SuppressWarnings("unused")
@@ -367,17 +389,23 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				}
 				return activityWorker;
 			}
-			
-			@Provides @Singleton @SuppressWarnings("unused")
-			public MessageFactory provideMessageFactory() {
-				return new MessageFactory(servletContext);
-			}
-			
 	        @Provides @Singleton @SuppressWarnings("unused")
             PersistenceManagerFactory providePersistence(){
                 PersistenceConfiguration pc = new PersistenceConfiguration();
                 pc.createEntityManagerFactory();
                 return pc.getPersistenceManagerFactory();
+            }
+	        
+            
+            @Provides @Singleton @SuppressWarnings("unused")
+            public ResourceBundleClient getResourceBundleClient(){
+                ResourceBundleClient client = new ResourceBundleClient(MessagingServletConfig.resPath+"/scripts/nls/");
+                return client;
+            }
+            
+            @Provides @Singleton @SuppressWarnings("unused")
+            public ResourceBundleFactory getResourceBundle(com._37coins.cache.Cache cache, ResourceBundleClient client){
+                return new ResourceBundleFactory(MessagingServletConfig.activeLocales, client, cache);
             }
 			
 			@Provides @Singleton @SuppressWarnings("unused")

@@ -31,6 +31,8 @@ import com._37coins.parse.ParserFilter;
 import com._37coins.sendMail.MailServiceClient;
 import com._37coins.sendMail.MockEmailClient;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.util.ResourceBundleClient;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.AccountPolicy;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -83,8 +85,8 @@ public class TestServletConfig extends GuiceServletContextListener {
 				@Provides
 				@Singleton
 				@SuppressWarnings("unused")
-				public CommandParser getMessageProcessor() {
-				  return new CommandParser();
+				public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
+				  return new CommandParser(rbf);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
@@ -122,9 +124,20 @@ public class TestServletConfig extends GuiceServletContextListener {
 				  return new AmazonSimpleWorkflowClient();
 				}
 				
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            public ResourceBundleClient getResourceBundleClient(){
+	                ResourceBundleClient client = new ResourceBundleClient(MessagingServletConfig.resPath+"/scripts/nls/");
+	                return client;
+	            }
+	            
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            public ResourceBundleFactory getResourceBundle(com._37coins.cache.Cache cache, ResourceBundleClient client){
+	                return new ResourceBundleFactory(MessagingServletConfig.activeLocales, client, cache);
+	            }
+				
 				@Provides @Singleton @SuppressWarnings("unused")
-				public MessageFactory provideMessageFactory() {
-					return new MessageFactory();
+				public MessageFactory provideMessageFactory(ResourceBundleFactory rbf) {
+					return new MessageFactory(rbf);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")

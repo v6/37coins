@@ -20,6 +20,11 @@
 
 <script src="${payload.resPath}/scripts/vendor/modernizr.js"></script>
 <script type="text/javascript">
+		window.activeLocales = {
+	        // root is mandatory.
+	        root: true,
+	        de: true
+	    };
 		window.opt = {
 			resPath: '${payload.resPath}',
 			lng: '${payload.lng}',

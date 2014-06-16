@@ -5,23 +5,20 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com._37coins.util.ResourceBundle;
+import com._37coins.util.ResourceBundleFactory;
+import com._37coins.util.TemplateStringModel;
 import com._37coins.workflow.pojo.DataSet;
+import com._37coins.workflow.pojo.DataSet.Action;
+import com._37coins.workflow.pojo.Signup;
 
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -39,16 +36,17 @@ public class MessageFactory {
 	
 
 	private final Configuration cfg;
-	private final ServletContext servletContext;
+	private final ResourceBundleFactory resourceBundleFactory;
 	private ResourceBundle rb;
+	
 
-	public MessageFactory() {
-		this(null);
+	public MessageFactory(ResourceBundleFactory resourceBundleFactory) {
+		this(null, resourceBundleFactory);
 	}
 
-	public MessageFactory(ServletContext servletContext) {
+	public MessageFactory(ServletContext servletContext, ResourceBundleFactory resourceBundleFactory) {
+	    this.resourceBundleFactory = resourceBundleFactory;
 		cfg = new Configuration();
-		this.servletContext = servletContext;
 		if (servletContext == null) {
 			try {
 				cfg.setDirectoryForTemplateLoading(new File(LOCAL_RESOURCE_PATH));
@@ -61,19 +59,11 @@ public class MessageFactory {
 					RESOURCE_PATH);
 		}
 	}
-
-	private void prepare(DataSet rsp) throws MalformedURLException {
+    
+    private void prepare(DataSet rsp) throws MalformedURLException {
 		if (null == rsp.getResBundle()) {
-			ClassLoader loader = null;
-			if (null==servletContext){
-				File file = new File(LOCAL_RESOURCE_PATH+"../classes");
-				URL[] urls = {file.toURI().toURL()};
-				loader = new URLClassLoader(urls);
-			}else{
-				loader = MessageFactory.class.getClassLoader();
-			}
-			rb = ResourceBundle.getBundle(rsp.getService(),rsp.getLocale(),loader);
-			rsp.setResBundle(new ResourceBundleModel(rb, new BeansWrapper()));
+			rb = resourceBundleFactory.getBundle(rsp.getLocale(), "labels");
+			rsp.setResBundle(new TemplateStringModel(rb));
 		}
 	}
 	
@@ -87,25 +77,15 @@ public class MessageFactory {
 		prepare(rsp);
 		return processTemplate(rsp, HTML_FOLDER);
 	}
-
-	public String constructJson(DataSet rsp,String file)
-			throws IOException, TemplateException {
-		prepare(rsp);
-		rsp.setService(file);
-		List<String> data = new ArrayList<>();
-		Enumeration<String> keys = rb.getKeys();
-		while(keys.hasMoreElements()){
-			String key = keys.nextElement();
-			if (key.indexOf("web")==0){
-				data.add(key);
-			}
-		}
-		rsp.setPayload(data);
-		return processTemplate(rsp, null);
-	}
 	
 	public String constructTxt(DataSet rsp)
 			throws IOException, TemplateException {
+	    if (rsp.getAction()==Action.SIGNUP && rsp.getPayload()!=null && rsp.getPayload() instanceof Signup){
+	        Signup signup = ((Signup)rsp.getPayload());
+	        if (signup.getWelcomeMessage()!=null && signup.getWelcomeMessage().length()>10){
+	            return signup.getWelcomeMessage();
+	        }
+	    }
 		prepare(rsp);
 		return processTemplate(rsp, TEXT_FOLDER);
 	}
@@ -113,7 +93,7 @@ public class MessageFactory {
 	public String constructSubject(DataSet rsp) throws IOException, TemplateException {
 		prepare(rsp);
 		String subjectPrefix= rsp.getAction().getText();
-		Template template = new Template("name", rb.getString(subjectPrefix+"Subject"),new Configuration()); 
+		Template template = new Template("name", rb.getString(subjectPrefix+"Subject"),cfg); 
 		Writer out = new StringWriter(); 
 		template.process(rsp, out); 
 		return out.toString();
@@ -121,7 +101,7 @@ public class MessageFactory {
 	
 	public String getText(String key, DataSet data) throws IOException, TemplateException{
 		prepare(data);
-		Template template = new Template("name", rb.getString(key),new Configuration()); 
+		Template template = new Template("name", rb.getString(key),cfg); 
 		Writer out = new StringWriter(); 
 		template.process(data, out);
 		return out.toString();

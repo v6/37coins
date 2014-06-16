@@ -157,7 +157,7 @@ public class smsIT {
         MerchantRequest req = new MerchantRequest().setAmount(new BigDecimal("0.5")).setOrderName("bla");
         String serverUrl = "base path" + MerchantResource.PATH + "/charge/test";
         req.setPayDest(new PaymentDestination().setAddressType(AddressType.BTC).setAddress("123565"));
-        String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.hmacToken);
+        String sig = DigestFilter.calculateSignature(serverUrl, DigestFilter.parseJson(new ObjectMapper().writeValueAsBytes(req)), MessagingServletConfig.digestToken);
         Response r = given()
             .contentType(ContentType.JSON)
             .header("X-Request-Signature", sig)

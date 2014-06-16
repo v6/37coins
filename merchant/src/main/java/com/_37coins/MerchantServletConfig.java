@@ -2,13 +2,15 @@ package com._37coins;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 import javax.inject.Named;
 import javax.jdo.PersistenceManagerFactory;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
@@ -30,8 +32,11 @@ import com._37coins.parse.CommandParser;
 import com._37coins.parse.ParserClient;
 import com._37coins.sendMail.AmazonEmailClient;
 import com._37coins.sendMail.MailServiceClient;
+import com._37coins.util.ResourceBundleClient;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.MerchantSession;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
+import com._37coins.workflow.pojo.DataSet;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
@@ -72,9 +77,10 @@ public class MerchantServletConfig extends GuiceServletContextListener {
     public static String senderMail;
     public static String amqpHost;
     public static String gaTrackingId;
+    public static String resPath;
+    public static List<Locale> activeLocales;
 	public static Logger log = LoggerFactory.getLogger(MerchantServletConfig.class);
 	public static Injector injector;
-	private ServletContext servletContext;
 	public SocketIOServer server;
     private ServiceLevelThread slt;
 	static {
@@ -94,12 +100,19 @@ public class MerchantServletConfig extends GuiceServletContextListener {
         amqpUser = System.getProperty("amqpUser");
         amqpPassword = System.getProperty("amqpPassword");
         amqpHost = System.getProperty("amqpHost");
+        resPath = System.getProperty("resPath");
         gaTrackingId = System.getProperty("gaTrackingId");
+        String locales = System.getProperty("activeLocales");
+        List<String> localeList = Arrays.asList(locales.split(","));
+        activeLocales = new ArrayList<>();
+        for (String localeString : localeList){
+            Locale locale = DataSet.parseLocaleString(localeString);
+            activeLocales.add(locale);
+        }
 	}
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
-		servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 	    server = i.getInstance(SocketIOServer.class);
@@ -210,6 +223,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/plivo/*").through(PersistenceFilter.class);
             	bind(ParserClient.class);
+            	bind(MessageFactory.class);
         	}
             
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -220,8 +234,8 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 			}
 			
 	        @Provides @Singleton @SuppressWarnings("unused")
-	        public CommandParser getMessageProcessor() {
-	            return new CommandParser(servletContext);
+	        public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
+	            return new CommandParser(rbf);
 	        }
 			
             @Provides @Singleton @SuppressWarnings("unused")
@@ -262,11 +276,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
     		public Random provideRandom(){
     			return new Random();
         	}
-			
-        	@Provides @Singleton @SuppressWarnings("unused")
-        	public String provideHmacToken(){
-        		return MerchantServletConfig.digestToken;
-        	}
         	
             @Provides @Singleton @SuppressWarnings("unused")
             MailServiceClient getMailClient(){
@@ -278,11 +287,17 @@ public class MerchantServletConfig extends GuiceServletContextListener {
                             new AmazonSimpleEmailServiceClient(awsCredentials));
                 }
             }
-        	
-			@Provides @Singleton @SuppressWarnings("unused")
-			public MessageFactory provideMessageFactory() {
-				return new MessageFactory(servletContext);
-			}
+	         
+            @Provides @Singleton @SuppressWarnings("unused")
+            public ResourceBundleClient getResourceBundleClient(){
+                ResourceBundleClient client = new ResourceBundleClient(MerchantServletConfig.resPath+"/scripts/nls/");
+                return client;
+            }
+            
+            @Provides @Singleton @SuppressWarnings("unused")
+            public ResourceBundleFactory getResourceBundle(com._37coins.cache.Cache cache, ResourceBundleClient client){
+                return new ResourceBundleFactory(MerchantServletConfig.activeLocales, client, cache);
+            }
         
             @Named("day")
         	@Provides @Singleton @SuppressWarnings("unused")
