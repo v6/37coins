@@ -59,7 +59,6 @@ define(['backbone',
             ':lng/gateways': 'showGateway',
             ':lng/balance': 'showBalance',
             ':lng/faq': 'showFaq',
-            //'faq': 'showFaq',
             ':lng/confSignup/:token': 'confirmSignUp',
             ':lng/confReset/:token': 'confirmReset',
             ':lng/help/SMSgateway': 'showFaq',
@@ -222,8 +221,8 @@ define(['backbone',
     });
 
     Controller.showIndex = function() {
-        var header = new IndexHeaderLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
-        var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var header = new IndexHeaderLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
+        var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         Communicator.mediator.trigger('app:show', layout, header);
         var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
         header.mobileInput.show(mobileInput);
@@ -234,7 +233,7 @@ define(['backbone',
 
     Controller.showAccount = function(mobile) {
         var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
-        var layout = new AccountLayout({mobile:mobile});
+        var layout = new AccountLayout({mobile:mobile,model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show', layout, header);
         var commands = new CommandsView();
         layout.commands.show(commands);
@@ -265,11 +264,11 @@ define(['backbone',
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showTerms = function() {
-        var contentView = new TermsView();
+        var contentView = new TermsView({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showPrivacy = function() {
-        var contentView = new PrivacyView();
+        var contentView = new PrivacyView({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showMerchant = function() {

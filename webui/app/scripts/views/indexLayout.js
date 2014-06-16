@@ -12,7 +12,7 @@ function(Backbone, Communicator, IndexLayout, myLabels) {
             gateways: '#gwTable'
         },
         template: IndexLayout,
-        templateHelpers: function(){return {l: myLabels};},
+        templateHelpers: function(){return {s: myLabels};},
         className: 'main',
         initialize: function() {
         },
