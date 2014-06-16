@@ -232,6 +232,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/*").through(HttpsEnforcerFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
             	filter("/envayasms/*").through(PersistenceFilter.class);
+            	filter("/envayasms/*").through(EnvayaFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/api/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls

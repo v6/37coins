@@ -1,22 +1,14 @@
 package com._37coins.resources;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.inject.Inject;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -24,12 +16,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.codec.binary.Base64;
-import org.restnucleus.dao.GenericRepository;
-import org.restnucleus.dao.RNQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -40,7 +28,11 @@ import com._37coins.cache.Element;
 import com._37coins.envaya.QueueClient;
 import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
-import com._37coins.persistence.dao.Gateway;
+import com._37coins.pojo.EnvayaEvent;
+import com._37coins.pojo.EnvayaRequest;
+import com._37coins.pojo.EnvayaResponse;
+import com._37coins.pojo.EnvayaRequest.MessageType;
+import com._37coins.pojo.EnvayaRequest.Status;
 import com._37coins.web.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -74,10 +66,10 @@ public class EnvayaSmsResource {
 	private final NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	private final WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory;
 	private final AmazonSimpleWorkflow swfService;
-	private final GenericRepository dao;
 	private final ParserClient parserClient;
 	private final Cache cache;
 	private int localPort;
+	private final EnvayaRequest req;
 	
 	@Inject public EnvayaSmsResource(ServletRequest request,
 			QueueClient qc,
@@ -89,7 +81,7 @@ public class EnvayaSmsResource {
 			AmazonSimpleWorkflow swfService) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+		req = (EnvayaRequest)httpReq.getAttribute("er");
 		this.qc = qc;
 		this.cache = cache;
 		this.swfService = swfService;
@@ -100,91 +92,72 @@ public class EnvayaSmsResource {
 	
 	@POST
 	@Path("/{cn}/sms/")
-	public Map<String, Object> receive(MultivaluedMap<String, String> params,
-			@HeaderParam("X-Request-Signature") String sig,
-			@PathParam("cn") String cn,
-			@Context UriInfo uriInfo){
-		Map<String, Object> rv = new HashMap<>();
+	public EnvayaResponse receive(@PathParam("cn") String cn, @Context UriInfo uriInfo){
 		try{
-		    Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", cn), Gateway.class);
-			String envayaToken = g.getApiSecret();
-			boolean isSame = false;
-			String url = MessagingServletConfig.basePath + "/" + uriInfo.getPath();
-			String calcSig = calculateSignature(url, params, envayaToken);
-			isSame = (sig.equals(calcSig))?true:false;
-			if (!isSame){
-				url = MessagingServletConfig.srvcPath + "/" + uriInfo.getPath();
-				calcSig = calculateSignature(url, params, envayaToken);
-				isSame = (sig.equals(calcSig))?true:false;
-			}
-			if (!isSame){
-				throw new WebApplicationException("signature missmatch",
-						javax.ws.rs.core.Response.Status.UNAUTHORIZED);
-			}
 			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-			switch (params.getFirst("action")) {
-				case "send_status":
-					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
-					MDC.put("msgId", params.getFirst("id"));
-					MDC.put("status", params.getFirst("status"));
-					MDC.put("error", params.getFirst("error"));
-					log.info("send status received");
+			switch (req.getAction()) {
+				case SEND_STATUS:
+                    MDC.put("hostName", cn);
+                    MDC.put("mobile", req.getPhoneNumber());
+                    MDC.put("event", req.getAction().toString());
+                    MDC.put("log", req.getLog());
+                    MDC.put("msgId", req.getId());
+                    MDC.put("status", req.getStatus().toString());
+                    MDC.put("error", req.getError());
+                    log.info("send status received");
 					MDC.clear();
-					if (params.getFirst("status").equals("sent")&&!params.getFirst("id").contains("SmsResource")){
+					if (req.getStatus() == Status.SENT &&! req.getId().contains("SmsResource")){
 				        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
-				        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(params.getFirst("id"));
+				        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(req.getId());
 				        manualCompletionClient.complete(null);
 					}
 					break;
-				case "test":
+				case TEST:
 					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
+					MDC.put("mobile", req.getPhoneNumber());
+					MDC.put("event", req.getAction().toString());
+					MDC.put("log", req.getLog());
 					log.info("test received");
 					MDC.clear();
 					try{
-						PhoneNumber pn = phoneUtil.parse(params.getFirst("phone_number"), "ZZ");
+						PhoneNumber pn = phoneUtil.parse(req.getPhoneNumber(), "ZZ");
 						if (!pn.hasCountryCode())
 							throw new NumberParseException(NumberParseException.ErrorType.INVALID_COUNTRY_CODE,"");
 					}catch(NumberParseException e){
 						throw new WebApplicationException("phone not valid",
 								javax.ws.rs.core.Response.Status.BAD_REQUEST);
 					}
-				case "amqp_started":
-					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
-					MDC.put("consumer_tag", params.getFirst("consumer_tag"));
-					log.info("amqp started received");
+				case AMQP_STARTED:
+                    MDC.put("hostName", cn);
+                    MDC.put("mobile", req.getPhoneNumber());
+                    MDC.put("event", req.getAction().toString());
+                    MDC.put("log", req.getLog());
+                    MDC.put("consumer_tag", req.getConsumerTag());
+                    log.info("amqp started received");
 					MDC.clear();
 					break;
-				case "device_status":
-					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
-					MDC.put("status", params.getFirst("status"));
-					log.info("device status received");
+				case DEVICE_STATUS:
+                    MDC.put("hostName", cn);
+                    MDC.put("mobile", req.getPhoneNumber());
+                    MDC.put("event", req.getAction().toString());
+                    MDC.put("log", req.getLog());
+                    MDC.put("status", req.getStatus().toString());
+                    log.info("device status received");
 					MDC.clear();
 					break;
-				case "forward_send":
-					MDC.put("hostName", cn);
-					MDC.put("mobile", params.getFirst("phone_number"));
-					MDC.put("event", params.getFirst("action"));
-					MDC.put("log", params.getFirst("log"));
-					log.info("forward message {} send to {} via {} at {}",params.getFirst("message"),params.getFirst("to"),params.getFirst("message_type"),params.getFirst("timestamp"));
+                case FORWARD_SEND:
+                    MDC.put("hostName", cn);
+                    MDC.put("mobile", req.getPhoneNumber());
+                    MDC.put("event", req.getAction().toString());
+                    MDC.put("log", req.getLog());
+                    log.info("forward message "+ req.getMessage()+" send to "+ req.getTo()+" via "+ req.getMessageType() + " at " + req.getTimestamp());
 					MDC.clear();
 					break;
-				case "incoming":
-					if (params.getFirst("message_type").equalsIgnoreCase("sms")) {
-						String from = params.getFirst("from");
-						String gateway = params.getFirst("phone_number");
-						String message = params.getFirst("message");
+				case INCOMING:
+					if (req.getMessageType() == MessageType.SMS) {
+						String from = req.getFrom();
+						String gateway = req.getPhoneNumber();
+						String message = req.getMessage();
 						PhoneNumber pn = phoneUtil.parse(gateway, "ZZ");
 						if (pn.getCountryCode()==1){
 							from = fixAmerica(from, gateway,message);
@@ -192,10 +165,10 @@ public class EnvayaSmsResource {
 						}
 						MDC.put("hostName", cn);
 						MDC.put("mobile", from);
-						MDC.put("event", params.getFirst("action"));
-						MDC.put("log", params.getFirst("log"));
-						MDC.put("message_type", params.getFirst("message_type"));
-						log.info("incoming message {} received from {} via {} at {}",params.getFirst("message"),from,params.getFirst("message_type"),params.getFirst("timestamp"));
+						MDC.put("event", req.getAction().toString());
+						MDC.put("log", req.getLog());
+						MDC.put("message_type", req.getMessageType().toString());
+						log.info("incoming message {} received from {} via {} at {}",req.getMessage(),from,req.getMessageType(),req.getTimestamp());
 						MDC.clear();
 						parserClient.start(from, gateway, cn, message, localPort,
 						new ParserAction() {
@@ -251,12 +224,11 @@ public class EnvayaSmsResource {
 					}
 				break;
 			}
-		}catch(NoSuchAlgorithmException | UnsupportedEncodingException | NumberParseException e){
+		}catch(Exception e){
 			log.warn("envaya call failed", e);
 			e.printStackTrace();
 		}
-		rv.put("events", new ArrayList<String>());
-		return rv;
+		return new EnvayaResponse().setEvents(new ArrayList<EnvayaEvent>());
 	}
 	
 	/*
@@ -285,32 +257,6 @@ public class EnvayaSmsResource {
 			return message.substring(message.indexOf(" - ")+3, message.length());
 		}
 		return message;
-	}
-	
-	public static String calculateSignature(String url, MultivaluedMap<String,String> paramMap, String pw) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		if (null==url||null==paramMap||null==pw){
-			return null;
-		}
-		List<String> params = new ArrayList<>();
-		for (Entry<String,List<String>> m :paramMap.entrySet()){
-			if (m.getValue().size()>0){
-				params.add(m.getKey()+"="+m.getValue().get(0));
-			}
-		}
-		Collections.sort(params);
-		StringBuilder sb = new StringBuilder();
-		sb.append(url);
-		for (String s : params){
-			sb.append(",");
-			sb.append(s);
-		}
-		sb.append(",");
-		sb.append(pw);
-		String value = sb.toString();
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        md.update(value.getBytes("utf-8"));
-
-        return new String(Base64.encodeBase64(md.digest()));     
 	}
 
 }
