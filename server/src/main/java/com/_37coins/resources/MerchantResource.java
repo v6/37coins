@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -43,6 +42,7 @@ import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.MerchantSession;
 import com._37coins.web.Transaction;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -68,17 +68,20 @@ public class MerchantResource {
 	private final Cache cache;
 	private final MerchantClient merchantClient;
 	private int localPort;
+	final private ResourceBundleFactory rbf;
 	
 	@Inject
 	public MerchantResource(ServletRequest request,
 			MessageFactory htmlFactory,
 			ParserClient parserClient,
+			ResourceBundleFactory rbf,
 			Cache cache, MerchantClient merchantClient,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
 			LookupService lookupService){
 		this.httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
 		this.htmlFactory = htmlFactory;
+		this.rbf = rbf;
 		this.mapper = new ObjectMapper();
 		this.merchantClient = merchantClient;
 		this.parserClient = parserClient;
@@ -91,26 +94,12 @@ public class MerchantResource {
 	
 	@GET
 	public Response merchant(@HeaderParam("Accept-Language") String lng,
+	        @Context UriInfo uriInfo,
 			@QueryParam("delivery")String delivery,
 			@QueryParam("deliveryParam")String deliveryParam){
-		Map<String,String> data = new HashMap<>();
-		data.put("resPath", MessagingServletConfig.resPath);
+		Map<String,String> data = IndexResource.prepare(lng, uriInfo, lookupService, httpReq, rbf);
 		data.put("delivery", delivery);
-		data.put("deliveryParam", deliveryParam);
-		data.put("basePath", MessagingServletConfig.basePath);
-		data.put("srvcPath", MessagingServletConfig.srvcPath);
-		data.put("gaTrackingId", MessagingServletConfig.gaTrackingId);
-		String country = null;
-		try{
-			country = lookupService.getCountry(TicketResource.getRemoteAddress(httpReq)).getCode();
-			country = (country.equals("--"))?null:country;
-		}catch(Exception e){
-			log.error("geoip exception",e);
-			e.printStackTrace();
-		}
-		data.put("country", country);
-		data.put("captchaPubKey", MessagingServletConfig.captchaPubKey);
-		data.put("lng", (lng!=null)?lng.split(",")[0]:"en-US");
+	    data.put("deliveryParam", deliveryParam);
 		DataSet ds = new DataSet()
 			.setService("index.html")
 			.setPayload(data);

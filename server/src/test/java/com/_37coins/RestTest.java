@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.ws.rs.core.Form;
-
 import junit.framework.Assert;
 
 import org.apache.commons.codec.binary.Base64;
@@ -40,6 +38,7 @@ import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
 import com._37coins.resources.HealthCheckResource;
+import com._37coins.resources.IndexResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
 import com._37coins.util.ResourceBundleClient;
@@ -371,22 +370,22 @@ public class RestTest {
 			.statusCode(200)
 		.when()
 			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
-		Form m = new Form();
-		m.param("version", "0.1");
-		m.param("now","12356789");
-		m.param("power","30");
-		m.param("action","status");	
+		Map<String,String> m = new HashMap<>();
+		m.put("version", "0.1");
+		m.put("now","12356789");
+		m.put("power","30");
+		m.put("action","status");	
 		String serverUrl = embeddedJetty.getBaseUri() + EnvayaSmsResource.PATH+"/OZV4N1JS2Z3476NL/sms";
 		System.out.println(serverUrl);
-		String sig = EnvayaSmsResource.calculateSignature(serverUrl, m.asMap(), pw);
+		String sig = EnvayaClient.calculateSignature(serverUrl, m, pw);
 		// fire get successfully
 		given()
 			.contentType(ContentType.URLENC)
 			.header("X-Request-Signature", sig)
-			.formParam("version", m.asMap().getFirst("version"))
-			.formParam("now", m.asMap().getFirst("now"))
-			.formParam("power", m.asMap().getFirst("power"))
-			.formParam("action", m.asMap().getFirst("action"))
+			.formParam("version", m.get("version"))
+			.formParam("now", m.get("now"))
+			.formParam("power", m.get("power"))
+			.formParam("action", m.get("action"))
 		.expect()
 			.statusCode(200)
 		.when()
@@ -395,12 +394,12 @@ public class RestTest {
 	
 	   
     @Test
-    public void testHealthcheck() throws IOException{
+    public void testIndex() throws IOException{
     	given()
-		.expect()
-			.statusCode(200)
-		.when()
-			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
+    		.expect()
+    			.statusCode(200)
+    		.when()
+    			.get(embeddedJetty.getBaseUri() + IndexResource.PATH+"de/merchant/");
     }
     
     @Test

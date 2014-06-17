@@ -250,7 +250,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         		bind(MessagingActivitiesImpl.class);
         		bind(ParserClient.class);
         		bind(QueueClient.class);
-        		bind(MessageFactory.class);
         	}
 			
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -277,7 +276,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 					}					
 				}
 			}
-
+			
+			@Provides @Singleton @SuppressWarnings("unused")
+			public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
+			    return new MessageFactory(servletContext, rbf);
+			}
 
 			@Provides @Named("nonTx") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getDepositWorker(AmazonSimpleWorkflow swfClient) {

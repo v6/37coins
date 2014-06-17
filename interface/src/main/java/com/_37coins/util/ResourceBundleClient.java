@@ -37,6 +37,8 @@ public class ResourceBundleClient {
         ResourceBundleInputStream is = new ResourceBundleInputStream(response.getEntity().getContent());
         JsonNode rootNode = new ObjectMapper().readTree(is);
         MultivaluedMap<String,String> rv = new MultivaluedHashMap<>();
+        DigestFilter.collectLeaves(rootNode.get("title"), rv);
+        DigestFilter.collectLeaves(rootNode.get("desc"), rv);
         DigestFilter.collectLeaves(rootNode.get("sms"), rv);
         DigestFilter.collectLeaves(rootNode.get("commands"), rv);
         DigestFilter.collectLeaves(rootNode.get("email"), rv);

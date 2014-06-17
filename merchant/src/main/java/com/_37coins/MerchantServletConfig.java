@@ -11,6 +11,7 @@ import java.util.Random;
 
 import javax.inject.Named;
 import javax.jdo.PersistenceManagerFactory;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import net.sf.ehcache.Cache;
@@ -82,6 +83,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 	public static Logger log = LoggerFactory.getLogger(MerchantServletConfig.class);
 	public static Injector injector;
 	public SocketIOServer server;
+	private ServletContext servletContext;
     private ServiceLevelThread slt;
 	static {
 	    if (null!=System.getProperty("accessKey")){
@@ -113,6 +115,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
     
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
+	    servletContext = servletContextEvent.getServletContext();
 		super.contextInitialized(servletContextEvent);
 		final Injector i = getInjector();
 	    server = i.getInstance(SocketIOServer.class);
@@ -223,7 +226,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/plivo/*").through(PersistenceFilter.class);
             	bind(ParserClient.class);
-            	bind(MessageFactory.class);
         	}
             
 			@Provides @Singleton @SuppressWarnings("unused")
@@ -237,6 +239,11 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 	        public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
 	            return new CommandParser(rbf);
 	        }
+	        
+            @Provides @Singleton @SuppressWarnings("unused")
+            public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
+                return new MessageFactory(servletContext, rbf);
+            }
 			
             @Provides @Singleton @SuppressWarnings("unused")
             public SocketIOServer provideSocket(){

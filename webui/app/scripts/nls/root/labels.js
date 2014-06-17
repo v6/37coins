@@ -21,6 +21,14 @@ define({
         "gwInv" : "Become an SMSgateway partner",
         "gwBtn" : "Open a Gateway"
     },
+    "title" : {
+        "t-index" : "37coins",
+        "t-merchant" : ""
+    },
+    "desc" : {
+        "d-index" : "A Bitcoin Wallet for the Low-teched and Unbanked. It makes financial transactions as simple as sending a text.",
+        "d-merchant" : ""
+    },
     "email" : {
         "ResetSubject" : "Password Reset",
         "Reset" : "Please click this link to reset your password: {0}",

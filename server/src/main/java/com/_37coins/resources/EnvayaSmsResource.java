@@ -14,9 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +28,9 @@ import com._37coins.parse.ParserAction;
 import com._37coins.parse.ParserClient;
 import com._37coins.pojo.EnvayaEvent;
 import com._37coins.pojo.EnvayaRequest;
-import com._37coins.pojo.EnvayaResponse;
 import com._37coins.pojo.EnvayaRequest.MessageType;
 import com._37coins.pojo.EnvayaRequest.Status;
+import com._37coins.pojo.EnvayaResponse;
 import com._37coins.web.Transaction;
 import com._37coins.workflow.NonTxWorkflowClientExternalFactoryImpl;
 import com._37coins.workflow.WithdrawalWorkflowClientExternalFactoryImpl;
@@ -92,7 +90,7 @@ public class EnvayaSmsResource {
 	
 	@POST
 	@Path("/{cn}/sms/")
-	public EnvayaResponse receive(@PathParam("cn") String cn, @Context UriInfo uriInfo){
+	public EnvayaResponse receive(@PathParam("cn") String cn){
 		try{
 			PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 			switch (req.getAction()) {

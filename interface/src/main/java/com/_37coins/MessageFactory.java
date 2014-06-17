@@ -18,6 +18,7 @@ import com._37coins.util.TemplateStringModel;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.Signup;
+import com.google.inject.Inject;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -39,7 +40,7 @@ public class MessageFactory {
 	private final ResourceBundleFactory resourceBundleFactory;
 	private ResourceBundle rb;
 	
-
+	@Inject
 	public MessageFactory(ResourceBundleFactory resourceBundleFactory) {
 		this(null, resourceBundleFactory);
 	}

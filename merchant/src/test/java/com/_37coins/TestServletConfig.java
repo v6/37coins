@@ -11,6 +11,7 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
 
+import com._37coins.util.ResourceBundleFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -19,12 +20,10 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 
 public class TestServletConfig extends GuiceServletContextListener {
-	
 	public static Injector injector;
 	
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
-		// TODO Auto-generated method stub
 		super.contextInitialized(servletContextEvent);
 	}
 
@@ -41,6 +40,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 	        	public String provideHmacToken(){
 	        		return MerchantServletConfig.digestToken;
 	        	}
+	            
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
+	                return new MessageFactory(rbf);
+	            }
 	        					
 	            @Named("day")
 	        	@Provides @Singleton @SuppressWarnings("unused")
