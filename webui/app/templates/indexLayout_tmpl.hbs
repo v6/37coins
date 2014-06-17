@@ -1,20 +1,19 @@
-{{#with s.indexLayout}}
 <div class="row">
   <div class="col-sm-12">
     <h1><span style="font-family: 'sofia_pro_regular';">SMS</span>wallet</h1>
   </div>
   <div class="col-sm-6">
-    <p class="visible-xs">{{mobileTag}}</p>
-    <p>{{wallet}}</p>
+    <p class="visible-xs">{{s.indexLayout.mobileTag}}</p>
+    <p>{{s.indexLayout.wallet}}</p>
     <div class="panel panel-default">
-      <div class="panel-heading">{{walletInv}}</div>
+      <div class="panel-heading">{{s.indexLayout.walletInv}}</div>
       <div class="panel-button">
-          <a class="btn btn-default" id="smsSignup" href="/{{l}}/signupWallet">{{walletBtn}} &raquo;</a>
+          <a class="btn btn-default" id="smsSignup" href="/{{l}}/signupWallet">{{s.indexLayout.walletBtn}} &raquo;</a>
       </div>
     </div>
   </div>
   <div class="col-sm-6">
-    <p>{{commands}} <a href="/{{l}}/help/SMSwallet">{{link}}</a>.</p>
+    <p>{{s.indexLayout.commands}} <a href="/{{l}}/help/SMSwallet">{{s.indexLayout.link}}</a>.</p>
     <div id="smsCommands">
     </div>
   </div>
@@ -24,12 +23,12 @@
     <h2><span style="font-family: 'sofia_pro_regular';">SMS</span>gateway</h2>
   </div>
   <div class="col-sm-6">
-    <p>{{gw1}}</p>
-    <p>{{gw2}}<ul>{{#each gwLi}}<li>{{this}}</li>{{/each}}</ul></p>
+    <p>{{s.indexLayout.gw1}}</p>
+    <p>{{s.indexLayout.gw2}}<ul>{{#each s.indexLayout.gwLi}}<li>{{this}}</li>{{/each}}</ul></p>
     <div class="panel panel-default">
-      <div class="panel-heading">{{gwInv}}</div>
+      <div class="panel-heading">{{s.indexLayout.gwInv}}</div>
       <div class="panel-button">
-        <a class="btn btn-default" href="/{{l}}/gateways">{{gwBtn}} &raquo;</a>
+        <a class="btn btn-default" href="/{{l}}/gateways">{{s.indexLayout.gwBtn}} &raquo;</a>
       </div>
     </div>
   </div>
@@ -37,4 +36,3 @@
 
   </div>
 </div>
-{{/with}}

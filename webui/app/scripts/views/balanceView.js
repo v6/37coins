@@ -28,7 +28,7 @@ function(Backbone, BalanceTmpl) {
                     xhr.setRequestHeader('Authorization', 'Basic ' + btoa(up.username + ':' + up.password));
                 },
                 success: function(data){
-                    self.$('span.spin').replaceWith('<strong> ' + data.balance + ' BTC</string>');
+                    self.$('img.spin').replaceWith('<strong> ' + data.balance + ' BTC</string>');
                     window.clearInterval(self.iid);
                 }
             });
