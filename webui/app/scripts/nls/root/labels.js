@@ -44,7 +44,7 @@ define({
         "DepositReqCmd" : ["addr","deposit","adr","address","adress"],
         "BalanceCmd" : ["bal","balance","blance","balnce"],
         "TransactionsCmd" : ["txns","transactions","trans","tran"],
-        "WithdrawalReqCmd" : ["send","sending","sent"],
+        "WithdrawalReqCmd" : ["send","sending","sent"], // Mathan: Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
         "VoiceCmd" : ["voice","PIN"],
         "ChargeCmd" : ["req","request","charge"],
         "ProductCmd" : ["prod","product"],
@@ -68,7 +68,7 @@ define({
         "WithdrawalReqHelp" : "Please use SEND <amount> <phone no>\r\nEx: SEND 1.42USD 5558675309\r\n<amount>use XXUSD for US value, or just XX to indicate mili-bitcoin",
         "WithdrawalReqPay" : "Pay {0}mBTC{1} to {2} for {3}?",
         "WithdrawalReqIstr" : "To confirm transaction, reply {0}",
-        "WithdrawalConf" : "Transfered {0}mBTC{1} to {2}.",
+        "WithdrawalConf" : "Transferred {0}mBTC{1} to {2}.",
         "Help" : "SEND limit: 12mBTC before PIN setup\r\nADDR - Bitcoin deposit address\r\nBAL - see available balance\r\nPIN - setup PIN\r\n{0}",
         "Buy" : "Your number has been added as a buyer.",
         "FormatError" : "We had trouble understanding your request. Please resend in the correct format.",
@@ -94,7 +94,7 @@ define({
         "VoiceSuccess" : "Please remember this PIN for future transactions.",
         "VoiceEnter" : "Please enter your 4-digit PIN, followed by the hash key.",
         "VoiceOk" : "The PIN is correct. Transaction executing.",
-        "VoiceFail" : "The PIN is not correct. The account will be blocked after failed 3 attempts.",
+        "VoiceFail" : "The PIN is not correct. The account will be blocked after 3 failed attempts.",
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     }
 });
