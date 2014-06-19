@@ -228,6 +228,11 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             	bind(ParserClient.class);
         	}
             
+            @Provides @Singleton @SuppressWarnings("unused")
+            CorsFilter provideCorsFilter(){
+                return new CorsFilter("*");
+            }
+            
 			@Provides @Singleton @SuppressWarnings("unused")
 			PersistenceManagerFactory providePersistence(){
 				PersistenceConfiguration pc = new PersistenceConfiguration();

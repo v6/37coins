@@ -16,6 +16,7 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.CorsFilter;
+import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
@@ -26,7 +27,6 @@ import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
-import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
 import com._37coins.sendMail.MailServiceClient;
@@ -71,7 +71,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	                filter("/*").through(GuiceShiroFilter.class);
 	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
-	            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
+	            	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
 	            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
@@ -90,6 +90,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
 				  return new CommandParser(rbf);
 				}
+				
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            public DigestFilter getDigestFilter(){
+	                return new DigestFilter(MessagingServletConfig.digestToken);
+	            }
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				MerchantClient provideProductsClient(){

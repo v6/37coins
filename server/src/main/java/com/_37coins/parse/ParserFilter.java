@@ -22,12 +22,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.btc4all.webfinger.WebfingerClient;
 import org.btc4all.webfinger.pojo.JsonResourceDescriptor;
 import org.btc4all.webfinger.pojo.Link;
 import org.joda.money.BigMoney;
 import org.joda.money.CurrencyUnit;
+import org.restnucleus.WrappedRequest;
+import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +70,16 @@ public class ParserFilter implements Filter {
 
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest httpReq = (HttpServletRequest) request;
+	    HttpServletRequest httpReq = (HttpServletRequest) request;
 		// parse parameters
-		String from = httpReq.getParameter("from");
-		String gateway = httpReq.getParameter("gateway");
-		String message = httpReq.getParameter("message");
-		String gwCn = httpReq.getParameter("gwCn");
+		MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+		DigestFilter.fromBody((WrappedRequest)request, map);
+		String from = map.getFirst("from");
+		String gateway = map.getFirst("gateway");
+		gateway = (null==gateway||gateway.length()<3)?null:gateway;
+		String message = map.getFirst("message");
+		String gwCn = map.getFirst("gwCn");
+		httpReq.setAttribute("gwCn", gwCn);
 		// Parse the locale
 		String acceptLng = httpReq.getHeader("Accept-Language");
 		Locale locale = DataSet.parseLocaleString(acceptLng);
@@ -108,7 +116,7 @@ public class ParserFilter implements Filter {
 			//use it
 			if (responseData.getAction()==Action.UNKNOWN_COMMAND||CommandParser.reqCmdList.contains(responseData.getAction())){
 				httpReq.setAttribute("dsl", responseList);
-				chain.doFilter(request, response);
+				chain.doFilter(httpReq, response);
 			}else{
 		        if (gwCn!=null){
 		            responseData.getTo().setGateway(gwCn);

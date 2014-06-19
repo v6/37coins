@@ -210,12 +210,6 @@ public class EnvayaSmsResource {
 							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(tx.getTaskToken());
 							        manualCompletionClient.complete(null);
 								}
-//								}else if (data.getAction()==Action.EMAIL_SMS_VER){
-//									EmailFactor ef = (EmailFactor)data.getPayload();
-//									ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
-//							        ManualActivityCompletionClient manualCompletionClient = manualCompletionClientFactory.getClient(ef.getTaksToken());
-//							        manualCompletionClient.complete(ef.getEmailToken());
-//								}
 							}
 						});
 						

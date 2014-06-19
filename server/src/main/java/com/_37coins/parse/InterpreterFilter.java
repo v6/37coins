@@ -39,10 +39,10 @@ public class InterpreterFilter implements Filter {
 	@SuppressWarnings("unchecked")
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest httpReq = (HttpServletRequest)request;
+	    HttpServletRequest httpReq = (HttpServletRequest)request;
 		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
 		DataSet responseData = responseList.get(0);
-	    String gwCn = httpReq.getParameter("gwCn");
+	    String gwCn = (String)httpReq.getAttribute("gwCn");
 		GenericRepository dao = (GenericRepository)httpReq.getAttribute("gr");
 		//get user from directory
 		Account a = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getAddress()), Account.class,false);

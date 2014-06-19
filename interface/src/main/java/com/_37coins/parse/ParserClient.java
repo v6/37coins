@@ -1,6 +1,8 @@
 package com._37coins.parse;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +12,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,6 +22,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.restnucleus.filter.DigestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +48,14 @@ public class ParserClient extends Thread {
 	private final CommandParser commandParser;
 	private ParserAction pa;
 	private final GoogleAnalytics ga;
+	private String digestToken;
 	
 	@Inject
 	public ParserClient(CommandParser commandParser,
-			GoogleAnalytics ga){
+			GoogleAnalytics ga, String digestToken){
 		this.commandParser = commandParser;
 		this.ga = ga;
+		this.digestToken = digestToken;
 	}
 	
 	public void start(String from, String gateway, String gwCn, String message, int localPort, ParserAction pa){
@@ -60,6 +67,14 @@ public class ParserClient extends Thread {
 		this.pa = pa;
 		this.start();
 	}
+	
+    public static String calculateSignature(String uri, List<NameValuePair> nvps, String pw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MultivaluedMap<String,String> paramMap = new MultivaluedHashMap<>(nvps.size());
+        for (NameValuePair nvp: nvps){
+            paramMap.add(nvp.getName(), nvp.getValue());
+        }
+        return DigestFilter.calculateSignature(uri, paramMap, pw);
+    }
 
 	@Override
 	public void run() {
@@ -69,7 +84,7 @@ public class ParserClient extends Thread {
 		HttpPost req = new HttpPost("http://127.0.0.1:"+localPort+"/parser/"+((null!=action)?action.getText():"UnknownCommand"));
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("from", from));
-		nvps.add(new BasicNameValuePair("gateway", gateway));
+		nvps.add(new BasicNameValuePair("gateway", (null==gateway)?"":gateway));
 		nvps.add(new BasicNameValuePair("gwCn", gwCn));
 		nvps.add(new BasicNameValuePair("message", message));
 		if (null!=locale){
@@ -78,19 +93,24 @@ public class ParserClient extends Thread {
 		List<DataSet> results = null;
 		try {
 			req.setEntity(new UrlEncodedFormEntity(nvps));
+			String reqSig = calculateSignature(req.getURI().toString(), nvps, digestToken);
+            req.setHeader(DigestFilter.AUTH_HEADER, reqSig);
 			CloseableHttpResponse rsp = httpclient.execute(req);
-			if (rsp.getStatusLine().getStatusCode()==200){
+			int status = rsp.getStatusLine().getStatusCode();
+			if (status==200){
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); 
 		        mapper.enableDefaultTyping(DefaultTyping.NON_FINAL);
 				results = mapper.readValue(rsp.getEntity().getContent(),new TypeReference<List<DataSet>>() { });
 				Collections.reverse(results);
+			}else if(status==401){
+			    throw new IllegalAccessError("not authorized to parser resource");
 			}
 			if (null==results){
 				results = Arrays.asList(new DataSet().setAction(Action.FORMAT_ERROR).setTo(MessageAddress.fromString(from, gateway)).setLocale(locale));
 			}
-		} catch (IOException |AddressException |NumberParseException e) {
+		} catch (IOException |AddressException |NumberParseException | NoSuchAlgorithmException e) {
 			log.error("parser exception", e);
 			e.printStackTrace();
 		}

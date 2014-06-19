@@ -48,7 +48,6 @@ import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
 import com._37coins.parse.InterpreterFilter;
-import com._37coins.parse.ParserAccessFilter;
 import com._37coins.parse.ParserClient;
 import com._37coins.parse.ParserFilter;
 import com._37coins.sendMail.AmazonEmailClient;
@@ -237,7 +236,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/envayasms/*").through(EnvayaFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/api/*").through(PersistenceFilter.class);
-            	filter("/parser/*").through(ParserAccessFilter.class); //make sure no-one can access those urls
+            	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
             	filter("/parser/*").through(DigestFilter.class); //allow directory access
@@ -250,7 +249,6 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/healthcheck/*").through(PersistenceFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class);
-        		bind(ParserClient.class);
         		bind(QueueClient.class);
         	}
 			
@@ -258,6 +256,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
 				return new CommandParser(rbf);
 			}
+			
+	        @Provides @Singleton @SuppressWarnings("unused")
+            public ParserClient getParserClient(CommandParser commandParser, GoogleAnalytics ga) {
+                return new ParserClient(commandParser, ga, MessagingServletConfig.digestToken);
+            }
 			
             @Provides @Singleton @SuppressWarnings("unused")
             MerchantClient provideProductsClient(){

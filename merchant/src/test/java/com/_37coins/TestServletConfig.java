@@ -1,5 +1,8 @@
 package com._37coins;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import javax.inject.Named;
 import javax.servlet.ServletContextEvent;
 
@@ -7,10 +10,13 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
+import net.spy.memcached.MemcachedClient;
 
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
 
+import com._37coins.cache.MemCacheWrapper;
+import com._37coins.util.ResourceBundleClient;
 import com._37coins.util.ResourceBundleFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -34,7 +40,17 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            protected void configureServlets(){
 	            	filter("/*").through(CorsFilter.class);
 	            	filter("/charges*").through(DigestFilter.class);
-	        	}	            
+	        	}
+                
+                @Provides @Singleton @SuppressWarnings("unused")
+                public DigestFilter getDigestFilter(){
+                    return new DigestFilter(MerchantServletConfig.digestToken);
+                }
+                   
+                @Provides @Singleton @SuppressWarnings("unused")
+                CorsFilter provideCorsFilter(){
+                    return new CorsFilter("*");
+                }
 	            
 	        	@Provides @Singleton @SuppressWarnings("unused")
 	        	public String provideHmacToken(){
@@ -45,6 +61,24 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
 	                return new MessageFactory(rbf);
 	            }
+	            
+	            @Provides @Singleton @SuppressWarnings("unused")
+                public ResourceBundleClient getResourceBundleClient(){
+                    ResourceBundleClient client = new ResourceBundleClient(MerchantServletConfig.resPath+"/scripts/nls/");
+                    return client;
+                }
+	            
+                @Provides @Singleton @SuppressWarnings("unused")
+                public ResourceBundleFactory getResourceBundle(com._37coins.cache.Cache cache, ResourceBundleClient client){
+                    return new ResourceBundleFactory(MerchantServletConfig.activeLocales, client, cache);
+                }
+                
+                @Provides @Singleton @SuppressWarnings("unused")
+                public com._37coins.cache.Cache provideMemcached() throws IOException{
+                    MemcachedClient client = new MemcachedClient(new InetSocketAddress(MerchantServletConfig.cacheHost, 11211));
+                    com._37coins.cache.Cache cache = new MemCacheWrapper(client, 3600);
+                    return cache;
+                }
 	        					
 	            @Named("day")
 	        	@Provides @Singleton @SuppressWarnings("unused")
