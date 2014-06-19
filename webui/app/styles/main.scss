@@ -80,9 +80,8 @@ h1, h2 {
 
 /*************************
 *     Media Changes      *
+/* Default, extra small devices (phones, <768px) 
 **************************/
-
-/* Default, extra small devices (phones, <768px) */
 
 /***  37coins navbar  ***/
 .navbar37-blue{
@@ -113,23 +112,21 @@ h1, h2 {
     li {
       margin-right: 25px;
       a {
-        padding-right: 0;
-        padding-left: 0;
+        padding-right: 0px;
+        padding-left: 0px;
       }
     }
     li.hidden-xs{
+      margin-right: 0px;
       img {
         margin-top: 10px;
-        }
-        margin-right: 0px;
+        } 
     }
-  }
+}
 
-.navbar {
-  }
-  .navbar-text {
+.navbar-text {
     color: $navbar-37-color;
-  }
+}
 
 .navbar-nav {
     > ul {
