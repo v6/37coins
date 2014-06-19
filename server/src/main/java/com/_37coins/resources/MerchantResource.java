@@ -97,7 +97,7 @@ public class MerchantResource {
 	        @Context UriInfo uriInfo,
 			@QueryParam("delivery")String delivery,
 			@QueryParam("deliveryParam")String deliveryParam){
-		Map<String,String> data = IndexResource.prepare(lng, uriInfo, lookupService, httpReq, rbf);
+		Map<String,Object> data = IndexResource.prepare(lng, uriInfo, lookupService, httpReq, rbf);
 		data.put("delivery", delivery);
 	    data.put("deliveryParam", deliveryParam);
 		DataSet ds = new DataSet()

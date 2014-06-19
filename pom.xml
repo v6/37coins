@@ -28,7 +28,7 @@
             <dependency>
                 <artifactId>RestNucleusBoilerplate</artifactId>
                 <groupId>org.restnucleus</groupId>
-                <version>0.2.2-SNAPSHOT</version>
+                <version>0.2.3-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.mail</groupId>

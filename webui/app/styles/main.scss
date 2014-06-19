@@ -4,22 +4,22 @@ $baseFontFamily: 'Helvetica';
 
 @font-face {
     font-family: 'sofia_pro_ultralightregular';
-    src: url('../images/SofiaProUltraLight-webfont.eot');
-    src: url('../images/SofiaProUltraLight-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../images/SofiaProUltraLight-webfont.woff') format('woff'),
-         url('../images/SofiaProUltraLight-webfont.ttf') format('truetype'),
-         url('../images/SofiaProUltraLight-webfont.svg#sofia_pro_ultralightregular') format('svg');
+    src: url('../fonts/SofiaProUltraLight-webfont.eot');
+    src: url('../fonts/SofiaProUltraLight-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/SofiaProUltraLight-webfont.woff') format('woff'),
+         url('../fonts/SofiaProUltraLight-webfont.ttf') format('truetype'),
+         url('../fonts/SofiaProUltraLight-webfont.svg#sofia_pro_ultralightregular') format('svg');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'sofia_pro_regular';
-    src: url('../images/SofiaProRegular-webfont.eot');
-    src: url('../images/SofiaProRegular-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../images/SofiaProRegular-webfont.woff') format('woff'),
-         url('../images/SofiaProRegular-webfont.ttf') format('truetype'),
-         url('../images/SofiaProRegular-webfont.svg#sofia_pro_ultralightregular') format('svg');
+    src: url('../fonts/SofiaProRegular-webfont.eot');
+    src: url('../fonts/SofiaProRegular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/SofiaProRegular-webfont.woff') format('woff'),
+         url('../fonts/SofiaProRegular-webfont.ttf') format('truetype'),
+         url('../fonts/SofiaProRegular-webfont.svg#sofia_pro_ultralightregular') format('svg');
     font-weight: normal;
     font-style: normal;
 }

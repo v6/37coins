@@ -114,6 +114,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String gaTrackingId;
 	public static String digestToken;
 	public static String adminCns;
+	public static String s3Path;
 	public static List<Locale> activeLocales;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
@@ -152,6 +153,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		gaTrackingId = System.getProperty("gaTrackingId");
 		digestToken = System.getProperty("hmacToken");
 		adminCns = System.getProperty("adminCns");
+		s3Path = System.getProperty("s3Path");
 		String locales = System.getProperty("activeLocales");
 		List<String> localeList = Arrays.asList(locales.split(","));
 		activeLocales = new ArrayList<>();
@@ -281,6 +283,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
 			    return new MessageFactory(servletContext, rbf);
 			}
+			
+            @Provides @Singleton @SuppressWarnings("unused")
+            CorsFilter provideCorsFilter(){
+                return new CorsFilter("*");
+            }
 
 			@Provides @Named("nonTx") @Singleton @SuppressWarnings("unused")
 			public WorkflowWorker getDepositWorker(AmazonSimpleWorkflow swfClient) {

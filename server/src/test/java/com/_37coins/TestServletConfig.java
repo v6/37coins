@@ -15,6 +15,7 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
@@ -66,6 +67,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 		 injector = Guice.createInjector(new ServletModule(){
 	            @Override
 	            protected void configureServlets(){
+	                filter("/*").through(CorsFilter.class);
 	                filter("/*").through(GuiceShiroFilter.class);
 	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
@@ -93,6 +95,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				MerchantClient provideProductsClient(){
 				    return new MockMerchantClient("bla","bla");
 				}
+				
+                @Provides @Singleton @SuppressWarnings("unused")
+                CorsFilter provideCorsFilter(){
+                    return new CorsFilter("*");
+                }
 				
 	            @Provides @Singleton @SuppressWarnings("unused")
 	            PersistenceManagerFactory providePersistence(){

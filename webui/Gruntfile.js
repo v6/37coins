@@ -265,8 +265,9 @@ module.exports = function (grunt) {
                     src: [
                         '*.{ico,xml}',
                         '.htaccess',
-                        'images/{,*/}*.{webp,gif,woff,ttf,eot,svg}',
+                        'images/{,*/}*.{webp,gif}',
                         'images/flags/*/*.svg',
+                        'fonts/*.*',
                         'scripts/nls/*/*.js',
                         'scripts/vendor/libphonenumbers.js',
                         'bower_components/requirejs/require.js'

@@ -155,6 +155,12 @@ public class IndexResource {
 	}
 	
 	@GET
+	@Path("favicon.ico")
+	public Response favicon(){
+	    return Response.seeOther(URI.create(MessagingServletConfig.resPath+"/images/faveicon32.png")).build();
+	}
+	
+	@GET
 	@Path("{path: .*}")
 	public Response fullindex(@HeaderParam("Accept-Language") String lng, @Context UriInfo uriInfo){
 		return index(lng, uriInfo);
