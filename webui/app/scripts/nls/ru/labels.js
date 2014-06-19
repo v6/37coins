@@ -14,7 +14,7 @@ define({
         "DepositReqCmd" : ["адр","депозит","адрес"],
         "BalanceCmd" : ["бал","баланс"],
         "TransactionsCmd" : ["сделки","обороты"],
-        "WithdrawalReqCmd" : ["послать","отправить"], // Mathan: Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
+        "WithdrawalReqCmd" : ["послать","отправить"],
         "VoiceCmd" : ["voice"],
         "ChargeCmd" : ["заряд"],
         "ProductCmd" : ["продукт"],
@@ -24,7 +24,7 @@ define({
         "BuyCmd" : ["купить"]
     },
     "sms" : {
-        "Signup" : "добро пожаловать на! Ваш глобальный портмоне. Bitcoin via SMS. Save this number, send commands to this gateway. Reply HELP for more info {0}",
+        "Signup" : "добро пожаловать! Ваш глобальный портмоне. Отправить HELP for more info {0}",
         "DepositReq" : "{0}",
         "Charge" : "Payable through \"pay {0}\"",
         "Product" : "Payable through \"pay {0}\"",
@@ -34,16 +34,14 @@ define({
         "DepositConfSndrMsg" : "Received {0}mBTC{1} from {2} for \"{3}\"",
         "Balance" : "в Вашем портмоне {0} mBTC{1} {2}",
         "BalanceInst" : "\r\nReply ADDR, for Bitcoin address",
-        "WithdrawalReq" : "Вы хотите отправить {0}mBTC{1} с Вашего счёта на {2}?",
+        "WithdrawalReq" : "Вы хотите отправить {0}mBTC{1} на {2}?",
         "WithdrawalReqHelp" : "Please use SEND <amount> <phone no>\r\nEx: SEND 1.42USD 5558675309\r\n<amount>use XXUSD for US value, or just XX to indicate mili-bitcoin",
         "WithdrawalReqPay" : "Pay {0}mBTC{1} to {2} for {3}?",
         "WithdrawalReqIstr" : "Для подтверждения просьба ответить: {0}",
-        "WithdrawalConf" : "Мы перевели {0}mBTC{1} с Вашего счёта на {2}.",
-	// Mathan - TO DO - The line below needs to be retranslated from its mate in our master file.
-        "Help" : "команды: бал, адрес, послать/запрос <количество> <получатель> [описание], сделки, цена, купить, продать, <цена>\r\n{0}", 
+        "WithdrawalConf" : "Мы перевели {0}mBTC{1} на {2}.",
+        "Help" : "команды: бал, адрес, послать <количество> <получатель> [описание], сделки \r\n{0}", 
         "Buy" : "Ваш номер добавлен в список покупатель",
         "FormatError" : "Мы в затруднении понять ваш запрос. Просьба повторить в правильном формате.",
-	// Mathan - TO DO - The line below needs to be retranslated from its mate in our master file. 
         "InsufficientFunds" : "недостаточно средств:\r\nВаш баланс {0} mBTC и требуется {1}mBTC для завершения сделки,\r\nrequired {2}mBTC{3}.\r\nReply ADDR for Bitcoin deposit address",
         "UnknownCommand" : "Вы отправили незнакомую команду. Ответ помощь или {0}",
         "Timeout" : "Нету подтверждения в течение данного времени. Сделка отменяется.",
@@ -70,10 +68,3 @@ define({
         "VoiceRegister" : "Привет от 37 монет. Ваш проверочный код ${payload}. Пожалуйста введите ${payload} для завершения верификации."
     }
 });
-
-//37Coins Resource bundle RUSSIAN
-// - A quick primer on JavaScript strings: http://www.quirksmode.org/js/strings.html
-// - The template from which this file was translated can be found at webui/app/scripts/nls/root/labels.js in this project as of 20140618. 
-// - xxxCMD should not overlap with any other languages
-//Author: Lidia Barbie
-//Editor: Mathan Basanese

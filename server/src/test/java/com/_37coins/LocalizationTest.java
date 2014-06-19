@@ -42,7 +42,7 @@ public class LocalizationTest {
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("de","DE"))
+		.setLocale(new Locale("ru","RU"))
 		//.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setTo(new MessageAddress()
 			.setAddress("+491606941382"));
@@ -276,7 +276,7 @@ public class LocalizationTest {
 		System.out.println(s);
 		Assert.assertTrue(s.contains("johann"));
 		Assert.assertTrue(s.contains("apple"));
-		Assert.assertTrue(s.contains("10EUR")||s.contains("10,00 €"));
+		Assert.assertTrue(s.contains("10EUR")||s.contains("10,00 €")||s.contains("€ 10,00"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}	
 
@@ -376,7 +376,6 @@ public class LocalizationTest {
 	public void testVoice() throws IOException, TemplateException {
 		rsp.setAction(Action.VOICE);
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	

@@ -14,7 +14,7 @@ define({
         "DepositReqCmd" : ["addr","주소,입금,입금하기","어드레스,어드래스"],
         "BalanceCmd" : ["잔액조회","잔액확인","계좌조회"],
         "TransactionsCmd" : ["업무"],
-        "WithdrawalReqCmd" : ["송금","송금하기","이체"], // Mathan: Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
+        "WithdrawalReqCmd" : ["송금","송금하기","이체"],
         "VoiceCmd" : ["voice"],
         "ChargeCmd" : ["책임"],
         "ProductCmd" : ["생성물"],
@@ -39,7 +39,6 @@ define({
         "WithdrawalReqPay" : "Pay {0}mBTC{1} to {2} for {3}?",
         "WithdrawalReqIstr" : "확인을 위해 다음 코드를 입력하세요: {0}",
         "WithdrawalConf" : "당신의 지갑에서 {0}mBTC을{1} 주소 {2}로 송금하였습니다.",
-	// Mathan - To Do: the line below needs to be translated again from its mate in the root "labels.js" file. Asked Song Yi.
         "Help" : "{0} 명령: 잔액조회, 주소, 송금/요청 <금액> <받는이> [서술], 확인 <언급>", 
         "Buy" : "Your number has been added as a buyer.",
         "FormatError" : "당신의 요청이 명확하지 않습니다. 메세지를 확인하시고 다시 요청하세요.",
@@ -69,9 +68,3 @@ define({
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     }
 });
-
-//37Coins Resource bundle KOREAN
-//A quick primer on JavaScript strings: http://www.quirksmode.org/js/strings.html
-// - xxxCMD should not overlap with any other languages
-//Author: SongYi Lee
-//Editor: Nathan Basanese

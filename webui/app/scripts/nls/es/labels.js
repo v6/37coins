@@ -14,7 +14,7 @@ define({
         "DepositReqCmd" : ["addr","depósito","dirección"],
         "BalanceCmd" : ["balanza","sal","saldo"],
         "TransactionsCmd" : ["txns","transacciones"],
-        "WithdrawalReqCmd" : ["enviar","enviando","enviado"], // Mathan -- Note to self, relabel all SEND commands as either enviar, Enviar, or ENVIAR, as appropriate.
+        "WithdrawalReqCmd" : ["enviar","enviando","enviado"],
         "VoiceCmd" : ["voice","PIN"],
         "ChargeCmd" : ["pedir","request","cobrar"],
         "ProductCmd" : ["prod","product"],
@@ -36,14 +36,13 @@ define({
         "BalanceInst" : "\r\nReply ADDR, para un dirección Bitcoin",
         "WithdrawalReq" : "Enviar {0}mBTC{1} to {2}?",
         "WithdrawalReqHelp" : "Favor usar ENVIAR <amount> <phone no>\r\nEjemplo: ENVIAR 1.42USD 5558675309\r\n<amount>utilizar XXUSD para EE.UU. valor, o solo XX a indicar mili-bitcoin", 
-	// Mathan - I am not sure how to handle this, and whether or not the denominations will be used correctly if they follow the instructions above. 
         "WithdrawalReqPay" : "Paga {0}mBTC{1} a {2} para {3}?",
         "WithdrawalReqIstr" : "Para confirmar, responda con: {0}",
         "WithdrawalConf" : "Hemos transferido {0}mBTC{1} de su cuenta para {2}.",
-        "Help" : "ENVIAR límite: 12mBTC antes de PIN disposición\r\nENVIAR comandos: sal, depósito, enviar/solicitar <cantidad> <receptor> [desc]\r\nADDR - Bitcoin depósito address\r\nSAL - mira balanza disponible\r\nPIN - configurar PIN\r\n{0}",
+        "Help" : "ENVIAR límite: 12mBTC antes de PIN disposición\r\nADDR - depósito address\r\nSAL - mira balanza disponible\r\nPIN - configurar PIN\r\n{0}",
         "Buy" : "Su número se ha añadido como un comprador.",
         "FormatError" : "Tuvimos problemas entendiendo su comando. Por favor, vuelva a enviar en el formato correcto.",
-        "InsufficientFunds" : "Usted tiene fondos insuficientes: su balance es: {0} mBTC, y {1} mBTC es requerido para completar la transacción.\r\nPor favor, responda ADDR a obtener su dirección de depósito Bitcoin.", // Had to translate that one with google translate a bit.
+        "InsufficientFunds" : "Usted tiene fondos insuficientes: su balance es: {0} mBTC, y {1} mBTC es requerido para completar la transacción.\r\nPor favor, responda ADDR a obtener su dirección de depósito Bitcoin.",
         "UnknownCommand" : "Has enviado un comando desconocido. Por favor, responda HELP o {0}",
         "Timeout" : "Ninguna confirmación se ha recibido dentro del tiempo dado. Transaction canceled.",
         "TransactionFailed" : "Transacción falló debido a razones desconocidas.",

@@ -14,9 +14,7 @@ define({
         "DepositReqCmd" : ["compte"],
         "BalanceCmd" : ["solde"],
         "TransactionsCmd" : ["actes"],
-        "WithdrawalReqCmd" : ["envoyer"], 
-	// Mathan : Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
-	// SEND command translated to ENVOYER on 20140618 15:00:29. 
+        "WithdrawalReqCmd" : ["envoyer"],
         "VoiceCmd" : ["voice"],
         "ChargeCmd" : ["charger"],
         "ProductCmd" : ["produit"],
@@ -70,4 +68,3 @@ define({
         "VoiceRegister" : "Bonjour de la part de 37coins. Votre code de vérification est $ {payload}. Merci de renvoyer $ {payload} pour terminer la vérification."
     }
 });
-// Mathan 20140618 14:55:11 - TO DO: Fill in missing translations.

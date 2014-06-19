@@ -44,7 +44,7 @@ define({
         "DepositReqCmd" : ["addr","deposit","adr","address","adress"],
         "BalanceCmd" : ["bal","balance","blance","balnce"],
         "TransactionsCmd" : ["txns","transactions","trans","tran"],
-        "WithdrawalReqCmd" : ["send","sending","sent"], // Mathan: Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
+        "WithdrawalReqCmd" : ["send","sending","sent"],
         "VoiceCmd" : ["voice","PIN"],
         "ChargeCmd" : ["req","request","charge"],
         "ProductCmd" : ["prod","product"],
