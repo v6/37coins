@@ -70,12 +70,7 @@ require.config({
         intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
         userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
-    waitSeconds: 0,
-    config: {
-        'GA': {
-            'id' : 'UA-29543456-1'
-        }
-    }
+    waitSeconds: 0
 });
 window.getLocale = function(){
     'use strict';
@@ -90,5 +85,10 @@ window.getLocale = function(){
     return locale;
 };
 require.config({
-    locale: window.getLocale()
+    locale: window.getLocale(),
+    config: {
+        'GA': {
+            'id' : window.opt.gaTrackingId
+        }
+    }
 });

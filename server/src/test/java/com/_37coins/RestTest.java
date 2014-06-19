@@ -145,7 +145,7 @@ public class RestTest {
     @Test
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+821039842742", "+821027423984", "OZV4N1JS2Z3476NL", "send 100 +821039842743", 8087,
 		new ParserAction() {
 			@Override
@@ -184,7 +184,7 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
     	//run invite
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+821039841234", null, "", Action.SIGNUP.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -218,7 +218,7 @@ public class RestTest {
             .post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
         //run invite
         final DataSet ds = new DataSet();
-        ParserClient parserClient = new ParserClient(cmdParser,ga);
+        ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
         parserClient.start("+821039841233", null, "PZV4N1JS2Z3476NM", Action.SIGNUP.toString(), 8087,
         new ParserAction() {
             @Override
@@ -244,7 +244,7 @@ public class RestTest {
     @Test
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", Action.VOICE.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -272,7 +272,7 @@ public class RestTest {
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+821039841234", "+821027423984", "OZV4N1JS2Z3476NL", "req 0.01", 8087,
 		new ParserAction() {
 			@Override
@@ -298,7 +298,7 @@ public class RestTest {
     @Test
 	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+821039841234", "+821027423984", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
 		new ParserAction() {
 			@Override
@@ -326,7 +326,7 @@ public class RestTest {
     @Test
 	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+491039841234", "+821027423984", "+821027423984", "send 1 +821123723984", 8087,
 		new ParserAction() {
 			@Override
@@ -346,7 +346,7 @@ public class RestTest {
     @Test
 	public void testPayedNumber() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
 		parserClient.start("+3940047374", "+393602742398", "+393602742398", "some shit here", 8087,
 		new ParserAction() {
 			@Override

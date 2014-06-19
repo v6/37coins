@@ -229,8 +229,13 @@ public class MerchantServletConfig extends GuiceServletContextListener {
         	}
             
             @Provides @Singleton @SuppressWarnings("unused")
-            CorsFilter provideCorsFilter(){
+            public CorsFilter provideCorsFilter(){
                 return new CorsFilter("*");
+            }
+            
+            @Provides @Singleton @SuppressWarnings("unused")
+            public DigestFilter getDigestFilter(){
+                return new DigestFilter(MerchantServletConfig.digestToken);
             }
             
 			@Provides @Singleton @SuppressWarnings("unused")
