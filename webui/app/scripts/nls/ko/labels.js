@@ -1,9 +1,3 @@
-//37Coins Resource bundle KOREAN
-//A quick primer on JavaScript strings: http://www.quirksmode.org/js/strings.html
-// - xxxCMD should not overlap with any other languages
-//Author: SongYi Lee
-//Editor: Nathan Basanese
-
 define({
     "email" : {
         "ResetSubject" : "Password Reset",
@@ -75,3 +69,9 @@ define({
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     }
 });
+
+//37Coins Resource bundle KOREAN
+//A quick primer on JavaScript strings: http://www.quirksmode.org/js/strings.html
+// - xxxCMD should not overlap with any other languages
+//Author: SongYi Lee
+//Editor: Nathan Basanese

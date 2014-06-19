@@ -1,4 +1,3 @@
-// Mathan 20140618 14:55:11 - TO DO: Fill in missing translations.
 define({
     "email" : {
         "ResetSubject" : "Mise à jour du mot de passe",
@@ -71,3 +70,4 @@ define({
         "VoiceRegister" : "Bonjour de la part de 37coins. Votre code de vérification est $ {payload}. Merci de renvoyer $ {payload} pour terminer la vérification."
     }
 });
+// Mathan 20140618 14:55:11 - TO DO: Fill in missing translations.
