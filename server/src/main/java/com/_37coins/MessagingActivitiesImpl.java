@@ -1,6 +1,7 @@
 package com._37coins;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
@@ -23,6 +24,7 @@ import com._37coins.persistence.dao.GatewaySettings;
 import com._37coins.sendMail.MailTransporter;
 import com._37coins.util.FiatPriceProvider;
 import com._37coins.util.SignupNotifier;
+import com._37coins.web.PriceTick;
 import com._37coins.web.Transaction;
 import com._37coins.web.Transaction.State;
 import com._37coins.workflow.pojo.DataSet;
@@ -248,4 +250,23 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			return null;
 		}
 	}
+	
+    
+    @Override
+    public BigDecimal getLimit(String gateway, String mobile) {
+        BigDecimal amount = null;
+        try {
+            FiatPriceProvider fpp = new FiatPriceProvider(cache);
+            PriceTick pt = fpp.getLocalCurValue(new BigDecimal("1").setScale(8),new Locale("en","US"));
+            amount = new BigDecimal("12.00").setScale(8).divide(pt.getLast().setScale(8),RoundingMode.HALF_UP).setScale(8);
+        }catch(Exception e){
+            e.printStackTrace();
+            log.error("get Limit exception",e);
+        }
+        if (null==amount){
+            amount = new BigDecimal("0.012").setScale(8);
+        }
+        return amount;
+    }
+	
 }

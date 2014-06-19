@@ -185,6 +185,10 @@ public class WithdrawalWorkflowTest {
 			public BigDecimal readRate(String curCode, BigDecimal amountBtc) {
 				return null;
 			}
+	        @Override
+            public BigDecimal getLimit(String gateway, String mobile){
+                return new BigDecimal("0.012").setScale(8);
+            }
 		};
         EposActivities eposActivities = new EposActivities() {
 

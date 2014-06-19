@@ -43,4 +43,8 @@ public interface MessagingActivities {
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 3600)
     Action phoneConfirmation(DataSet rsp, String workflowId);
     
+    @Activity(name = "GetAuthLimit", version = "0.1")
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30, defaultTaskStartToCloseTimeoutSeconds = 10)
+    BigDecimal getLimit(String gateway, String mobile);
+    
 }

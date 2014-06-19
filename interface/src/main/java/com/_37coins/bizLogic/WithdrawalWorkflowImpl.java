@@ -45,11 +45,12 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     public void executeCommand(final DataSet data) {
     	Promise<BigDecimal> balance = bcdClient.getAccountBalance(data.getTo().getAddress().replace("+", ""));
     	Promise<BigDecimal> volume24h = bcdClient.getTransactionVolume(data.getTo().getAddress().replace("+", ""),24);
-    	handleAccount(balance, volume24h, data);
+    	Promise<BigDecimal> limit = msgClient.getLimit(data.getTo().getGateway(),data.getTo().getAddress());
+    	handleAccount(balance, volume24h, limit, data);
     }
     
     @Asynchronous
-    public void handleAccount(Promise<BigDecimal> balance, Promise<BigDecimal> volume24h, final DataSet data){
+    public void handleAccount(Promise<BigDecimal> balance, Promise<BigDecimal> volume24h, Promise<BigDecimal> limit, final DataSet data){
 		final Settable<DataSet> confirm = new Settable<>();
     	Withdrawal w = (Withdrawal)data.getPayload();
     	BigDecimal amount = w.getAmount();
@@ -83,7 +84,7 @@ public class WithdrawalWorkflowImpl implements WithdrawalWorkflow {
     	}else{
     		//balance sufficient, now secure transaction authenticity 
 			final Promise<Action> response;
-			if (volume24h.get().add(amount).compareTo(fee.multiply(new BigDecimal("100.0"))) > 0){
+			if (volume24h.get().add(amount).compareTo(limit.get()) > 0){
 				response = msgClient.phoneConfirmation(data,contextProvider.getDecisionContext().getWorkflowContext().getWorkflowExecution().getWorkflowId());
 				w.setConfKey(WithdrawalWorkflow.VOICE_VER_TOKEN);
 			}else {
