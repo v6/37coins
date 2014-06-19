@@ -1,9 +1,10 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/indexLayout_tmpl'
+    'hbs!tmpl/indexLayout_tmpl',
+    'i18n!nls/labels'
 ],
-function(Backbone, Communicator, IndexLayout) {
+function(Backbone, Communicator, IndexLayout, myLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
         regions: {
@@ -11,6 +12,7 @@ function(Backbone, Communicator, IndexLayout) {
             gateways: '#gwTable'
         },
         template: IndexLayout,
+        templateHelpers: function(){return {s: myLabels};},
         className: 'main',
         initialize: function() {
         },

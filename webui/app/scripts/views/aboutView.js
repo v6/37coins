@@ -1,11 +1,13 @@
 define([
 	'backbone',
-	'hbs!tmpl/aboutView_tmpl'
+	'hbs!tmpl/aboutView_tmpl',
+	'i18n!nls/labels'
 ],
-function(Backbone, AboutTmpl) {
+function(Backbone, AboutTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: AboutTmpl,
-        className: 'static'
+        className: 'static',
+        templateHelpers: function(){return {l: myLabels};},
     });
 });

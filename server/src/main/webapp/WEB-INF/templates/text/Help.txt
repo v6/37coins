@@ -1,2 +1,2 @@
 <#setting locale=locale>
-${resBundle("Help","37coins")}
+${resBundle("Help",service)}

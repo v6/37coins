@@ -23,15 +23,20 @@
         <script src="bower_components/modernizr/modernizr.js"></script>
         <!-- endbuild -->
         <script type="text/javascript">
+          window.activeLocales = {
+              // root is mandatory.
+              root: true,
+              de: true
+          };
           window.opt = {
               resPath: 'http://192.168.111.222:9000',
-	      lng: 'en',
+              lng: 'en',
               gaTrackingId: 'UA-29543456-1',
               ioPath: 'http://127.0.0.1:8081',
               country: 'US',
-              i18nResPath: 'https://localhost:8443/res/locales/__lng__/__ns__.json',
+              srvcPath: 'http://127.0.0.1:9000',
               captchaPubKey: '6LcIKewSAAAAAPxoQ6LmPP1F443wEQ01lHFdqLyr',
-            basePath: 'https://www.37coins.com'
+              basePath: 'https://qa.37coins.com'
           };
         </script>
     </head>

@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.ws.rs.core.Form;
-
 import junit.framework.Assert;
 
 import org.apache.commons.codec.binary.Base64;
@@ -40,8 +38,11 @@ import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
 import com._37coins.resources.HealthCheckResource;
+import com._37coins.resources.IndexResource;
 import com._37coins.resources.ParserResource;
 import com._37coins.resources.TicketResource;
+import com._37coins.util.ResourceBundleClient;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.AccountRequest;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
@@ -72,9 +73,13 @@ public class RestTest {
 	
     private static EmbeddedJetty embeddedJetty;
     private static GoogleAnalytics ga;
+    private static CommandParser cmdParser;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        ResourceBundleClient client = new ResourceBundleClient("http://localhost:9000"+"/scripts/nls/");
+        ResourceBundleFactory rbf = new ResourceBundleFactory(MessagingServletConfig.activeLocales, client, null);
+        cmdParser = new CommandParser(rbf);
         embeddedJetty = new EmbeddedJetty(){
         	@Override
         	public String setInitParam(ServletHolder holder) {
@@ -88,15 +93,15 @@ public class RestTest {
 		gac.setEnabled(false);
 		ga = new GoogleAnalytics(gac,"UA-123456");
 	      //prepare data
-		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
+		Gateway gw1 = new Gateway().setEmail("before@gmail.com").setApiSecret("test9900").setMobile("+821027423933").setCountryCode(82).setCn("NZV4N1JS2Z3476NK").setLocale(new Locale("ko","KR")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
 		gw1.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0006")).setWelcomeMsg("PZWelcomeMessage"));
-	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
+	    Gateway gw2 = new Gateway().setEmail("extraterrestrialintelligence@gmail.com").setApiSecret("test9900").setMobile("+821027423984").setCountryCode(82).setCn("OZV4N1JS2Z3476NL").setLocale(new Locale("ko","KR"));
 	    gw2.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0007")));
 	    Gateway gw3 = new Gateway().setEmail("after@gmail.com").setApiSecret("test9900").setMobile("+821027423985").setCn("PZV4N1JS2Z3476NM").setLocale(new Locale("ko","KR"));
 	    gw3.setSettings(new GatewaySettings().setFee(new BigDecimal("0.0008")));
-	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
+	    Gateway gw4 = new Gateway().setEmail("johannbarbie@me.com").setApiSecret("test9900").setMobile("+491602742398").setCountryCode(49).setCn("DEV4N1JS2Z3476DE").setLocale(new Locale("de","DE")).setPassword(CryptoUtils.getSaltedPassword("password".getBytes()));
 	    gw4.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
-	    Gateway gw5 = new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT"));
+	    Gateway gw5 = new Gateway().setEmail("stefano@mail.com").setApiSecret("test9900").setMobile("+393602742398").setCountryCode(39).setCn("ITV4N1JS2Z3476DE").setLocale(new Locale("it","IT"));
 	    gw5.setSettings(new GatewaySettings().setFee(new BigDecimal("0.002")));
         List<Gateway> rv = new ArrayList<>();
         rv.add(gw1);
@@ -140,7 +145,7 @@ public class RestTest {
     @Test
 	public void testParserClient() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+821039842742", "+821027423984", "OZV4N1JS2Z3476NL", "send 100 +821039842743", 8087,
 		new ParserAction() {
 			@Override
@@ -179,7 +184,7 @@ public class RestTest {
 			.post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
     	//run invite
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+821039841234", null, "", Action.SIGNUP.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -213,7 +218,7 @@ public class RestTest {
             .post(embeddedJetty.getBaseUri() + HelperResource.PATH+"/init");
         //run invite
         final DataSet ds = new DataSet();
-        ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+        ParserClient parserClient = new ParserClient(cmdParser,ga);
         parserClient.start("+821039841233", null, "PZV4N1JS2Z3476NM", Action.SIGNUP.toString(), 8087,
         new ParserAction() {
             @Override
@@ -239,7 +244,7 @@ public class RestTest {
     @Test
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", Action.VOICE.toString(), 8087,
 		new ParserAction() {
 			@Override
@@ -267,7 +272,7 @@ public class RestTest {
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+821039841234", "+821027423984", "OZV4N1JS2Z3476NL", "req 0.01", 8087,
 		new ParserAction() {
 			@Override
@@ -293,7 +298,7 @@ public class RestTest {
     @Test
 	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+821039841234", "+821027423984", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
 		new ParserAction() {
 			@Override
@@ -321,7 +326,7 @@ public class RestTest {
     @Test
 	public void testForeightGateway() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+491039841234", "+821027423984", "+821027423984", "send 1 +821123723984", 8087,
 		new ParserAction() {
 			@Override
@@ -341,7 +346,7 @@ public class RestTest {
     @Test
 	public void testPayedNumber() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(new CommandParser(),ga);
+    	ParserClient parserClient = new ParserClient(cmdParser,ga);
 		parserClient.start("+3940047374", "+393602742398", "+393602742398", "some shit here", 8087,
 		new ParserAction() {
 			@Override
@@ -365,22 +370,22 @@ public class RestTest {
 			.statusCode(200)
 		.when()
 			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
-		Form m = new Form();
-		m.param("version", "0.1");
-		m.param("now","12356789");
-		m.param("power","30");
-		m.param("action","status");	
+		Map<String,String> m = new HashMap<>();
+		m.put("version", "0.1");
+		m.put("now","12356789");
+		m.put("power","30");
+		m.put("action","status");	
 		String serverUrl = embeddedJetty.getBaseUri() + EnvayaSmsResource.PATH+"/OZV4N1JS2Z3476NL/sms";
 		System.out.println(serverUrl);
-		String sig = EnvayaSmsResource.calculateSignature(serverUrl, m.asMap(), pw);
+		String sig = EnvayaClient.calculateSignature(serverUrl, m, pw);
 		// fire get successfully
 		given()
 			.contentType(ContentType.URLENC)
 			.header("X-Request-Signature", sig)
-			.formParam("version", m.asMap().getFirst("version"))
-			.formParam("now", m.asMap().getFirst("now"))
-			.formParam("power", m.asMap().getFirst("power"))
-			.formParam("action", m.asMap().getFirst("action"))
+			.formParam("version", m.get("version"))
+			.formParam("now", m.get("now"))
+			.formParam("power", m.get("power"))
+			.formParam("action", m.get("action"))
 		.expect()
 			.statusCode(200)
 		.when()
@@ -389,12 +394,12 @@ public class RestTest {
 	
 	   
     @Test
-    public void testHealthcheck() throws IOException{
+    public void testIndex() throws IOException{
     	given()
-		.expect()
-			.statusCode(200)
-		.when()
-			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
+    		.expect()
+    			.statusCode(200)
+    		.when()
+    			.get(embeddedJetty.getBaseUri() + IndexResource.PATH+"de/merchant/");
     }
     
     @Test

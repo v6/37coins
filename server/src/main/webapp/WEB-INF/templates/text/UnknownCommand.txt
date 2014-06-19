@@ -1,2 +1,2 @@
 <#setting locale=locale>
-${resBundle.UnknownCommand}
+${resBundle("UnknownCommand",service)}

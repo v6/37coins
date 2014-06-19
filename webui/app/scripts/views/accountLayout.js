@@ -118,6 +118,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                 this.$('#donate').append( '<a href="bitcoin:'+data+'">'+data+'</a>');
                 this.attemts = 0;
             }else{
+                this.attempts++;
                 this.submitInvite({status:200});
             }
         }

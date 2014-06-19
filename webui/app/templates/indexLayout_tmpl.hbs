@@ -3,17 +3,17 @@
     <h1><span style="font-family: 'sofia_pro_regular';">SMS</span>wallet</h1>
   </div>
   <div class="col-sm-6">
-    <p class="visible-xs">Money without borders or barriers, as easy as sending an SMS. Send and receive Bitcoin<br/> anywhere in the World.</b> No internet or smartphone required.</p>
-    <p>After setting up your account, you will receive an automated text message from a gateway. To control your account, send any of these commands to that phone number via SMS.</p>
+    <p class="visible-xs">{{s.indexLayout.mobileTag}}</p>
+    <p>{{s.indexLayout.wallet}}</p>
     <div class="panel panel-default">
-      <div class="panel-heading">Become an SMSwallet beta user</div>
+      <div class="panel-heading">{{s.indexLayout.walletInv}}</div>
       <div class="panel-button">
-          <a class="btn btn-default" id="smsSignup" href="#signupWallet">Open a Wallet &raquo;</a>
+          <a class="btn btn-default" id="smsSignup" href="/{{l}}/signupWallet">{{s.indexLayout.walletBtn}} &raquo;</a>
       </div>
     </div>
   </div>
   <div class="col-sm-6">
-    <p>Commands are not case-sensitve and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet <a href="/help/SMSwallet">help page</a>.</p>
+    <p>{{s.indexLayout.commands}} <a href="/{{l}}/help/SMSwallet">{{s.indexLayout.link}}</a>.</p>
     <div id="smsCommands">
     </div>
   </div>
@@ -23,15 +23,12 @@
     <h2><span style="font-family: 'sofia_pro_regular';">SMS</span>gateway</h2>
   </div>
   <div class="col-sm-6">
-    <p>A decentralized, open-source Android app that bridges between SMS and Bitcoin. Designed for low-end Android phones. In other words, you can connect your country to the global economy via Bitcoin (and earn a little for your time and effort, too. ;-).</p>
-    <p>Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:<ul>
-    <li>Dedicated Android phone</li>
-    <li>Text messaging plan</li>
-    <li>Internet connection</li></ul></p>
+    <p>{{s.indexLayout.gw1}}</p>
+    <p>{{s.indexLayout.gw2}}<ul>{{#each s.indexLayout.gwLi}}<li>{{this}}</li>{{/each}}</ul></p>
     <div class="panel panel-default">
-      <div class="panel-heading">Become an SMSgateway partner</div>
+      <div class="panel-heading">{{s.indexLayout.gwInv}}</div>
       <div class="panel-button">
-	<a class="btn btn-default" href="#gateways">Open a Gateway &raquo;</a>
+        <a class="btn btn-default" href="/{{l}}/gateways">{{s.indexLayout.gwBtn}} &raquo;</a>
       </div>
     </div>
   </div>

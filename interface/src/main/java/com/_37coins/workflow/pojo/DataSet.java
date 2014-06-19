@@ -12,10 +12,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import freemarker.ext.beans.ResourceBundleModel;
+import freemarker.template.TemplateModel;
 
 @JsonInclude(Include.NON_NULL)
 public class DataSet {
+    public static final String SERVICE = "www.37coins.com";
 	
 	public enum Action {
 		//REQUESTS
@@ -86,7 +87,7 @@ public class DataSet {
 	}
 	
 	public DataSet(){
-		setService("37coins");
+		setService(SERVICE);
 	}
 	
 	private Action action;
@@ -107,7 +108,7 @@ public class DataSet {
 	
 	private String cn;
 	
-	private ResourceBundleModel resBundle;
+	private TemplateModel resBundle;
 	
 	//########## UTILS
 
@@ -244,16 +245,16 @@ public class DataSet {
 		this.gwFee = gwFee;
 		return this;
 	}
+	
+    @JsonIgnore
+    public TemplateModel getResBundle() {
+        return resBundle;
+    }
 
-	@JsonIgnore
-	public ResourceBundleModel getResBundle() {
-		return resBundle;
-	}
-
-	public DataSet setResBundle(ResourceBundleModel resBundle) {
-		this.resBundle = resBundle;
-		return this;
-	}
+    public DataSet setResBundle(TemplateModel resBundle) {
+        this.resBundle = resBundle;
+        return this;
+    }
 
 	@JsonIgnore
 	public Object getFiatPriceProvider() {

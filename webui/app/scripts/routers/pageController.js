@@ -41,7 +41,8 @@ define(['backbone',
     'views/privacyView',
     'routeFilter',
     'views/merchantView',
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView) {
+    'i18n'
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
     'use strict';
 
     var Controller = {};
@@ -54,42 +55,54 @@ define(['backbone',
         },
         appRoutes: {
             '': 'showIndex',
-            'gateways': 'showGateway',
-            'balance': 'showBalance',
-            'faq': 'showFaq',
-            'confSignup/:token': 'confirmSignUp',
-            'confReset/:token': 'confirmReset',
-            'help/SMSgateway': 'showFaq',
-            'help/SMSwallet': 'showCommandHelp',
-            'account/:mobile': 'showAccount',
-            'legal/terms': 'showTerms',
-            'legal/privacy': 'showPrivacy',
-            'reset': 'showReset',
-            'about': 'showAbout',
-            'signUp': 'showSignUp',
-            'signupWallet':'showSignupWallet',
-            'signinWallet':'showSigninWallet',
-            'logout': 'showLogout',
-            'merchant': 'showMerchant',
-            'notFound': 'showNotFound'
+            ':lng/': 'showIndex',
+            ':lng/gateways': 'showGateway',
+            ':lng/balance': 'showBalance',
+            ':lng/faq': 'showFaq',
+            ':lng/confSignup/:token': 'confirmSignUp',
+            ':lng/confReset/:token': 'confirmReset',
+            ':lng/help/SMSgateway': 'showFaq',
+            ':lng/help/SMSwallet': 'showCommandHelp',
+            ':lng/account/:mobile': 'showAccount',
+            ':lng/legal/terms': 'showTerms',
+            ':lng/legal/privacy': 'showPrivacy',
+            ':lng/reset': 'showReset',
+            ':lng/about': 'showAbout',
+            ':lng/signUp': 'showSignUp',
+            ':lng/signupWallet':'showSignupWallet',
+            ':lng/signinWallet':'showSigninWallet',
+            ':lng/logout': 'showLogout',
+            ':lng/merchant': 'showMerchant',
+            ':lng/*notFound': 'showNotFound',
+            '*notFound': 'showNotFound'
         },
         before:{
             '': 'loadLibPhone',
-            'account/:mobile': 'loadLibPhone',
-            'signupWallet': 'loadLibPhone',
-            'signinWallet': 'loadLibPhone',
-            'signUp': 'getTicket',
-            'reset': 'getTicket',
-            'gateways': 'showLogin',
-            'balance': 'showLogin',
-            'merchant': 'getTicket',
+            ':lng/': 'loadLibPhone',
+            ':lng/account/:mobile': 'loadLibPhone',
+            ':lng/signupWallet': 'loadLibPhone',
+            ':lng/signinWallet': 'loadLibPhone',
+            ':lng/signUp': 'getTicket',
+            ':lng/reset': 'getTicket',
+            ':lng/gateways': 'showLogin',
+            ':lng/balance': 'showLogin',
+            ':lng/merchant': 'getTicket',
+            '*notFound': 'lngRedirect',
             '*any': function(fragment, args, next){
-                //set title
-                if (fragment){
-                    $(document).attr('title', '37 Coins - ' + fragment);
-                }else {
-                    $(document).attr('title', '37 Coins');
+                //capture language
+                var locale = window.getLocale();
+                if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
+                    if(locale !== args[0]) {
+                        localStorage.setItem('locale', args[0]);
+                        location.reload();
+                    }
+                }else{
+                    if(locale !== 'en') {
+                        localStorage.setItem('locale', 'en');
+                        location.reload();
+                    }
                 }
+                //do highlights on navigationbar
                 var items = $('.navbar .nav li a');
                 _.each(items, function(item){
                     var href = ($(item).attr('href'))?$(item).attr('href').replace('#',''):undefined;
@@ -106,9 +119,6 @@ define(['backbone',
                         }
                     }
                 });
-                //set meta tag
-                $('meta[name=description]').remove();
-                $('head').append( '<meta name="description" content="this is new">' );
                 //track page visit
                 GA.view(fragment);
                 next();
@@ -146,6 +156,16 @@ define(['backbone',
                 });
             }else{
                 next();
+            }
+        },
+        lngRedirect: function(fragment, args, next) {
+            if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
+                next();
+            }else{
+                var locale = window.getLocale();
+                console.log('redirect: '+locale);
+                this.app.router.navigate(locale+'/'+fragment, {trigger: true, replace: true});
+                return false;
             }
         },
         showLogin: function(fragment, args, next) {
@@ -201,8 +221,8 @@ define(['backbone',
     });
 
     Controller.showIndex = function() {
-        var header = new IndexHeaderLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
-        var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var header = new IndexHeaderLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
+        var layout = new IndexLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         Communicator.mediator.trigger('app:show', layout, header);
         var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
         header.mobileInput.show(mobileInput);
@@ -211,9 +231,9 @@ define(['backbone',
         layout.commands.show(commands);
     };
 
-    Controller.showAccount = function(mobile) {
+    Controller.showAccount = function(lang, mobile) {
         var header = new AccountHeaderView({mobile:mobile,gateways:this.gateways});
-        var layout = new AccountLayout({mobile:mobile});
+        var layout = new AccountLayout({mobile:mobile,model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show', layout, header);
         var commands = new CommandsView();
         layout.commands.show(commands);
@@ -229,7 +249,7 @@ define(['backbone',
     };
 
     Controller.showAbout = function() {
-        var view = new AboutView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var view = new AboutView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         Communicator.mediator.trigger('app:show', view);
     };
 
@@ -244,11 +264,11 @@ define(['backbone',
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showTerms = function() {
-        var contentView = new TermsView();
+        var contentView = new TermsView({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showPrivacy = function() {
-        var contentView = new PrivacyView();
+        var contentView = new PrivacyView({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showMerchant = function() {
@@ -267,12 +287,12 @@ define(['backbone',
         }
     };
     Controller.showCommandSend = function() {
-        var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         var contentView = new CommandSendView();
         Communicator.mediator.trigger('app:show',contentView, headerView);
     };
     Controller.showCommandHelp = function() {
-        var layout = new CommandHelpLayout({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var layout = new CommandHelpLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',layout);
         var commands = new CommandsView();
         layout.commands.show(commands);
@@ -282,35 +302,35 @@ define(['backbone',
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showSignUp = function() {
-        var accountRequest = new AccountRequest({ticket:Controller.ticket});
+        var accountRequest = new AccountRequest({ticket:Controller.ticket,l:window.getLocale()});
         var contentView = new SignupView({model:accountRequest});
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showSignupWallet = function() {
         var layout = new SignupWalletLayout();
         Communicator.mediator.trigger('app:show',layout);
-        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         layout.mobileInput.show(mobileInput);
     };
     Controller.showSigninWallet = function() {
         var layout = new SigninWalletLayout();
         Communicator.mediator.trigger('app:show',layout);
-        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath})});
+        var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         layout.mobileInput.show(mobileInput);
     };
-    Controller.confirmSignUp = function(token) {
-        var model = new SignupConf({token:token});
+    Controller.confirmSignUp = function(lang, token) {
+        var model = new SignupConf({token:token,l:window.getLocale()});
         var contentView = new SignupConfView({model: model});
         Communicator.mediator.trigger('app:show',contentView);
         model.save();
     };
     Controller.showReset = function() {
-        var model = new ResetRequest({ticket:Controller.ticket});
+        var model = new ResetRequest({ticket:Controller.ticket,l:window.getLocale()});
         var contentView = new ResetView({model:model});
         Communicator.mediator.trigger('app:show',contentView);
     };
-    Controller.confirmReset = function(token) {
-        var model = new ResetConf({token:token});
+    Controller.confirmReset = function(lang, token) {
+        var model = new ResetConf({token:token,l:window.getLocale()});
         var contentView = new ResetConfView({model: model});
         Communicator.mediator.trigger('app:show',contentView);
     };

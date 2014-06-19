@@ -19,13 +19,15 @@ import com._37coins.bcJsonRpc.pojo.Transaction;
 import com._37coins.plivo.Speak;
 import com._37coins.plivo.XmlCharacterHandler;
 import com._37coins.util.FiatPriceProvider;
+import com._37coins.util.ResourceBundleClient;
+import com._37coins.util.ResourceBundleFactory;
 import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.MessageAddress;
 import com._37coins.workflow.pojo.PaymentAddress;
+import com._37coins.workflow.pojo.PaymentAddress.PaymentType;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.sun.xml.bind.marshaller.CharacterEscapeHandler;
 
@@ -34,16 +36,24 @@ import freemarker.template.TemplateException;
 public class LocalizationTest {
 	
 	DataSet rsp;
-	MessageFactory ef = new MessageFactory();
+	MessageFactory ef;
 	
 	@Before
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("en","US"))
-		.setFiatPriceProvider(new FiatPriceProvider(null))
+		.setLocale(new Locale("de","DE"))
+		//.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setTo(new MessageAddress()
 			.setAddress("+491606941382"));
+        
+		List<Locale> activeLocales = new ArrayList<>();
+		activeLocales.add(new Locale("en"));
+		activeLocales.add(new Locale("de"));
+		activeLocales.add(new Locale("ru"));
+		activeLocales.add(new Locale("es"));
+        ResourceBundleClient client = new ResourceBundleClient("http://localhost:9000"+"/scripts/nls/");
+		ef = new MessageFactory(new ResourceBundleFactory(activeLocales, client, null));
 	}
 	
 	//matches all locales onto what plivo has available
@@ -107,8 +117,6 @@ public class LocalizationTest {
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
 		rsp.setPayload(new PaymentAddress().setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"));
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -118,8 +126,6 @@ public class LocalizationTest {
 		System.out.println("UNAVAILABLE:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -130,8 +136,6 @@ public class LocalizationTest {
 		rsp.setPayload(new PaymentAddress().setAddress("mkGFr3M4HWy3NQm6LcSprcUypghQxoYmVq"));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -141,8 +145,6 @@ public class LocalizationTest {
 		System.out.println("HELP:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -157,8 +159,6 @@ public class LocalizationTest {
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 		
@@ -170,8 +170,6 @@ public class LocalizationTest {
 				.setBalance(new BigDecimal("1.25"))
 				.setAmount(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -182,8 +180,6 @@ public class LocalizationTest {
 				.setBalance(new BigDecimal("1.25"))
 				.setAmount(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -196,8 +192,6 @@ public class LocalizationTest {
 				.setAmount(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -211,8 +205,6 @@ public class LocalizationTest {
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -228,8 +220,6 @@ public class LocalizationTest {
 					.setDisplayName("johann")));
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue(s.contains("johann"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
@@ -246,8 +236,6 @@ public class LocalizationTest {
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue(s.contains("1CBtg1"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
@@ -266,8 +254,6 @@ public class LocalizationTest {
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue(s.contains("johann"));
 		Assert.assertTrue(s.contains("apple"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
@@ -287,11 +273,10 @@ public class LocalizationTest {
 					.setDisplayName("johann")));
 		System.out.println("DEPOSIT CONFIRM:");
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
+		System.out.println(s);
 		Assert.assertTrue(s.contains("johann"));
 		Assert.assertTrue(s.contains("apple"));
-		Assert.assertTrue(s.contains("10EUR"));
+		Assert.assertTrue(s.contains("10EUR")||s.contains("10,00 €"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}	
 
@@ -305,8 +290,6 @@ public class LocalizationTest {
 		System.out.println("REQ:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -324,8 +307,6 @@ public class LocalizationTest {
 		System.out.println("WITHDRAWAL REQUEST:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -338,8 +319,6 @@ public class LocalizationTest {
 		System.out.println("BALANCE:");
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -356,8 +335,6 @@ public class LocalizationTest {
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -375,8 +352,6 @@ public class LocalizationTest {
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("0.05")));
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 
@@ -385,8 +360,6 @@ public class LocalizationTest {
 	public void testDestinationUnavailable() throws IOException, TemplateException {
 		rsp.setAction(Action.DST_ERROR);
 		String s = ef.constructTxt(rsp);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -395,7 +368,6 @@ public class LocalizationTest {
         rsp.setAction(Action.TX_CANCELED);
         String s = ef.constructTxt(rsp);
         System.out.println(s);
-        ef.constructSubject(rsp);
         Assert.assertTrue("SMS to long",s.getBytes().length<140);
     }
     
@@ -420,8 +392,6 @@ public class LocalizationTest {
 		System.out.println(s);
 		Assert.assertTrue(s.contains("1,051.1"));
 		Assert.assertTrue(s.contains("512.3"));
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 		
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
@@ -433,8 +403,6 @@ public class LocalizationTest {
 		System.out.println(s);
 		Assert.assertTrue(s.contains("1.051,1"));
 		Assert.assertTrue(s.contains("512,3"));
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 
 	}
@@ -450,8 +418,6 @@ public class LocalizationTest {
 		System.out.println(s);
 		Assert.assertTrue(s.contains("1.051,1"));
 		Assert.assertTrue(s.contains("5.123,457"));
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -467,8 +433,6 @@ public class LocalizationTest {
 			.setPayload(list);
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	
@@ -480,8 +444,6 @@ public class LocalizationTest {
 			.setPayload(list);
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		ef.constructHtml(rsp);
-		ef.constructSubject(rsp);
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 

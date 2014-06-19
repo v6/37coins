@@ -84,7 +84,7 @@ public class InterpreterFilter implements Filter {
                         .setSignupCallback(g.getSettings().getSignupCallback())
                         .setWelcomeMessage(g.getSettings().getWelcomeMsg())
                         .setDigestToken(g.getApiSecret()))
-                    .setService(responseData.getService());
+                    .setService(g.getSettings().getCompanyName());
                 httpReq.setAttribute("create", create);                
 			}
 			responseData.setGwFee(g.getSettings().getFee())
@@ -118,7 +118,7 @@ public class InterpreterFilter implements Filter {
                         .setSignupCallback(g.getSettings().getSignupCallback())
                         .setWelcomeMessage(g.getSettings().getWelcomeMsg())
                         .setDigestToken(g.getApiSecret()))
-					.setService(responseData.getService());
+					.setService(g.getSettings().getCompanyName());
 				httpReq.setAttribute("create", create);
 			}
 		}
