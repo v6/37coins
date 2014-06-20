@@ -161,7 +161,7 @@ public class MerchantResource {
 		if (mvm==null || mvm.size()<2 || withdrawal.getAmount()==null || withdrawal.getPayDest()==null){
 			throw new WebApplicationException("mandatory data (amount, payDest) missing.", Response.Status.BAD_REQUEST);
 		}
-		String url = MessagingServletConfig.basePath + path;
+		String url = MessagingServletConfig.basePath + "/" + path;
 		String calcSig = null;
 		try {
 			calcSig = DigestFilter.calculateSignature(url, mvm, a.getApiSecret());

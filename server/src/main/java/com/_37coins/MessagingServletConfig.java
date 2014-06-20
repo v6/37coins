@@ -17,6 +17,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import me.moocar.logbackgelf.GelfAppender;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import net.spy.memcached.MemcachedClient;
 
 import org.apache.shiro.guice.web.GuiceShiroFilter;
@@ -418,7 +421,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             }
             
             @Provides @Singleton @SuppressWarnings("unused")
-            public ResourceBundleFactory getResourceBundle(com._37coins.cache.Cache cache, ResourceBundleClient client){
+            public ResourceBundleFactory getResourceBundle(@Named("local") com._37coins.cache.Cache cache, ResourceBundleClient client){
                 return new ResourceBundleFactory(MessagingServletConfig.activeLocales, client, cache);
             }
 			
@@ -430,6 +433,23 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 						.addTransportAddress(new InetSocketTransportAddress(
 								MessagingServletConfig.elasticSearchHost, 9300));
 			}
+			
+	        @Named("local")
+            @Provides @Singleton @SuppressWarnings("unused")
+            public Cache provideHourCache(){
+                //Create a singleton CacheManager using defaults
+                CacheManager manager = CacheManager.create();
+                //Create a Cache specifying its configuration.
+                net.sf.ehcache.Cache localCache = new net.sf.ehcache.Cache(new CacheConfiguration("hour", 1000)
+                    .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
+                    .eternal(false)
+                    .timeToLiveSeconds(7200)
+                    .timeToIdleSeconds(3600)
+                    .diskExpiryThreadIntervalSeconds(0));
+                manager.addCache(localCache);
+                Cache cache = new EhCacheWrapper(localCache);
+                return cache;
+            }
         
         	@Provides @Singleton @SuppressWarnings("unused")
         	public Cache provideCache() throws IOException{
