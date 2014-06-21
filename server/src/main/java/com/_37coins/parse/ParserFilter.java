@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +25,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.btc4all.webfinger.WebfingerClient;
+import org.btc4all.webfinger.WebfingerClientException;
 import org.btc4all.webfinger.pojo.JsonResourceDescriptor;
 import org.btc4all.webfinger.pojo.Link;
 import org.joda.money.BigMoney;
@@ -218,7 +218,7 @@ public class ParserFilter implements Filter {
 						bitcoinAddr = l.getHref().toString();
 					}
 				}
-			}catch(IOException| URISyntaxException e){
+			}catch(WebfingerClientException e){
 				log.error("parser exception",e);
 				e.printStackTrace();
 			}
