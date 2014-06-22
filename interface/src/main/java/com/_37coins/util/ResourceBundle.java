@@ -37,7 +37,8 @@ public class ResourceBundle {
     }
     
     public String getString(String key){
-        return getStringList(key).get(0);
+        List<String> rv = getStringList(key);
+        return (null!=rv)?getStringList(key).get(0):null;
     }
 
     @SuppressWarnings("unchecked")

@@ -22,12 +22,15 @@ define({
         "gwBtn" : "Open a Gateway"
     },
     "title" : {
+        "wildcards" : ["confSignup","confReset","account"],
         "t-index" : "37coins",
-        "t-merchant" : ""
+        "t-notFound" : "37coins - not Found",
+        "t-account-*" : "37coins Account"
     },
     "desc" : {
         "d-index" : "A Bitcoin Wallet for the Low-teched and Unbanked. It makes financial transactions as simple as sending a text.",
-        "d-merchant" : ""
+        "d-notFound" : "This page does not exist",
+        "d-account-*" : "An account page"
     },
     "email" : {
         "ResetSubject" : "Password Reset",

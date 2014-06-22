@@ -36,6 +36,7 @@ import freemarker.template.TemplateException;
 @Path(IndexResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class IndexResource {
+    public final static String WILDCARDS = "wildcards";
     public final static String RES_PATH = "resPath";
     public final static String BASE_PATH = "basePath";
     public final static String TRACK_ID = "gaTrackingId";
@@ -93,16 +94,32 @@ public class IndexResource {
             locale = rbf.getActiveLocales().get(0);
         }
         data.put(LANG, locale.toString());
-        
+        ResourceBundle rb = rbf.getBundle(locale, "labels");
         //deal with description
         String key = "";
-        for (int i = segmentCount; i < segments.size(); i++)
-            key = (segments.get(i).toString().length()>0)?key + "-" + segments.get(i):key;
-        key = (key.length()<2)?"-index":key; 
-        ResourceBundle rb = rbf.getBundle(locale, "labels");
-        data.put(DESC, rb.getString("d"+key));
-        data.put(TITLE, rb.getString("t"+key));
-        
+        String parentSegment = null;
+        List<String> wildcardSegments = rb.getStringList(WILDCARDS);
+        for (int i = segmentCount; i < segments.size(); i++){
+            String segment = (segments.get(i).toString().length()>0)?segments.get(i).toString():null;
+            if (null!=parentSegment){
+                for (String wildcard : wildcardSegments){
+                    if (wildcard.equals(parentSegment)){
+                        segment = "*";
+                    }
+                }
+            }
+            key = (null!=segment)?key + "-" + segment:key;
+            parentSegment = segment;
+        }
+        key = (key.length()<2)?"-index":key;
+        String desc = rb.getString("d"+key);
+        if (null==desc)
+            desc = rb.getString("d-index");
+        String title = rb.getString("t"+key);
+        if (null==title)
+            title = rb.getString("t-index");
+        data.put(DESC, desc);
+        data.put(TITLE, title);
         return data;
 	}
 	
@@ -124,13 +141,15 @@ public class IndexResource {
 
 	@GET
 	public Response index(@HeaderParam("Accept-Language") String lng, @Context UriInfo uriInfo){
+	    Map<String,Object> payload = prepare(lng, uriInfo, lookupService, httpReq, rbf);
 		DataSet ds = new DataSet()
 			.setService("index.html")
-			.setPayload(prepare(lng, uriInfo, lookupService, httpReq, rbf));
+			.setPayload(payload);
 		String rsp;
 		try {
 			rsp = htmlFactory.processTemplate(ds, null);
 		} catch (IOException | TemplateException e) {
+		    e.printStackTrace();
 			throw new WebApplicationException("template not loaded",
 					javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR);
 		}
