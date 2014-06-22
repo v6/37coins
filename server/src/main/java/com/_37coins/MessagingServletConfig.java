@@ -242,7 +242,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-            	filter("/parser/*").through(DigestFilter.class); //allow directory access
+            	filter("/parser/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
             	filter("/account*").through(PersistenceFilter.class); //allow directory access
             	filter("/email/*").through(PersistenceFilter.class); //allow directory access
@@ -261,6 +261,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			}
 			
 	        @Provides @Singleton @SuppressWarnings("unused")
+            public EnvayaFilter getEnvayaFilter() {
+                return new EnvayaFilter(MessagingServletConfig.basePath);
+            }
+			
+	        @Provides @SuppressWarnings("unused")
             public ParserClient getParserClient(CommandParser commandParser, GoogleAnalytics ga) {
                 return new ParserClient(commandParser, ga, MessagingServletConfig.digestToken);
             }

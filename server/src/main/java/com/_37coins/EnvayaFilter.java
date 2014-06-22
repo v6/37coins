@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -17,19 +16,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.NameValuePair;
 import org.restnucleus.WrappedRequest;
+import org.restnucleus.dao.GenericRepository;
+import org.restnucleus.dao.RNQuery;
 
-import com._37coins.EnvayaClient;
+import com._37coins.persistence.dao.Gateway;
 import com._37coins.pojo.EnvayaRequest;
 
 @Singleton
 public class EnvayaFilter implements Filter {
-    
-    private String secret;
     private String basePath;
     
-    @Inject
-    public EnvayaFilter(String secret, String basePath) {
-        this.secret = secret;
+    public EnvayaFilter(String basePath) {
         this.basePath = basePath;
     }
 
@@ -52,9 +49,14 @@ public class EnvayaFilter implements Filter {
         if (httpReq.getMethod().equalsIgnoreCase("POST") || httpReq.getMethod().equalsIgnoreCase("PUT")){
             envayaRequest = EnvayaRequest.fromBody(wrappedRequest.getInputStream());
         }
-        httpReq.setAttribute("er", envayaRequest);
+        wrappedRequest.setAttribute("er", envayaRequest);
+        String p = httpReq.getPathInfo().substring(1,httpReq.getPathInfo().length()-1);
+        String cn = p.substring(p.indexOf("/")+1, p.lastIndexOf("/"));
+        GenericRepository dao = (GenericRepository)httpReq.getAttribute("gr");
+        wrappedRequest.setAttribute("gr", dao);
+        Gateway g = dao.queryEntity(new RNQuery().addFilter("cn", cn), Gateway.class);
         try {
-            calcSig = EnvayaClient.calculateSignature(url, (null!=envayaRequest)?envayaRequest.toMap():new ArrayList<NameValuePair>(), secret);
+            calcSig = EnvayaClient.calculateSignature(url, (null!=envayaRequest)?envayaRequest.toMap():new ArrayList<NameValuePair>(), g.getApiSecret());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
