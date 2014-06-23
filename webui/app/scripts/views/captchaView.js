@@ -1,14 +1,15 @@
 define([
 	'backbone',
 	'hbs!tmpl/captchaView_tmpl',
-	'recaptcha'
+	'recaptcha',
+	'i18n!nls/labels'
 ],
-function( Backbone, CaptchaTmpl, Recaptcha) {
+function( Backbone, CaptchaTmpl, Recaptcha, myLabels) {
     'use strict';
 
 	/* Return a ItemView class definition */
 	return Backbone.Marionette.ItemView.extend({
-
+		templateHelpers: function(){return {s: myLabels};},
 		initialize: function(opt) {
 			this.next = opt.next;
 			this.controller = opt.controller;

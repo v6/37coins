@@ -8,6 +8,6 @@ function(Backbone, AboutTmpl, myLabels) {
     return Backbone.Marionette.ItemView.extend({
         template: AboutTmpl,
         className: 'static',
-        templateHelpers: function(){return {l: myLabels};},
+        templateHelpers: function(){return {l: myLabels};}
     });
 });

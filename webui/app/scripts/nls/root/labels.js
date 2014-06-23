@@ -8,6 +8,43 @@ define({
         "role3" : "Developer",
         "role4" : "Designer"
     },
+    "accountLayout" : {
+        "expl" : "Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet "
+    },
+    "balanceView" : {
+        "balH2" : "Account Balance",
+        "bal" : "Your account balance is",
+        "amountLbl" : "Withdrawal amount:",
+        "amountPh" : "Enter amount",
+        "addressLbl" : "Withdrawal address:",
+        "addressPh" : "Enter withdrawal address",
+        "withdrawalBtn" : "Withdrawal",
+        "error" : "Communitcation Error!",
+        "success" : "Request Submitted."
+    },
+    "captchaView" : {
+        "captchaH2" : "Verify Captcha!",
+        "captcha" : "Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.",
+        "error" : "Incorrect Solution! Try again.",
+        "captchaBtn" : "Done!"
+    },
+    "cmdHelpL" : {
+        "h1" : "SMSwallet Help",
+        "refH2" : "Quick Reference",
+        "cmdH2" : "SMSwallet Commands",
+        "cmd" : "Commands are not case-sensitve and are sent to the gateways via SMS/text.",
+        "w" : "Recognized shorthand or misspellings: ",
+        "addr" : {
+            "h4" : "ADDRESS",
+            "p1" : "The ADDRESS command returns the most recent bitcoin address associated to your SMSwallet account.",
+            "p2" : "With this bitcoin address, you can deposit bitcoins from another bitcoin wallet. If you don’t have any bitcoins, you can purchase them from"
+        },
+        "bal" : {
+            "h4" : "BALANCE",
+            "p1" : "The BALANCE command returns the current bitcoin value of your SMSwallet.",
+            "p2" : "The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of bitcoins that you can transfer to another SMSwallet."
+        }
+    },
     "indexLayout" : {
         "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive Bitcoin anywhere in the World. No internet or smartphone required.",
         "wallet" : "After setting up your account, you will receive an automated text message from a gateway. To control your account, send any of these commands to that phone number via SMS.",

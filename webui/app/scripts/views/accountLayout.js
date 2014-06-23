@@ -5,12 +5,13 @@ define([
     'views/commandsView',
     'views/accountHeadlineView',
     'webfinger',
+    'i18n!nls/labels'
 ],
-function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger) {
+function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger, myLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
         template: AccountLayout,
-
+        templateHelpers: function(){return {s: myLabels};},
         regions: {
             commands: '#smsCommands',
             header: '#accountHeadline'

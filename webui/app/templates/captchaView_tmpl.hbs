@@ -1,13 +1,13 @@
 <div class="row">
     <div class="col-sm-12">
-	  <h2 class="form-signin-heading">Verify Captcha!</h2>
-	  <p>Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.</p>
+	  <h2 class="form-signin-heading">{{s.captchaView.captchaH2}}</h2>
+	  <p>{{s.captchaView.captcha}}</p>
 	  <div class="alert alert-danger alert-dismissable">
 	    <button type="button" class="close" aria-hidden="true">&times;</button>
-	    <strong>Error!</strong> Incorrect Solution! Try again.
+	    <strong>Error!</strong> {{s.captchaView.error}}
 	  </div>
 	  <div id="recaptcha_div">loading captcha ...</div>
-	    <button class="btn btn-lg btn-primary btn-block" type="submit">Done!</button>
+	    <button class="btn btn-lg btn-primary btn-block" type="submit">{{s.captchaView.captchaBtn}}</button>
 	  </div>
 	</div>
 </div>
