@@ -101,7 +101,7 @@ public class IndexResource {
         List<String> wildcardSegments = rb.getStringList(WILDCARDS);
         for (int i = segmentCount; i < segments.size(); i++){
             String segment = (segments.get(i).toString().length()>0)?segments.get(i).toString():null;
-            if (null!=parentSegment){
+            if (null!=parentSegment && null!=wildcardSegments){
                 for (String wildcard : wildcardSegments){
                     if (wildcard.equals(parentSegment)){
                         segment = "*";

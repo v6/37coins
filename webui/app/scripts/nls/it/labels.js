@@ -5,7 +5,7 @@ define({
         "RegisterSubject" : "Verifica Email",
         "Register" : "Apri questo link per verificare il tuo indirizzo email: {0}",
         "GatewayAlertSubject" : "Gateway offline",
-        "GatewayAlert" : "La tua Gateway 37coins andato offline a pochi minuti fa. Si prega di operazioni di ripristino. Vi informeremo i clienti, dopo un fermo prolungato.", // Mathan - 20140618 21:26:37  I used google translate here. 
+        "GatewayAlert" : "La tua Gateway 37coins andato offline a pochi minuti fa. Si prega di operazioni di ripristino. Vi informeremo i clienti, dopo un fermo prolungato.",
         "Byebye" : "Arrivederci a presto,\r\n{0}"
     },
     "commands" : {
@@ -14,7 +14,7 @@ define({
         "DepositReqCmd" : ["addr","deposit","address"],
         "BalanceCmd" : ["bal","balance"],
         "TransactionsCmd" : ["txns","transactions"],
-        "WithdrawalReqCmd" : ["send","sending","sent"], // Mathan: Note to translators: The SEND command appears a lot in the rest of this file. Write down the relationship before translating, so you can refer to it later if there is not a proper translation elsewhere. 
+        "WithdrawalReqCmd" : ["send","sending","sent"],
         "VoiceCmd" : ["voice"],
         "ChargeCmd" : ["req","request","charge"],
         "ProductCmd" : ["prod","product"],

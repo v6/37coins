@@ -68,6 +68,7 @@ function( Backbone, Communicator, HeaderView, NavView, FooterView) {
             $('div#content').css('padding-top','5px');
             $('div#footer').remove();
         }
+        $('body').attr('style', '');
         this.router = new options.pageController.Router({
             controller: options.pageController, // wire-up the start method
             app:App
