@@ -153,7 +153,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				public FiatPriceProvider provideFiatPrices(Cache cache){
-	                return new FiatPriceProvider(cache, "http://api.bitcoinaverage.com/ticker/global/");
+	                return new FiatPriceProvider(cache, MessagingServletConfig.tickerPath);
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
