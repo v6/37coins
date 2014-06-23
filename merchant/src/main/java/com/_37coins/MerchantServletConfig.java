@@ -252,7 +252,7 @@ public class MerchantServletConfig extends GuiceServletContextListener {
 	        
             @Provides @Singleton @SuppressWarnings("unused")
             public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
-                return new MessageFactory(servletContext, rbf);
+                return new MessageFactory(servletContext, rbf, 1000, "mBTC");
             }
 			
             @Provides @Singleton @SuppressWarnings("unused")

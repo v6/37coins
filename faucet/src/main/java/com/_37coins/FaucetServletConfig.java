@@ -79,7 +79,7 @@ public class FaucetServletConfig extends GuiceServletContextListener {
             }
             @Provides @Singleton @SuppressWarnings("unused")
             FiatPriceProvider provideFiatPrices(Cache cache){
-                return new FiatPriceProvider(cache);
+                return new FiatPriceProvider(cache, "http://api.bitcoinaverage.com/ticker/global/");
             }});
         return injector;
     }

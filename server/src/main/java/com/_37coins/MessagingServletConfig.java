@@ -117,6 +117,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String digestToken;
 	public static String adminCns;
 	public static String s3Path;
+	public static int unitFactor;
+	public static String unitName;
 	public static List<Locale> activeLocales;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
 	public static Injector injector;
@@ -156,6 +158,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		digestToken = System.getProperty("hmacToken");
 		adminCns = System.getProperty("adminCns");
 		s3Path = System.getProperty("s3Path");
+	    unitFactor = (null!=System.getProperty("unitFactor"))?Integer.parseInt(System.getProperty("unitFactor")):1000;
+	    unitName = (null!=System.getProperty("unitName"))?System.getProperty("unitName"):"mBTC";
 		String locales = System.getProperty("activeLocales");
 		List<String> localeList = Arrays.asList(locales.split(","));
 		activeLocales = new ArrayList<>();
@@ -292,7 +296,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
-			    return new MessageFactory(servletContext, rbf);
+			    return new MessageFactory(servletContext, rbf,MessagingServletConfig.unitFactor,MessagingServletConfig.unitName);
 			}
 			
             @Provides @Singleton @SuppressWarnings("unused")
@@ -382,7 +386,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			FiatPriceProvider provideFiatPrices(Cache cache){
-				return new FiatPriceProvider(cache);
+				return new FiatPriceProvider(cache, "http://api.bitcoinaverage.com/ticker/global/");
 			}
 			
 			@Provides @Singleton @SuppressWarnings("unused")

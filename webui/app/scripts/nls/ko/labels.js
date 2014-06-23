@@ -42,7 +42,7 @@ define({
         "Help" : "{0} 명령: 잔액조회, 주소, 송금/요청 <금액> <받는이> [서술], 확인 <언급>", 
         "Buy" : "Your number has been added as a buyer.",
         "FormatError" : "당신의 요청이 명확하지 않습니다. 메세지를 확인하시고 다시 요청하세요.",
-        "InsufficientFunds" : "잔액부족! 균형:\r\n{0} mBTC, 이 필요합니다: {1} mBTC.,\r\nrequired {2}mBTC{3}.\r\nReply ADDR for Bitcoin deposit address",
+        "InsufficientFunds" : "잔액부족! 균형:\r\n{0} mBTC, 이 필요합니다: {1} mBTC.,\r\nrequired {2}mBTC{3}.",
         "UnknownCommand" : "You have sent an unknown command. Reply HELP or {0}",
         "Timeout" : "Confirmation response not received in time. Transaction canceled.",
         "TransactionFailed" : "Transaction failed due to an unknown reason.",

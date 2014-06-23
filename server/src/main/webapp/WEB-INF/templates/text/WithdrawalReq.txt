@@ -27,8 +27,8 @@
 <#assign dest = "">
 </#if>
 <#if payload.comment??>
-${resBundle("WithdrawalReqPay",payload.miliAmount?string("#,##0.###"),fiat,dest,payload.comment)}
+${resBundle("WithdrawalReqPay",(payload.amount*unitFactor)?string("#,##0.###"),fiat,dest,payload.comment,unitName)}
 <#else>
-${resBundle("WithdrawalReq",payload.miliAmount?string("#,##0.###"),fiat,dest)}
+${resBundle("WithdrawalReq",(payload.amount*unitFactor)?string("#,##0.###"),fiat,dest,unitName)}
 </#if>
-${resBundle("WithdrawalReqIstr",payload.confKey)}
+${resBundle("WithdrawalReqIstr",payload.confKey,unitName)}

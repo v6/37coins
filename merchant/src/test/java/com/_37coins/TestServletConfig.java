@@ -59,7 +59,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            
 	            @Provides @Singleton @SuppressWarnings("unused")
 	            public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
-	                return new MessageFactory(rbf);
+	                return new MessageFactory(null,rbf,1000,"mBTC");
 	            }
 	            
 	            @Provides @Singleton @SuppressWarnings("unused")

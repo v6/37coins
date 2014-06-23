@@ -1,6 +1,6 @@
 <#setting locale=locale>
 <#function mili x>
-  <#return x * 1000>
+  <#return x * unitFactor>
 </#function>
 <#if payload?has_content>
 <#list payload?sort_by("time")?reverse?chunk(3)?first as t>

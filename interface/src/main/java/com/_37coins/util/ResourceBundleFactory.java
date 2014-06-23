@@ -6,6 +6,7 @@ import java.util.Locale;
 import com._37coins.cache.Cache;
 
 public class ResourceBundleFactory {
+    public static final String CLASS_NAME = "labels";
     private List<Locale> activeLocales;
     private final Cache cache;
     private final ResourceBundleClient client;

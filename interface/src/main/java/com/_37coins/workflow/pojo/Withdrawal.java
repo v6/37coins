@@ -2,7 +2,6 @@ package com._37coins.workflow.pojo;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -53,11 +52,6 @@ public class Withdrawal {
 
 	public BigDecimal getAmount() {
 		return amount;
-	}
-	
-	@JsonIgnore
-	public BigDecimal getMiliAmount() {
-		return amount.multiply(new BigDecimal(1000));
 	}
 
 	public Withdrawal setAmount(BigDecimal amount) {
@@ -121,11 +115,6 @@ public class Withdrawal {
 
 	public BigDecimal getBalance() {
 		return balance;
-	}
-	
-	@JsonIgnore
-	public BigDecimal getMiliBalance() {
-		return balance.multiply(new BigDecimal(1000));
 	}
 
 	public Withdrawal setBalance(BigDecimal balance) {

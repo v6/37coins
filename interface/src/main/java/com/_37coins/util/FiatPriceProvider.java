@@ -30,7 +30,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FiatPriceProvider {
-	public static final String TICKER_URL = "http://api.bitcoinaverage.com/ticker/global/";
 	public static Logger log = LoggerFactory.getLogger(FiatPriceProvider.class);
 	
 	final private Cache cache;
@@ -39,20 +38,15 @@ public class FiatPriceProvider {
 	private CurrencyUnit cu;
 	
 	@Inject
-	public FiatPriceProvider(Cache cache){
+	public FiatPriceProvider(Cache cache, String url){
 		this.cache = cache;
-		this.url = TICKER_URL;
+		this.url = url;
 	}
 	
 	public FiatPriceProvider(BigDecimal rate, CurrencyUnit cu){
 		this.rate = rate;
 		this.cu = cu;
 		this.cache = null;
-	}
-	
-	public FiatPriceProvider(Cache cache, String url){
-		this.cache = cache;
-		this.url = url;
 	}
 	
 	public PriceTick getLocalCurValue(Locale locale){

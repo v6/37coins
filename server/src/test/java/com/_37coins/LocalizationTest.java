@@ -37,6 +37,7 @@ public class LocalizationTest {
 	
 	DataSet rsp;
 	MessageFactory ef;
+	FiatPriceProvider fiatPriceProvider;
 	
 	@Before
 	public void start(){
@@ -46,14 +47,14 @@ public class LocalizationTest {
 		//.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setTo(new MessageAddress()
 			.setAddress("+491606941382"));
-        
+        fiatPriceProvider = new FiatPriceProvider(null, "http://api.bitcoinaverage.com/ticker/global/");
 		List<Locale> activeLocales = new ArrayList<>();
 		activeLocales.add(new Locale("en"));
 		activeLocales.add(new Locale("de"));
 		activeLocales.add(new Locale("ru"));
 		activeLocales.add(new Locale("es"));
         ResourceBundleClient client = new ResourceBundleClient("http://localhost:9000"+"/scripts/nls/");
-		ef = new MessageFactory(new ResourceBundleFactory(activeLocales, client, null));
+		ef = new MessageFactory(null,new ResourceBundleFactory(activeLocales, client, null),1000,"mBTC");
 	}
 	
 	//matches all locales onto what plivo has available
@@ -186,7 +187,7 @@ public class LocalizationTest {
 	@Test
 	public void test37coinsReiceiveNot() throws IOException, TemplateException {
 		rsp.setAction(Action.DEPOSIT_NOT)
-			.setFiatPriceProvider(new FiatPriceProvider(null))
+			.setFiatPriceProvider(fiatPriceProvider)
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("1.25"))
 				.setAmount(new BigDecimal("0.05")));
@@ -296,7 +297,7 @@ public class LocalizationTest {
 	@Test
 	public void test37coinsWithdrawalReq() throws IOException, TemplateException {
 		rsp.setAction(Action.WITHDRAWAL_CONF)
-			.setFiatPriceProvider(new FiatPriceProvider(null))
+			.setFiatPriceProvider(fiatPriceProvider)
 			.setPayload(new Withdrawal()
 				.setBalance(new BigDecimal("0.23"))
 				.setAmount(new BigDecimal("0.01"))

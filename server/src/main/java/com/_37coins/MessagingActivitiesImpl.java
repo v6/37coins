@@ -71,6 +71,9 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
 	@Inject
 	GenericRepository dao;
+	
+	@Inject
+	FiatPriceProvider fiatPriceProvider;
 
 	@Override
 	@ManualActivityCompletion
@@ -88,7 +91,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				}
 			}
 			if (rsp.getFiatPriceProvider()==null){
-				rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+				rsp.setFiatPriceProvider(fiatPriceProvider);
 			}
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 				mt.sendMessage(rsp);
@@ -153,7 +156,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 			if (w.getRate()!=null && w.getCurrencyCode()!=null){
 				rsp.setFiatPriceProvider(new FiatPriceProvider(new BigDecimal(w.getRate()),CurrencyUnit.of(w.getCurrencyCode())));
 			}else{
-				rsp.setFiatPriceProvider(new FiatPriceProvider(cache));
+				rsp.setFiatPriceProvider(fiatPriceProvider);
 			}
 			if (rsp.getTo().getAddressType() == MsgType.EMAIL){
 		        ManualActivityCompletionClientFactory manualCompletionClientFactory = new ManualActivityCompletionClientFactoryImpl(swfService);
@@ -228,8 +231,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	
 	@Override
 	public BigDecimal readRate(String curCode, BigDecimal amountBtc) {
-		FiatPriceProvider fpp = new FiatPriceProvider(cache);
-		return fpp.getLocalCurValue(amountBtc, CurrencyUnit.of(curCode)).getLast();
+		return fiatPriceProvider.getLocalCurValue(amountBtc, CurrencyUnit.of(curCode)).getLast();
 	}
 
 	@Override
@@ -256,8 +258,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
     public BigDecimal getLimit(String gateway, String mobile) {
         BigDecimal amount = null;
         try {
-            FiatPriceProvider fpp = new FiatPriceProvider(cache);
-            PriceTick pt = fpp.getLocalCurValue(new BigDecimal("1").setScale(8),new Locale("en","US"));
+            PriceTick pt = fiatPriceProvider.getLocalCurValue(new BigDecimal("1").setScale(8),new Locale("en","US"));
             amount = new BigDecimal("12.00").setScale(8).divide(pt.getLast().setScale(8),RoundingMode.HALF_UP).setScale(8);
         }catch(Exception e){
             e.printStackTrace();

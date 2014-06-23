@@ -71,7 +71,6 @@ public class TestServletConfig extends GuiceServletContextListener {
 	                filter("/*").through(GuiceShiroFilter.class);
 	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
-	            	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
 	            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
@@ -97,7 +96,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            }
 				
 				@Provides @Singleton @SuppressWarnings("unused")
-				MerchantClient provideProductsClient(){
+				MerchantClient provideMerchantClient(){
 				    return new MockMerchantClient("bla","bla");
 				}
 				
@@ -149,12 +148,12 @@ public class TestServletConfig extends GuiceServletContextListener {
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				public MessageFactory provideMessageFactory(ResourceBundleFactory rbf) {
-					return new MessageFactory(rbf);
+					return new MessageFactory(null,rbf,1000,"mBTC");
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				public FiatPriceProvider provideFiatPrices(Cache cache){
-					return new FiatPriceProvider(cache);
+	                return new FiatPriceProvider(cache, "http://api.bitcoinaverage.com/ticker/global/");
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")

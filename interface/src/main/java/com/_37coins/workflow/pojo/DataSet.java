@@ -110,6 +110,10 @@ public class DataSet {
 	
 	private TemplateModel resBundle;
 	
+	private String unitName;
+	
+	private int unitFactor;
+	
 	//########## UTILS
 
 	@Override
@@ -265,5 +269,27 @@ public class DataSet {
 		this.fiatPriceProvider = fiatPriceProvider;
 		return this;
 	}
+
+	@JsonIgnore
+    public String getUnitName() {
+        return unitName;
+    }
+
+    public DataSet setUnitName(String unitName) {
+        this.unitName = unitName;
+        return this;
+    }
+
+    @JsonIgnore
+    public int getUnitFactor() {
+        return unitFactor;
+    }
+
+    public DataSet setUnitFactor(int unitFactor) {
+        this.unitFactor = unitFactor;
+        return this;
+    }
+	
+	
 
 }

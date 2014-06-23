@@ -18,7 +18,6 @@ import com._37coins.util.TemplateStringModel;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
 import com._37coins.workflow.pojo.Signup;
-import com.google.inject.Inject;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -39,14 +38,13 @@ public class MessageFactory {
 	private final Configuration cfg;
 	private final ResourceBundleFactory resourceBundleFactory;
 	private ResourceBundle rb;
-	
-	@Inject
-	public MessageFactory(ResourceBundleFactory resourceBundleFactory) {
-		this(null, resourceBundleFactory);
-	}
+	private int unitFactor;
+	private String unitName;
 
-	public MessageFactory(ServletContext servletContext, ResourceBundleFactory resourceBundleFactory) {
+	public MessageFactory(ServletContext servletContext, ResourceBundleFactory resourceBundleFactory, int unitFactor, String unitName) {
 	    this.resourceBundleFactory = resourceBundleFactory;
+	    this.unitFactor = unitFactor;
+	    this.unitName = unitName;
 		cfg = new Configuration();
 		if (servletContext == null) {
 			try {
@@ -63,7 +61,9 @@ public class MessageFactory {
     
     private void prepare(DataSet rsp) throws MalformedURLException {
 		if (null == rsp.getResBundle()) {
-			rb = resourceBundleFactory.getBundle(rsp.getLocale(), "labels");
+		    rsp.setUnitFactor(unitFactor);
+		    rsp.setUnitName(unitName);
+			rb = resourceBundleFactory.getBundle(rsp.getLocale(), ResourceBundleFactory.CLASS_NAME);
 			rsp.setResBundle(new TemplateStringModel(rb));
 		}
 	}
@@ -123,6 +123,8 @@ public class MessageFactory {
 
 		// create html mail part
 		stringWriter = new StringWriter();
+        rsp.setUnitFactor(unitFactor);
+        rsp.setUnitName(unitName);
 		template.process(rsp, stringWriter);
 
 		stringWriter.flush();
