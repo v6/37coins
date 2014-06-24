@@ -40,7 +40,6 @@ define({
             "p2" : "With this bitcoin address, you can deposit bitcoins from another bitcoin wallet. If you don’t have any bitcoins, you can purchase them from"
         },
         "bal" : {
-            "h4" : "BALANCE",
             "p1" : "The BALANCE command returns the current bitcoin value of your SMSwallet.",
             "p2" : "The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of bitcoins that you can transfer to another SMSwallet."
         }
@@ -82,10 +81,10 @@ define({
         "SignupCmd" : ["signup"],
         "HelpCmd" : ["help","hlp"],
         "DepositReqCmd" : ["addr","deposit","adr","address","adress"],
-        "BalanceCmd" : ["bal","balance","blance","balnce"],
+        "BalanceCmd" : ["balance","bal","blance","balnce"],
         "TransactionsCmd" : ["txns","transactions","trans","tran"],
         "WithdrawalReqCmd" : ["send","sending","sent"],
-        "VoiceCmd" : ["voice","PIN"],
+        "VoiceCmd" : ["voice","pin"],
         "ChargeCmd" : ["req","request","charge"],
         "ProductCmd" : ["prod","product"],
         "PayCmd" : ["pay"],

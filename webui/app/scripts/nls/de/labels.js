@@ -12,7 +12,7 @@ define({
         "SignupCmd" : ["signupDE"],
         "HelpCmd" : ["hilfe","hilf"],
         "DepositReqCmd" : ["depot","adresse","adr","einzahlen"],
-        "BalanceCmd" : ["bil","bilanz","saldo","guthaben","haben","kontostand"],
+        "BalanceCmd" : ["bilanz","bil","saldo","guthaben","haben","kontostand"],
         "TransactionsCmd" : ["transaktionen","umsätze","umsatz"],
         "WithdrawalReqCmd" : ["sende","schick","schicken"],
         "VoiceCmd" : ["anruf","pin"],
