@@ -1,5 +1,6 @@
 {
   "name": "tmp",
+  "description": "This is a client that allows users to register gateway accounts, see available gateways, and learn about the 37coins project.",
   "version": "0.0.0",
   "dependencies": {
     "bootstrap-sass-official": "3.1.1",
