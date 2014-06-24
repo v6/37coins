@@ -18,6 +18,7 @@ import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.filter.PersistenceFilter;
+import org.restnucleus.filter.QueryFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
 import com._37coins.cache.Cache;
@@ -69,6 +70,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            protected void configureServlets(){
 	                filter("/*").through(CorsFilter.class);
 	                filter("/*").through(GuiceShiroFilter.class);
+	                filter("/api/*").through(QueryFilter.class);
 	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset

@@ -32,6 +32,7 @@ import org.restnucleus.PersistenceConfiguration;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
 import org.restnucleus.filter.PersistenceFilter;
+import org.restnucleus.filter.QueryFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,6 +245,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             	filter("/envayasms/*").through(PersistenceFilter.class);
             	filter("/envayasms/*").through(EnvayaFilter.class);
             	filter("/.well-known*").through(PersistenceFilter.class);
+            	filter("/api/*").through(QueryFilter.class);
             	filter("/api/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset

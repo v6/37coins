@@ -51,7 +51,8 @@ function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl  ) {
 			'click .close': 'handleClose',
 		},
 
-		handleReset: function(){
+		handleReset: function(e){
+			e.preventDefault();
 			this.$('button.btn-primary').button('loading');
 			var user = this.$('#exampleInputEmail1').val();
 			this.model.set('email',user);
@@ -79,8 +80,8 @@ function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl  ) {
 			        },
 			        errorElement: 'span',
 			        errorClass: 'help-block',
-			        submitHandler: function() {
-						self.handleReset();
+			        submitHandler: function(a,e) {
+						self.handleReset(e);
 			        },
 			        errorPlacement: function(error, element) {
 			            error.insertAfter(element);

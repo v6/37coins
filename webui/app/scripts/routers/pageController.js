@@ -9,11 +9,15 @@ define(['backbone',
     'models/balanceModel',
     'models/settingsModel',
     'collections/gatewayCollection',
+    'collections/accountCollection',
     'views/indexLayout',
     'views/indexHeaderLayout',
     'views/loginView',
     'views/gatewayView',
     'views/gatewayCollectionView',
+    'views/adminLayout',
+    'views/adminAccountCollection',
+    'views/adminAccountView',
     'views/faqView',
     'views/aboutView',
     'views/accountLayout',
@@ -42,7 +46,7 @@ define(['backbone',
     'routeFilter',
     'views/merchantView',
     'i18n'
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, AccountCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, AdminLayout, AdminAccountCollection, AdminAccountView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
     'use strict';
 
     var Controller = {};
@@ -59,6 +63,7 @@ define(['backbone',
             ':lng/gateways': 'showGateway',
             ':lng/balance': 'showBalance',
             ':lng/faq': 'showFaq',
+            ':lng/admin': 'showAdmin',
             ':lng/confSignup/:token': 'confirmSignUp',
             ':lng/confReset/:token': 'confirmReset',
             ':lng/help/SMSgateway': 'showFaq',
@@ -79,6 +84,7 @@ define(['backbone',
         before:{
             '': 'loadLibPhone',
             ':lng/': 'loadLibPhone',
+            ':lng/admin': 'showLogin',
             ':lng/account/:mobile': 'loadLibPhone',
             ':lng/signupWallet': 'loadLibPhone',
             ':lng/signinWallet': 'loadLibPhone',
@@ -243,6 +249,14 @@ define(['backbone',
         Communicator.mediator.trigger('app:verify');
     };
 
+    Controller.showAdmin = function() {
+        var layout = new AdminLayout();
+        Communicator.mediator.trigger('app:show', layout);
+        var collection = new AccountCollection();
+        layout.account.show(new AdminAccountCollection({collection:collection}));
+        collection.fetch();
+    };
+
     Controller.showFaq = function() {
         var view = new FaqView();
         Communicator.mediator.trigger('app:show', view);
@@ -307,13 +321,13 @@ define(['backbone',
         Communicator.mediator.trigger('app:show',contentView);
     };
     Controller.showSignupWallet = function() {
-        var layout = new SignupWalletLayout();
+        var layout = new SignupWalletLayout({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',layout);
         var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         layout.mobileInput.show(mobileInput);
     };
     Controller.showSigninWallet = function() {
-        var layout = new SigninWalletLayout();
+        var layout = new SigninWalletLayout({model:new Backbone.Model({l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',layout);
         var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         layout.mobileInput.show(mobileInput);

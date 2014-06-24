@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -67,6 +68,7 @@ public class GatewayResource {
 	private static final BigDecimal FEE = new BigDecimal("0.0007").setScale(8);
 	
 	private final GenericRepository dao;
+	private final RNQuery q;
 	final private Cache cache;
 	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	final private MessageFactory messageFactory;
@@ -78,6 +80,7 @@ public class GatewayResource {
 			MessageFactory messageFactory) {
 		HttpServletRequest httpReq = (HttpServletRequest)request;
 		dao = (GenericRepository)httpReq.getAttribute("gr");
+		q = (RNQuery)httpReq.getAttribute(RNQuery.QUERY_PARAM);
 		this.nonTxFactory = nonTxFactory;
 		this.messageFactory = messageFactory;
 		this.mailClient = mailClient;
@@ -118,8 +121,15 @@ public class GatewayResource {
 		return gu;
 	}
 	
+    @GET
+    @Path("/admin/accounts")
+    @RolesAllowed({"admin"})
+    public List<Account> ListAccounts(){
+        return dao.queryList(q, Account.class);
+    }
+	
     @DELETE
-    @Path("/admin/{mobile}")
+    @Path("/admin/accounts/{mobile}")
     @RolesAllowed({"admin"})
     public void deleteAccount(@PathParam("mobile")String mobile){
         dao.queryDelete(new RNQuery().addFilter("mobile", "+"+mobile), Account.class);
