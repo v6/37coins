@@ -1,11 +1,13 @@
 define([
     'backbone',
     'hbs!tmpl/balanceView_tmpl',
+    'i18n!nls/labels'
 ],
-function(Backbone, BalanceTmpl) {
+function(Backbone, BalanceTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: BalanceTmpl,
+        templateHelpers: function(){return {s: myLabels};},
         className: 'gwLayout',
         initialize: function() {
             this.model.on('error', this.onError, this);
