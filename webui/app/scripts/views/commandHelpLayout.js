@@ -7,7 +7,9 @@ function(Backbone, HelpTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
         template: HelpTmpl,
-        templateHelpers: function(){return {s: myLabels};},
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
         regions: {
             commands: '#smsCommands'
         },

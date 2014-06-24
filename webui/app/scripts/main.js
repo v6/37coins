@@ -24,6 +24,14 @@ function ( Backbone, App, PageController ) {
             }
         }
     };
+    window.helpers = function(labels){
+        return {
+            s: labels,
+            up: function(str){
+                return str.toUpperCase();
+            }
+        };
+    };
     var options = {
         pageController: PageController
     };

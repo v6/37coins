@@ -70,7 +70,10 @@ require.config({
         intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
         userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
     },
-    waitSeconds: 0
+    waitSeconds: 0,
+    hbs:{
+        helpers: false
+    }
 });
 window.getLocale = function(){
     'use strict';
