@@ -48,6 +48,9 @@ define(['backbone',
     var Controller = {};
 
     // private module/app router  capture route and call start method of our controller
+    // Mathan Notes 20140624
+    // Make sure to pass in a new model object the language attribute to any views that need link localization. 
+    
     Controller.Router = Backbone.Marionette.AppRouter.extend({
         initialize: function(opt){
             this.app = opt.app;
@@ -313,7 +316,7 @@ define(['backbone',
         layout.mobileInput.show(mobileInput);
     };
     Controller.showSigninWallet = function() {
-        var layout = new SigninWalletLayout();
+        var layout = new SigninWalletLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         Communicator.mediator.trigger('app:show',layout);
         var mobileInput = new MobileInputView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
         layout.mobileInput.show(mobileInput);
