@@ -40,11 +40,13 @@ public class MessageFactory {
 	private ResourceBundle rb;
 	private int unitFactor;
 	private String unitName;
+	private String unitFormat;
 
-	public MessageFactory(ServletContext servletContext, ResourceBundleFactory resourceBundleFactory, int unitFactor, String unitName) {
+	public MessageFactory(ServletContext servletContext, ResourceBundleFactory resourceBundleFactory, int unitFactor, String unitName, String unitFormat) {
 	    this.resourceBundleFactory = resourceBundleFactory;
 	    this.unitFactor = unitFactor;
 	    this.unitName = unitName;
+	    this.unitFormat = unitFormat;
 		cfg = new Configuration();
 		if (servletContext == null) {
 			try {
@@ -63,6 +65,7 @@ public class MessageFactory {
 		if (null == rsp.getResBundle()) {
 		    rsp.setUnitFactor(unitFactor);
 		    rsp.setUnitName(unitName);
+		    rsp.setUnitFormat(unitFormat);
 			rb = resourceBundleFactory.getBundle(rsp.getLocale(), ResourceBundleFactory.CLASS_NAME);
 			rsp.setResBundle(new TemplateStringModel(rb));
 		}
@@ -125,6 +128,7 @@ public class MessageFactory {
 		stringWriter = new StringWriter();
         rsp.setUnitFactor(unitFactor);
         rsp.setUnitName(unitName);
+        rsp.setUnitFormat(unitFormat);
 		template.process(rsp, stringWriter);
 
 		stringWriter.flush();

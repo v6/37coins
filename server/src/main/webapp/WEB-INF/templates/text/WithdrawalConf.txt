@@ -9,12 +9,12 @@
 </#if>
 <#if payload.msgDest??>
 <#if payload.msgDest.address?length &lt; 12>
-${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string("#,##0.###"),fiat,payload.msgDest.address,unitName)}
+${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string(unitFormat),fiat,payload.msgDest.address,unitName)}
 <#else>
-${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string("#,##0.###"),fiat,payload.msgDest.address?substring(0,9)+"..",unitName)}
+${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string(unitFormat),fiat,payload.msgDest.address?substring(0,9)+"..",unitName)}
 </#if>
 <#else>
-${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string("#,##0.###"),fiat,payload.payDest.address?substring(0,9)+"..",unitName)}
+${resBundle("WithdrawalConf",(payload.amount*unitFactor)?string(unitFormat),fiat,payload.payDest.address?substring(0,9)+"..",unitName)}
 </#if>
 <#if payload.balance??>
 <#include "Balance.txt">

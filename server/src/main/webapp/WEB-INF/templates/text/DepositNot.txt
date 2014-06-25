@@ -7,4 +7,4 @@
 <#else>
 <#assign fiat = "">
 </#if>
-${resBundle("DepositNotify",(payload.amount*unitFactor)?string("#,##0.###"),fiat,unitName)}
+${resBundle("DepositNotify",(payload.amount*unitFactor)?string(unitFormat),fiat,unitName)}

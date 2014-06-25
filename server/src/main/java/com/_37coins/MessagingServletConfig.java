@@ -120,6 +120,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 	public static String s3Path;
 	public static int unitFactor;
 	public static String unitName;
+	public static String unitFormat;
 	public static String tickerPath;
 	public static List<Locale> activeLocales;
 	public static Logger log = LoggerFactory.getLogger(MessagingServletConfig.class);
@@ -163,6 +164,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		tickerPath = System.getProperty("tickerPath");
 	    unitFactor = (null!=System.getProperty("unitFactor"))?Integer.parseInt(System.getProperty("unitFactor")):1000;
 	    unitName = (null!=System.getProperty("unitName"))?System.getProperty("unitName"):"mBTC";
+	    unitFormat = (null!=System.getProperty("unitFormat"))?System.getProperty("unitFormat"):"#,##0.###";
 		String locales = System.getProperty("activeLocales");
 		List<String> localeList = Arrays.asList(locales.split(","));
 		activeLocales = new ArrayList<>();
@@ -300,7 +302,7 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			
 			@Provides @Singleton @SuppressWarnings("unused")
 			public MessageFactory getMessageFactory(ResourceBundleFactory rbf){
-			    return new MessageFactory(servletContext, rbf,MessagingServletConfig.unitFactor,MessagingServletConfig.unitName);
+			    return new MessageFactory(servletContext, rbf,MessagingServletConfig.unitFactor,MessagingServletConfig.unitName, MessagingServletConfig.unitFormat);
 			}
 			
             @Provides @Singleton @SuppressWarnings("unused")

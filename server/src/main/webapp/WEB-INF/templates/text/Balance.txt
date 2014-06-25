@@ -17,4 +17,4 @@
 <#else>
 <#assign inst = "">
 </#if>
-${resBundle("Balance",bal?string("#,##0.#####"),fiat,inst,unitName)}
+${resBundle("Balance",bal?string(unitFormat),fiat,inst,unitName)}

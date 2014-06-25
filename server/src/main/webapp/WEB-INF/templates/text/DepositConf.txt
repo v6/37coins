@@ -19,12 +19,12 @@
 </#if>
 <#if from??>
 <#if comment??>	
-${resBundle("DepositConfSndrMsg",(payload.amount*unitFactor)?string("#,##0.###"),fiat,from,comment,unitName)}
+${resBundle("DepositConfSndrMsg",(payload.amount*unitFactor)?string(unitFormat),fiat,from,comment,unitName)}
 <#else>
-${resBundle("DepositConfSndr",(payload.amount*unitFactor)?string("#,##0.###"),fiat,from,unitName)}
+${resBundle("DepositConfSndr",(payload.amount*unitFactor)?string(unitFormat),fiat,from,unitName)}
 </#if>		
 <#else>
-${resBundle("DepositConf",(payload.amount*unitFactor)?string("#,##0.###"),fiat,unitName)}
+${resBundle("DepositConf",(payload.amount*unitFactor)?string(unitFormat),fiat,unitName)}
 </#if>
 <#if payload.balance??>
 <#include "Balance.txt">

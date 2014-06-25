@@ -20,4 +20,4 @@
 <#assign bal = 0>
 <#assign balFiat ="">
 </#if>
-${resBundle("InsufficientFunds",bal?string("#,##0.#####"),balFiat,(payload.amount*unitFactor)?string("#,##0.###"),amtFiat,unitName)}
+${resBundle("InsufficientFunds",bal?string(unitFormat),balFiat,(payload.amount*unitFactor)?string(unitFormat),amtFiat,unitName)}

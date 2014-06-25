@@ -114,6 +114,8 @@ public class DataSet {
 	
 	private int unitFactor;
 	
+	private String unitFormat;
+	
 	//########## UTILS
 
 	@Override
@@ -289,7 +291,14 @@ public class DataSet {
         this.unitFactor = unitFactor;
         return this;
     }
-	
-	
+
+    public String getUnitFormat() {
+        return unitFormat;
+    }
+
+    public DataSet setUnitFormat(String unitFormat) {
+        this.unitFormat = unitFormat;
+        return this;
+    }
 
 }
