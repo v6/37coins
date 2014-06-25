@@ -1,7 +1,5 @@
 require.config({
 
-    baseUrl: '/scripts',
-
     /* starting point for application */
     deps: ['backbone.marionette', 'bootstrap', 'main'],
 
@@ -88,6 +86,7 @@ window.getLocale = function(){
     return locale;
 };
 require.config({
+    baseUrl: window.opt.resPath+'/scripts',
     locale: window.getLocale(),
     config: {
         'GA': {

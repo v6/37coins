@@ -31,8 +31,6 @@ define(['backbone',
     'views/signupWalletLayout',
     'views/signinWalletLayout',
     'views/resetView',
-    'views/headerSendView',
-    'views/commandSendView',
     'views/commandHelpLayout',
     'views/resetConfView',
     'views/signupConfView',
@@ -46,7 +44,7 @@ define(['backbone',
     'routeFilter',
     'views/merchantView',
     'i18n'
-], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, AccountCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, AdminLayout, AdminAccountCollection, AdminAccountView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, HeaderSendView, CommandSendView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
+], function(Backbone, Communicator, GA, LoginModel, AccountRequest, ResetRequest, ResetConf, SignupConf, BalanceModel, SettingsModel, GatewayCollection, AccountCollection, IndexLayout, IndexHeaderLayout, LoginView, GatewayView, GatewayCollectionView, AdminLayout, AdminAccountCollection, AdminAccountView, FaqView, AboutView, AccountLayout, AccountHeaderView, CommandsView, VerifyView, ValidateView, CaptchaView, LogoutView, SignupView, SignupWalletLayout, SigninWalletLayout, ResetView, CommandHelpLayout, ResetConfView, SignupConfView, BalanceView, FeeView, MobileInputView, GatewayLayout, NotFoundView, TermsView, PrivacyView, io, MerchantView,I18n) {
     'use strict';
 
     var Controller = {};
@@ -300,11 +298,6 @@ define(['backbone',
             script.src = window.opt.resPath + '/scripts/vendor/libphonenumbers.js';
             document.getElementsByTagName('head')[0].appendChild(script);
         }
-    };
-    Controller.showCommandSend = function() {
-        var headerView = new HeaderSendView({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
-        var contentView = new CommandSendView();
-        Communicator.mediator.trigger('app:show',contentView, headerView);
     };
     Controller.showCommandHelp = function() {
         var layout = new CommandHelpLayout({model:new Backbone.Model({resPath:window.opt.resPath,l:window.getLocale()})});
