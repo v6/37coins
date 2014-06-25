@@ -48,7 +48,6 @@ import com._37coins.web.PriceTick;
 import com._37coins.web.Seller;
 import com._37coins.workflow.pojo.DataSet;
 import com._37coins.workflow.pojo.DataSet.Action;
-import com._37coins.workflow.pojo.PaymentAddress;
 import com._37coins.workflow.pojo.Signup;
 import com._37coins.workflow.pojo.Withdrawal;
 import com.brsanthu.googleanalytics.GoogleAnalytics;
@@ -292,34 +291,6 @@ public class RestTest {
 		parserClient.join();
 		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.CHARGE);
 		Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
-		Assert.assertNotNull(ds.getCn());
-    }
-    
-    @Test
-	public void testWebfinger() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
-    	final DataSet ds = new DataSet();
-    	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
-		parserClient.start("+821039841234", "+821027423984", "+821027423984", "send 1 jangkim321@gmail.com", 8087,
-		new ParserAction() {
-			@Override
-			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
-			
-			@Override
-			public void handleWithdrawal(DataSet data) {
-				ds.setAction(data.getAction());
-				ds.setPayload(data.getPayload());
-				ds.setCn(data.getCn());
-			}
-			@Override
-			public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
-			@Override
-			public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
-		});
-		parserClient.join();
-		Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.WITHDRAWAL_REQ);
-		Withdrawal w = (Withdrawal)ds.getPayload();
-		Assert.assertEquals("19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh",w.getPayDest().getAddress());
-		Assert.assertEquals(PaymentAddress.PaymentType.BTC,w.getPayDest().getAddressType());
 		Assert.assertNotNull(ds.getCn());
     }
     
@@ -614,7 +585,7 @@ public class RestTest {
         .expect()
             .statusCode(403)
         .when()
-            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/821039841235");
+            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/accounts/821039841235");
         //try admin 
         given()
             .header(new Header("Authorization", "Basic "+admin))
@@ -622,7 +593,7 @@ public class RestTest {
         .expect()
             .statusCode(204)
         .when()
-            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/821039841235");
+            .delete(embeddedJetty.getBaseUri() + GatewayResource.PATH +"/admin/accounts/821039841235");
     }
 	
 	@Test

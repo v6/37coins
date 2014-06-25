@@ -70,66 +70,69 @@ public class ParserFilter implements Filter {
 
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
-	    HttpServletRequest httpReq = (HttpServletRequest) request;
-		// parse parameters
-		MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
-		DigestFilter.fromBody((WrappedRequest)request, map);
-		String from = map.getFirst("from");
-		String gateway = map.getFirst("gateway");
-		gateway = (null==gateway||gateway.length()<3)?null:gateway;
-		String message = map.getFirst("message");
-		String gwCn = map.getFirst("gwCn");
-		httpReq.setAttribute("gwCn", gwCn);
-		// Parse the locale
-		String acceptLng = httpReq.getHeader("Accept-Language");
-		Locale locale = DataSet.parseLocaleString(acceptLng);
-		// parse action
-		String url = httpReq.getRequestURL().toString();
-		String actionString = url.substring(
-				url.indexOf(ParserResource.PATH) + ParserResource.PATH.length() + 1, url.length());
-		try {
-			// parse message address
-			MessageAddress md = MessageAddress.fromString(from, gateway)
-					.setGateway(gateway);
-			//exclude all roaming requests
-			if (md.getAddressType() == MsgType.SMS 
-					&& !isFromSameCountry(md, gateway)){
-				respond(new ArrayList<DataSet>(), response);
-			}
-			//exclude non mobile numbers
-			if (md.getAddressType() == MsgType.SMS
-					&& !isMobileNumber(md)){
-				respond(new ArrayList<DataSet>(), response);
-			}
-			//set locale
-			if (md.getAddressType() == MsgType.SMS){
-				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
-				locale = new Locale("",rc);
-			}else if (null==locale){
-				locale = Locale.US;
-			}
-			// parse message into dataset
-			DataSet responseData = process(md, message, locale,Action.fromString(actionString));
-			List<DataSet> responseList = new ArrayList<>();
-			responseList.add(responseData);
-			//use it
-			if (responseData.getAction()==Action.UNKNOWN_COMMAND||CommandParser.reqCmdList.contains(responseData.getAction())){
-				httpReq.setAttribute("dsl", responseList);
-				chain.doFilter(httpReq, response);
-			}else{
-		        if (gwCn!=null){
-		            responseData.getTo().setGateway(gwCn);
-		            responseData.setGwCn(gwCn);
-		        }
-				respond(responseList,response);
-			}
-		} catch (Exception e) {
-			log.error("parser exception", e);
-			e.printStackTrace();
-			HttpServletResponse httpResponse = (HttpServletResponse) response;
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
+        HttpServletRequest httpReq = (HttpServletRequest) request;
+        DataSet responseData = null;
+        List<DataSet> responseList = null;
+        if (null==httpReq.getAttribute("pFlag")){
+            httpReq.setAttribute("pFlag", true);
+    		// parse parameters
+    		MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+    		DigestFilter.fromBody((WrappedRequest)request, map);
+    		String from = map.getFirst("from");
+    		String gateway = map.getFirst("gateway");
+    		gateway = (null==gateway||gateway.length()<3)?null:gateway;
+    		String message = map.getFirst("message");
+    		String gwCn = map.getFirst("gwCn");
+    		httpReq.setAttribute("gwCn", gwCn);
+    		// Parse the locale
+    		String acceptLng = httpReq.getHeader("Accept-Language");
+    		Locale locale = DataSet.parseLocaleString(acceptLng);
+    		// parse action
+    		String url = httpReq.getRequestURL().toString();
+    		String actionString = url.substring(
+    				url.indexOf(ParserResource.PATH) + ParserResource.PATH.length() + 1, url.length());
+    		try {
+    			// parse message address
+    			MessageAddress md = MessageAddress.fromString(from, gateway)
+    					.setGateway(gateway);
+    			//exclude all roaming requests
+    			if (md.getAddressType() == MsgType.SMS 
+    					&& !isFromSameCountry(md, gateway)){
+    				respond(new ArrayList<DataSet>(), response);
+    			}
+    			//exclude non mobile numbers
+    			if (md.getAddressType() == MsgType.SMS
+    					&& !isMobileNumber(md)){
+    				respond(new ArrayList<DataSet>(), response);
+    			}
+    			//set locale
+    			if (md.getAddressType() == MsgType.SMS){
+    				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+    				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
+    				locale = new Locale("",rc);
+    			}else if (null==locale){
+    				locale = Locale.US;
+    			}
+    			// parse message into dataset
+    			responseData = process(md, message, locale,Action.fromString(actionString));
+    			responseList = new ArrayList<>();
+    			responseList.add(responseData);
+            } catch (Exception e) {
+                log.error("parser exception", e);
+                e.printStackTrace();
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+    	      //use it
+            if ((responseData.getAction()==Action.UNKNOWN_COMMAND||CommandParser.reqCmdList.contains(responseData.getAction()))){
+                httpReq.setAttribute("dsl", responseList);
+                chain.doFilter(httpReq, response);
+            }else{
+                respond(responseList,response);
+            }
+    	}else{
+    	    chain.doFilter(request, response);
+    	}
 	}
 	
 	private boolean isMobileNumber(MessageAddress sender){
@@ -360,11 +363,12 @@ public class ParserFilter implements Filter {
 		if (data.getAction() == Action.BUY 
 				|| data.getAction() == Action.SELL) {
 			float price = 1f;
-			try{
-				price = Float.parseFloat(ca[1]);
-			}catch(Exception e){
-				log.error("parse float failed",e);
-			}
+			if (ca.length>1)
+    			try{
+    				price = Float.parseFloat(ca[1]);
+    			}catch(Exception e){
+    				log.error("parse float failed",e);
+    			}
 			data.setPayload(price);
 		}
 		if (data.getAction() == Action.CLAIM){

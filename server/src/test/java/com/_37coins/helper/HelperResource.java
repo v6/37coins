@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,14 +25,11 @@ public class HelperResource {
 	public static Logger log = LoggerFactory.getLogger(HelperResource.class);
 		
 	private final Cache cache;
-		
-	private final HttpServletRequest httpReq;
+
 
 	@Inject
-	public HelperResource(Cache cache,
-				ServletRequest request){
+	public HelperResource(Cache cache){
 			this.cache = cache;
-			httpReq = (HttpServletRequest)request;
 	}
 	
 	@GET
@@ -50,6 +45,12 @@ public class HelperResource {
 	@POST
 	public void clear(){
 		cache.flush();
+	}
+	
+	@GET
+	@Path("/all")
+	public String tick(){
+	    return "{\"KRW\": {\"24h_avg\": 594135.23,\"last\": 594135.23},\"EUR\": {\"24h_avg\": 434.85,\"ask\": 430.31,\"bid\": 427.93,\"last\": 428.65,\"timestamp\": \"Wed, 25 Jun 2014 01:59:53 -0000\",\"volume_btc\": 1490.44,\"volume_percent\": 5.31},  \"USD\": {\"24h_avg\": 591.57,\"ask\": 585.41,\"bid\": 582.18,\"last\": 583.16,\"timestamp\": \"Wed, 25 Jun 2014 01:59:53 -0000\",\"volume_btc\": 19208.09,\"volume_percent\": 68.42}}";
 	}
 	
 	@POST

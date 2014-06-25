@@ -24,6 +24,7 @@ import org.restnucleus.log.SLF4JTypeListener;
 import com._37coins.cache.Cache;
 import com._37coins.envaya.QueueClient;
 import com._37coins.helper.MockMerchantClient;
+import com._37coins.helper.WrapFilter;
 import com._37coins.merchant.MerchantClient;
 import com._37coins.parse.AbuseFilter;
 import com._37coins.parse.CommandParser;
@@ -64,7 +65,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 
 	@Override
 	protected Injector getInjector() {
-		final String restUrl = "http://localhost:8080";
+		final String restUrl = "http://localhost:8087";
 		 injector = Guice.createInjector(new ServletModule(){
 	            @Override
 	            protected void configureServlets(){
@@ -73,6 +74,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	                filter("/api/*").through(QueryFilter.class);
 	                filter("/api/*").through(PersistenceFilter.class);
 	            	filter("/envayasms/*").through(PersistenceFilter.class);
+	            	filter("/parser/*").through(WrapFilter.class);
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
 	            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
@@ -83,6 +85,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());
 	            	bind(ParserClient.class);
 	            	bind(QueueClient.class);
+	            	bind(WrapFilter.class);
 	        	}
 				
 				@Provides
@@ -155,7 +158,7 @@ public class TestServletConfig extends GuiceServletContextListener {
 				
 				@Provides @Singleton @SuppressWarnings("unused")
 				public FiatPriceProvider provideFiatPrices(Cache cache){
-	                return new FiatPriceProvider(cache, MessagingServletConfig.tickerPath);
+	                return new FiatPriceProvider(cache, restUrl + "/helper");
 				}
 				
 				@Provides @Singleton @SuppressWarnings("unused")
