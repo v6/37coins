@@ -11,8 +11,11 @@ function( Backbone, AccountModel, Communicator) {
         search: function(filter){
             var cred = sessionStorage.getItem('credentials');
             this.credentials = $.parseJSON(cred);
-            this.url = this.base + '?filter=' + encodeURIComponent(filter);
+            if (filter.length>2){
+                this.url = this.base + '?filter=' + encodeURIComponent(filter);
+            }
             var fetch = this.fetch();
+            this.url = this.base;
             return fetch;
         },
         initialize: function(){

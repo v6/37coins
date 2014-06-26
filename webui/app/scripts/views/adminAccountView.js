@@ -14,6 +14,7 @@ function(Backbone, Communicator, AccountTmpl) {
         },
         initialize: function(options){
             this.credentials = options.credentials;
+            this.collection = options.collection;
         },
         handleDelete: function(e){
             console.dir(e);
@@ -29,7 +30,7 @@ function(Backbone, Communicator, AccountTmpl) {
                 },
                 type: 'DELETE',
                 success: function() {
-                    self.collection.sync();
+                    self.collection.fetch();
                 }
             });
             return false;

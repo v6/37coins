@@ -9,7 +9,10 @@ function(Backbone, Communicator, AccountView, AccountCollectionTmpl) {
     return Backbone.Marionette.CompositeView.extend({
         itemView: AccountView,
         itemViewOptions: function(){
-            return {credentials: this.collection.credentials};
+            return {
+                collection: this.collection,
+                credentials: this.collection.credentials
+            };
         },
         itemViewContainer: 'tbody',
         template: AccountCollectionTmpl,
