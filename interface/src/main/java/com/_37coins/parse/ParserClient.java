@@ -61,7 +61,7 @@ public class ParserClient extends Thread {
 	public void start(String from, String gateway, String gwCn, String message, int localPort, ParserAction pa){
 		this.from = from;
 		this.gateway = gateway;
-		this.gwCn = gwCn;
+		this.gwCn = (null==gwCn)?"":gwCn;
 		this.message = message;
 		this.localPort = localPort;
 		this.pa = pa;

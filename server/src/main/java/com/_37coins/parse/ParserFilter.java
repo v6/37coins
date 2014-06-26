@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.internet.AddressException;
 import javax.servlet.Filter;
@@ -62,10 +61,13 @@ public class ParserFilter implements Filter {
 	public static final String BC_ADDR_REGEX = "^[mn13][1-9A-Za-z][^OIl]{20,40}";
 	
 	private final FiatPriceProvider fiatPriceProvider;
+	private int unitFactor;
+	private String unitName;
 	
-	@Inject
-	public ParserFilter(FiatPriceProvider fiatPriceProvider){
+	public ParserFilter(FiatPriceProvider fiatPriceProvider, int unitFactor, String unitName){
 		this.fiatPriceProvider = fiatPriceProvider;
+		this.unitFactor = unitFactor;
+		this.unitName = unitName;
 	}
 
 	public void doFilter(ServletRequest request, ServletResponse response,
@@ -265,7 +267,8 @@ public class ParserFilter implements Filter {
 				Pattern pattern = Pattern.compile("[a-zA-Z]{3}");
 				Matcher matcher = pattern.matcher(amount);
 				matcher.find();
-				amount = matcher.group().toUpperCase() + " "+r[r.length-1];
+				String g = matcher.group().toUpperCase();
+				amount = ((g.equals(unitName.toUpperCase()))?"BTC ":g + " ") + r[r.length-1];
 			}
 		}
 		try {
@@ -275,7 +278,7 @@ public class ParserFilter implements Filter {
 				PriceTick pt = fiatPriceProvider.getLocalCurValue(null, money.getCurrencyUnit());
 				val = money.getAmount().divide(pt.getLast(),8,RoundingMode.HALF_UP); 
 			}else{
-				val = val.divide(new BigDecimal(1000));
+				val = val.divide(new BigDecimal(unitFactor));
 			}
 			w.setAmount(val);
 			return true;

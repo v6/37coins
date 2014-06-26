@@ -189,7 +189,7 @@ public class AccountResource {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
             throw new WebApplicationException("unexpected response" + ds.getAction(),Response.Status.INTERNAL_SERVER_ERROR);
-		}catch(Exception e){
+		}catch(InterruptedException e){
 		    e.printStackTrace();
 		    log.error("invite failed",e);
 		    throw new WebApplicationException(e,Response.Status.INTERNAL_SERVER_ERROR);

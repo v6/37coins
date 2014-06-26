@@ -43,7 +43,7 @@ public class LocalizationTest {
 	public void start(){
 		rsp =  new DataSet()
 		.setService("37coins")
-		.setLocale(new Locale("ru","RU"))
+		.setLocale(new Locale("en","US"))
 		//.setFiatPriceProvider(new FiatPriceProvider(null))
 		.setTo(new MessageAddress()
 			.setAddress("+491606941382"));
@@ -54,7 +54,7 @@ public class LocalizationTest {
 		activeLocales.add(new Locale("ru"));
 		activeLocales.add(new Locale("es"));
         ResourceBundleClient client = new ResourceBundleClient("http://localhost:9000"+"/scripts/nls/");
-		ef = new MessageFactory(null,new ResourceBundleFactory(activeLocales, client, null),1000,"mBTC");
+		ef = new MessageFactory(null,new ResourceBundleFactory(activeLocales, client, null),1000000,"Bit","#,##0");
 	}
 	
 	//matches all locales onto what plivo has available
@@ -390,8 +390,8 @@ public class LocalizationTest {
 				.setBalance(new BigDecimal("0.5123")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1,051.1"));
-		Assert.assertTrue(s.contains("512.3"));
+		Assert.assertTrue(s.contains("1,051,1"));
+		Assert.assertTrue(s.contains("512,3"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 		
 		rsp.setAction(Action.INSUFISSIENT_FUNDS)
@@ -401,8 +401,8 @@ public class LocalizationTest {
 			.setBalance(new BigDecimal("0.5123")));
 		s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1.051,1"));
-		Assert.assertTrue(s.contains("512,3"));
+		Assert.assertTrue(s.contains("1.051.1"));
+		Assert.assertTrue(s.contains("512.3"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 
 	}
@@ -416,8 +416,8 @@ public class LocalizationTest {
 				.setBalance(new BigDecimal("1.0511")));
 		String s = ef.constructTxt(rsp);
 		System.out.println(s);
-		Assert.assertTrue(s.contains("1.051,1"));
-		Assert.assertTrue(s.contains("5.123,457"));
+		Assert.assertTrue(s.contains("1.051.1"));
+		Assert.assertTrue(s.contains("5.123.457"));
 		Assert.assertTrue("SMS to long",s.getBytes().length<140);
 	}
 	

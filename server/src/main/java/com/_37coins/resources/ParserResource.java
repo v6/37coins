@@ -156,6 +156,8 @@ public class ParserResource {
 			}
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {
+		    e.printStackTrace();
+		    log.error("json process exception",e);
 			return null;
 		}
 	}
@@ -186,9 +188,8 @@ public class ParserResource {
 				gwAddress = referrer.getGateway();
 			}else{//or try to find a gateway in the database
 				try{
-					
 					RNQuery q = new RNQuery().addFilter("countryCode", recipient.getPhoneNumber().getCountryCode());
-					List<Gateway> qResultsFixed = dao.queryList(q, Gateway.class);
+					List<Gateway> qResultsFixed = dao.queryList(q.setRange(0L,200L), Gateway.class);
 					List<Gateway> qResults = new ArrayList<>(qResultsFixed);
 					Collections.sort(qResults, new GatewayPriceComparator());
 					Element gws = cache.get("gateways");
@@ -215,7 +216,7 @@ public class ParserResource {
 					throw new WebApplicationException(e1, Response.Status.INTERNAL_SERVER_ERROR);
 				}
 			}
-		}else if (recipient.getAddressType()==MsgType.EMAIL){
+		}else{
 			throw new RuntimeException("not implemented");
 		}
 		if (null!=gwDn){

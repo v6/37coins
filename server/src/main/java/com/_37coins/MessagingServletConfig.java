@@ -163,8 +163,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 		s3Path = System.getProperty("s3Path");
 		tickerPath = System.getProperty("tickerPath");
 	    unitFactor = (null!=System.getProperty("unitFactor"))?Integer.parseInt(System.getProperty("unitFactor")):1000;
-	    unitName = (null!=System.getProperty("unitName"))?System.getProperty("unitName"):"mBTC";
-	    unitFormat = (null!=System.getProperty("unitFormat"))?System.getProperty("unitFormat"):"#,##0.###";
+	    unitName = (null!=System.getProperty("unitName"))?System.getProperty("unitName"):"Bit";
+	    unitFormat = (null!=System.getProperty("unitFormat"))?System.getProperty("unitFormat"):"#,##0";
 		String locales = System.getProperty("activeLocales");
 		List<String> localeList = Arrays.asList(locales.split(","));
 		activeLocales = new ArrayList<>();
@@ -269,6 +269,11 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 			public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
 				return new CommandParser(rbf);
 			}
+			
+	        @Provides @Singleton @SuppressWarnings("unused")
+            public ParserFilter getParserFilter(FiatPriceProvider fiatPriceProvider) {
+                return new ParserFilter(fiatPriceProvider, MessagingServletConfig.unitFactor, MessagingServletConfig.unitName);
+            }
 			
 	        @Provides @Singleton @SuppressWarnings("unused")
             public EnvayaFilter getEnvayaFilter() {

@@ -96,6 +96,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				}
 				
 	            @Provides @Singleton @SuppressWarnings("unused")
+	            public ParserFilter getParserFilter(FiatPriceProvider fiatPriceProvider) {
+	                return new ParserFilter(fiatPriceProvider, MessagingServletConfig.unitFactor, MessagingServletConfig.unitName);
+	            }
+				
+	            @Provides @Singleton @SuppressWarnings("unused")
 	            public DigestFilter getDigestFilter(){
 	                return new DigestFilter(MessagingServletConfig.digestToken);
 	            }

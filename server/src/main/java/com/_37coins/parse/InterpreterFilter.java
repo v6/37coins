@@ -105,6 +105,8 @@ public class InterpreterFilter implements Filter {
     			        a.setLocale(new Locale("",rc));
     			    }
     			    a.setLocale(g.getLocale());
+    			    for (DataSet ds: responseList)
+    			        ds.setLocale(g.getLocale());
     			    dao.add(a);
     			    responseData.getTo().setGateway(g.getCn());
     			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getSettings().getFee());
