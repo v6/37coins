@@ -51,6 +51,9 @@ public class EnvayaRequest {
             if (e.getKey().equals(MESSAGE_TYPE)) er.setMessageType(MessageType.fromString(e.getValue()));
             if (e.getKey().equals(MESSAGE)) er.setMessage((e.getValue()));
             if (e.getKey().equals(TIMESTAMP)) er.setTimestamp(Long.parseLong(e.getValue()));
+            if (e.getKey().equals(PHONE_ID)) er.setPhoneId(e.getValue());
+            if (e.getKey().equals(PHONE_TOKEN)) er.setPhoneToken(e.getValue());
+            if (e.getKey().equals(SEND_LIMIT)) er.setSendLimit(Integer.parseInt(e.getValue()));
             if (e.getKey().equals(MMS_PARTS)) throw new RuntimeException("not implemented");
             if (e.getKey().equals(ID)) er.setId(e.getValue());
             if (e.getKey().equals(STATUS)) er.setStatus(Status.fromString(e.getValue()));
@@ -192,6 +195,9 @@ public class EnvayaRequest {
     public final static String STATUS = "status";
     public final static String ERROR = "error";
     public final static String EVENT = "event";
+    public final static String PHONE_ID = "phone_id";
+    public final static String PHONE_TOKEN = "phone_token";
+    public final static String SEND_LIMIT = "send_limit";
     public final static String TO = "to";
     public final static String CONSUMER_TAG = "consumer_tag";
     
@@ -203,8 +209,11 @@ public class EnvayaRequest {
     private Long now;
     private Integer battery;
     private Integer power;
+    private Integer sendLimit;
     private Action action;
     private String from;
+    private String phoneId;
+    private String phoneToken;
     private MessageType messageType;
     private String message;
     private Long timestamp;
@@ -254,6 +263,24 @@ public class EnvayaRequest {
         return this;
     }
 
+    public String getPhoneId() {
+        return phoneId;
+    }
+
+    public EnvayaRequest setPhoneId(String phoneId) {
+        this.phoneId = phoneId;
+        return this;
+    }
+
+    public String getPhoneToken() {
+        return phoneToken;
+    }
+
+    public EnvayaRequest setPhoneToken(String phoneToken) {
+        this.phoneToken = phoneToken;
+        return this;
+    }
+
     public Integer getSettingsVersion() {
         return settingsVersion;
     }
@@ -290,6 +317,15 @@ public class EnvayaRequest {
         this.power = power;
         return this;
     }
+    
+    public Integer getSendLimit() {
+        return sendLimit;
+    }
+
+    public EnvayaRequest setSendLimit(Integer sendLimit) {
+        this.sendLimit = sendLimit;
+        return this;
+    }    
 
     public Action getAction() {
         return action;
@@ -409,7 +445,10 @@ public class EnvayaRequest {
         if (null!=getId()) nvps.add(new BasicNameValuePair(EnvayaRequest.ID, getId()));
         if (null!=getLog()) nvps.add(new BasicNameValuePair(EnvayaRequest.LOG, getLog()));
         if (null!=getMessage()) nvps.add(new BasicNameValuePair(EnvayaRequest.MESSAGE, getMessage()));
-        if (null!=getMessageType()) nvps.add(new BasicNameValuePair(EnvayaRequest.MESSAGE_TYPE, getMessageType().toString()));
+        if (null!=getPhoneId()) nvps.add(new BasicNameValuePair(EnvayaRequest.PHONE_ID, getPhoneId()));
+        if (null!=getPhoneToken()) nvps.add(new BasicNameValuePair(EnvayaRequest.PHONE_TOKEN, getPhoneToken()));
+        if (null!=getSendLimit()) nvps.add(new BasicNameValuePair(EnvayaRequest.SEND_LIMIT, getSendLimit().toString()));
+        if (null!=getMessageType()) nvps.add(new BasicNameValuePair(EnvayaRequest.MESSAGE_TYPE, getMessageType().getText()));
         if (null!=getNetwork()) nvps.add(new BasicNameValuePair(EnvayaRequest.NETWORK, getNetwork()));
         if (null!=getPhoneNumber()) nvps.add(new BasicNameValuePair(EnvayaRequest.PHONE_NUMBER, getPhoneNumber()));
         if (null!=getStatus()) nvps.add(new BasicNameValuePair(EnvayaRequest.STATUS, getStatus().getText()));
