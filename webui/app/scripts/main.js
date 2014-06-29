@@ -29,7 +29,9 @@ function ( Backbone, App, PageController ) {
             s: labels,
             up: function(str){
                 return str.toUpperCase();
-            }
+            },
+            resPath:window.opt.resPath,
+            l:window.getLocale()
         };
     };
     var options = {

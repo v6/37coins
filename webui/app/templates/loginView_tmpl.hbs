@@ -1,34 +1,30 @@
 <div class="row">
     <div class="col-sm-6">
-    	<h2 class="form-signin-heading">Please Login:</h2>
+    	<h2 class="form-signin-heading">{{s.loginView.form-signin-heading}}</h2>
 		<form>
 			<div class="alert alert-danger alert-dismissable fade">
 			  <button type="button" class="close" aria-hidden="true">&times;</button>
-			  <strong>Error!</strong> Incorrect Email or Password!
+                {{{s.loginView.error.badPass}}}
 			</div>
 			<div class="form-group">
-		    	<label for="InputEmail">Email address:</label>
-			    <input type="text" name="email" class="form-control" id="InputEmail" placeholder="Enter email">
+		    	<label for="InputEmail">{{s.loginView.inputEmail.label}}</label>
+			    <input type="text" name="email" class="form-control" id="InputEmail" placeholder="{{s.loginView.inputEmail.placeholder}}">
 		    </div>
 		    <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="Enter password">
+                <label for="password">{{s.loginView.inputPassword.label}}</label>
+                <input type="password" name="password" class="form-control" id="password" placeholder="{{s.loginView.inputPassword.placeholder}}">
 		    </div>
-		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">Login</button>
+		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">{{s.loginView.loginBtn}}</button>
 		</form>
-		<p class="pull-right"><br>Forgot password? <a href="/{{l}}/reset">Reset</a></p>
+		<p class="pull-right"><br>{{s.loginView.reset.prompt}}<a href="/{{l}}/reset">{{s.loginView.reset.linkTitle}}</a></p>
     </div>
 
     <div class="col-sm-6">
     	<div id="registerForm">
-	    	<h2 class="form-signin-heading">New Gateway?</h2>
-			<p>Do you have a spare Android phone and want to run an SMSgateway in your country?</p>
-			<a href="/{{l}}/signUp" id="regBtn" class="btn btn-primary">Sign up</a>
-			<ul>The registration process will take you through:
-				<li>Setting up an android phone</li>
-				<li>Choosing a transaction fee</li>
-				<li>Testing your gateway</li>
-			</ul>
+	    	<h2 class="form-signin-heading">{{s.loginView.newGwPrompt}}</h2>
+			<p>{{s.loginView.gwCallToAction}}</p>
+			<a href="/{{l}}/signUp" id="regBtn" class="btn btn-primary">{{s.loginView.signUpLinkLabel}}</a>
+			{{{registrationExplanation}}}
 		</div>
    	</div>
 </div>

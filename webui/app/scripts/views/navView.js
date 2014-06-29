@@ -1,9 +1,10 @@
 define([
 	'backbone',
 	'communicator' ,
-	'hbs!tmpl/navView_tmpl'
+	'hbs!tmpl/navView_tmpl',
+	'i18n!nls/labels'
 ],
-function(Backbone, Communicator, NavTmpl) {
+function(Backbone, Communicator, NavTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
 		initialize: function() {
@@ -12,6 +13,9 @@ function(Backbone, Communicator, NavTmpl) {
 			vent.on('app:login', function(){
 				self.setButton();
 			});
+		},
+		templateHelpers: function(){
+			return window.helpers(myLabels);
 		},
         template: NavTmpl,
         className: 'navbar navbar-37',

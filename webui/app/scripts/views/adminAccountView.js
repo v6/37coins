@@ -1,13 +1,17 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/adminAccountView_tmpl'
+    'hbs!tmpl/adminAccountView_tmpl',
+    'i18n!nls/labels'
 ],
-function(Backbone, Communicator, AccountTmpl) {
+function(Backbone, Communicator, AccountTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: AccountTmpl,
         tagName: 'tr',
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
         events: {
             'click a.del': 'handleDelete',
             'click a.edit': 'handleEdit'

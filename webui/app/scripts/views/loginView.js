@@ -2,13 +2,17 @@ define([
     'backbone',
     'communicator',
     'hbs!tmpl/loginView_tmpl',
+    'i18n!nls/labels',
     'jqueryValidation'
 ],
-function(Backbone, Communicator, LoginTmpl) {
+function(Backbone, Communicator, LoginTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: LoginTmpl,
         className: 'container',
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
         initialize: function(opt) {
             this.next = opt.next;
 			this.model.on('change:roles', this.onRolesChange, this);

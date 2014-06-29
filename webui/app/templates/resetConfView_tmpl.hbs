@@ -1,19 +1,19 @@
 <div class="row">
     <div class="col-sm-12">
-    	<h2 class="form-signin-heading">Please Choose a new Password</h2>
+    	<h2 class="form-signin-heading">{{s.reset.newPass}}</h2>
         <div class="form-group">
-            <label for="password1">Password:</label>
-            <input type="password" name="password1" class="form-control" id="password1" placeholder="Enter password">
+            <label for="password1">{{s.reset.newPass.form.password.label}}Password:</label>
+            <input type="password" name="password1" class="form-control" id="password1" placeholder="{{s.reset.newPass.form.password.placeholder}}">
         </div>
         <div class="form-group">
-            <label for="password2">Password:</label>
-            <input type="password" name="password2" class="form-control" id="password2" placeholder="Repeat password">
+            <label for="password2">{{s.reset.newPass.form.password2.label}}Password:</label>
+            <input type="password" name="password2" class="form-control" id="password2" placeholder="{{s.reset.newPass.form.password2.placeholder}}">
         </div>
-        <button class="btn btn-lg btn-primary" type="submit">Save</button>
+        <button class="btn btn-lg btn-primary" type="submit">{{s.reset.newPass.form.saveBtn}}</button>
 
         <div class="alert alert-danger alert-dismissable fade">
           <button type="button" class="close" aria-hidden="true">&times;</button>
-          <strong>Error!</strong> Passwords have to match!
+          <strong>{{s.reset.newPass.form.error}}Error!</strong> {{s.reset.newPass.unMatched}}
         </div>
     </div>
 </div>

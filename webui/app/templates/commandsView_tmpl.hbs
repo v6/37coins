@@ -1,16 +1,17 @@
+<!--TO DO: Use indexing instead of the stupid "1" at the end.-->
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>Command</th>
-      <th>Description</th>
+      <th>{{s.commands.smlHlp.column1}}</th>
+      <th>{{s.commands.smlHlp.column2}}</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td>ADDR</td><td>Get Bitcoin deposit address</td></tr>
-    <tr><td>PIN</td><td>Setup secret PIN</td></tr>
-    <tr><td>BAL</td><td>Get balance in mBTC</td></tr>
-    <tr><td>SEND</td><td>Send bitcoins to phone number, bitcoin address.</td></tr>
-    <tr><td>TRANS</td><td>List the last 3 transactions</td></tr>
-    <tr><td>HELP</td><td>List available commands</td></tr>
+    <tr><td>{{up s.commands.DepositReqCmd1}}</td><td>{{s.commands.smlHlp.DepositReqCmd}}</td></tr>
+    <tr><td>{{up s.commands.VoiceCmd1}}</td><td>{{s.commands.smlHlp.VoiceCmd}}</td></tr>
+    <tr><td>{{up s.commands.BalanceCmd1}}</td><td>{{s.commands.smlHlp.BalanceCmd}}</td></tr>
+    <tr><td>{{up s.commands.WithdrawalReqCmd1}}</td><td>{{s.commands.smlHlp.WithdrawalReqCmd}}</td></tr>
+    <tr><td>{{up s.commands.TransactionsCmd1}}</td><td>{{s.commands.smlHlp.TransactionsCmd}}</td></tr>
+    <tr><td>{{up s.commands.HelpCmd1}}</td><td>{{s.commands.smlHlp.HelpCmd}}</td></tr>
   </tbody>
 </table>

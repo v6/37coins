@@ -1,13 +1,17 @@
 define([
-	'backbone',
-	'hbs!tmpl/adminLayout_tmpl'
+    'backbone',
+    'hbs!tmpl/adminLayout_tmpl',
+    'i18n!nls/labels'
 ],
-function(Backbone, AdminLayout) {
+function(Backbone, AdminLayout, myLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
-	    template: AdminLayout,
-	    regions: {
-	        account: '#accountView'
-	    }
+        template: AdminLayout,
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
+        regions: {
+            account: '#accountView'
+        }
     });
 });

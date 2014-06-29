@@ -1,17 +1,17 @@
 <div class="row">
 <div id="valFrm" class="col-md-12">
-  <h2>Gateway Ownership Verification</h2>
+  <h2>{{s.form.gwSetup.ver.titleH2}}</h2>
   <form>
       <div class="form-group">
-          <label for="inputTel">Gateway Mobile Number:</label>
-          <input type="tel" name="tel" class="form-control" id="inputTel" placeholder="+CCXXXXXX...">
-          <span class="help-block">Enter your gateway's number in international format. Avoid special signs and spaces. You will receive a call, telling your 5-digit confirmation code.</span>
+          <label for="inputTel">{{s.form.gwSetup.ver.inputTel}}</label>
+          <input type="tel" name="tel" class="form-control" id="inputTel" placeholder="{{s.form.gwSetup.ver.inputTel.placeholder}}">
+          <span class="help-block">{{s.form.gwSetup.ver.inputTel.help-block}}</span>
       </div>
-      <button class="btn btn-lg btn-primary" type="submit">Start Verification</button>
+      <button class="btn btn-lg btn-primary" type="submit">{{s.form.gwSetup.ver.inputTel.verBtn}}</button>
   </form>
   <div class="alert alert-danger alert-dismissable fade">
     <button type="button" class="close" aria-hidden="true">&times;</button>
-    <strong>Error!</strong> Communication Error.
+    <strong>{{s.form.gwSetup.ver.inputTel.sad}}Error!</strong> {{s.form.gwSetup.ver.inputTel.sadExpln}}
   </div>
 </div>
 </div>

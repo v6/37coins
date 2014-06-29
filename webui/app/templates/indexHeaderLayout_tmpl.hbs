@@ -9,15 +9,15 @@
       </div></div>
     </div>
     <div class="headerText, col-sm-7">
-      <h2 class="hidden-xs">Without borders or barriers,<br/> as easy as sending an SMS</h2>
-      <p class="lead hidden-xs">Send and receive bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.</p>
-      <label class="hidden-xs">Sign-up to be an SMSwallet beta user.</label>
+      <h2 class="hidden-xs">{{{s.indexLayout.header.mobileTag}}}</h2>
+      <p class="lead hidden-xs">{{{s.indexLayout.header.tag}}}</p>
+      <label class="hidden-xs">{{s.indexLayout.header.walletInv}}</label>
       <div id="mobileInput">
-
+        <!-- TO DO: Add mobile input here? Does the mobileInput ID take care of this? -->
       </div>
     </div>
     <div style="height:400px;" class="visible-md visible-lg"></div>
-    <div class="pull-right" style="color: #b3b3a7;"><small>By clicking Go!, you agree to the <a href="/{{l}}/legal/terms">terms of use</a></small></div>
+    <div class="pull-right" style="color: #b3b3a7;"><small>{{s.indexLayout.header.terms.prompt}} <a href="/{{l}}/legal/terms">{{s.indexLayout.header.terms.label}}</a></small></div>
   </div>
 </div>
 </div>

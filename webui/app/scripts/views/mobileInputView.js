@@ -2,13 +2,17 @@ define([
     'backbone',
     'communicator',
     'hbs!tmpl/mobileInputView_tmpl',
+    'i18n!nls/labels',
     'intlTelInput'
 ],
-function(Backbone, Communicator, MobileInputTmpl) {
+function(Backbone, Communicator, MobileInputTmpl, myLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: MobileInputTmpl,
         className: 'static',
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
         handleJoin: function(mobile){
             Backbone.history.navigate('account/'+mobile, {trigger: true});
         },

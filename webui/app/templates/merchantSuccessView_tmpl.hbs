@@ -1,19 +1,19 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="alert alert-success fade in">
-          <strong>Success!</strong> Merchant account successfully verified.
+          {{{s.merchant.success.alert}}}
         </div>
         <form>
             <div class="form-group">
-                <label for="InputName1">Display Name:</label>
-                <input type="text" name="displayName" class="form-control" id="InputName1" placeholder="Enter display name.">
+                <label for="InputName1">{{{s.merchant.success.InputName1.label}}}</label>
+                <input type="text" name="displayName" class="form-control" id="InputName1" placeholder="{{{s.merchant.success.InputName1.placeholder}}}">
             </div>
-            <button class="btn btn-lg" type="submit">Set Name</button>
+            <button class="btn btn-lg" type="submit">{{s.merchant.success.button}}</button>
             <div class="alert alert-danger alert-dismissable fade">
               <button type="button" class="close" aria-hidden="true">&times;</button>
-              <strong>Error!</strong> Please <a href="/{{l}}/contact" class="alert-link">contact support</a>.
+              {{{s.merchant.success.error.prompt}}} <a href="/{{l}}/contact" class="alert-link">{{s.merchant.success.error.label}}</a>.
             </div>
         </form>
-        <div id="instructions"></div>
+        <div id="instructions">{{s.merchant.success.instructions}}</div>
     </div>
 </div>

@@ -1,13 +1,16 @@
+<!--Refer to the "cmdHelpL" section of "webui/app/scripts/nls/root/labels.js" for labels referred to by the items in double-curly braces-->
+
+<!--Command Help-->
 <div class="row">
   <div class="col-sm-12 wbox">
-  <h1>{{s.cmdHelpL.h1}}</h1>
+  <h1>{{s.brands.SMSWallet}} {{s.cmdHelpL.h1}}</h1>
   <h2>{{s.cmdHelpL.refH2}}</h2>
     <div id="smsCommands" class="col-sm-12"></div>
   </div>
 </div>
 
 <div class="row">
- <h2>{{s.cmdHelpL.cmdH2}}</h2>
+ <h2>{{s.brands.SMSWallet}} {{s.cmdHelpL.cmdH2}}</h2>
  <p>{{s.cmdHelpL.cmd}}</p>
   <div class="panel-group" id="accordion">
     <!--address--> 
@@ -22,7 +25,7 @@
       <div id="help-ADDRESS" class="panel-collapse collapse in">
         <div class="panel-body">
           <p>{{s.cmdHelpL.addr.p1}}</p>
-          <p>{{s.cmdHelpL.addr.p2}} <a href="https://localbitcoins.com/buy-bitcoins-online/?ch=1zol">Localbitcoins</a> or <a href="https://coinbase.com/?r=5367c0e6c9f6f52297000082&utm_campaign=user-referral&src=referral-link">Coinbase</a>.</p>
+          <p>{{{s.cmdHelpL.addr.p2}}}</p>
           <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.DepositReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
@@ -32,7 +35,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-BALANCE">
-            {{up s.commands.BalanceCmd.[0]}}
+            {{up s.commands.BalanceCmd1}}
           </a>
         </h4>
       </div>
@@ -43,16 +46,16 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <td>System response</td><td>Implication</td>
+                <td>{{s.cmdHelpL.bal.column1}}</td><td>{{s.cmdHelpL.bal.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Balance 12.048mBTC ($5.24)<br/>Reply ADDR, for Bitcoin address</td><td>You can SEND up to 12.048 worth of Bitcoins to another phone number or bitcoin address</td>
+                <td>{{s.cmdHelpL.bal.systemResponse1}}</td><td>{{s.cmdHelpL.bal.implication1}}</td>
               </tr>
             </tbody>
           </table>
-          <label>*Bitcoin to US Dollar values, as of 5/4/2014</label>
+          <label>{{s.cmdHelpL.bal.label1}}</label>
           <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.BalanceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
@@ -62,105 +65,106 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-SEND">
-            SEND
+            {{s.cmdHelpL.send.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-SEND" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.</p>
-          </p>The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notiﬁed.</p>
-          <p><strong>Ensure that you typed the recipients phone number or bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong></p>
+          <p>{{s.cmdHelpL.send.p1}}</p>
+          <p>{{s.cmdHelpL.send.p2}}</p>
+          <p>{{{s.cmdHelpL.send.p3}}}</p>
 
-          <h5>SEND command syntax</h5>
+          <h5>{{s.cmdHelpL.send.syntax}}</h5>
             <table class="table table-striped">
               <thead>
-                <caption>SEND &lt;amount&gt; &lt;address&gt; [comment]</caption>
+                <caption>{{s.cmdHelpL.send.caption}}</caption>
               </thead>
               <tbody>
                  <tr>
-                  <td>&lt;amount&gt;</td><td>The amount to send to the recipient. Use 12 to indicate 12mBTC, use 5USD to indicate sending bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)</td>
+                  <td>{{s.cmdHelpL.send.amount.td1}}</td><td>{{{s.cmdHelpL.send.amount.td2}}}</td>
                 </tr>
                  <tr>
-                  <td>&lt;address&gt;</td><td>The destination address to send the bitcoins. Can be either a phone number or a bitcoin address. Phone numbers may not have spaces. If sending internationally, include the country code and the plus (+) sign. I.e. +63 for a Philippines number. </td>
+                  <td>{{s.cmdHelpL.send.address.td1}}</td><td>{{s.cmdHelpL.send.address.td2}}</td>
                 </tr>
                 <tr>
-                  <td>[comment]</td><td>Optional comment, up to 40 characters. Messages that are too long will be shortend.</td>
+                  <td>{{s.cmdHelpL.send.comment.td1}}</td><td>{{s.cmdHelpL.send.comment.td2}}</td>
                 </tr>
               </tbody>
             </table> 
 
-          <h5>SEND command examples</h5>
+          <h5>{{s.cmdHelpL.send.example.header}}</h5>
           <table class="table table-striped">
             <thead>
-              <caption>Sending bitcoin domestically (assuming a US SMSwallet user)</caption>
+              <caption>{{s.cmdHelpL.send.example.ex1.caption}}Sending bitcoin domestically (assuming a US SMSwallet user) (labeled)</caption>
               <tr>
-               <td>Example</td><td>Command explanation</td>
+               <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>SEND 1USD 6165551234</td><td>This request the system to send 1 US dollar worth of bitcoin to the US phone number 6165551234</td>
+                <td>{{s.cmdHelpL.send.example.ex1.td1}}</td><td>{{s.cmdHelpL.send.example.ex1.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>Sending bitcoin overseas (assuming a US SMSwallet user)</caption>
+              <caption>{{s.cmdHelpL.send.example.ex2.caption}}</caption>
               <tr>
-                <td>Example</td><td>Command explanation</td>
+                  <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>SEND 44PHP +639125551234</td><td>This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +639125551234</td>
+                <td>{{s.cmdHelpL.send.example.ex2.td1}}</td><td>{{s.cmdHelpL.send.example.ex2.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>Sending with shorthand</caption>
+              <caption>{{s.cmdHelpL.send.example.ex3.caption}}</caption>
               <tr>
-                <td>Example</td><td>Command explanation</td>
+                <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>6.3 6165551234</td><td>This requests the system to send 6.3 mBTC to the phone number 6165551234</td>
+                <td>{{s.cmdHelpL.send.example.ex3.td1}}</td><td>{{s.cmdHelpL.send.example.ex3.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>Sending to a bitcoin address</caption>
+              <caption>{{s.cmdHelpL.send.example.ex4.caption}}</caption>
               <tr>
-                <td>Example</td><td>Command explanation</td>
+                <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>SEND 12USD 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh</td><td>This requests the system to send 12USD worth of bitcoin to the bitcoin address 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh</td>
+                <td>{{s.cmdHelpL.send.example.ex3.td1}}</td><td>{{s.cmdHelpL.send.example.ex3.td2}}</td>
               </tr>
             </tbody>
           </table>
-          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): send, sending, sent
+          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.WithdrawalReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}
           </div>        
         </div>
       </div>
     </div>
     <!--transaction-->
+    <!--TODO: Add examples. See examples above. To allow for pre-emptive localization, there is already a section for this command in labels.js.-->
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-TRANSACTION">
-            TRANSACTION
+              {{s.cmdHelpL.transaction.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-TRANSACTION" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>The TRANSACTION command returns the history of your last three transactions.</p>
-          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): transactions, txns, trans, tran</div>
+          <p>{{s.cmdHelpL.transaction.p1}}</p>
+          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.TransactionsCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -169,17 +173,17 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PIN">
-            PIN
+              {{s.cmdHelpL.pin.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-PIN" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>The PIN command sets up the Security PIN for your account.</p>
-          <p>The Security PIN is a 4-digit code that you assign. It protects your account from unauthorized spending.</p>
-          <p>If a Security PIN is not already set up, the system will call you and guide you through the process. If the Security PIN is already set up, the system will call you, confirm your existing Security PIN, and then guide you through setting up a different security PIN.  When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).</p>
-          <p>Currently the Security PIN is required if you try to SEND more than 12mBTC (2014/05/04 $5.25) in one day. In the future, you will be able to adjust this amount.</p>
-          <div class="alert alert-warning">Recognized shorthand or misspellings, English (EN): pin, voice</div>
+          <p>{{s.cmdHelpL.pin.p1}}</p>
+          <p>{{s.cmdHelpL.pin.p2}}</p>
+          <p>{{s.cmdHelpL.pin.p3}}</p>
+          <p>{{s.cmdHelpL.pin.p4}}</p>
+          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.VoiceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -188,13 +192,14 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PRICE">
-            PRICE
+            {{s.cmdHelpL.price.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-PRICE" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>The PRICE command returns the current bitcoin exchange rate for your region’s common fiat currency. The exchange rate is calculated from <a href="https://bitcoinaverage.com">Bitcoinaverage.com</a></p>
+          <p>{{{s.cmdHelpL.price.p1}}}</p>
+          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.PriceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -202,23 +207,22 @@
   </div>
 </div>
 
-
-
+<!--SMSwallet FAQ-->
 <div class="row">
-  <h2>SMSwallet FAQ</h2>
-  <div class="panel-group" id="accordion2">     
+  <h2>{{s.brand.SMSwallet}} FAQ</h2>
+  <div class="panel-group" id="accordion2">
     <!--What is 'SMSwallet'?-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ1">
-            What is ‘SMSwallet’?
+            {{s.cmdHelpL.faq.question1}} ’{{s.brand.SMSwallet}}’?
           </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ1" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>‘SMSwallet’ is a simple way to send bitcoins to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use bitcoin! You can send your bitcoin to anyone who has a phone number no matter where they are!</p>
+            <p>’{{s.brand.SMSwallet}}’ {{s.cmdHelpL.faq.answer1.p1}}</p>
           </div>
         </div>
       </div>
@@ -227,17 +231,17 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ2">
-              Is there a fee for using the SMSwallet system?
+                {{s.cmdHelpL.faq.question2}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ2" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <strong>Sending between SMSwallet users</strong>
-            <p>Right now there is only a fee for transactions that are initiated with the SEND command. These fees are set by the SMSgateway operators and reflect the cost of operating in their country (and market competition). Currently there is no fee for use of the Security PIN feature.</p>
-            <p>The sender always pays the transaction fee and is assessed from the sender's gateway operator. So, the fee is the same if you send bitcoins to a domestic phone number or an international phone number.</p>
-            <strong>Sending to a Bitcoin address</strong>
-            <p>If sending to an external Bitcoin address, there will be an additional Blockchain transaction fee, in addition to the gateway fee. The Blockchain transaction fee depends on the size of the transaction.</p>
+            <strong>{{s.cmdHelpL.faq.answer2.title1}}</strong>
+            <p>{{s.cmdHelpL.faq.answer2.p1}}</p>
+            <p>{{s.cmdHelpL.faq.answer2.p2}}</p>
+            <strong>{{s.cmdHelpL.faq.answer2.title2}}</strong>
+            <p>{{s.cmdHelpL.faq.answer2.p3}}</p>
           </div>
         </div>
       </div>
@@ -246,14 +250,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ3">
-              After opening a new SMSwallet, why is my my balance a negative?
+                {{s.cmdHelpL.faq.question3}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ3" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>There is a small account activation fee. The fee is 1x the transaction fee of your gateway. Therefore, if the transaction fee of your gateway is 0.1mBTC (2014/05/04: $0.04) per transaction, then your account will start with a negative balance of -0.1mBTC. On your first bitcoin deposit, your total balance will be adjusted to reflect the account activation fee.</p>
-            <p>The account activation fee only happes when you initiate your wallet for the first time.</p>
+            <p>{{s.cmdHelpL.faq.answer3.p1}}</p>
+            <p>{{s.cmdHelpL.faq.answer3.p2}}</p>
           </div>
         </div>
       </div>
@@ -262,14 +266,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ4">
-              I want to open an SMSwallet, do I need to run an SMSgateway?
+                {{s.cmdHelpL.faq.question4}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ4" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>No, if you just want to open a wallet, just choose a gateway from your country and send a text message to it. Opening an SMSgateway will not give you an SMSwallet.</p>
-            <p>If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or <a href="/{{l}}/gateways">sign up</a>.</p>
+            <p>{{s.cmdHelpL.faq.answer4.p1}}</p>
+            <p>{{{s.cmdHelpL.faq.answer4.p2}}}</p>
           </div>
         </div>
       </div>
@@ -278,14 +282,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ5">
-              How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?
+                {{s.cmdHelpL.faq.question5}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ5" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Instead of confirming the message via SMS/text, you enter a Secret PIN with dial-tones via a voice call. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in Security PIN protected transactions. </p>
-            <div class="alert alert-warning">However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted.</div>
+            <p>{{s.cmdHelpL.faq.answer5.p1}}</p>
+            <div class="alert alert-warning">{{s.cmdHelpL.faq.answer5.p2}}</div>
           </div>
         </div>
       </div>
