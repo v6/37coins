@@ -34,6 +34,7 @@ import com._37coins.parse.ParserClient;
 import com._37coins.persistence.dao.Account;
 import com._37coins.persistence.dao.Gateway;
 import com._37coins.persistence.dao.GatewaySettings;
+import com._37coins.pojo.EnvayaRequest;
 import com._37coins.resources.AccountResource;
 import com._37coins.resources.EnvayaSmsResource;
 import com._37coins.resources.GatewayResource;
@@ -342,12 +343,12 @@ public class RestTest {
 		.when()
 			.get(embeddedJetty.getBaseUri() + HealthCheckResource.PATH);
 		Map<String,String> m = new HashMap<>();
-		m.put("version", "0.1");
-		m.put("now","12356789");
-		m.put("power","30");
-		m.put("action","status");	
+		m.put(EnvayaRequest.VERSION, "1");
+		m.put(EnvayaRequest.NOW,"12356789");
+		m.put(EnvayaRequest.POWER,"30");
+		m.put(EnvayaRequest.PHONE_NUMBER, "+491606941382");
+		m.put(EnvayaRequest.ACTION,"test");
 		String serverUrl = embeddedJetty.getBaseUri() + EnvayaSmsResource.PATH+"/OZV4N1JS2Z3476NL/sms";
-		System.out.println(serverUrl);
 		String sig = EnvayaClient.calculateSignature(serverUrl, m, pw);
 		// fire get successfully
 		given()
@@ -356,11 +357,19 @@ public class RestTest {
 			.formParam("version", m.get("version"))
 			.formParam("now", m.get("now"))
 			.formParam("power", m.get("power"))
+			.formParam(EnvayaRequest.PHONE_NUMBER, m.get(EnvayaRequest.PHONE_NUMBER))
 			.formParam("action", m.get("action"))
 		.expect()
 			.statusCode(200)
 		.when()
 			.post(serverUrl);
+	  given()
+          .contentType(ContentType.URLENC)
+          .header("X-Request-Signature", sig)
+      .expect()
+          .statusCode(401)
+      .when()
+          .post(serverUrl);
 	}
 	
 	   

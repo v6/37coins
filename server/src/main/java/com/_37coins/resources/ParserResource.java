@@ -18,12 +18,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.jdo.JDOException;
 import javax.mail.internet.AddressException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -84,20 +84,19 @@ public class ParserResource {
 	private int localPort;
 	
 	@SuppressWarnings("unchecked")
-	@Inject public ParserResource(ServletRequest request,
+	@Inject public ParserResource(@Context HttpServletRequest request,
 			Cache cache, FiatPriceProvider fiatPriceProvider,
-			MessageFactory mf,MerchantClient merchantClient) {
+			MessageFactory mf,MerchantClient merchantClient, GenericRepository dao) {
 		this.cache = cache;
-		HttpServletRequest httpReq = (HttpServletRequest)request;
-		responseList = (List<DataSet>)httpReq.getAttribute("dsl");
-		DataSet ds = (DataSet)httpReq.getAttribute("create");
+		responseList = (List<DataSet>)request.getAttribute("dsl");
+		DataSet ds = (DataSet)request.getAttribute("create");
 		if (null!=ds)
 			responseList.add(ds);
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+		this.dao = dao;
 		this.fiatPriceProvider = fiatPriceProvider;
 		this.mf = mf;
 		this.merchantClient = merchantClient;
-		localPort = httpReq.getLocalPort();
+		localPort = request.getLocalPort();
 		MessagingServletConfig.localPort = localPort;
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -29,9 +29,9 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
-import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.filter.QueryFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 import org.slf4j.Logger;
@@ -81,6 +81,7 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.inject.servlet.RequestScoped;
 import com.google.inject.servlet.ServletModule;
 import com.maxmind.geoip.LookupService;
 
@@ -240,26 +241,15 @@ public class MessagingServletConfig extends GuiceServletContextListener {
         injector = Guice.createInjector(new ServletModule(){
             @Override
             protected void configureServlets(){
-                
             	filter("/*").through(CorsFilter.class);
             	filter("/*").through(HttpsEnforcerFilter.class);
             	filter("/*").through(GuiceShiroFilter.class);
-            	filter("/envayasms/*").through(PersistenceFilter.class);
             	filter("/envayasms/*").through(EnvayaFilter.class);
-            	filter("/.well-known*").through(PersistenceFilter.class);
             	filter("/api/*").through(QueryFilter.class);
-            	filter("/api/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(DigestFilter.class); //make sure no-one can access those urls
             	filter("/parser/*").through(ParserFilter.class); //read message into dataset
             	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-            	filter("/parser/*").through(PersistenceFilter.class);
             	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
-            	filter("/account*").through(PersistenceFilter.class); //allow directory access
-            	filter("/email/*").through(PersistenceFilter.class); //allow directory access
-            	filter("/plivo/*").through(PersistenceFilter.class); //allow directory access
-            	filter("/data/*").through(PersistenceFilter.class); //allow directory access
-            	filter("/merchant/*").through(PersistenceFilter.class);
-            	filter("/healthcheck/*").through(PersistenceFilter.class); //allow directory access
             	bindListener(Matchers.any(), new SLF4JTypeListener());
         		bind(MessagingActivitiesImpl.class);
         		bind(QueueClient.class);
@@ -276,8 +266,8 @@ public class MessagingServletConfig extends GuiceServletContextListener {
             }
 			
 	        @Provides @Singleton @SuppressWarnings("unused")
-            public EnvayaFilter getEnvayaFilter() {
-                return new EnvayaFilter(MessagingServletConfig.basePath);
+            public EnvayaFilter getEnvayaFilter(PersistenceManagerFactory pmf) {
+                return new EnvayaFilter(MessagingServletConfig.basePath, pmf);
             }
 			
 	        @Provides @SuppressWarnings("unused")
@@ -426,8 +416,16 @@ public class MessagingServletConfig extends GuiceServletContextListener {
 				}
 				return activityWorker;
 			}
+			            
+            @Provides @RequestScoped  @SuppressWarnings("unused")
+            public GenericRepository providePersistenceManager(PersistenceManagerFactory pmf){
+                GenericRepository dao = new GenericRepository(pmf);
+                dao.getPersistenceManager();
+                return dao;
+            }
+			
 	        @Provides @Singleton @SuppressWarnings("unused")
-            PersistenceManagerFactory providePersistence(){
+            public PersistenceManagerFactory providePersistence(){
                 PersistenceConfiguration pc = new PersistenceConfiguration();
                 pc.createEntityManagerFactory();
                 return pc.getPersistenceManagerFactory();

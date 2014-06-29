@@ -4,8 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.inject.Inject;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,9 +25,9 @@ public class AmqpResource {
     
     private final GenericRepository dao;
     
-    @Inject public AmqpResource(ServletRequest request) {
-        HttpServletRequest httpReq = (HttpServletRequest)request;
-        dao = (GenericRepository)httpReq.getAttribute("gr");
+    @Inject 
+    public AmqpResource(GenericRepository dao) {
+        this.dao = dao;
     }
     
     @GET

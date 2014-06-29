@@ -77,7 +77,7 @@ public class MerchantResource {
 			ResourceBundleFactory rbf,
 			Cache cache, MerchantClient merchantClient,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
-			LookupService lookupService){
+			LookupService lookupService, GenericRepository dao){
 		this.httpReq = (HttpServletRequest)request;
 		localPort = httpReq.getLocalPort();
 		this.htmlFactory = htmlFactory;
@@ -88,7 +88,7 @@ public class MerchantResource {
 		this.lookupService = lookupService;
 		this.cache = cache;
 		this.withdrawalFactory = withdrawalFactory;
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+		this.dao = dao;
 	}
 	
 	

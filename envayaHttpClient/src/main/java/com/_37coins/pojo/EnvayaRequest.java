@@ -37,7 +37,6 @@ public class EnvayaRequest {
         }
         EnvayaRequest er = new EnvayaRequest();
         for (Entry<String,String> e : map.entrySet()){
-            System.out.println(e.getKey() + " " + e.getValue());
             if (e.getKey().equals(VERSION)) er.setVersion(Integer.parseInt(e.getValue()));
             if (e.getKey().equals(PHONE_NUMBER)) er.setPhoneNumber((e.getValue()));
             if (e.getKey().equals(LOG)) er.setLog((e.getValue()));

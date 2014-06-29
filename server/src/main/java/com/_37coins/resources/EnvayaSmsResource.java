@@ -7,13 +7,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.servlet.ServletRequest;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.google.inject.Injector;
 
 import freemarker.template.TemplateException;
 
@@ -67,19 +67,18 @@ public class EnvayaSmsResource {
 	private final ParserClient parserClient;
 	private final Cache cache;
 	private int localPort;
-	private final EnvayaRequest req;
+	private EnvayaRequest req;
 	
-	@Inject public EnvayaSmsResource(ServletRequest request,
-			QueueClient qc,
-			Injector i,
+	@Inject public EnvayaSmsResource(QueueClient qc,
 			ParserClient parserClient,
 			Cache cache,
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
 			WithdrawalWorkflowClientExternalFactoryImpl withdrawalFactory,
-			AmazonSimpleWorkflow swfService) {
-		HttpServletRequest httpReq = (HttpServletRequest)request;
-		localPort = httpReq.getLocalPort();
-		req = (EnvayaRequest)httpReq.getAttribute("er");
+			AmazonSimpleWorkflow swfService,
+			Provider<EnvayaRequest> envayaReqProvider,
+			@Context HttpServletRequest hsr) {
+		localPort = hsr.getLocalPort();
+		req = (EnvayaRequest)hsr.getAttribute("er");
 		this.qc = qc;
 		this.cache = cache;
 		this.swfService = swfService;

@@ -74,10 +74,11 @@ public class AccountResource {
 			MailServiceClient mailClient,
 			MessageFactory msgFactory,
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
-			ParserClient parserClient){
+			ParserClient parserClient,
+			GenericRepository dao){
 		this.cache = cache;
 		httpReq = (HttpServletRequest)request;
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+		this.dao = dao;
 		this.accountPolicy = accountPolicy;
 		this.mailClient = mailClient;
 		this.msgFactory = msgFactory;

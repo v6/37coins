@@ -6,8 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.inject.Inject;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -64,12 +62,11 @@ public class PlivoResource {
 	private Marshaller marshaller;
 	
 	@Inject public PlivoResource(
-			ServletRequest request,
 			AmazonSimpleWorkflow swfService,
 			MessageFactory msgFactory,
-			Cache cache,ParserClient parserClient) {
-		HttpServletRequest httpReq = (HttpServletRequest)request;
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+			Cache cache,ParserClient parserClient,
+			GenericRepository dao) {
+		this.dao = dao;
 		this.swfService = swfService;
 		this.msgFactory = msgFactory;
 		this.cache = cache;

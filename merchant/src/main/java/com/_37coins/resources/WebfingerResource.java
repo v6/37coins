@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,9 +46,8 @@ public class WebfingerResource {
 	@Inject
 	public WebfingerResource(ServletRequest request, 
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
-			Cache cache) {
-		HttpServletRequest httpReq = (HttpServletRequest)request;
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+			Cache cache, GenericRepository dao) {
+		this.dao = dao;
 		this.cache = cache;
 		this.nonTxFactory = nonTxFactory;
 		mapper = new ObjectMapper();

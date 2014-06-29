@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 
 import javax.jdo.JDOException;
+import javax.jdo.PersistenceManagerFactory;
 
 import org.joda.money.CurrencyUnit;
 import org.restnucleus.dao.GenericRepository;
@@ -70,7 +71,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	MessageFactory mf;
 	
 	@Inject
-	GenericRepository dao;
+	PersistenceManagerFactory pmf;
 	
 	@Inject
 	FiatPriceProvider fiatPriceProvider;
@@ -180,6 +181,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	public Action phoneConfirmation(DataSet rsp, String workflowId) {
 		ActivityExecutionContext executionContext = contextProvider.getActivityExecutionContext();
 		String taskToken = executionContext.getTaskToken();
+		GenericRepository dao = new GenericRepository(pmf);
 		try{
 			Transaction tt = new Transaction();
 			tt.setTaskToken(taskToken);
@@ -214,6 +216,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	        log.error("phone confirmation exception",e);
 	        e.printStackTrace();
 	        return null;
+		} finally{
+		    dao.closePersistenceManager();
 		}
 	}
 	
@@ -221,11 +225,17 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 	public BigDecimal readAccountFee(String mobile) {
 	    mobile = (mobile.contains("+"))?mobile:"+"+mobile;
 	    RNQuery q = new RNQuery().addFilter("mobile", mobile);
-		Account a = dao.queryEntity(q, Account.class);
-		if (a.getOwner().getSettings()==null)
-		    a.getOwner().setSettings(new GatewaySettings());
-		GatewaySettings gs = a.getOwner().getSettings();
-		BigDecimal fee = (gs.getFee()!=null)?gs.getFee():BigDecimal.ZERO;
+	    GenericRepository dao = new GenericRepository(pmf);
+	    BigDecimal fee = null;
+	    try{
+    		Account a = dao.queryEntity(q, Account.class);
+    		if (a.getOwner().getSettings()==null)
+    		    a.getOwner().setSettings(new GatewaySettings());
+    		GatewaySettings gs = a.getOwner().getSettings();
+    		fee = (gs.getFee()!=null)?gs.getFee():BigDecimal.ZERO;
+	    }finally{
+	        dao.closePersistenceManager();
+	    }
 		return fee;
 	}
 	
@@ -236,6 +246,7 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 
 	@Override
 	public DataSet readMessageAddress(DataSet data) {
+	    GenericRepository dao = new GenericRepository(pmf);
 	    try{
 	        String mobile = data.getCn();
 	        mobile = (mobile.contains("+"))?mobile:"+"+mobile;
@@ -250,6 +261,8 @@ public class MessagingActivitiesImpl implements MessagingActivities {
 				.setService("37coins");
 		}catch(JDOException e){
 			return null;
+		}finally{
+		    dao.closePersistenceManager();
 		}
 	}
 	

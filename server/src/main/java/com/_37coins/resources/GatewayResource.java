@@ -14,7 +14,6 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.jdo.JDOException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -74,12 +73,11 @@ public class GatewayResource {
 	final private MessageFactory messageFactory;
 	private final MailServiceClient mailClient;
 	
-	@Inject public GatewayResource(ServletRequest request, 
+	@Inject public GatewayResource(@Context HttpServletRequest httpReq, 
 			Cache cache, MailServiceClient mailClient,
 			NonTxWorkflowClientExternalFactoryImpl nonTxFactory,
-			MessageFactory messageFactory) {
-		HttpServletRequest httpReq = (HttpServletRequest)request;
-		dao = (GenericRepository)httpReq.getAttribute("gr");
+			MessageFactory messageFactory, GenericRepository dao) {
+		this.dao = dao;
 		q = (RNQuery)httpReq.getAttribute(RNQuery.QUERY_PARAM);
 		this.nonTxFactory = nonTxFactory;
 		this.messageFactory = messageFactory;

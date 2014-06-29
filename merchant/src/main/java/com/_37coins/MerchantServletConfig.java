@@ -22,9 +22,9 @@ import net.spy.memcached.MemcachedClient;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
-import org.restnucleus.filter.PersistenceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +59,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.inject.servlet.RequestScoped;
 import com.google.inject.servlet.ServletModule;
 import com.plivo.helper.api.client.RestAPI;
 import com.plivo.helper.api.response.call.Call;
@@ -222,9 +223,6 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             protected void configureServlets(){
                 filter("/*").through(CorsFilter.class);
             	filter("/product*").through(DigestFilter.class);
-            	filter("/amqp*").through(PersistenceFilter.class);
-            	filter("/.well-known*").through(PersistenceFilter.class);
-            	filter("/plivo/*").through(PersistenceFilter.class);
             	bind(ParserClient.class);
         	}
             
@@ -239,11 +237,18 @@ public class MerchantServletConfig extends GuiceServletContextListener {
             }
             
 			@Provides @Singleton @SuppressWarnings("unused")
-			PersistenceManagerFactory providePersistence(){
+			public PersistenceManagerFactory providePersistence(){
 				PersistenceConfiguration pc = new PersistenceConfiguration();
 				pc.createEntityManagerFactory();
 				return pc.getPersistenceManagerFactory();
 			}
+
+            @Provides @RequestScoped  @SuppressWarnings("unused")
+            public GenericRepository providePersistenceManager(PersistenceManagerFactory pmf){
+                GenericRepository dao = new GenericRepository(pmf);
+                dao.getPersistenceManager();
+                return dao;
+            }
 			
 	        @Provides @Singleton @SuppressWarnings("unused")
 	        public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {

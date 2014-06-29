@@ -101,11 +101,13 @@ public class ParserFilter implements Filter {
     			if (md.getAddressType() == MsgType.SMS 
     					&& !isFromSameCountry(md, gateway)){
     				respond(new ArrayList<DataSet>(), response);
+    				return;
     			}
     			//exclude non mobile numbers
     			if (md.getAddressType() == MsgType.SMS
     					&& !isMobileNumber(md)){
     				respond(new ArrayList<DataSet>(), response);
+    				return;
     			}
     			//set locale
     			if (md.getAddressType() == MsgType.SMS){
@@ -131,6 +133,7 @@ public class ParserFilter implements Filter {
                 chain.doFilter(httpReq, response);
             }else{
                 respond(responseList,response);
+                return;
             }
     	}else{
     	    chain.doFilter(request, response);

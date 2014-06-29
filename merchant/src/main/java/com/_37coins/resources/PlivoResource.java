@@ -67,7 +67,8 @@ public class PlivoResource {
 	final private NonTxWorkflowClientExternalFactoryImpl nonTxFactory;
 	private int localPort;
 	
-	@Inject public PlivoResource(
+	@Inject 
+	public PlivoResource(
 			ServletRequest request,
 			Cache cache,
 			SocketIOServer server,

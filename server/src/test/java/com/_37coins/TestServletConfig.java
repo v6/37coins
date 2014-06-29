@@ -15,9 +15,9 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 import org.apache.shiro.guice.web.GuiceShiroFilter;
 import org.restnucleus.PersistenceConfiguration;
+import org.restnucleus.dao.GenericRepository;
 import org.restnucleus.filter.CorsFilter;
 import org.restnucleus.filter.DigestFilter;
-import org.restnucleus.filter.PersistenceFilter;
 import org.restnucleus.filter.QueryFilter;
 import org.restnucleus.log.SLF4JTypeListener;
 
@@ -49,6 +49,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.inject.servlet.RequestScoped;
 import com.google.inject.servlet.ServletModule;
 import com.maxmind.geoip.LookupService;
 
@@ -72,16 +73,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 	                filter("/*").through(CorsFilter.class);
 	                filter("/*").through(GuiceShiroFilter.class);
 	                filter("/api/*").through(QueryFilter.class);
-	                filter("/api/*").through(PersistenceFilter.class);
-	            	filter("/envayasms/*").through(PersistenceFilter.class);
+	                filter("/envayasms*").through(EnvayaFilter.class);
 	            	filter("/parser/*").through(WrapFilter.class);
 	            	filter("/parser/*").through(ParserFilter.class); //read message into dataset
 	            	filter("/parser/*").through(AbuseFilter.class);    //prohibit overuse
-	            	filter("/parser/*").through(PersistenceFilter.class); //allow directory access
 	            	filter("/parser/*").through(InterpreterFilter.class); //do semantic stuff
-	            	filter("/account*").through(PersistenceFilter.class); //allow directory access
-	            	filter("/merchant/*").through(PersistenceFilter.class);
-	            	filter("/email/*").through(PersistenceFilter.class); //allow directory access
 	            	bindListener(Matchers.any(), new SLF4JTypeListener());
 	            	bind(ParserClient.class);
 	            	bind(QueueClient.class);
@@ -94,6 +90,11 @@ public class TestServletConfig extends GuiceServletContextListener {
 				public CommandParser getMessageProcessor(ResourceBundleFactory rbf) {
 				  return new CommandParser(rbf);
 				}
+				
+	            @Provides @Singleton @SuppressWarnings("unused")
+	            public EnvayaFilter getEnvayaFilter(PersistenceManagerFactory pmf) {
+	                return new EnvayaFilter(MessagingServletConfig.basePath, pmf);
+	            }
 				
 	            @Provides @Singleton @SuppressWarnings("unused")
 	            public ParserFilter getParserFilter(FiatPriceProvider fiatPriceProvider) {
@@ -120,6 +121,13 @@ public class TestServletConfig extends GuiceServletContextListener {
 	                PersistenceConfiguration pc = new PersistenceConfiguration();
 	                pc.createEntityManagerFactory();
 	                return pc.getPersistenceManagerFactory();
+	            }
+	            
+	            @Provides @RequestScoped  @SuppressWarnings("unused")
+	            GenericRepository providePersistenceManager(PersistenceManagerFactory pmf){
+	                GenericRepository dao = new GenericRepository(pmf);
+	                dao.getPersistenceManager();
+	                return dao;
 	            }
 				
 				@Provides @Singleton @SuppressWarnings("unused")
