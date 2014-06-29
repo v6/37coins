@@ -51,7 +51,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.bal.systemResponse1}}</td><td>{{s.cmdHelpL.bal.implication1}}</td>
+                <td>{{{s.cmdHelpL.bal.systemResponse1}}}</td><td>{{s.cmdHelpL.bal.implication1}}</td>
               </tr>
             </tbody>
           </table>
@@ -96,7 +96,7 @@
           <h5>{{s.cmdHelpL.send.example.header}}</h5>
           <table class="table table-striped">
             <thead>
-              <caption>{{s.cmdHelpL.send.example.ex1.caption}}Sending bitcoin domestically (assuming a US SMSwallet user) (labeled)</caption>
+              <caption>{{s.cmdHelpL.send.example.ex1.caption}}</caption>
               <tr>
                <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
               </tr>
@@ -142,7 +142,7 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.send.example.ex3.td1}}</td><td>{{s.cmdHelpL.send.example.ex3.td2}}</td>
+                <td>{{s.cmdHelpL.send.example.ex4.td1}}</td><td>{{s.cmdHelpL.send.example.ex4.td2}}</td>
               </tr>
             </tbody>
           </table>
@@ -181,7 +181,7 @@
         <div class="panel-body">
           <p>{{s.cmdHelpL.pin.p1}}</p>
           <p>{{s.cmdHelpL.pin.p2}}</p>
-          <p>{{s.cmdHelpL.pin.p3}}</p>
+          <p>{{{s.cmdHelpL.pin.p3}}}</p>
           <p>{{s.cmdHelpL.pin.p4}}</p>
           <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.VoiceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>

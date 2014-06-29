@@ -77,7 +77,7 @@ define({
             "column1" : "Variable",
             "column2" : "Description",
             "td1" : "<amount>",
-            "td2" : "The amount to send to the recipient. Use <em>12000</em> to indicate 12,000 bits, use <em>5USD</em> to indicate sending BTC in the value of USD 5.",
+            "td2" : "The amount to send to the recipient. Use <em>12000</em> to indicate 12,000 bits, or use <em>5USD</em> to indicate sending BTC in the value of USD 5.",
             "td3" : "<address>",
             "td4" : "The destination address to send the bitcoins. Can be either a phone number or a bitcoin address.",
             "td5" : "[comment]",
@@ -108,7 +108,7 @@ define({
         "send": {
             "anchor" : "SEND",
             "syntax" : "SEND command syntax",
-            "caption" : "SEND <amount>; <address>; [comment]",
+            "caption" : "SEND <amount> <address> [comment]",
             "p1": "The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.",
             "p2": "The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notified.",
             "p3": "<strong>Ensure that you typed the recipients phone number or bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong>",
@@ -129,19 +129,19 @@ define({
                 "column1" : "Example",
                 "column2" : "Command explanation",
                 "ex1" : {
-                     "caption" : "Sending bitcoin domestically (assuming a US SMSwallet user)",
+                     "caption" : "Sending bitcoin domestically (from a US SMSwallet user)",
                      "td1" : "SEND 1USD 6165551234",
                      "td2" : "This requests the system to send 1 US dollar worth of bitcoin to the US phone number 6165551234."
                 },
                 "ex2" : {
-                    "caption" : "Sending bitcoins overseas (assuming a US SMSwallet user)",
+                    "caption" : "Sending bitcoins overseas (from a US SMSwallet user)",
                     "td1" : "SEND 44PHP +639125551234",
                     "td2" : "This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +639125551234."
                 },
                 "ex3" : {
-                    "caption" : "Sending bitcoin domestically (assuming a US SMSwallet user)",
+                    "caption" : "Sending with shorthand (from a US SMSwallet user)",
                     "td1" : "6300 6165551234",
-                    "td2" : "This requests the system to send 6300 bits to the phone number 6165551234."
+                    "td2" : "This requests the system to send 6,300 bits to the phone number 6165551234."
                 },
                 "ex4" : {
                     "caption" : "Sending to a bitcoin address",
@@ -187,7 +187,7 @@ define({
             "caption": "PIN",
             "p1": "The PIN command sets up the Security PIN for your account.",
             "p2": "The Security PIN is a 4-digit code that you assign. It protects your account from unauthorized spending.",
-            "p3": "If a Security PIN is not already set up, the system will call you and guide you through the process. If the Security PIN is already set up, the system will call you, confirm your existing Security PIN, and then guide you through setting up a different security PIN.  When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).",
+            "p3": "If a Security PIN is not already set up, the system will call you and guide you through the process. <!--If the Security PIN is already set up, the system will call you, confirm your existing Security PIN, and then guide you through setting up a different security PIN.-->  When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).",
             "p4": "Currently the Security PIN is required if you try to SEND more than 12USD in one day. In the future, you will be able to adjust this amount."
         },
         "price": {
@@ -213,7 +213,7 @@ define({
             "question3" : "After depositing bitcoins to my SMSwallet, why is my my balance less?",
             "answer3" : {
                 "p1" : "The system only shows the amount of bitcoins that you can send. To send bitcoins through 37coins, there is a small transaction fee. Therefore, if the transaction fee of your gateway is 100 bits (2014/05/04: $0.04) per transaction, then your account can only send [deposit amount] - [trans fee] = [available balance].",
-                "p2" : "Your 'available balance' already calculates the future transaction fee."'
+                "p2" : "Your \'available balance\' already calculates the future transaction fee."
             },
             "question4" : "I want to open an SMSwallet, do I need to run an SMSgateway?",
             "answer4" : {
@@ -376,7 +376,7 @@ define({
             "BalanceCmd" : "Get balance in bits",
             "TransactionsCmd" : "List the last 3 transactions",
             "WithdrawalReqCmd" : "Send bitcoins to phone number, bitcoin address",
-            "VoiceCmd" : "Setup secret PIN",
+            "VoiceCmd" : "Setup Secret PIN",
             "ChargeCmd" : "Charges",
             "ProductCmd" : "Lists products",
             "PayCmd" : "Pays bitcoin",
@@ -437,12 +437,12 @@ define({
             "titleH1" : "SMSgateway FAQ:",
             "q1WhyGateway" : "What is ‘SMSgateway’? Why is it needed?",
             "a1WhyGateway" : {
-                "p1" : "‘SMSgateway’ is an android app that is a mediator between any local SMS network and the internet. Each gateway has the power to connect a country’s SMS network to the Bitcoin network; and, thus, to the global economy. It can be operated by anyone willing to invest in an Android phone, install the app, and take care of its connectivity. This person is the SMSgateway partner. The partner’s efforts are rewarded with a small reward from any transaction that is initiated through their gateway. The more gateways that are set up, the bigger the reach of '37Coins network' and the more resilient it will be to hardware failure or a malicious attack. The SMSgateway is designed as a regular client to the mobile provider's network. No approval, co-operation, or agreement with the network provider, except a paid SIM-card, is necessary for set up.",
+                "p1" : "‘SMSgateway’ is an android app that is a mediator between any local SMS network and the internet. Each gateway has the power to connect a country’s SMS network to the Bitcoin network; and, thus, to the global economy. It can be operated by anyone willing to invest in an Android phone, install the app, and take care of its connectivity. This person is the SMSgateway partner. The partner’s efforts are rewarded with a small reward from any transaction that is initiated through their gateway. The more gateways that are set up, the bigger the reach of '37coins network' and the more resilient it will be to hardware failure or a malicious attack. The SMSgateway is designed as a regular client to the mobile provider's network. No approval, co-operation, or agreement with the network provider, except a paid SIM-card, is necessary for set up.",
                 "p2" : "The SMSwallet users do NOT need a smart phone. They can open a wallet with an gateway by simply sending it an SMS from any feature-phone."
             },
             "q2WorkTogether" : "How do SMSgateway and SMSwallet work together?",
             "a2WorkTogether" : {
-                "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The secret PIN is entered using dial tones via a voice call."
+                "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The Secret PIN is entered using dial tones via a voice call."
             },
             "q3WhatPhone" : "Can I run a gateway on my every-day phone?",
             "a3WhatPhone" : {
