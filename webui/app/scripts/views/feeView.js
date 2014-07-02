@@ -27,10 +27,10 @@ function(Backbone, FeeTmpl, myLabels) {
             }else{
                 this.$('#successAlert').css('display','');
                 this.$('#successAlert').addClass('in');
-            }
+        }
             this.$('button').button('reset');
             //update form
-            var fee = this.model.get('fee');
+            var fee = this.model.get('fee') ;
             if (fee){
                 this.$('#feeInput').val(fee);
             }
@@ -55,7 +55,7 @@ function(Backbone, FeeTmpl, myLabels) {
             alert.removeClass('in');
         },
         events: {
-            'click .close': 'handleClose',
+            'click .close': 'handleClose'
         },
         handleClick: function(e){
             e.preventDefault();
@@ -69,7 +69,7 @@ function(Backbone, FeeTmpl, myLabels) {
             var modified = false;
             if (fee !== this.model.get('fee')){
                 sessionStorage.setItem('fee',fee);
-                this.model.set('fee',fee);
+                this.model.set('fee',fee * 0.000001);
                 modified = true;
             }
             if (welcomeMsg !== this.model.get('welcomeMsg')){
