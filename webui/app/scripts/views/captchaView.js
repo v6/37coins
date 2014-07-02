@@ -1,4 +1,4 @@
-define([
+    define([
 	'backbone',
 	'hbs!tmpl/captchaView_tmpl',
 	'recaptcha',

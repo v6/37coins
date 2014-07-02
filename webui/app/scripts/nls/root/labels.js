@@ -65,7 +65,8 @@ define({
     "captchaView" : {
         "captchaH2" : "Verify Captcha!",
         "captcha" : "Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.",
-        "error" : "Incorrect Solution! Try again.",
+        "error" : "Error!",
+        "errorMsg" : "Incorrect Solution! Try again.",
         "captchaBtn" : "Done!"
     },
     "commandSendView" : {

@@ -1,3 +1,6 @@
 # 37 Coins web app
 
-landing page and login for gateway operators to setup and manage sms gateway.
+Landing page, login for gateway operators to setup and manage their SMS gateway, 
+and login for SMS Wallet users to set up or view their wallet balance and current gateway. 
+
+## This uses a Model-View-Controller (MVC) UI architecture pattern made with AngularJS.  
