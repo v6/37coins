@@ -3,30 +3,30 @@
 <!--Command Help-->
 <div class="row">
   <div class="col-sm-12 wbox">
-  <h1>{{s.brands.SMSWallet}} {{s.cmdHelpL.h1}}</h1>
-  <h2>{{s.cmdHelpL.refH2}}</h2>
+  <h1>{{w.brand.SMSWallet}} {{w.cmdHelpL.h1}}</h1>
+  <h2>{{w.cmdHelpL.refH2}}</h2>
     <div id="smsCommands" class="col-sm-12"></div>
   </div>
 </div>
 
 <div class="row">
- <h2>{{s.brands.SMSWallet}} {{s.cmdHelpL.cmdH2}}</h2>
- <p>{{s.cmdHelpL.cmd}}</p>
+ <h2>{{w.brands.SMSWallet}} {{w.cmdHelpL.cmdH2}}</h2>
+ <p>{{w.cmdHelpL.cmd}}</p>
   <div class="panel-group" id="accordion">
     <!--address--> 
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
          <a data-toggle="collapse" data-parent="#accordion" href="#help-ADDRESS">
-           {{s.cmdHelpL.addr.h4}}
+           {{w.cmdHelpL.addr.h4}}
           </a>
         </h4>
       </div>
       <div id="help-ADDRESS" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{s.cmdHelpL.addr.p1}}</p>
-          <p>{{{s.cmdHelpL.addr.p2}}}</p>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.DepositReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
+          <p>{{w.cmdHelpL.addr.p1}}</p>
+          <p>{{{w.cmdHelpL.addr.p2}}}</p>
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.DepositReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -35,28 +35,28 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-BALANCE">
-            {{up s.commands.BalanceCmd1}}
+            {{up s.commands.BalanceCmd.[1]}}
           </a>
         </h4>
       </div>
       <div id="help-BALANCE" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{s.cmdHelpL.bal.p1}}</p>
-          <p>{{s.cmdHelpL.bal.p2}}</p>
+          <p>{{w.cmdHelpL.bal.p1}}</p>
+          <p>{{w.cmdHelpL.bal.p2}}</p>
           <table class="table table-striped">
             <thead>
               <tr>
-                <td>{{s.cmdHelpL.bal.column1}}</td><td>{{s.cmdHelpL.bal.column2}}</td>
+                <td>{{w.cmdHelpL.bal.column1}}</td><td>{{w.cmdHelpL.bal.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{{s.cmdHelpL.bal.systemResponse1}}}</td><td>{{s.cmdHelpL.bal.implication1}}</td>
+                <td>{{{w.cmdHelpL.bal.systemResponse1}}}</td><td>{{w.cmdHelpL.bal.implication1}}</td>
               </tr>
             </tbody>
           </table>
-          <label>{{s.cmdHelpL.bal.label1}}</label>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.BalanceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
+          <label>{{w.cmdHelpL.bal.label1}}</label>
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.BalanceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -65,88 +65,88 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-SEND">
-            {{s.cmdHelpL.send.anchor}}
+            {{w.cmdHelpL.send.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-SEND" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{s.cmdHelpL.send.p1}}</p>
-          <p>{{s.cmdHelpL.send.p2}}</p>
-          <p>{{{s.cmdHelpL.send.p3}}}</p>
+          <p>{{w.cmdHelpL.send.p1}}</p>
+          <p>{{w.cmdHelpL.send.p2}}</p>
+          <p>{{{w.cmdHelpL.send.p3}}}</p>
 
-          <h5>{{s.cmdHelpL.send.syntax}}</h5>
+          <h5>{{w.cmdHelpL.send.syntax}}</h5>
             <table class="table table-striped">
               <thead>
-                <caption>{{s.cmdHelpL.send.caption}}</caption>
+                <caption>{{w.cmdHelpL.send.caption}}</caption>
               </thead>
               <tbody>
                  <tr>
-                  <td>{{s.cmdHelpL.send.amount.td1}}</td><td>{{{s.cmdHelpL.send.amount.td2}}}</td>
+                  <td>{{w.cmdHelpL.send.amount.td1}}</td><td>{{{w.cmdHelpL.send.amount.td2}}}</td>
                 </tr>
                  <tr>
-                  <td>{{s.cmdHelpL.send.address.td1}}</td><td>{{s.cmdHelpL.send.address.td2}}</td>
+                  <td>{{w.cmdHelpL.send.address.td1}}</td><td>{{w.cmdHelpL.send.address.td2}}</td>
                 </tr>
                 <tr>
-                  <td>{{s.cmdHelpL.send.comment.td1}}</td><td>{{s.cmdHelpL.send.comment.td2}}</td>
+                  <td>{{w.cmdHelpL.send.comment.td1}}</td><td>{{w.cmdHelpL.send.comment.td2}}</td>
                 </tr>
               </tbody>
             </table> 
 
-          <h5>{{s.cmdHelpL.send.example.header}}</h5>
+          <h5>{{w.cmdHelpL.send.example.header}}</h5>
           <table class="table table-striped">
             <thead>
-              <caption>{{s.cmdHelpL.send.example.ex1.caption}}</caption>
+              <caption>{{w.cmdHelpL.send.example.ex1.caption}}</caption>
               <tr>
-               <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
+               <td>{{w.cmdHelpL.send.example.column1}}</td><td>{{w.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.send.example.ex1.td1}}</td><td>{{s.cmdHelpL.send.example.ex1.td2}}</td>
+                <td>{{w.cmdHelpL.send.example.ex1.td1}}</td><td>{{w.cmdHelpL.send.example.ex1.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>{{s.cmdHelpL.send.example.ex2.caption}}</caption>
+              <caption>{{w.cmdHelpL.send.example.ex2.caption}}</caption>
               <tr>
-                  <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
+                  <td>{{w.cmdHelpL.send.example.column1}}</td><td>{{w.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.send.example.ex2.td1}}</td><td>{{s.cmdHelpL.send.example.ex2.td2}}</td>
+                <td>{{w.cmdHelpL.send.example.ex2.td1}}</td><td>{{w.cmdHelpL.send.example.ex2.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>{{s.cmdHelpL.send.example.ex3.caption}}</caption>
+              <caption>{{w.cmdHelpL.send.example.ex3.caption}}</caption>
               <tr>
-                <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
+                <td>{{w.cmdHelpL.send.example.column1}}</td><td>{{w.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.send.example.ex3.td1}}</td><td>{{s.cmdHelpL.send.example.ex3.td2}}</td>
+                <td>{{w.cmdHelpL.send.example.ex3.td1}}</td><td>{{w.cmdHelpL.send.example.ex3.td2}}</td>
               </tr>
             </tbody>
           </table>
           <table class="table table-striped">
             <thead>
-              <caption>{{s.cmdHelpL.send.example.ex4.caption}}</caption>
+              <caption>{{w.cmdHelpL.send.example.ex4.caption}}</caption>
               <tr>
-                <td>{{s.cmdHelpL.send.example.column1}}</td><td>{{s.cmdHelpL.send.example.column2}}</td>
+                <td>{{w.cmdHelpL.send.example.column1}}</td><td>{{w.cmdHelpL.send.example.column2}}</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{{s.cmdHelpL.send.example.ex4.td1}}</td><td>{{s.cmdHelpL.send.example.ex4.td2}}</td>
+                <td>{{w.cmdHelpL.send.example.ex4.td1}}</td><td>{{w.cmdHelpL.send.example.ex4.td2}}</td>
               </tr>
             </tbody>
           </table>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.WithdrawalReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.WithdrawalReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}
           </div>        
         </div>
       </div>
@@ -157,14 +157,14 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-TRANSACTION">
-              {{s.cmdHelpL.transaction.anchor}}
+              {{w.cmdHelpL.transaction.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-TRANSACTION" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{s.cmdHelpL.transaction.p1}}</p>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.TransactionsCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
+          <p>{{w.cmdHelpL.transaction.p1}}</p>
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.TransactionsCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -173,17 +173,17 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PIN">
-              {{s.cmdHelpL.pin.anchor}}
+              {{w.cmdHelpL.pin.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-PIN" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{s.cmdHelpL.pin.p1}}</p>
-          <p>{{s.cmdHelpL.pin.p2}}</p>
-          <p>{{{s.cmdHelpL.pin.p3}}}</p>
-          <p>{{s.cmdHelpL.pin.p4}}</p>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.VoiceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
+          <p>{{w.cmdHelpL.pin.p1}}</p>
+          <p>{{w.cmdHelpL.pin.p2}}</p>
+          <p>{{{w.cmdHelpL.pin.p3}}}</p>
+          <p>{{w.cmdHelpL.pin.p4}}</p>
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.VoiceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -192,14 +192,14 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PRICE">
-            {{s.cmdHelpL.price.anchor}}
+            {{w.cmdHelpL.price.anchor}}
           </a>
         </h4>
       </div>
       <div id="help-PRICE" class="panel-collapse collapse in">
         <div class="panel-body">
-          <p>{{{s.cmdHelpL.price.p1}}}</p>
-          <div class="alert alert-warning">{{s.cmdHelpL.w}}{{#each s.commands.PriceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
+          <p>{{{w.cmdHelpL.price.p1}}}</p>
+          <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.PriceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
     </div>
@@ -209,20 +209,20 @@
 
 <!--SMSwallet FAQ-->
 <div class="row">
-  <h2>{{s.brand.SMSwallet}} FAQ</h2>
+  <h2>{{w.brand.SMSwallet}} FAQ</h2>
   <div class="panel-group" id="accordion2">
     <!--What is 'SMSwallet'?-->
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ1">
-            {{s.cmdHelpL.faq.question1}} ’{{s.brand.SMSwallet}}’?
+            {{w.cmdHelpL.faq.question1}} ’{{w.brand.SMSwallet}}’?
           </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ1" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>’{{s.brand.SMSwallet}}’ {{s.cmdHelpL.faq.answer1.p1}}</p>
+            <p>’{{w.brand.SMSwallet}}’ {{w.cmdHelpL.faq.answer1.p1}}</p>
           </div>
         </div>
       </div>
@@ -231,17 +231,17 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ2">
-                {{s.cmdHelpL.faq.question2}}
+                {{w.cmdHelpL.faq.question2}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ2" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <strong>{{s.cmdHelpL.faq.answer2.title1}}</strong>
-            <p>{{s.cmdHelpL.faq.answer2.p1}}</p>
-            <p>{{s.cmdHelpL.faq.answer2.p2}}</p>
-            <strong>{{s.cmdHelpL.faq.answer2.title2}}</strong>
-            <p>{{s.cmdHelpL.faq.answer2.p3}}</p>
+            <strong>{{w.cmdHelpL.faq.answer2.title1}}</strong>
+            <p>{{w.cmdHelpL.faq.answer2.p1}}</p>
+            <p>{{w.cmdHelpL.faq.answer2.p2}}</p>
+            <strong>{{w.cmdHelpL.faq.answer2.title2}}</strong>
+            <p>{{w.cmdHelpL.faq.answer2.p3}}</p>
           </div>
         </div>
       </div>
@@ -250,14 +250,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ3">
-                {{s.cmdHelpL.faq.question3}}
+                {{w.cmdHelpL.faq.question3}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ3" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>{{s.cmdHelpL.faq.answer3.p1}}</p>
-            <p>{{s.cmdHelpL.faq.answer3.p2}}</p>
+            <p>{{w.cmdHelpL.faq.answer3.p1}}</p>
+            <p>{{w.cmdHelpL.faq.answer3.p2}}</p>
           </div>
         </div>
       </div>
@@ -266,14 +266,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ4">
-                {{s.cmdHelpL.faq.question4}}
+                {{w.cmdHelpL.faq.question4}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ4" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>{{s.cmdHelpL.faq.answer4.p1}}</p>
-            <p>{{{s.cmdHelpL.faq.answer4.p2}}}</p>
+            <p>{{w.cmdHelpL.faq.answer4.p1}}</p>
+            <p>{{{w.cmdHelpL.faq.answer4.p2}}}</p>
           </div>
         </div>
       </div>
@@ -282,14 +282,14 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ5">
-                {{s.cmdHelpL.faq.question5}}
+                {{w.cmdHelpL.faq.question5}}
             </a>
           </h4>
         </div>
         <div id="help-SMSwalletFAQ5" class="panel-collapse collapse2 in">
           <div class="panel-body">
-            <p>{{s.cmdHelpL.faq.answer5.p1}}</p>
-            <div class="alert alert-warning">{{s.cmdHelpL.faq.answer5.p2}}</div>
+            <p>{{w.cmdHelpL.faq.answer5.p1}}</p>
+            <div class="alert alert-warning">{{w.cmdHelpL.faq.answer5.p2}}</div>
           </div>
         </div>
       </div>

@@ -351,7 +351,8 @@ define({
         }
     },
     "brand" : {
-        "SMSwallet" : "SMSwallet"
+        "SMSwallet" : "SMSwallet",
+        "SMSgateway" : "SMSgateway"
     },
     "faq" : {
         "gw" : {
