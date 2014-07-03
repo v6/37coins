@@ -245,7 +245,7 @@ public class RestTest {
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
-		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", Action.VOICE.toString(), 8087,
+		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", "비밀번호", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}			

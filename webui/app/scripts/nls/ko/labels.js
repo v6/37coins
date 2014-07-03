@@ -15,7 +15,7 @@ define({
         "BalanceCmd" : ["잔액조회","잔액확인","계좌조회"],
         "TransactionsCmd" : ["업무"],
         "WithdrawalReqCmd" : ["송금","송금하기","이체"],
-        "VoiceCmd" : ["voice"],
+	"VoiceCmd" : ["핀","핀코드","비밀","비밀번호"],
         "ChargeCmd" : ["책임"],
         "ProductCmd" : ["생성물"],
         "PayCmd" : ["지불"],

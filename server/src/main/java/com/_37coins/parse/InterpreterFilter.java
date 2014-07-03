@@ -54,6 +54,12 @@ public class InterpreterFilter implements Filter {
         		List<DataSet> responseList = (List<DataSet>)httpReq.getAttribute("dsl");
         		DataSet responseData = responseList.get(0);
         	    String gwCn = (String)httpReq.getAttribute("gwCn");
+		//check locale
+		String acceptLng = httpReq.getHeader("Accept-Language");
+		Locale locale = DataSet.parseLocaleString(acceptLng);
+		String rl = (null!=locale)?locale.getLanguage():null;
+		PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+		String rc = phoneUtil.getRegionCodeForNumber(responseData.getTo().getPhoneNumber());
         		//get user from directory
         		Account a = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getAddress()), Account.class,false);
         		if (null!=a){
@@ -66,17 +72,8 @@ public class InterpreterFilter implements Filter {
         			responseData.setCn(a.getId().toString());
         			//read the gateway
         			Gateway g = a.getOwner();
-        
-        	        //check locale
-                    if (a.getLocale()!=null){
-                        if (a.getLocale().getCountry()==null){
-                            a.setLocale(new Locale(a.getLocale().getLanguage(),responseData.getLocale().getCountry()));
-                        }else{
-                            a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
-                        }
-                    }else{
-                        a.setLocale(new Locale(g.getLocale().getLanguage(),responseData.getLocale().getCountry()));
-                    }            
+				//update language
+		    a.setLocale(findLanguage(rl, rc, a.getLocale(), g.getLocale()));
         			//check if gateway changed
         			if (null!=responseData.getTo().getGateway()&&!g.getMobile().equalsIgnoreCase(responseData.getTo().getGateway())){
         				//look up the new gateway and overwrite all values
@@ -104,18 +101,13 @@ public class InterpreterFilter implements Filter {
         		}else{//new user
         			if (responseData.getAction()!=Action.SIGNUP){
         			    Gateway g = dao.queryEntity(new RNQuery().addFilter("mobile", responseData.getTo().getGateway()), Gateway.class);
+				    Locale accountLocale = findLanguage(rl, rc, null, g.getLocale());
         			    a = new Account()
+					.setLocale(accountLocale)
         			        .setMobile(responseData.getTo().getAddress())
         			        .setOwner(g);
-        			    if (g.getLocale()==null||g.getLocale().getCountry()==null){
-        			        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        	                String rc = phoneUtil.getRegionCodeForNumber(responseData.getTo().getPhoneNumber());
-        			        a.setLocale(new Locale("",rc));
-        			    }
-        			    a.setLocale(g.getLocale());
-        			    for (DataSet ds: responseList)
-        			        ds.setLocale(g.getLocale());
         			    dao.add(a);
+
         			    responseData.getTo().setGateway(g.getCn());
         			    responseData.setCn(responseData.getTo().getAddress().replace("+", "")).setGwCn(g.getCn()).setGwFee(g.getSettings().getFee());
         			    //respond to new user with welcome message
@@ -123,7 +115,7 @@ public class InterpreterFilter implements Filter {
         					.setAction(Action.SIGNUP)
         					.setTo(responseData.getTo())
         					.setCn(responseData.getCn())
-        					.setLocale(responseData.getLocale())
+						.setLocale(accountLocale)
         					.setPayload(new Signup()
                                 .setMobile(responseData.getTo().getAddress())
                                 .setSource(Source.NEW)
@@ -132,6 +124,9 @@ public class InterpreterFilter implements Filter {
                                 .setDigestToken(g.getApiSecret()))
         					.setService(g.getSettings().getCompanyName());
         				httpReq.setAttribute("create", create);
+			//update language, make sure each response has it set
+			for (DataSet ds: responseList)
+			    ds.setLocale(accountLocale);
         			}
         		}
                 if (gwCn!=null){
@@ -145,7 +140,26 @@ public class InterpreterFilter implements Filter {
 	    chain.doFilter(request, response);
 	}
 	
-	public void respond(List<DataSet> dsl, ServletResponse response){
+	protected static Locale findLanguage(String reqLanguage, String regionCode, Locale existingLocale, Locale gatewayLocale){
+	//update language
+	if (reqLanguage==null||reqLanguage.length()!=2)
+	    reqLanguage = (gatewayLocale!=null && gatewayLocale.getLanguage()!=null)?gatewayLocale.getLanguage():"en";
+	//update database if locale in database missing
+	if (existingLocale==null){
+	    return new Locale(reqLanguage,regionCode);
+	}
+	if (existingLocale.getLanguage()==null
+		||existingLocale.getLanguage().length()!=2){
+	    return new Locale(reqLanguage,existingLocale.getCountry());
+	}
+	if (existingLocale.getCountry()==null
+		||existingLocale.getCountry().length()!=2){
+	    return new Locale(existingLocale.getLanguage(),regionCode);
+	}
+	return existingLocale;
+	}
+
+	private void respond(List<DataSet> dsl, ServletResponse response){
 		OutputStream os = null;
 		try {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;

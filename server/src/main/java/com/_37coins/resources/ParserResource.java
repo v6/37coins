@@ -219,8 +219,9 @@ public class ParserResource {
 			throw new RuntimeException("not implemented");
 		}
 		if (null!=gwDn){
-			//create new user
+			//the locale is either passed in from the website, the inviting user, or the taken from the gateway
 	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
+		//create new user
 		    Account newUser = new Account()
 		        .setOwner(gwDn)
 		        .setMobile(recipient.getAddress())

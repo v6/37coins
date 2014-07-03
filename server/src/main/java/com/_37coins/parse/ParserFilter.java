@@ -83,45 +83,33 @@ public class ParserFilter implements Filter {
     		String from = map.getFirst("from");
     		String gateway = map.getFirst("gateway");
     		gateway = (null==gateway||gateway.length()<3)?null:gateway;
-    		String message = map.getFirst("message");
-    		String gwCn = map.getFirst("gwCn");
-    		httpReq.setAttribute("gwCn", gwCn);
-    		// Parse the locale
-    		String acceptLng = httpReq.getHeader("Accept-Language");
-    		Locale locale = DataSet.parseLocaleString(acceptLng);
-    		// parse action
-    		String url = httpReq.getRequestURL().toString();
-    		String actionString = url.substring(
-    				url.indexOf(ParserResource.PATH) + ParserResource.PATH.length() + 1, url.length());
-    		try {
-    			// parse message address
-    			MessageAddress md = MessageAddress.fromString(from, gateway)
-    					.setGateway(gateway);
-    			//exclude all roaming requests
-    			if (md.getAddressType() == MsgType.SMS 
-    					&& !isFromSameCountry(md, gateway)){
-    				respond(new ArrayList<DataSet>(), response);
-    				return;
-    			}
-    			//exclude non mobile numbers
-    			if (md.getAddressType() == MsgType.SMS
-    					&& !isMobileNumber(md)){
-    				respond(new ArrayList<DataSet>(), response);
-    				return;
-    			}
-    			//set locale
-    			if (md.getAddressType() == MsgType.SMS){
-    				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-    				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
-				locale = new Locale(locale.getLanguage(),rc);
-    			}else if (null==locale){
-    				locale = Locale.US;
-    			}
-    			// parse message into dataset
-    			responseData = process(md, message, locale,Action.fromString(actionString));
-    			responseList = new ArrayList<>();
-    			responseList.add(responseData);
-            } catch (Exception e) {
+		String message = map.getFirst("message");
+		String gwCn = map.getFirst("gwCn");
+		httpReq.setAttribute("gwCn", gwCn);
+		// parse action
+		String url = httpReq.getRequestURL().toString();
+		String actionString = url.substring(
+				url.indexOf(ParserResource.PATH) + ParserResource.PATH.length() + 1, url.length());
+		try {
+			// parse message address
+			MessageAddress md = MessageAddress.fromString(from, gateway).setGateway(gateway);
+			//exclude all roaming requests
+			if (md.getAddressType() == MsgType.SMS
+					&& !isFromSameCountry(md, gateway)){
+				respond(new ArrayList<DataSet>(), response, Locale.US);
+				return;
+			}
+			//exclude non mobile numbers
+			if (md.getAddressType() == MsgType.SMS
+					&& !isMobileNumber(md)){
+				respond(new ArrayList<DataSet>(), response, Locale.US);
+				return;
+			}
+			// parse message into dataset
+			responseData = process(md, message, Action.fromString(actionString));
+			responseList = new ArrayList<>();
+			responseList.add(responseData);
+	    } catch (Exception e) {
                 log.error("parser exception", e);
                 e.printStackTrace();
                 HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -132,7 +120,7 @@ public class ParserFilter implements Filter {
                 httpReq.setAttribute("dsl", responseList);
                 chain.doFilter(httpReq, response);
             }else{
-                respond(responseList,response);
+		respond(responseList,response, Locale.US);
                 return;
             }
     	}else{
@@ -166,7 +154,13 @@ public class ParserFilter implements Filter {
 		return false;
 	}
 	
-	public void respond(List<DataSet> dsl, ServletResponse response){
+	public void respond(List<DataSet> dsl, ServletResponse response, Locale locale){
+	    //set response language
+	    //TODO: static workaround now, because Language parsed in InterpreterFilter
+	for (DataSet ds : dsl){
+	    ds.setLocale(locale);
+	}
+	//write out response
 		OutputStream os = null;
 		try {
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -293,10 +287,10 @@ public class ParserFilter implements Filter {
 	}
 
 	public DataSet process(MessageAddress sender, String subject,
-			Locale locale, Action action) {
+			Action action) {
 		subject = subject.trim().replaceAll(" +", " ");
 		String[] ca = subject.split(" ");
-		DataSet data = new DataSet().setLocale(locale).setAction(action)
+		DataSet data = new DataSet().setAction(action)
 				.setTo(sender);
 
 		if (data.getAction() == Action.WITHDRAWAL_REQ) {
