@@ -4,7 +4,7 @@ define([
     'i18n!nls/labels',
     'i18n!nls/webLabels'
 ],
-function( Backbone, SignupConfTmpl  ) {
+function( Backbone, SignupConfTmpl, myLabels, myWebLabels ) {
     'use strict';
 
 	/* Return a ItemView class definition */

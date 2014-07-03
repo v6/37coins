@@ -71,18 +71,9 @@ define({
                 "label" : "Enter the phone number for your existing account.",
                 "gwPrompt" : "Wanted to sign in to your SMSgateway account?",
                 "gwLink" : "Click here."
-            },
-            // MOVED "signUp" : {
-            "signUpConf" : {
-                "signUpH2" : "Sign Up",
-                "success" : "Success",
-                "created" : "Account created.",
-                "linkLabel" : "Get started",
-                "linkLabelPunct" : "!",
-                "sad" : "Error!",
-                "sadMsg" : "Account creation failed. Please",
-                "contactSupport" : "contact support"
             }
+            // MOVED "signUp" : {
+            // MOVED "signUpConf" : {
         }
         // MOVED "signup" :
     },
