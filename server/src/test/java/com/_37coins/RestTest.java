@@ -110,7 +110,7 @@ public class RestTest {
         rv.add(gw4);
         rv.add(gw5);
         List<Account> ac = new ArrayList<>();
-        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test"));
+        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test").setLocale(new Locale("ko","KR")));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
         data.put(Gateway.class, rv);
         data.put(Account.class, ac);
