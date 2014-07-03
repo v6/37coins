@@ -1,11 +1,5 @@
 define({
-    "siteNav" : {
-        // MOVED "root" :
-        // MOVED "notFound" :
-        "terms" : "Terms of Use",
-        "termsH1" : "37coins Terms of Service",
-        "privTerms" : "Privacy Policy"
-    },
+    // MOVED "siteNav" : {
     "privacy" : {
         "h1" : "Privacy Policy",
         "h2" : "Personal Information"
