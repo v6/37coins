@@ -243,24 +243,7 @@ define({
     } ,
     // MOVED "gatewayCollectionView" : {
     // MOVED "logoutView" : {
-    "merchant" :
-    {
-        // MOVED "success" : {
-        "verify" : {
-            "h2" : "Account Verification",
-            "desc" : "We are going to call you at your phone number to verify your mobile. Click <b>Call me now</b> below and enter the 4-digit code that will be displayed to you.",
-            "searchInput" : {
-                "label" : "Phone Number:",
-                "placeholder" : "+XXYYYYYYYY"
-            },
-            "disabledInput" : {
-                "label" : "Code:",
-                "placeholder" : "4 digit code here..."
-            },
-            "verBtn" : "Call me now",
-            "merchStatus1" : "Please insert your phone number."
-        }
-    },
+    // MOVED "merchant" :
     "mobileInput" : {
         "descCountry" : "Country",
         "descNumber" : "Mobile Number",

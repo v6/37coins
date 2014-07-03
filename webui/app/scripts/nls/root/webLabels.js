@@ -478,7 +478,7 @@ define({
                 "placeholder" : "4 digit code here..."
             },
             "verBtn" : "Call me now",
-            "merchStatus1" : "Please input   your phone number."
+            "merchStatus1" : "Please input your phone number."
         }
     },
     "mobileInput" : {
