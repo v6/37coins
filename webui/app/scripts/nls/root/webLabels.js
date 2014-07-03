@@ -320,7 +320,9 @@ define({
                 "promptBeta" : "Join the SMSwallet beta.",
                 "happy" : "You have successfully submitted a registration request.",
                 "alert" : "Attention!",
-                "alertMsg" : "To complete registration please check your email inbox and validate you email address."
+                "alertMsg" : "To complete registration please check your email inbox and validate you email address.",
+                "gw" : "Wanted to start an SMSgateway?",
+                "gwLnk" : "Click here."
             },
             "signUpConf" : {
                 "signUpH2" : "Sign Up",
