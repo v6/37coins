@@ -244,12 +244,7 @@ define({
     // MOVED "gatewayCollectionView" : {
     // MOVED "logoutView" : {
     // MOVED "merchant" :
-    "mobileInput" : {
-        "descCountry" : "Country",
-        "descNumber" : "Mobile Number",
-        "success" : "Valid",
-        "error" : "Invalid number"
-    },
+    // MOVED    "mobileInput" : {
     "reset" : {
         "happy" : "Success!",
         "submitted" : "Password request submitted. Please check your email inbox and follow the provided instructions.",
