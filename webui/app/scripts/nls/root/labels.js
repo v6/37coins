@@ -290,7 +290,7 @@ define({
             },
             "signUp" : {
                 "SMS" : "SMS",
-                "titleH1" : "wallet SignUp",
+                "titleH1" : "wallet Signup",
                 "titleH2" : "Please Sign up",
                 "promptBeta" : "Join the SMSwallet beta.",
                 "happy" : "You have successfully submitted a registration request.",

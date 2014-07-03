@@ -9,7 +9,9 @@ function( Backbone, CaptchaTmpl, Recaptcha, myLabels) {
 
 	/* Return a ItemView class definition */
 	return Backbone.Marionette.ItemView.extend({
-		templateHelpers: function(){return {s: myLabels};},
+        templateHelpers: function(){
+            return window.helpers(myLabels);
+        },
 		initialize: function(opt) {
 			this.next = opt.next;
 			this.controller = opt.controller;

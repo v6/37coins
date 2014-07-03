@@ -55,7 +55,7 @@ function(Backbone, FeeTmpl, myLabels) {
             alert.removeClass('in');
         },
         events: {
-            'click .close': 'handleClose',
+            'click .close': 'handleClose'
         },
         handleClick: function(e){
             e.preventDefault();
