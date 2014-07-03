@@ -1,15 +1,16 @@
 define([
     'backbone',
     'hbs!tmpl/feeView_tmpl',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, FeeTmpl, myLabels) {
+function(Backbone, FeeTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: FeeTmpl,
         className: 'gwLayout',
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
         initialize: function() {
             this.firstRun = true;

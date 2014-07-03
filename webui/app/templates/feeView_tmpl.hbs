@@ -1,32 +1,32 @@
-<h2 class="form-fee-heading">Gateway Settings</h2>
+<h2 class="form-fee-heading">{{w.form.gwSet.h2}}</h2>
 <form>
   <div class="form-group">
-    <label for="feeImput">Transaction Fee:</label>
-    <input id="feeInput" type="number" step="0.0001" min="0" name="fee" class="form-control" placeholder="0.00xx">
-    <span class="help-block">Choose a transaction fee paid to you by the user for each successful transaction.</span>
+    <label for="feeInput">{{w.form.gwSet.feeInput.label}}</label>
+    <input id="feeInput" type="number" step="1" min="0" name="fee" class="form-control" placeholder="{{w.form.gwSet.feeInput.placeholder}}">
+    <span class="help-block">{{w.form.gwSet.feeInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="msgImput">Welcome Message:</label>
-    <textarea id="msgInput" name="msg" class="form-control" rows="3" placeholder="37coins"></textarea>
-    <span class="help-block">Set the welcome message for new users.</span>
+    <label for="msgInput">{{w.form.gwSet.msgInput.label}}</label>
+    <textarea id="msgInput" name="msg" class="form-control" rows="3" placeholder="{{w.form.gwSet.msgInput.placeholder}}"></textarea>
+    <span class="help-block">{{w.form.gwSet.msgInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="urlImput">Company Url:</label>
-    <input id="urlInput" type="text" name="url" class="form-control" placeholder="www.37coins.com">
-    <span class="help-block">Set the name of your company.</span>
+    <label for="urlInput">{{w.form.gwSet.urlInput.label}}</label>
+    <input id="urlInput" type="text" name="url" class="form-control" placeholder="{{w.form.gwSet.urlInput.placeholder}}">
+    <span class="help-block">{{w.form.gwSet.urlInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="callbackImput">Signup Callback:</label>
-    <input id="callbackInput" type="text" name="callback" class="form-control" placeholder="https://">
-    <span class="help-block">Notify your server when a new user signs up.</span>
+    <label for="callbackInput">{{w.form.gwSet.callbackInput.label}}</label>
+    <input id="callbackInput" type="text" name="callback" class="form-control" placeholder="{{w.form.gwSet.callbackInput.placeholder}}">
+    <span class="help-block">{{w.form.gwSet.callbackInput.help-block}}</span>
   </div>
-  <button class="btn btn-inverse" type="submit">Update Settings</button>
+  <button class="btn btn-inverse" type="submit">{{w.form.gwSet.submitBtn}}</button>
 </form>
 <div id="errorAlert" class="alert alert-danger alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>Error!</strong> Communication Error!
+  <strong>{{w.form.gwSet.sad}}</strong>&nbsp;{{w.form.gwSet.commErr}}
 </div>
 <div id="successAlert" class="alert alert-success alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>Success!</strong> Settings updated.
+  <strong>{{w.form.gwSet.happy}}</strong>&nbsp;{{w.form.gwSet.success}}
 </div>

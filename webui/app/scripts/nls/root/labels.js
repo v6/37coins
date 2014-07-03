@@ -263,28 +263,8 @@ define({
                     "sadExpln" : "Communication Error."
                 }
             }
-        },
-        "gwSet" : {
-            "h2" : "Gateway Settings",
-            "feeInput" : {
-                "label" : "Transaction Fee:",
-                "help-block" : "Choose a transaction fee payed to you by the user for each successful transaction."
-            },
-            "msgInput" : {
-                "label" : "Transaction Fee:",
-                "help-block" : "Define the welcome message a new user receives."
-            },
-            "urlInput" : {
-                "label" : "Company Url:",
-                "help-block" : "Set the name of your company."
-            },
-            "callbackInput" : {
-                "label" : "Signup Callback:",
-                "help-block" : "Notify your server about new Users."
-            },
-            "commErr" : "<strong>Error!</strong> Communication Error! Please try again later, from a different browser, or contact support.",
-            "success" : "<strong>Success!</strong> Settings updated."
         }
+        //MOVED "gwSet" : {
     } ,
     "gatewayCollectionView" : {
         "numberTh1": "Number",
