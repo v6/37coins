@@ -1,9 +1,5 @@
 define({
     // MOVED "siteNav" : {
-    "privacy" : {
-        "h1" : "Privacy Policy",
-        "h2" : "Personal Information"
-    },
     "aboutView" : {
         "about" : "About 37coins",
         "desc" : "We are committed to making bitcoin easy, secure to use, and accessible to everyone. With a global focus on social equity, we develop down-teched, secure, scalable solutions that are as appropriate for emerging economies as they are for developed ones.",
@@ -180,7 +176,7 @@ define({
             }
         }
         //MOVED "gwSet" : {
-    } ,
+    }
     // MOVED "gatewayCollectionView" : {
     // MOVED "logoutView" : {
     // MOVED "merchant" :
