@@ -77,7 +77,7 @@ define({
             "column1" : "Variable",
             "column2" : "Description",
             "td1" : "<amount>",
-            "td2" : "The amount to send to the recipient. Use <em>12000</em> to indicate 12,000 bits, or use <em>5USD</em> to indicate sending BTC in the value of USD 5.",
+            "td2" : "The amount to send to the recipient. Use <em>12000</em> to indicate 12,000 bits, or use <em>5USD</em> to indicate sending bitcoins in the value of USD 5.",
             "td3" : "<address>",
             "td4" : "The destination address to send the bitcoins. Can be either a phone number or a bitcoin address.",
             "td5" : "[comment]",
@@ -99,7 +99,7 @@ define({
         "bal" : {
             "column1" : "System Response",
             "column2" : "Implication",
-            "systemResponse1" : "Balance 12,048bit ($5.24)<br/>Reply ADDR, for bitcoin address",
+            "systemResponse1" : "Balance 12,048BIT ($5.24)<br/>Reply ADDR, for bitcoin address",
             "implication1" : "You can SEND up to 12,048 bits worth of bitcoins to another phone number or bitcoin address",
             "label1" : "*bitcoin to US Dollar values, as of 5/4/2014",
             "p1" : "The BALANCE command returns the current bitcoin value of your SMSwallet.",
