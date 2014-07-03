@@ -63,11 +63,6 @@ define({
         "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive bitcoin anywhere in the World. No internet or smartphone required.",
         // MOVED "header" : {
         // MOVED other stuff for indexLayout_tmpl.hbs
-        "gw1" : "A decentralized, open-source Android app that bridges between SMS and Bitcoin. Designed for low-end Android phones. In other words, you can connect your country to the global economy via Bitcoin (and earn a little for your time and effort, too. ;-).",
-        "gw2" : "Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:",
-        "gwLi" : ["Dedicated Android phone","Text messaging plan","Internet connection"],
-        "gwInv" : "Become an SMSgateway partner",
-        "gwBtn" : "Open a Gateway"
     },
     "loginView" : {
         "gwCallToAction" : "Do you have a spare Android phone and want to run an SMSgateway in your country?",

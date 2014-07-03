@@ -269,6 +269,7 @@ define({
         "walletBtn" : "Open a Wallet",
         "commands" : "Commands are not case-sensitve and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet",
         "link" : "help page",
+        "h2gw" : "gateway",
         "gw1" : "A decentralized, open-source Android app that bridges between SMS and Bitcoin. Designed for low-end Android phones. In other words, you can connect your country to the global economy via Bitcoin (and earn a little for your time and effort, too. ;-).",
         "gw2" : "Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:",
         "gwLi" : ["Dedicated Android phone","Text messaging plan","Internet connection"],
@@ -354,7 +355,9 @@ define({
     },
     "brand" : {
         "SMSwallet" : "SMSwallet",
-        "SMSgateway" : "SMSgateway"
+        "SMSgateway" : "SMSgateway",
+        "sms" : "SMS",
+        "gateway" : "gateway"
     },
     "faq" : {
         "gw" : {
