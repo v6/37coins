@@ -242,12 +242,7 @@ define({
         //MOVED "gwSet" : {
     } ,
     // MOVED "gatewayCollectionView" : {
-    "logoutView" : {
-        "success" : {
-            "alert" :"strong>Success!</strong> Logout successfull.",
-            "alert-link" :"Continue to Login"
-        }
-    },
+    // MOVED "logoutView" : {
     "merchant" :
     {
         "success" : {

@@ -446,7 +446,8 @@ define({
     },
     "logoutView" : {
         "success" : {
-            "alert" :"strong>Success!</strong> Logout successfull.",
+            "happy" : "Success!",
+            "alert" :"Logout successful.",
             "alert-link" :"Continue to Login"
         }
     },
