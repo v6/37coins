@@ -1,15 +1,6 @@
 define({
     "siteNav" : {
-        "root" : {
-            "products" : "products",
-            "help" : "help",
-            "about" : "about",
-            "terms" : "terms",
-            "privacy" : "privacy",
-            "bf" : "Bitfinger [coming soon]",
-            "signIn" : "sign in",
-            "signUp" : "sign up"
-        },
+        // MOVED "root" :
         "notFound" : {
             "h1" : "Not found",
             "face" : ":(",
