@@ -10,6 +10,7 @@ function(Backbone, FaqTmpl, myLabels, myWebLabels) {
         template: FaqTmpl,
         className: 'static',
         templateHelpers: function(){
+            console.log ( self , "Loading Helpers and Labels for FAQ" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
         onShow:function () {

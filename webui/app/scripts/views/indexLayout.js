@@ -2,9 +2,10 @@ define([
     'backbone',
     'communicator',
     'hbs!tmpl/indexLayout_tmpl',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, IndexLayout, myLabels) {
+function(Backbone, Communicator, IndexLayout, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
         regions: {
@@ -12,7 +13,10 @@ function(Backbone, Communicator, IndexLayout, myLabels) {
             gateways: '#gwTable'
         },
         template: IndexLayout,
-        templateHelpers: function(){return {s: myLabels};},
+        templateHelpers: function(){
+            console.log ( self , "Loading Helpers and Labels for start page" ); // DEBUGGING CODE
+            return window.helpers(myLabels, myWebLabels);
+        },
         className: 'main',
         initialize: function() {
         },

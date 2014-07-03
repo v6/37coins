@@ -262,6 +262,8 @@ define({
                 "label": "terms of use"
             }
         },
+        "h1SMS" : "SMS",
+        "h1Wallet" : "wallet",
         "wallet" : "After setting up your account, you will receive an automated text message from a gateway. To control your account, send any of these commands to that phone number via SMS.",
         "walletInv" : "Become an SMSwallet beta user",
         "walletBtn" : "Open a Wallet",
