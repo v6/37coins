@@ -9,6 +9,7 @@ function(Backbone, FooterTmpl, myLabels, myWebLabels) {
     return Backbone.Marionette.ItemView.extend({
         template: FooterTmpl,
         templateHelpers: function(){
+            console.log ( "Loading template helpers for footer view" ) ; // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
         className: 'container'
