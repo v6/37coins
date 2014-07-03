@@ -59,11 +59,7 @@ define({
         }
     },
     // MOVED "cmdHelpL"
-    "indexLayout" : {
-        "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive bitcoin anywhere in the World. No internet or smartphone required.",
-        // MOVED "header" : {
-        // MOVED other stuff for indexLayout_tmpl.hbs
-    },
+    // MOVED "indexLayout" : {
     "loginView" : {
         "gwCallToAction" : "Do you have a spare Android phone and want to run an SMSgateway in your country?",
         "signUpLinkLabel" : "Sign Up",

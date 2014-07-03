@@ -3,15 +3,16 @@ define([
     'communicator',
     'hbs!tmpl/loginView_tmpl',
     'i18n!nls/labels',
+    'i18n!nls/webLabels',
     'jqueryValidation'
 ],
-function(Backbone, Communicator, LoginTmpl, myLabels) {
+function(Backbone, Communicator, LoginTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: LoginTmpl,
         className: 'container',
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
         initialize: function(opt) {
             this.next = opt.next;
