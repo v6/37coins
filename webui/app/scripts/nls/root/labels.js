@@ -1,17 +1,7 @@
 define({
     "siteNav" : {
         // MOVED "root" :
-        "notFound" : {
-            "h1" : "Not found",
-            "face" : ":(",
-            "sorry" : "Sorry, but the page you were trying to view does not exist.",
-            "cause" : {
-                "expln" :"It looks like this was the result of either:",
-                "addr" : "a mistyped address",
-                "link" : "an out-of-date link"
-            },
-            "backToHome" : "Continue to Index"
-        },
+        // MOVED "notFound" :
         "terms" : "Terms of Use",
         "termsH1" : "37coins Terms of Service",
         "privTerms" : "Privacy Policy"
