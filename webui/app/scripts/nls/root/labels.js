@@ -72,15 +72,7 @@ define({
                 "gwPrompt" : "Wanted to sign in to your SMSgateway account?",
                 "gwLink" : "Click here."
             },
-            "signUp" : {
-                "SMS" : "SMS",
-                "titleH1" : "wallet SignUp",
-                "titleH2" : "Please Sign up",
-                "promptBeta" : "Join the SMSwallet beta.",
-                "happy" : "You have successfully submitted a registration request.",
-                "alert" : "Attention!",
-                "alertMsg" : "To complete registration please check your email inbox and validate you email address."
-            },
+            // MOVED "signUp" : {
             "signUpConf" : {
                 "signUpH2" : "Sign Up",
                 "success" : "Success",
@@ -91,26 +83,8 @@ define({
                 "sadMsg" : "Account creation failed. Please",
                 "contactSupport" : "contact support"
             }
-        },
-        "signup" : {
-            "titleH2" : "Please Sign up",
-            "InputEmail1" : {
-                "label" : "Email Address:",
-                "placeholder" : "Enter email"
-            },
-            "password1" : {
-                "label" : "Password:",
-                "placeholder" : "Enter password"
-            },
-            "password2" : {
-                "label" : "Password:",
-                "placeholder" : "Repeat password"
-            },
-            "signUpBtn" : "Sign up",
-            "sad" : "Error!",
-            "sadLinkPrompt" : "Please",
-            "sadLinkLabel" : "contact support"
         }
+        // MOVED "signup" :
     },
     "title" : {
         "wildcards" : ["confSignup","confReset","account"],
