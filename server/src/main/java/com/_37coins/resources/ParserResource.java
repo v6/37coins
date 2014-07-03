@@ -140,6 +140,15 @@ public class ParserResource {
 			return null;
 		}
 	}
+    @POST
+    @Path("/HelpSend")
+    public Response helpSend(){
+        try {
+            return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
 	
 	@POST
 	@Path("/Signup")

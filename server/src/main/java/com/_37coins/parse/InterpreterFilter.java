@@ -141,22 +141,24 @@ public class InterpreterFilter implements Filter {
 	}
 	
 	protected static Locale findLanguage(String reqLanguage, String regionCode, Locale existingLocale, Locale gatewayLocale){
-	//update language
-	if (reqLanguage==null||reqLanguage.length()!=2)
-	    reqLanguage = (gatewayLocale!=null && gatewayLocale.getLanguage()!=null)?gatewayLocale.getLanguage():"en";
-	//update database if locale in database missing
-	if (existingLocale==null){
-	    return new Locale(reqLanguage,regionCode);
-	}
-	if (existingLocale.getLanguage()==null
-		||existingLocale.getLanguage().length()!=2){
-	    return new Locale(reqLanguage,existingLocale.getCountry());
-	}
-	if (existingLocale.getCountry()==null
-		||existingLocale.getCountry().length()!=2){
-	    return new Locale(existingLocale.getLanguage(),regionCode);
-	}
-	return existingLocale;
+        	//update language
+        	if (reqLanguage==null||reqLanguage.length()!=2)
+        	    reqLanguage = (gatewayLocale!=null && gatewayLocale.getLanguage()!=null)?gatewayLocale.getLanguage():"en";
+        	//update database if locale in database missing
+        	if (existingLocale==null){
+        	    return new Locale(reqLanguage,regionCode);
+        	}
+        	if (existingLocale.getLanguage()==null
+        		||existingLocale.getLanguage().length()!=2){
+        	    return new Locale(reqLanguage,existingLocale.getCountry());
+        	}
+        	if (existingLocale.getCountry()==null
+        		||existingLocale.getCountry().length()!=2){
+        	    return new Locale(existingLocale.getLanguage(),regionCode);
+        	}
+        	if (reqLanguage != null)
+        	    return new Locale(reqLanguage, existingLocale.getCountry());
+        	return existingLocale;
 	}
 
 	private void respond(List<DataSet> dsl, ServletResponse response){

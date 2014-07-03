@@ -76,7 +76,10 @@ public class CommandParser {
 	public Action processCommand(String msg) {
 		msg = msg.trim().replaceAll(" +", " ");
 		String[] ca = msg.split(" ");
-		return replaceCommand(ca[0]);
+		Action rv = replaceCommand(ca[0]);
+		if (ca.length==1 && rv == Action.WITHDRAWAL_REQ)
+		    return Action.HELP_SEND;
+		return rv;
 	}
 	
 	public Locale guessLocale(String msg) {

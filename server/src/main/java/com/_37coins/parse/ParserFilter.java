@@ -116,7 +116,7 @@ public class ParserFilter implements Filter {
                 httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
     	      //use it
-            if ((responseData.getAction()==Action.UNKNOWN_COMMAND||CommandParser.reqCmdList.contains(responseData.getAction()))){
+            if ((responseData.getAction()==Action.UNKNOWN_COMMAND||responseData.getAction()==Action.HELP_SEND||CommandParser.reqCmdList.contains(responseData.getAction()))){
                 httpReq.setAttribute("dsl", responseList);
                 chain.doFilter(httpReq, response);
             }else{
