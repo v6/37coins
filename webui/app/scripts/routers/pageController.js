@@ -98,8 +98,12 @@ define(['backbone',
                 var locale = window.getLocale();
                 if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
                     if(locale !== args[0]) {
-                        localStorage.setItem('locale', args[0]);
-                        location.reload();
+                        if (args[0] in window.activeLocales){
+                            localStorage.setItem('locale', args[0]);
+                            location.reload();
+                        }else{
+                            this.lngRedirect(fragment, args, next);
+                        }
                     }
                 }else{
                     if(locale !== 'en') {
@@ -164,7 +168,10 @@ define(['backbone',
             }
         },
         lngRedirect: function(fragment, args, next) {
-            if (args.length > 0 && args[0].length===2 && fragment.indexOf(args[0])===0){
+            var activeLocales = window.activeLocales;
+            activeLocales.en = true;
+            if (args.length > 0 && args[0].length===2 &&
+                fragment.indexOf(args[0])===0 && args[0] in activeLocales){
                 next();
             }else{
                 var locale = window.getLocale();

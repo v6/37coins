@@ -213,7 +213,7 @@ define({
             "question3" : "After depositing bitcoins to my SMSwallet, why is my my balance less?",
             "answer3" : {
                 "p1" : "The system only shows the amount of bitcoins that you can send. To send bitcoins through 37coins, there is a small transaction fee. Therefore, if the transaction fee of your gateway is 100 bits (2014/05/04: $0.04) per transaction, then your account can only send [deposit amount] - [trans fee] = [available balance].",
-                "p2" : "Your \'available balance\' already calculates the future transaction fee."
+                "p2" : "Your \\'available balance\\' already calculates the future transaction fee."
             },
             "question4" : "I want to open an SMSwallet, do I need to run an SMSgateway?",
             "answer4" : {
