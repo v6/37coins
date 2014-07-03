@@ -1,6 +1,8 @@
 define([
 	'backbone',
-	'hbs!tmpl/signupConfView_tmpl'
+	'hbs!tmpl/signupConfView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
 function( Backbone, SignupConfTmpl  ) {
     'use strict';
@@ -15,6 +17,12 @@ function( Backbone, SignupConfTmpl  ) {
 		},
 
 		template: SignupConfTmpl,
+
+
+        templateHelpers: function(){
+            console.log ( "loading localization parameters for signup confirmation view and helpers for attendant templates");
+            return window.helpers(myLabels, myWebLabels);
+        },
         
         onError: function(){
 			console.log('failed');
