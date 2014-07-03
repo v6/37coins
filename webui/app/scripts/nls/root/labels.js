@@ -41,9 +41,7 @@ define({
         "role3" : "Developer",
         "role4" : "Designer"
     },
-    "accountLayout" : {
-        "expl" : "Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet "
-    },
+    // MOVED "accountLayout"
     "configView" : {
         "dlH2" : "Download App",
         "dlInstP1" : "To operate the gateway, download  <a href=\"https://play.google.com/store/apps/details?id=org.envaya.sms\">EnvayaSMS</a> and configure it with the following parameters.",

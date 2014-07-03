@@ -42,7 +42,10 @@ define({
         "role4" : "Designer"
     },
     "accountLayout" : {
-        "expl" : "Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet "
+        "expl" : "Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet ",
+        "hlpPageL" : "help page",
+        "headerTagline" : "Most Recent Gateway",
+        "acctHeadlineV" : "Account"
     },
     "configView" : {
         "dlH2" : "Download App",
