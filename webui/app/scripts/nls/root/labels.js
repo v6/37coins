@@ -242,37 +242,7 @@ define({
         "VoiceFail" : "The PIN is not correct. The account will be blocked after 3 failed attempts.",
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     },
-    "faq" : {
-        "gw" : {
-            "titleH1" : "SMSgateway FAQ:",
-            "q1WhyGateway" : "What is ‘SMSgateway’? Why is it needed?",
-            "a1WhyGateway" : {
-                "p1" : "‘SMSgateway’ is an android app that is a mediator between any local SMS network and the internet. Each gateway has the power to connect a country’s SMS network to the Bitcoin network; and, thus, to the global economy. It can be operated by anyone willing to invest in an Android phone, install the app, and take care of its connectivity. This person is the SMSgateway partner. The partner’s efforts are rewarded with a small reward from any transaction that is initiated through their gateway. The more gateways that are set up, the bigger the reach of '37coins network' and the more resilient it will be to hardware failure or a malicious attack. The SMSgateway is designed as a regular client to the mobile provider's network. No approval, co-operation, or agreement with the network provider, except a paid SIM-card, is necessary for set up.",
-                "p2" : "The SMSwallet users do NOT need a smart phone. They can open a wallet with an gateway by simply sending it an SMS from any feature-phone."
-            },
-            "q2WorkTogether" : "How do SMSgateway and SMSwallet work together?",
-            "a2WorkTogether" : {
-                "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The Secret PIN is entered using dial tones via a voice call."
-            },
-            "q3WhatPhone" : "Can I run a gateway on my every-day phone?",
-            "a3WhatPhone" : {
-                "p1" : "No, that is not a good idea. The SMSgateway app consumes a lot of battery and forwards all arriving SMS —even your private ones— to the internet. Use a dedicated phone (best some obsolete 1st generation Android) to run the gateway in a secure place, connected to internet and electricity at all times. The users of your SMSgateway will thank you."
-            },
-            "q4Profit" : "I run an SMSgateway, what is the average payout per month?",
-            "a4Profit" : {
-                "p1" : "If you don't acquire customers and promote your SMSgateway’s number, you will not see any payout at all. Your gateway is like a small business, keep 100% uptime and spread the word."
-            },
-            "q5WhatNow" : "I opened a new SMSgateway, what now?",
-            "a5WhatNow" : {
-                "p1" : "Promote your service! Once you have your SMSgateway fully operational, open an SMSwallet from a different phone. In other words, send a text from another phone to your SMSgateway’s number. This will create a new SMSwallet account. You will now have an SMSwallet phone and an SMSgateway phone. From your SMSwallet phone, request your bitcoin address by sending the “ADDRESS” command. Send bitcoins to this address. Once your wallet is charged, you can demonstrate the service and amaze your friends by inviting them by sending them tiny fractions of a bitcoin."
-            },
-            "q6HowSecure" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
-            "a6HowSecure" : {
-                "p1" : "SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in spending-PIN protected transactions.",
-                "alert-warning1" : "However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted."
-            }
-        }
-    } ,
+    // MOVED "faq"
     "form" : {
         "gwSetup" : {
             "ver" : {
