@@ -13,7 +13,7 @@ function( Backbone) {
 				response.locale = lc;
 				response.resPath = window.opt.resPath;
 				response.lName = window.countryCodeToName(lc);
-				response.fee = (response.fee * 1000).toFixed(2);
+				response.fee = (response.fee * 1000000).toFixed(2); //Send fee in bitcoin from server to interface in Bits. Each bitcoin is one MIIIIIIILLILLLLLION Bits.
             }
             return response;
         }

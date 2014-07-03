@@ -1,9 +1,9 @@
 <h2 class="form-fee-heading">Gateway Settings</h2>
 <form>
   <div class="form-group">
-    <label for="feeImput">Transaction Fee:</label>
-    <input id="feeInput" type="number" step="0.0001" min="0" name="fee" class="form-control" placeholder="0.00xx">
-    <span class="help-block">Choose a transaction fee paid to you by the user for each successful transaction.</span>
+    <label for="feeInput">Transaction Fee in <span title="Bits are 0.000001 BTC, or one millionth of a Bitcoin.">Bits</span>:</label>
+    <input id="feeInput" type="number" step="1" min="0" name="fee" class="form-control" placeholder="0.00xx">
+    <span class="help-block" title="Bits are 0.000001 BTC, or one millionth of a Bitcoin.">Choose a transaction fee paid in &quot;Bits&quot; of bitcoin to you by the user for each successful transaction.</span>
   </div>
   <div class="form-group">
     <label for="msgImput">Welcome Message:</label>
@@ -24,9 +24,9 @@
 </form>
 <div id="errorAlert" class="alert alert-danger alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>Error!</strong> Communication Error!
+  <strong>Error!</strong> Communication Error! We were unable to publish changes to the server. Please try again, try with a different browser, or contact support.
 </div>
 <div id="successAlert" class="alert alert-success alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>Success!</strong> Settings updated.
+  <strong>Success!</strong>&nbsp;Settings updated.
 </div>

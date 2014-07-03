@@ -30,7 +30,7 @@ function(Backbone, FeeTmpl, myLabels) {
         }
             this.$('button').button('reset');
             //update form
-            var fee = this.model.get('fee') ;
+            var fee = this.model.get('fee')/1000 ;
             if (fee){
                 this.$('#feeInput').val(fee);
             }
@@ -69,7 +69,7 @@ function(Backbone, FeeTmpl, myLabels) {
             var modified = false;
             if (fee !== this.model.get('fee')){
                 sessionStorage.setItem('fee',fee);
-                this.model.set('fee',fee * 0.000001);
+                this.model.set('fee',fee);
                 modified = true;
             }
             if (welcomeMsg !== this.model.get('welcomeMsg')){
