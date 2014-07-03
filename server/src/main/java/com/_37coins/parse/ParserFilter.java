@@ -113,7 +113,7 @@ public class ParserFilter implements Filter {
     			if (md.getAddressType() == MsgType.SMS){
     				PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
     				String rc = phoneUtil.getRegionCodeForNumber(md.getPhoneNumber());
-    				locale = new Locale("",rc);
+				locale = new Locale(locale.getLanguage(),rc);
     			}else if (null==locale){
     				locale = Locale.US;
     			}

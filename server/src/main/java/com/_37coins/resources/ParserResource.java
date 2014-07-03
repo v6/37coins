@@ -150,7 +150,7 @@ public class ParserResource {
 		try {
 			if (null==rv){
 				responseList.clear();
-				responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+				responseList.add(new DataSet().setTo(data.getTo()).setLocale(data.getLocale()).setAction(Action.DST_ERROR));
 				return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 			}
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
@@ -277,7 +277,7 @@ public class ParserResource {
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
 					responseList.clear();
-					responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+					responseList.add(new DataSet().setTo(data.getTo()).setLocale(data.getLocale()).setAction(Action.DST_ERROR));
 					try{
 						return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 					} catch (JsonProcessingException ex) {
