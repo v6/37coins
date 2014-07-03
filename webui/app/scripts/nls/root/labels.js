@@ -221,6 +221,7 @@ define({
     // MOVED "merchant" :
     // MOVED    "mobileInput" : {
     "reset" : {
+        "identifyH2" : "Identify Account for Reset",
         "happy" : "Success!",
         "submitted" : "Password request submitted. Please check your email inbox and follow the provided instructions.",
         "sad" : "Error!",
