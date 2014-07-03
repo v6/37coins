@@ -9,7 +9,7 @@ function(Backbone, BalanceTmpl, myLabels, myWebLabels) {
     return Backbone.Marionette.ItemView.extend({
         template: BalanceTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels for balance View" ); // DEBUGGING CODE
+            console.log ( "Loading Helpers and Labels for balance View" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
         className: 'gwLayout',
