@@ -1,13 +1,13 @@
 <div class="row">
     <div class="col-sm-12">
-	  <h2 class="form-signin-heading">{{s.captchaView.captchaH2}}</h2>
-	  <p>{{s.captchaView.captcha}}</p>
+	  <h2 class="form-signin-heading">{{w.CaptchaView.captchaH2}}</h2>
+	  <p>{{w.CaptchaView.captcha}}</p>
 	  <div class="alert alert-danger alert-dismissable">
 	    <button type="button" class="close" aria-hidden="true">&times;</button>
-	    <strong>Error!</strong> {{s.captchaView.error}}
+	    <strong>{{w.CaptchaView.sad}}</strong> {{w.CaptchaView.error}}
 	  </div>
-	  <div id="recaptcha_div">loading captcha ...</div>
-	    <button class="btn btn-lg btn-primary btn-block" type="submit">{{s.captchaView.captchaBtn}}</button>
+	  <div id="recaptcha_div">{{w.CaptchaView.loading}}</div>
+	    <button class="btn btn-lg btn-primary btn-block" type="submit">{{w.CaptchaView.captchaBtn}}</button>
 	  </div>
 	</div>
 </div>

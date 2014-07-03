@@ -49,13 +49,8 @@ define({
         "fieldHeader" : "Field",
         "valueHeader" : "Value"
     },
-    // MOVED "balanceView
-    "captchaView" : {
-        "captchaH2" : "Verify Captcha!",
-        "captcha" : "Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.",
-        "error" : "Incorrect Solution! Try again.",
-        "captchaBtn" : "Done!"
-    },
+    // MOVED "balanceView"
+    // MOVED "captchaView"
     "commandSendView" : {
         "messageType" : "command",
         "syntax" : "SEND <amount> <address> [comment]",
