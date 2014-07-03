@@ -1,12 +1,18 @@
 define([
     'backbone',
     'hbs!tmpl/merchantSuccessView_tmpl',
+        'i18n!nls/labels',
+        'i18n!nls/webLabels',
     'jqueryValidation'
 ],
-function(Backbone, MerchantSuccessTmpl) {
+function(Backbone, MerchantSuccessTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: MerchantSuccessTmpl,
+        templateHelpers: function(){
+        console.log ( "template labels and helpers loading for merchant view");
+        return window.helpers(myLabels, myWebLabels);
+        },
         className: 'gwLayout',
         initialize: function(opt) {
             this.model.on('sync', this.onSuccess, this);

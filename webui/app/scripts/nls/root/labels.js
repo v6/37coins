@@ -245,19 +245,7 @@ define({
     // MOVED "logoutView" : {
     "merchant" :
     {
-        "success" : {
-            "alert" : "<strong>Success!</strong> Merchant account successfully verified.",
-            "InputName1" : {
-                "label": "Display Name:",
-                "placeholder": "Enter display name."
-            },
-            "button" : "Set Name",
-            "error" : {
-                "prompt" : "<strong>Error!</strong> Please",
-                "label" : "contact support"
-            },
-            "instructions" : "Try out your new account! Sign up some users and let us know what you think!"
-        },
+        // MOVED "success" : {
         "verify" : {
             "h2" : "Account Verification",
             "desc" : "We are going to call you at your phone number to verify your mobile. Click <b>Call me now</b> below and enter the 4-digit code that will be displayed to you.",

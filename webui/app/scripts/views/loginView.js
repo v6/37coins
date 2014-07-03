@@ -12,6 +12,7 @@ function(Backbone, Communicator, LoginTmpl, myLabels, myWebLabels) {
         template: LoginTmpl,
         className: 'container',
         templateHelpers: function(){
+            console.log ( "login view helpers loading");
             return window.helpers(myLabels, myWebLabels);
         },
         initialize: function(opt) {
