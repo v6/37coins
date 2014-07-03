@@ -42,13 +42,7 @@ define({
         "role4" : "Designer"
     },
     // MOVED "accountLayout"
-    "configView" : {
-        "dlH2" : "Download App",
-        "dlInstP1" : "To operate the gateway, download  <a href=\"https://play.google.com/store/apps/details?id=org.envaya.sms\">EnvayaSMS</a> and configure it with the following parameters.",
-        "cfgH2" : "Configure App",
-        "fieldHeader" : "Field",
-        "valueHeader" : "Value"
-    },
+   // MOVED "configView" : {
     // MOVED "balanceView"
     // MOVED "captchaView"
     "commandSendView" : {
