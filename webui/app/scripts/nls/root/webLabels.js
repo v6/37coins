@@ -520,6 +520,10 @@ define({
             },
             "ohNoez" : "Error!",
             "notFound" : "Account not found. Try again."
+        },
+        "succ" : {
+            "done" : "Passwords successfully reset.",
+            "login" : "Continue to Login"
         }
     }
 });
