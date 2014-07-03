@@ -49,17 +49,7 @@ define({
         "fieldHeader" : "Field",
         "valueHeader" : "Value"
     },
-    "balanceView" : {
-        "balH2" : "Account Balance",
-        "bal" : "Your account balance is",
-        "amountLbl" : "Withdrawal amount:",
-        "amountPh" : "Enter amount",
-        "addressLbl" : "Withdrawal address:",
-        "addressPh" : "Enter withdrawal address",
-        "withdrawalBtn" : "Withdrawal",
-        "error" : "Communication Error!",
-        "success" : "Request Submitted."
-    },
+    // MOVED "balanceView
     "captchaView" : {
         "captchaH2" : "Verify Captcha!",
         "captcha" : "Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.",
