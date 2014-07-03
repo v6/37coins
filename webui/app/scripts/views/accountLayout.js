@@ -5,13 +5,17 @@ define([
     'views/commandsView',
     'views/accountHeadlineView',
     'webfinger',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger, myLabels) {
+function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
         template: AccountLayout,
-        templateHelpers: function(){return {s: myLabels};},
+        templateHelpers: function(){
+            console.log ( self , "Loading Helpers and Labels for accountLayout View" ); // DEBUGGING CODE
+            return window.helpers(myLabels, myWebLabels);
+        },
         regions: {
             commands: '#smsCommands',
             header: '#accountHeadline'
