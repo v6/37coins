@@ -4,7 +4,6 @@ require([
 	'routers/pageController',
 	'basicauth',
 	'regionManager'
-	
 ],
 function ( Backbone, App, PageController ) {
     'use strict';
@@ -24,14 +23,19 @@ function ( Backbone, App, PageController ) {
             }
         }
     };
-    window.helpers = function(labels){
+    window.helpers = function(labels, webLabels){
         return {
-            s: labels,
-            up: function(str){
-                return str.toUpperCase();
+            s : labels,
+            w : webLabels,
+            up : function(str){
+                if ( str === ("" || null ) ) {
+                    console.log ( "error, nothing to uppercase. That's why your view isn't loading.")
+                } else {
+                    return str.toUpperCase();
+                }
             },
-            resPath:window.opt.resPath,
-            l:window.getLocale()
+            resPath : window.opt.resPath,
+            l : window.getLocale()
         };
     };
     var options = {
