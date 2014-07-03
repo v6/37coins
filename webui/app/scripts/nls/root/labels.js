@@ -61,16 +61,7 @@ define({
     // MOVED "cmdHelpL"
     "indexLayout" : {
         "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive bitcoin anywhere in the World. No internet or smartphone required.",
-        "header" : {
-            "_comment" : "This may be deprecated.",
-            "mobileTag" : "<br>Without borders or barriers,<br/> as easy as sending an SMS",
-            "tag" : "Send and receive bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.",
-            "walletInv" : "Sign-up to be an SMSwallet beta user.",
-            "terms" : {
-                "prompt": "By clicking Go!, you agree to the",
-                "label": "terms of use"
-            }
-        },
+        // MOVED "header" : {
         "wallet" : "After setting up your account, you will receive an automated text message from a gateway. To control your account, send any of these commands to that phone number via SMS.",
         "walletInv" : "Become an SMSwallet beta user",
         "walletBtn" : "Open a Wallet",
