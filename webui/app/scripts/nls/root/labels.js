@@ -220,39 +220,5 @@ define({
     // MOVED "logoutView" : {
     // MOVED "merchant" :
     // MOVED    "mobileInput" : {
-    "reset" : {
-        "identifyH2" : "Identify Account for Reset",
-        "happy" : "Success!",
-        "submitted" : "Password request submitted. Please check your email inbox and follow the provided instructions.",
-        "sad" : "Error!",
-        "failMsg" : "Passwords reset URL no longer valid. Please",
-        "supp" : "contact support",
-        "newPass" : {
-            "h2" : "Please Choose a new Password",
-            "form" : {
-                "password" : {
-                    "label" : "Password:",
-                    "placeholder" : "Enter password"
-                },
-                "password2" : {
-                    "label" : "Password:",
-                    "placeholder" : "Repeat password"
-                },
-                "saveBtn" : "Save",
-                "error" : "Error!",
-                "unMatched" : "Passwords have to match!"
-            }
-        },
-        "resetReqForm" : {
-            "titleH2": "Identify Account for Reset",
-            "exampleInputEmail1" : {
-                "label" : "Email address:",
-                "placeholder" : "Enter email",
-                "help-block" : "Type your account's email address to receive a reset code.",
-                "resetBtn" : "Reset Password"
-            },
-            "ohNoez" : "Error!",
-            "notFound" : "Account not found. Try again."
-        }
-    }
+    // MOVED "reset" : {
 });
