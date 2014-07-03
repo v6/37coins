@@ -33,6 +33,9 @@ window.opt = {
 	<#if payload.deliveryParam??>deliveryParam: '${payload.deliveryParam}',</#if>
 	<#if payload.srvcPath??> srvcPath: '${payload.srvcPath}',</#if>
 	<#if payload.captchaPubKey??> captchaPubKey: '${payload.captchaPubKey}',</#if>
+	<#if payload.unitName??>unitName: '${payload.unitName}',</#if>
+	<#if payload.unitFactor??>unitFactor: '${payload.unitFactor}',</#if>
+	<#if payload.unitFormat??>unitFormat: '${payload.unitFormat}',</#if>
 	basePath: '${payload.basePath}'
 };
 </script>
