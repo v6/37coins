@@ -152,11 +152,10 @@ define({
         "VoiceOk" : "The PIN is correct. Transaction executing.",
         "VoiceFail" : "The PIN is not correct. The account will be blocked after 3 failed attempts.",
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
-    },
+    }
     // MOVED "faq"
     // MOVED "form" : {
         //MOVED "gwSet" : {
-    }
     // MOVED "gatewayCollectionView" : {
     // MOVED "logoutView" : {
     // MOVED "merchant" :
