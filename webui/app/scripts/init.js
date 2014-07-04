@@ -66,7 +66,8 @@ require.config({
         webfinger: 'vendor/webfinger',
         socketio: 'vendor/socket.io',
         intlTelInput: '../bower_components/intl-tel-input/build/js/intlTelInput',
-        userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA'
+        userVoice: '//widget.uservoice.com/yvssgWHkFiUzGrxQUlrdxA',
+        isoCountries: '../bower_components/iso-countries/dist/countries'
     },
     waitSeconds: 0,
     hbs:{
