@@ -410,7 +410,8 @@ define({
                     "startBtn" : "Start Verification",
                     "sad" : "Error!",
                     "sadExpln" : "Communication Error."
-                }
+                },
+                "verBtn" : "Start Verification"
             }
         },
         "gwSet" : {
