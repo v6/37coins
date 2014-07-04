@@ -3,24 +3,30 @@ define([
     'communicator',
     'hbs!tmpl/loginView_tmpl',
     'i18n!nls/labels',
+    'i18n!nls/webLabels',
     'jqueryValidation'
 ],
-function(Backbone, Communicator, LoginTmpl, myLabels) {
+function(Backbone, Communicator, LoginTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: LoginTmpl,
-        className: 'container',
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
+
+        className: 'container',
+
         initialize: function(opt) {
             this.next = opt.next;
 			this.model.on('change:roles', this.onRolesChange, this);
             this.model.on('error', this.onError, this);
         },
+
         events: {
             'click .close': 'handleClose',
         },
+
         handleClose: function(e){
             var alert = $(e.target).parent();
             alert.one(window.transEvent(), function(){
@@ -28,6 +34,7 @@ function(Backbone, Communicator, LoginTmpl, myLabels) {
             });
             alert.removeClass('in');
         },
+
         handleLogin: function(e) {
             e.preventDefault();
             this.$('#loginBtn').button('loading');
@@ -46,17 +53,20 @@ function(Backbone, Communicator, LoginTmpl, myLabels) {
             this.model.credentials = cred;
             this.model.fetch();
         },
+
         onRolesChange: function(){
             if (this.model.get('roles')){
                 Communicator.mediator.trigger('app:login');
                 this.next();
             }
         },
+
         onError: function(model, response){
             this.$('.alert').css('display','');
             this.$('.alert').addClass('in');
             this.$('#loginBtn').button('reset');
         },
+
         onShow:function () {
             this.$('.alert').css('display', 'none');
             var jForm = this.$('form');

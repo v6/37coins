@@ -1,18 +1,22 @@
 define([
     'backbone',
     'hbs!tmpl/commandHelpLayout_tmpl',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, HelpTmpl, myLabels) {
+function(Backbone, HelpTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
+
         template: HelpTmpl,
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
+
         regions: {
             commands: '#smsCommands'
         },
+
         className: 'static',
         onShow:function () {
             this.$('.collapse').collapse({

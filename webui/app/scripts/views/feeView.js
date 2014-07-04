@@ -1,26 +1,32 @@
 define([
     'backbone',
     'hbs!tmpl/feeView_tmpl',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, FeeTmpl, myLabels) {
+function(Backbone, FeeTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: FeeTmpl,
-        className: 'gwLayout',
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
+
+        className: 'gwLayout',
+
         initialize: function() {
             this.firstRun = true;
             this.model.on('error', this.onError, this);
             this.model.on('sync', this.onSuccess, this);
         },
+
         onError: function(){
             this.$('#errorAlert').css('display','');
             this.$('#errorAlert').addClass('in');
             this.$('button').button('reset');
         },
+
         onSuccess: function(){
             if (this.firstRun){
                 this.firstRun = false;
@@ -47,6 +53,7 @@ function(Backbone, FeeTmpl, myLabels) {
                 this.$('#callbackInput').val(callbackUrl);
             }
         },
+
         handleClose: function(e){
             var alert = $(e.target).parent();
             alert.one(window.transEvent(), function(){
@@ -54,9 +61,11 @@ function(Backbone, FeeTmpl, myLabels) {
             });
             alert.removeClass('in');
         },
+
         events: {
             'click .close': 'handleClose',
         },
+
         handleClick: function(e){
             e.preventDefault();
             this.$('button').button('loading');
@@ -93,6 +102,7 @@ function(Backbone, FeeTmpl, myLabels) {
                 this.$('button').button('reset');
             }
         },
+
         onShow:function () {
             this.$('#feeInput').val(this.model.get('fee'));
             this.$('.alert').css('display', 'none');

@@ -35,11 +35,16 @@ function ( Backbone, App, PageController ) {
             }
         }
     });
-    window.helpers = function(labels){
+    window.helpers = function(labels, webLabels){
         return {
-            s: labels,
-            up: function(str){
-                return str.toUpperCase();
+            s : labels,
+            w : webLabels,
+            up : function(str){
+                if ( str === ('' || null ) ) {
+                    console.log ( 'error, nothing to uppercase. That\'s why your view isn\'t loading.');
+                } else {
+                    return str.toUpperCase();
+                }
             },
             sms: function(format){
                 var args = Array.prototype.slice.call(arguments, 1);
@@ -70,8 +75,8 @@ function ( Backbone, App, PageController ) {
                     return (type === 'string') ? args[number] : match;
                 });
             },
-            resPath:window.opt.resPath,
-            l:window.getLocale()
+            resPath : window.opt.resPath,
+            l : window.getLocale()
         };
     };
     var options = {

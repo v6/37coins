@@ -1,25 +1,36 @@
 define([
     'backbone',
     'communicator',
-    'hbs!tmpl/validateView_tmpl'
+    'hbs!tmpl/validateView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, ValidateTmpl) {
+function(Backbone, Communicator, ValidateTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: ValidateTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
+
         className: 'container',
+
         initialize: function() {
             this.model.on('sync', this.onSync, this);
             this.model.on('error', this.onError, this);
         },
+
         onSync: function(){
             Communicator.mediator.trigger('app:verify');
         },
+
         onError: function(){
             this.$('.alert').css('display','');
             this.$('.alert').addClass('in');
             this.$('button.btn-primary').button('reset');
         },
+
         handleClose: function(e){
             var alert = $(e.target).parent();
             alert.one(window.transEvent(), function(){
@@ -39,6 +50,7 @@ function(Backbone, Communicator, ValidateTmpl) {
             this.model.set('code',code);
             this.model.save();
         },
+
         onShow:function () {
             this.$('.alert').css('display', 'none');
             var jForm = this.$('form');

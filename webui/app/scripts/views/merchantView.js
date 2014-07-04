@@ -4,12 +4,17 @@ define([
     'socketio',
     'communicator',
     'views/merchantSuccessView',
-    'models/merchantModel'
+    'models/merchantModel',
+        'i18n!nls/labels',
+        'i18n!nls/webLabels'
 ],
-function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, MerchantModel) {
+function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, MerchantModel, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
         template: MerchantTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
         className: 'gwLayout',
         initialize: function(opt) {
             this.ticket = opt.ticket;

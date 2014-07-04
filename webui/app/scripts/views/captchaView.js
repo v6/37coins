@@ -2,20 +2,23 @@ define([
 	'backbone',
 	'hbs!tmpl/captchaView_tmpl',
 	'recaptcha',
-	'i18n!nls/labels'
+	'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function( Backbone, CaptchaTmpl, Recaptcha, myLabels) {
+function( Backbone, CaptchaTmpl, Recaptcha, myLabels, myWebLabels) {
     'use strict';
 
 	/* Return a ItemView class definition */
 	return Backbone.Marionette.ItemView.extend({
-		templateHelpers: function(){return {s: myLabels};},
 		initialize: function(opt) {
 			this.next = opt.next;
 			this.controller = opt.controller;
 		},
 		
 		template: CaptchaTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
 
 
 		/* ui selector cache */

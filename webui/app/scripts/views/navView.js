@@ -2,9 +2,10 @@ define([
 	'backbone',
 	'communicator' ,
 	'hbs!tmpl/navView_tmpl',
-	'i18n!nls/labels'
+	'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, NavTmpl, myLabels) {
+function(Backbone, Communicator, NavTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
 		initialize: function() {
@@ -14,10 +15,10 @@ function(Backbone, Communicator, NavTmpl, myLabels) {
 				self.setButton();
 			});
 		},
-		templateHelpers: function(){
-			return window.helpers(myLabels);
-		},
         template: NavTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
         className: 'navbar navbar-37',
         tagName: 'div role="navigation"',
         events: {
