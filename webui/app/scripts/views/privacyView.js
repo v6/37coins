@@ -9,7 +9,6 @@ function(Backbone, PrivacyTmpl, myLabels, myWebLabels) {
     return Backbone.Marionette.ItemView.extend({
         template: PrivacyTmpl,
         templateHelpers: function(){
-            console.log ("loading helpers for privacy view"); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
         className: 'static'

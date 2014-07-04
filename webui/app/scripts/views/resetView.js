@@ -28,7 +28,6 @@ function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl, myLabels, myWebL
 		},
 
         templateHelpers: function(){
-            console.log ("loading localization parameters and handlebar helper functions for reset"); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
 

@@ -22,7 +22,6 @@ function(Backbone, ResetErrorTmpl, ResetSuccessTmpl, ResetConfTmpl, myLabels, my
 
 
         templateHelpers: function(){
-            console.log ("loading localization parameters and handlebar helper functions for reset confirmation"); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
 

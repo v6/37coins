@@ -9,11 +9,12 @@ define([
 function(Backbone, Communicator, GatewayCollection, AccountHeaderTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: AccountHeaderTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
+
         className: 'static',
         initialize: function(opt){
             this.mobileString = opt.mobile;

@@ -8,21 +8,25 @@ define([
 function(Backbone, Communicator, IndexLayout, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
+
         regions: {
             commands: '#smsCommands',
             gateways: '#gwTable'
         },
+
         template: IndexLayout,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels for start page" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
+
         className: 'main',
         initialize: function() {
         },
+
         events: {
             'click #smsSignup': 'handleJoin',
         },
+
         handleJoin: function(e){
             e.preventDefault();
             $('html, body').animate({ scrollTop: 0 }, 'slow');

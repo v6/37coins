@@ -11,7 +11,6 @@ function(Backbone, Communicator, NotFoundTmpl, myLabels, myWebLabels) {
         template: NotFoundTmpl,
         className: 'container',
 		templateHelpers: function(){
-            console.log ("Loading helpers and localization for our 404 page");
 			return window.helpers(myLabels, myWebLabels);
 		},
         initialize: function() {

@@ -10,7 +10,6 @@ function(Backbone, MerchantSuccessTmpl, myLabels, myWebLabels) {
     return Backbone.Marionette.ItemView.extend({
         template: MerchantSuccessTmpl,
         templateHelpers: function(){
-            console.log ( "template labels and helpers loading for merchant view");
             return window.helpers(myLabels, myWebLabels);
         },
         className: 'gwLayout',

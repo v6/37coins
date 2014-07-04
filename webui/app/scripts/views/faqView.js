@@ -7,12 +7,14 @@ define([
 function(Backbone, FaqTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
-        template: FaqTmpl,
+
         className: 'static',
+
+        template: FaqTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels for FAQ" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
+
         onShow:function () {
             this.$('.collapse').collapse({
                 parent: '#accordion',

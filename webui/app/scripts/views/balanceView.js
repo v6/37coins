@@ -7,11 +7,12 @@ define([
 function(Backbone, BalanceTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: BalanceTmpl,
         templateHelpers: function(){
-            console.log ( "Loading Helpers and Labels for balance View" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
+
         className: 'gwLayout',
         initialize: function() {
             this.model.on('error', this.onError, this);

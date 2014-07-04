@@ -6,12 +6,14 @@ define([
 ],
 function(Backbone, CommandsTmpl, myLabels, myWebLabels) {
     'use strict';
+
     return Backbone.Marionette.ItemView.extend({
+
+        template : CommandsTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
-        template: CommandsTmpl,
+
         className: 'static'
     });
 });

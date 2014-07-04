@@ -11,7 +11,6 @@ define([
     return Backbone.Marionette.ItemView.extend({
         template: LogoutTmpl,
         templateHelpers: function(){
-            console.log ( "Loading template helpers for logout" ) ; // DEBUGGING CODE
             return window.helpers(myLabels, webLabels);
         },
         className: 'container',

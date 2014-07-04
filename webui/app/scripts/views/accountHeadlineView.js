@@ -7,11 +7,12 @@ define([
 function(Backbone, HeadlineTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
-	template: HeadlineTmpl,
-	className: 'static',
+
+    template: HeadlineTmpl,
     templateHelpers: function(){
-        console.log ( self , "Loading Helpers and Labels for accountHeadlineView" ); // DEBUGGING CODE
         return window.helpers(myLabels, myWebLabels);
-    }
+    },
+
+	className: 'static'
     });
 });

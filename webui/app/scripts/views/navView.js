@@ -15,11 +15,10 @@ function(Backbone, Communicator, NavTmpl, myLabels, myWebLabels) {
 				self.setButton();
 			});
 		},
-		templateHelpers: function(){
-            console.log ("loading localization parameters and handlebar helpers for navigation");
-			return window.helpers(myLabels, myWebLabels);
-		},
         template: NavTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
         className: 'navbar navbar-37',
         tagName: 'div role="navigation"',
         events: {

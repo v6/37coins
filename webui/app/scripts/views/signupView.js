@@ -17,7 +17,6 @@ function(Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha, myLabels, myWebLab
             this.model.on('error', this.onError, this);
         },
         templateHelpers: function(){
-            console.log ( "loading localization parameters for signup view and helpers for attendant templates");
             return window.helpers(myLabels, myWebLabels);
         },
         onError: function(model, response){

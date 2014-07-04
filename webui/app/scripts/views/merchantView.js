@@ -13,7 +13,6 @@ function(Backbone, MerchantTmpl, io, Communicator, MerchantSuccessView, Merchant
     return Backbone.Marionette.ItemView.extend({
         template: MerchantTmpl,
         templateHelpers: function(){
-            console.log ( "template labels and helpers loading for merchant view... again");
             return window.helpers(myLabels, myWebLabels);
         },
         className: 'gwLayout',

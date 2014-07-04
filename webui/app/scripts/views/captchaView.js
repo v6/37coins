@@ -17,7 +17,6 @@ function( Backbone, CaptchaTmpl, Recaptcha, myLabels, myWebLabels) {
 		
 		template: CaptchaTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
 

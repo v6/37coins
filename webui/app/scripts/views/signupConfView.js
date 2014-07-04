@@ -20,7 +20,6 @@ function( Backbone, SignupConfTmpl, myLabels, myWebLabels ) {
 
 
         templateHelpers: function(){
-            console.log ( "loading localization parameters for signup confirmation view and helpers for attendant templates");
             return window.helpers(myLabels, myWebLabels);
         },
         

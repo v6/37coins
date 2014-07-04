@@ -10,7 +10,6 @@ function(Backbone, AboutTmpl, myLabels, myWebLabels) {
         template: AboutTmpl,
         className: 'static',
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         }
     });

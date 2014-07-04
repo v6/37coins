@@ -12,7 +12,6 @@ function(Backbone, Communicator, MobileInputTmpl, myLabels, myWebLabels) {
         template: MobileInputTmpl,
         className: 'static',
         templateHelpers: function(){
-            console.log ( "Loading localization and helpers for mobile input view");
             return window.helpers(myLabels, myWebLabels);
         },
         handleJoin: function(mobile){
