@@ -1,78 +1,4 @@
 define({
-    // MOVED "siteNav" : {
-    "aboutView" : {
-        "about" : "About 37coins",
-        "desc" : "We are committed to making bitcoin easy, secure to use, and accessible to everyone. With a global focus on social equity, we develop down-teched, secure, scalable solutions that are as appropriate for emerging economies as they are for developed ones.",
-        "team" : "Team",
-        "role1" : "Social Entrepreneur",
-        "role2" : "Community and Content Manager",
-        "role3" : "Developer",
-        "role4" : "Designer"
-    },
-    // MOVED "accountLayout"
-   // MOVED "configView" : {
-    // MOVED "balanceView"
-    // MOVED "captchaView"
-    "commandSendView" : {
-        "messageType" : "command",
-        "syntax" : "SEND <amount> <address> [comment]",
-        "p1" : "The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.",
-        "p2" : "The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notiﬁed.",
-        "table2" : {
-            "column1" : "Variable",
-            "column2" : "Description",
-            "td1" : "<amount>",
-            "td2" : "The amount to send to the recipient. Use <em>12000</em> to indicate 12,000 bits, or use <em>5USD</em> to indicate sending bitcoins in the value of USD 5.",
-            "td3" : "<address>",
-            "td4" : "The destination address to send the bitcoins. Can be either a phone number or a bitcoin address.",
-            "td5" : "[comment]",
-            "td6" : "Optional comment, up to 40 characters"
-        }
-    },
-    // MOVED "cmdHelpL"
-    // MOVED "indexLayout" : {
-    "loginView" : {
-        "gwCallToAction" : "Do you have a spare Android phone and want to run an SMSgateway in your country?",
-        "signUpLinkLabel" : "Sign Up",
-        "registrationExplanation" : "<ul>The registration process will take you through:<li>Setting up an android phone</li><li>Choosing a transaction fee</li><li>Testing your gateway</li></ul>",
-        "walletBtn" : "Open a Wallet",
-        "commands" : "Commands are not case-sensitve and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet",
-        "link" : "help page",
-        "gw1" : "A decentralized, open-source Android app that bridges between SMS and Bitcoin. Designed for low-end Android phones. In other words, you can connect your country to the global economy via Bitcoin (and earn a little for your time and effort, too. ;-).",
-        "gw2" : "Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:",
-        "gwLi" : ["Dedicated Android phone","Text messaging plan","Internet connection"],
-        "gwInv" : "Become an SMSgateway partner",
-        "inputEmail" : {
-            "label" : "Email Address",
-            "placeholder" : "Enter email"
-        },
-        "inputPassword" : {
-            "label" : "Password:",
-            "placeholder" : "Enter password"
-        },
-        "form-signin-heading" : "Please Login:",
-        "loginBtn" : "Login",
-        "gwBtn" : "Open a Gateway",
-        "newGwPrompt" : "New Gateway?",
-        "reset" : {
-            "prompt" : "Forgot password?",
-            "linkTitle" : "Reset"
-        },
-        "error" : {
-            "badPass" : "<strong>Error!</strong> Incorrect Email or Password!"
-        },
-        "wallet" : {
-            "login" : {
-                "title2" : "wallet Sign in",
-                "label" : "Enter the phone number for your existing account.",
-                "gwPrompt" : "Wanted to sign in to your SMSgateway account?",
-                "gwLink" : "Click here."
-            }
-            // MOVED "signUp" : {
-            // MOVED "signUpConf" : {
-        }
-        // MOVED "signup" :
-    },
     "title" : {
         "wildcards" : ["confSignup","confReset","account"],
         "t-index" : "37coins",
@@ -108,7 +34,6 @@ define({
         "SellCmd" : ["sell"],
         "BuyCmd" : ["buy"]
     },
-    // MOVED "brand" : {
     "sms" : {
         "Signup" : "Welcome to 37coins BETA! Bitcoin via SMS. Save this number, send commands to this gateway. Reply HELP for more info {0}",
         "DepositReq" : "{0}",
@@ -153,12 +78,4 @@ define({
         "VoiceFail" : "The PIN is not correct. The account will be blocked after 3 failed attempts.",
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     }
-    // MOVED "faq"
-    // MOVED "form" : {
-        //MOVED "gwSet" : {
-    // MOVED "gatewayCollectionView" : {
-    // MOVED "logoutView" : {
-    // MOVED "merchant" :
-    // MOVED    "mobileInput" : {
-    // MOVED "reset" : {
 });
