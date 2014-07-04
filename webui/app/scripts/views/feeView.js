@@ -10,7 +10,6 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
 
         template: FeeTmpl,
         templateHelpers: function(){
-            console.log ( self , "Loading Helpers and Labels for Gateway Config (feeView)" ); // DEBUGGING CODE
             return window.helpers(myLabels, myWebLabels);
         },
 
