@@ -154,27 +154,7 @@ define({
         "VoiceRegister" : "Hello from 37 coins. Your verification-code is ${payload}. Please enter ${payload} to complete verification."
     },
     // MOVED "faq"
-    "form" : {
-        "gwSetup" : {
-            "ver" : {
-                "titleH2" : "Gateway Ownership Verification",
-                "inputCode" : {
-                    "label": "Verification Code:",
-                    "help-block" : "Type the 5-digit code you received during the verification call.",
-                    "confirmBtn" : "Confirm Ownership",
-                    "sad" : "Error!",
-                    "sadExpln" : "Submitted code not valid."
-                },
-                "inputTel" : {
-                    "label" : "Gateway Mobile Number:",
-                    "placeholder" : "+CCXXXXXX...",
-                    "help-block" : "Enter your gateway's number in international format. Avoid special signs and spaces. You will receive a call, telling your 5-digit confirmation code.",
-                    "startBtn" : "Start Verification",
-                    "sad" : "Error!",
-                    "sadExpln" : "Communication Error."
-                }
-            }
-        }
+    // MOVED "form" : {
         //MOVED "gwSet" : {
     }
     // MOVED "gatewayCollectionView" : {
