@@ -2,11 +2,12 @@ require([
 	'backbone',
 	'application',
 	'routers/pageController',
+    'hbs/Handlebars',
 	'basicauth',
 	'regionManager',
     'isoCountries'
 ],
-function ( Backbone, App, PageController ) {
+function ( Backbone, App, PageController, Handlebars ) {
     'use strict';
     window.transEvent = function(){
         var t;
@@ -40,11 +41,22 @@ function ( Backbone, App, PageController ) {
             s : labels,
             w : webLabels,
             up : function(str){
-                if ( str === ('' || null ) ) {
+                if (!str) {
                     console.log ( 'error, nothing to uppercase. That\'s why your view isn\'t loading.');
                 } else {
                     return str.toUpperCase();
                 }
+            },
+            link : function(text, options) {
+                var attrs = [];
+                for(var prop in options.hash) {
+                    if (prop==='href'){
+                        attrs.push(prop + '="/' + window.getLocale() + options.hash[prop] + '"');
+                    }else{
+                        attrs.push(prop + '="' + options.hash[prop] + '"');
+                    }
+                }
+                return '<a ' + attrs.join(' ') + '>' + text + '</a>';
             },
             sms: function(format){
                 var args = Array.prototype.slice.call(arguments, 1);
@@ -68,15 +80,27 @@ function ( Backbone, App, PageController ) {
                 });
                 return rv;
             },
-            printf: function(format){
+            printf: function(){
+                var options = arguments[arguments.length-1];
+                var arg = arguments[1];
+                if (arg && arg !== options && typeof arg === 'string' && arg.indexOf('.')!==-1){
+                    var obj = webLabels;
+                    var tokens = arg.split('.');
+                    for (var i = 0; i < tokens.length; i++){
+                        obj = obj[tokens[i]];
+                    }
+                    var tmp = arguments[0];
+                    arguments[0] = obj;
+                    arguments[1] = tmp;
+                }
                 var args = Array.prototype.slice.call(arguments, 1);
-                return format.replace(/{(\d+)}/g, function(match, number) {
-                    var type = typeof args[number];
-                    return (type === 'string') ? args[number] : match;
+                return arguments[0].replace(/{(\d+)}/g, function(match, number) {
+                    return (args[number] && args[number] !== options) ? args[number] : match;
                 });
             },
             resPath : window.opt.resPath,
-            l : window.getLocale()
+            l : window.getLocale(),
+            unitName: window.opt.unitName
         };
     };
     var options = {
