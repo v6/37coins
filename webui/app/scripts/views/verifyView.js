@@ -2,25 +2,36 @@ define([
     'backbone',
     'communicator',
     'views/validateView',
-    'hbs!tmpl/verifyView_tmpl'
+    'hbs!tmpl/verifyView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, ValidateView, VerifyTmpl) {
+function(Backbone, Communicator, ValidateView, VerifyTmpl, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.ItemView.extend({
+
         template: VerifyTmpl,
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
+
         className: 'container',
+
         initialize: function() {
             this.model.on('sync', this.onSync, this);
             this.model.on('error', this.onError, this);
         },
+
         onSync: function(){
             Communicator.mediator.trigger('app:verify');
         },
+
         onError: function(){
             this.$('.alert').css('display','');
             this.$('.alert').addClass('in');
             this.$('button.btn-primary').button('reset');
         },
+
         handleClose: function(e){
             var alert = $(e.target).parent();
             alert.one(window.transEvent(), function(){
@@ -28,9 +39,11 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
             });
             alert.removeClass('in');
         },
+
         events: {
             'click .close': 'handleClose',
         },
+
         handleValidate: function(e) {
             e.preventDefault();
             this.$('button.btn-primary').button('loading');
@@ -39,6 +52,7 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
             this.model.set('locale',window.opt.lng);
             this.model.save();
         },
+
         onShow:function () {
             this.$('.alert').css('display', 'none');
             var jForm = this.$('form');
@@ -68,6 +82,7 @@ function(Backbone, Communicator, ValidateView, VerifyTmpl) {
                 },
                 errorElement: 'span',
                 errorClass: 'help-block',
+
         submitHandler: function(a,e) {
             self.handleValidate(e);
                 },

@@ -3,9 +3,11 @@ define([
 	'communicator',
 	'hbs!tmpl/resetView_tmpl',
 	'hbs!tmpl/resetCompletedView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels',
 	'jqueryValidation'
 ],
-function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl  ) {
+function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl, myLabels, myWebLabels ) {
     'use strict';
 
 	/* Return a ItemView class definition */
@@ -24,6 +26,10 @@ function( Backbone, Communicator, ResetTmpl, ResetCompleteTmpl  ) {
 		        return ResetTmpl;
 		    }
 		},
+
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
 
 		onSuccess: function(){
 			this.fetched = true;

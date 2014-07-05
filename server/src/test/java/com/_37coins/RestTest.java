@@ -110,7 +110,7 @@ public class RestTest {
         rv.add(gw4);
         rv.add(gw5);
         List<Account> ac = new ArrayList<>();
-        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test"));
+        ac.add(new Account().setMobile("+821039841235").setDisplayName("merchant").setOwner(gw2).setApiSecret("test").setApiToken("test").setLocale(new Locale("ko","KR")));
         Map<Class<? extends Model>, List<? extends Model>> data = new HashMap<>();
         data.put(Gateway.class, rv);
         data.put(Account.class, ac);
@@ -245,7 +245,7 @@ public class RestTest {
 	public void testVoiceReq() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();
     	ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
-		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", Action.VOICE.toString(), 8087,
+		parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", "비밀번호", 8087,
 		new ParserAction() {
 			@Override
 			public void handleResponse(DataSet data) {ds.setAction(data.getAction());}			
@@ -268,7 +268,61 @@ public class RestTest {
 		Assert.assertEquals(new Locale("ko","KR"),ds.getLocale());
 		Assert.assertNotNull(ds.getCn());
     }
+    
+    @Test
+    public void testSendInstructions() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+        final DataSet ds = new DataSet();
+        ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
+        parserClient.start("+821039841234", "+821027423984", "OZV4N1JS2Z3476NL", "send", 8087,
+        new ParserAction() {
+            @Override
+            public void handleResponse(DataSet data) {
+                ds.setAction(data.getAction());
+                ds.setTo(data.getTo());
+                ds.setCn(data.getCn());
+            }
+            
+            @Override
+            public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleDeposit(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+        });
+        parserClient.join();
+        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.HELP_SEND);
+        Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+        Assert.assertNotNull(ds.getCn());
+    }
 
+    @Test
+    public void testForeignLanguage() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+        final DataSet ds = new DataSet();
+        ParserClient parserClient = new ParserClient(cmdParser,ga,MessagingServletConfig.digestToken);
+        parserClient.start("+821039841235", "+821027423984", "OZV4N1JS2Z3476NL", "balanza", 8087,
+        new ParserAction() {
+            @Override
+            public void handleResponse(DataSet data) {ds.setAction(data.getAction());}
+            
+            @Override
+            public void handleWithdrawal(DataSet data) {ds.setAction(data.getAction());}
+            @Override
+            public void handleDeposit(DataSet data) {
+                ds.setAction(data.getAction());
+                ds.setTo(data.getTo());
+                ds.setLocale(data.getLocale());
+                ds.setCn(data.getCn());
+            }
+            @Override
+            public void handleConfirm(DataSet data) {ds.setAction(data.getAction());}
+        });
+        parserClient.join();
+        Assert.assertTrue("unexpected Response: "+ds.getAction().toString(),ds.getAction()==Action.BALANCE);
+        Assert.assertEquals(new Locale("es","KR"), ds.getLocale());
+        Assert.assertEquals("OZV4N1JS2Z3476NL",ds.getTo().getGateway());
+        Assert.assertNotNull(ds.getCn());
+    }
+    
     @Test
 	public void testCharge() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
     	final DataSet ds = new DataSet();

@@ -4,9 +4,10 @@ define([
     'hbs!tmpl/signupCompletedView_tmpl',
     'recaptcha',
     'i18n!nls/labels',
+    'i18n!nls/webLabels',
     'jqueryValidation'
 ],
-function(Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha, myLabels) {
+function(Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha, myLabels, myWebLabels) {
     'use strict';
 
     /* Return a ItemView class definition */
@@ -16,7 +17,7 @@ function(Backbone, SignupTmpl, SignupCompleteTmpl, Recaptcha, myLabels) {
             this.model.on('error', this.onError, this);
         },
         templateHelpers: function(){
-            return window.helpers(myLabels);
+            return window.helpers(myLabels, myWebLabels);
         },
         onError: function(model, response){
             if (response.status===417){

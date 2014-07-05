@@ -1,8 +1,10 @@
 define([
 	'backbone',
-	'hbs!tmpl/signupConfView_tmpl'
+	'hbs!tmpl/signupConfView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function( Backbone, SignupConfTmpl  ) {
+function( Backbone, SignupConfTmpl, myLabels, myWebLabels ) {
     'use strict';
 
 	/* Return a ItemView class definition */
@@ -15,6 +17,11 @@ function( Backbone, SignupConfTmpl  ) {
 		},
 
 		template: SignupConfTmpl,
+
+
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
         
         onError: function(){
 			console.log('failed');

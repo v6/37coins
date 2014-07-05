@@ -140,6 +140,15 @@ public class ParserResource {
 			return null;
 		}
 	}
+    @POST
+    @Path("/HelpSend")
+    public Response helpSend(){
+        try {
+            return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
 	
 	@POST
 	@Path("/Signup")
@@ -150,7 +159,7 @@ public class ParserResource {
 		try {
 			if (null==rv){
 				responseList.clear();
-				responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+				responseList.add(new DataSet().setTo(data.getTo()).setLocale(data.getLocale()).setAction(Action.DST_ERROR));
 				return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 			}
 			return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
@@ -219,8 +228,9 @@ public class ParserResource {
 			throw new RuntimeException("not implemented");
 		}
 		if (null!=gwDn){
-			//create new user
+			//the locale is either passed in from the website, the inviting user, or the taken from the gateway
 	        Locale uLocale = (null==gwLng)?DataSet.parseLocaleString(locale):gwLng;
+		//create new user
 		    Account newUser = new Account()
 		        .setOwner(gwDn)
 		        .setMobile(recipient.getAddress())
@@ -277,7 +287,7 @@ public class ParserResource {
 				newGw = signup(w.getMsgDest(), data.getTo(), data.getGwCn(), data.getLocaleString(), data.getService());
 				if (null==newGw){
 					responseList.clear();
-					responseList.add(new DataSet().setTo(data.getTo()).setAction(Action.DST_ERROR));
+					responseList.add(new DataSet().setTo(data.getTo()).setLocale(data.getLocale()).setAction(Action.DST_ERROR));
 					try{
 						return Response.ok(mapper.writeValueAsString(responseList), MediaType.APPLICATION_JSON).build();
 					} catch (JsonProcessingException ex) {

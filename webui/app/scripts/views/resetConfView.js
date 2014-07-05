@@ -2,9 +2,11 @@ define([
 	'backbone',
 	'hbs!tmpl/resetConfErrorView_tmpl',
 	'hbs!tmpl/resetConfSuccessView_tmpl',
-	'hbs!tmpl/resetConfView_tmpl'
+	'hbs!tmpl/resetConfView_tmpl',
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, ResetErrorTmpl, ResetSuccessTmpl, ResetConfTmpl) {
+function(Backbone, ResetErrorTmpl, ResetSuccessTmpl, ResetConfTmpl, myLabels, myWebLabels) {
     'use strict';
 
 	/* Return a ItemView class definition */
@@ -17,6 +19,11 @@ function(Backbone, ResetErrorTmpl, ResetSuccessTmpl, ResetConfTmpl) {
 		},
 
 		template: ResetConfTmpl,
+
+
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
 
 		getTemplate: function(){
 		    if (this.fetched){

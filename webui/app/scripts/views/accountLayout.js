@@ -5,13 +5,18 @@ define([
     'views/commandsView',
     'views/accountHeadlineView',
     'webfinger',
-    'i18n!nls/labels'
+    'i18n!nls/labels',
+    'i18n!nls/webLabels'
 ],
-function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger, myLabels) {
+function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineView, webfinger, myLabels, myWebLabels) {
     'use strict';
     return Backbone.Marionette.Layout.extend({
+
         template: AccountLayout,
-        templateHelpers: function(){return {s: myLabels};},
+        templateHelpers: function(){
+            return window.helpers(myLabels, myWebLabels);
+        },
+
         regions: {
             commands: '#smsCommands',
             header: '#accountHeadline'
@@ -27,11 +32,13 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                 this.handleJoin(opt.mobile);
             }
         },
+
         onShow: function(){
             if (this.model){
                 this.header.show(new AccountHeadlineView({model:this.model}));
             }
         },
+
         handleJoin: function(mobile) {
             this.phoneUtil = window.i18n.phonenumbers.PhoneNumberUtil.getInstance();
             var val = '+'+mobile;
@@ -78,6 +85,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                 this.$('#donate').append('<p>Please enter a valid mobile number.</p>');
             }
         },
+
         submitInvite: function(data){
             var cn;
             this.$('#donate').empty();
@@ -111,6 +119,7 @@ function(Backbone, Communicator, AccountLayout, CommandsView, AccountHeadlineVie
                 });
             }
         },
+
         handleAddress: function(err,p){
             if (!err) {
                 var data = JSON.parse(p.JRD).links[0].href.split(':')[1];

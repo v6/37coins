@@ -25,7 +25,8 @@
     "jqueryValidation": "https://github.com/jzaefferer/jquery-validation.git",
     "requirejs-google-analytics": "~0.1.6",
     "webfirst": "https://github.com/silverbucket/webfinger.js.git",
-    "intl-tel-input": "~1.1.12"
+    "intl-tel-input": "~1.1.12",
+    "iso-countries": "https://github.com/psmithuk/iso-countries.git"
   },
   "devDependencies": {},
   "directory": "bower_components"
