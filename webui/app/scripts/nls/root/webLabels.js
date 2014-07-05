@@ -82,7 +82,7 @@ define({
         "BalanceCmd" : "Get balance in {0}",
         "TransactionsCmd" : "List the last 3 transactions",
         "WithdrawalReqCmd" : "Send Bitcoins to phone number, Bitcoin address",
-        "VoiceCmd" : "Setup secret PIN",
+        "VoiceCmd" : "Setup Secret PIN",
         "ChargeCmd" : "Charges",
         "ProductCmd" : "Lists products",
         "PayCmd" : "Pays Bitcoin",
@@ -120,7 +120,7 @@ define({
             },
             "amount" : {
                 "td1" : "<amount>",
-                "td2" : "The amount to send to the recipient. Use <em>1200</em> to indicate 12000BIT, use <em>5USD</em> to indicate sending Bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)"
+                "td2" : "The amount to send to the recipient. Use <em>1200</em> to indicate 12000BIT, or use <em>5USD</em> to indicate sending Bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)"
             },
             "comment" : {
                 "td1": "[comment]",
@@ -131,19 +131,19 @@ define({
                 "column1" : "Example",
                 "column2" : "Command explanation",
                 "ex1" : {
-                    "caption" : "Sending Bitcoin domestically (assuming a US SMSwallet user)",
+                    "caption" : "Sending Bitcoin domestically (from a US SMSwallet user)",
                     "td1" : "SEND 1USD 6165551234",
                     "td2" : "This requests the system to send 1 US dollar worth of Bitcoin to the US phone number 6165551234."
                 },
                 "ex2" : {
-                    "caption" : "Sending Bitcoin overseas (assuming a US SMSwallet user)",
+                    "caption" : "Sending Bitcoin overseas (from a US SMSwallet user)",
                     "td1" : "SEND 44PHP +639125551234",
                     "td2" : "This requests the system to send 44 Philippine Pesos worth of Bitcoin to the PH phone number +639125551234."
                 },
                 "ex3" : {
-                    "caption" : "Sending Bitcoin domestically (assuming a US SMSwallet user)",
+                    "caption" : "Sending with shorthand (assuming a US SMSwallet user)",
                     "td1" : "6300 6165551234",
-                    "td2" : "This requests the system to send 6300 BIT to the phone number 6165551234."
+                    "td2" : "This requests the system to send 6,300 BIT to the phone number 6165551234."
                 },
 
                 "ex4" : {
@@ -161,7 +161,7 @@ define({
             "syntax": "PIN command syntax",
             "p1": "The PIN command sets up the Security PIN for your account.",
             "p2": "The Security PIN is a 4-digit code that you assign. It protects your account from unauthorized spending.",
-            "p3": "If a Security PIN is not already set up, the system will call you and guide you through the process. If the Security PIN is already set up, the system will call you, confirm your existing Security PIN, and then guide you through setting up a different security PIN.  When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).",
+            "p3": "If a Security PIN is not already set up, the system will call you and guide you through the process. When you receive the voice call to setup your PIN, the system will prompt you to dial your 4-digit code, followed by the hash key (#).",
             "p4": "Currently the Security PIN is required if you try to SEND more than 12 USD in one day. In the future, you will be able to adjust this amount."
         },
         "price": {
