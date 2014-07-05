@@ -36,7 +36,7 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
         }
             this.$('button').button('reset');
             //update form
-            var fee = this.model.get('fee')/1000 ;
+            var fee = this.model.get('fee') ;
             if (fee){
                 this.$('#feeInput').val(fee);
             }
