@@ -2,7 +2,7 @@ require([
 	'backbone',
 	'application',
 	'routers/pageController',
-    'hbs/Handlebars',
+        'hbs/handlebars',
 	'basicauth',
 	'regionManager',
     'isoCountries'
