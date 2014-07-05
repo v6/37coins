@@ -18,7 +18,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
          <a data-toggle="collapse" data-parent="#accordion" href="#help-ADDRESS">
-           {{w.cmdHelpL.addr.h4}}
+           {{up s.commands.DepositReqCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -35,7 +35,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-BALANCE">
-            {{up s.commands.BalanceCmd.[1]}}
+            {{up s.commands.BalanceCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -51,11 +51,10 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{{w.cmdHelpL.bal.systemResponse1}}}</td><td>{{w.cmdHelpL.bal.implication1}}</td>
+                <td>{{sms s.sms.Balance "0.012048" "BalanceInst"}}</td><td>{{w.cmdHelpL.bal.implication1}}</td>
               </tr>
             </tbody>
           </table>
-          <label>{{w.cmdHelpL.bal.label1}}</label>
           <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.BalanceCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
@@ -65,7 +64,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-SEND">
-            {{w.cmdHelpL.send.anchor}}
+            {{up s.commands.WithdrawalReqCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -152,12 +151,11 @@
       </div>
     </div>
     <!--transaction-->
-    <!--TODO: Add examples. See examples above. To allow for pre-emptive localization, there is already a section for this command in labels.js.-->
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-TRANSACTION">
-              {{w.cmdHelpL.transaction.anchor}}
+            {{up s.commands.TransactionsCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -173,7 +171,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PIN">
-              {{w.cmdHelpL.pin.anchor}}
+            {{up s.commands.VoiceCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -187,12 +185,12 @@
         </div>
       </div>
     </div>
-    <!--Commented out until fixed price   
+    <!--price-->
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#accordion" href="#help-PRICE">
-            {{w.cmdHelpL.price.anchor}}
+            {{up s.commands.PriceCmd.[0]}}
           </a>
         </h4>
       </div>
@@ -203,7 +201,6 @@
         </div>
       </div>
     </div>
-    -->
   </div>
 </div>
 
@@ -242,22 +239,6 @@
             <p>{{w.cmdHelpL.faq.answer2.p2}}</p>
             <strong>{{w.cmdHelpL.faq.answer2.title2}}</strong>
             <p>{{w.cmdHelpL.faq.answer2.p3}}</p>
-          </div>
-        </div>
-      </div>
-      <!--Negative balance?-->
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion2" href="#help-SMSwalletFAQ3">
-                {{w.cmdHelpL.faq.question3}}
-            </a>
-          </h4>
-        </div>
-        <div id="help-SMSwalletFAQ3" class="panel-collapse collapse2 in">
-          <div class="panel-body">
-            <p>{{w.cmdHelpL.faq.answer3.p1}}</p>
-            <p>{{w.cmdHelpL.faq.answer3.p2}}</p>
           </div>
         </div>
       </div>
