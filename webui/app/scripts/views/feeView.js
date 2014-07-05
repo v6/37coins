@@ -33,10 +33,10 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
             }else{
                 this.$('#successAlert').css('display','');
                 this.$('#successAlert').addClass('in');
-            }
+        }
             this.$('button').button('reset');
             //update form
-            var fee = this.model.get('fee');
+            var fee = this.model.get('fee') ;
             if (fee){
                 this.$('#feeInput').val(fee);
             }
@@ -63,7 +63,7 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
         },
 
         events: {
-            'click .close': 'handleClose',
+            'click .close': 'handleClose'
         },
 
         handleClick: function(e){

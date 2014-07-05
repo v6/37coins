@@ -361,9 +361,12 @@ define({
         "gwSet" : {
             "h2" : "Gateway Settings",
             "feeInput" : {
-                "label" : "Transaction Fee:",
+                "label" : "Transaction Fee in ",
+                "labelDen" : "Bits:",
+                "labelDenExpl" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin.",
                 "placeholder" : "0.00xx",
-                "help-block" : "Choose a transaction fee payed to you by the user for each successful transaction."
+                "help-block" : "Choose a transaction fee paid in \"Bits\" of bitcoin to you by the user for each successful transaction.",
+                "help-block-tt" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin."
             },
             "msgInput" : {
                 "label" : "Welcome Message:",
