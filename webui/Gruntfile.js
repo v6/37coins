@@ -284,14 +284,12 @@ module.exports = function (grunt) {
 
         // handlebars
         handlebars: {
-            compile: {
-                options: {
-                    namespace: 'JST',
-                    amd: true
-                },
-                files: {
-                    '.tmp/scripts/templates.js': ['app/templates/*.hbs']
-                }
+            options: {
+                namespace: 'JST',
+                amd: true
+            },
+            files: {
+                '.tmp/scripts/templates.js': ['app/templates/*.hbs']
             }
         }
     });
