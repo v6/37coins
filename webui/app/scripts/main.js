@@ -50,8 +50,11 @@ function ( Backbone, App, PageController, Handlebars ) {
             link : function(text, options) {
                 var attrs = [];
                 for(var prop in options.hash) {
-                    if (prop==='href'){
+                    // TO DO: Make elegant
+                    if (prop==='href' && !( options.hash[prop].indexOf("http") == 0 ) ) {
                         attrs.push(prop + '="/' + window.getLocale() + options.hash[prop] + '"');
+                    }else if ( prop==='href' && ( options.hash[prop].indexOf("http") == 0 ) ) {
+                        attrs.push(prop + '="' + options.hash[prop] + '"');
                     }else{
                         attrs.push(prop + '="' + options.hash[prop] + '"');
                     }
