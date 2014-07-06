@@ -1,4 +1,26 @@
 define({
+    "ftr" : {
+        "1000000" : {
+            "n" : [ "BIT", "Bits" ],
+            "d" : "1 Bit = 1BIT = 0.000001BTC = one millionth of a bitcoin.",
+            "s" : "0.000001 BTC"
+        }
+    },
+    "sad" : {
+        "bld" : "Error!",
+        "cm" : [ "Communication Error!" ]
+    },
+    "happy" : {
+        "req" : [ "Success!" , "Request Submitted."]
+    },
+    "ln" : {
+        "rs1" : "Reset",
+        "lgn" : "Login",
+        "reg" : "Sign Up",
+        "regB" : "Sign Up",
+        "sgn" : "Sign In",
+        "lbtc" : "Localbitcoins"
+    },
     "siteNav" : {
         "root" : {
             "products" : "products",
@@ -6,9 +28,7 @@ define({
             "about" : "about",
             "terms" : "terms",
             "privacy" : "privacy",
-            "bf" : "Bitfinger [coming soon]",
-            "signIn" : "sign in",
-            "signUp" : "sign up"
+            "bf" : "Bitfinger [coming soon]"
         },
         "notFound" : {
             "h1" : "Not found",
@@ -49,7 +69,8 @@ define({
     },
     "configView" : {
         "dlH2" : "Download App",
-        "dlInstP1" : "To operate the gateway, download  <a href=\"https://play.google.com/store/apps/details?id=org.envaya.sms\">EnvayaSMS</a> and configure it with the following parameters.",
+        "dlInstP1" : "To operate the gateway, download {0} and configure it with the following parameters.",
+        "dlL" : "EnvayaSMS",
         "cfgH2" : "Configure App",
         "fieldHeader" : "Field",
         "valueHeader" : "Value"
@@ -61,9 +82,7 @@ define({
         "amountPh" : "Enter amount",
         "addressLbl" : "Withdrawal address:",
         "addressPh" : "Enter withdrawal address",
-        "withdrawalBtn" : "Withdrawal",
-        "error" : "Communication Error!",
-        "success" : "Request Submitted."
+        "withdrawalBtn" : "Withdrawal"
     },
     "captchaView" : {
         "loading" : "loading captcha ...",
@@ -202,7 +221,7 @@ define({
             "tag" : "Send and receive Bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.",
             "walletInv" : "Sign-up to be an SMSwallet beta user.",
             "terms" : {
-                "prompt": "By clicking Go!, you agree to the",
+                "prompt" : "By clicking Go!, you agree to the",
                 "label": "terms of use"
             }
         },
@@ -243,12 +262,9 @@ define({
         "loginBtn" : "Login",
         "gwBtn" : "Open a Gateway",
         "newGwPrompt" : "New Gateway?",
-        "reset" : {
-            "prompt" : "Forgot password?",
-            "linkTitle" : "Reset"
-        },
+        "reset" : "Forgot password? {0}",
         "error" : {
-            "badPass" : "<strong>Error!</strong> Incorrect Email or Password!"
+            "badPass" : "Incorrect Email or Password!"
         },
         "wallet" : {
             "login" : {

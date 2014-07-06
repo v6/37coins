@@ -25,7 +25,7 @@
       <div id="help-ADDRESS" class="panel-collapse collapse in">
         <div class="panel-body">
           <p>{{w.cmdHelpL.addr.p1}}</p>
-          <p>{{{w.cmdHelpL.addr.p2}}}</p>
+          <p>{{{w.cmdHelpL.addr.p2}}}{{{printf (link w.ln.lbtc href="/insite/link") "cmdHelpL.addr.p2"}}}</p>
           <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.DepositReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>

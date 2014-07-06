@@ -4,7 +4,7 @@
 		<form>
 			<div class="alert alert-danger alert-dismissable fade">
 			  <button type="button" class="close" aria-hidden="true">&times;</button>
-                {{{w.loginView.error.badPass}}}
+                <strong>{{w.sad.bld}}</strong>&nbsp;{{w.loginView.error.badPass}}
 			</div>
 			<div class="form-group">
 		    	<label for="InputEmail">{{w.loginView.inputEmail.label}}</label>
@@ -14,16 +14,16 @@
                 <label for="password">{{w.loginView.inputPassword.label}}</label>
                 <input type="password" name="password" class="form-control" id="password" placeholder="{{w.loginView.inputPassword.placeholder}}">
 		    </div>
-		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">{{w.loginView.loginBtn}}</button>
+		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">{{w.ln.lgn}}</button>
 		</form>
-		<p class="pull-right"><br>{{w.loginView.reset.prompt}}<a href="/{{l}}/reset">{{w.loginView.reset.linkTitle}}</a></p>
+		<p class="pull-right"><br />{{{printf (link w.ln.rs1 href="/reset") "loginView.reset"}}}</p>
     </div>
 
     <div class="col-sm-6">
     	<div id="registerForm">
 	    	<h2 class="form-signin-heading">{{w.loginView.newGwPrompt}}</h2>
 			<p>{{w.loginView.gwCallToAction}}</p>
-			<a href="/{{l}}/signUp" id="regBtn" class="btn btn-primary">{{w.loginView.signUpLinkLabel}}</a>
+			<a href="/{{l}}/signUp" id="regBtn" class="btn btn-primary">{{w.ln.regB}}</a>
 			{{{w.loginView.registrationExplanation}}}
 		</div>
    	</div>
