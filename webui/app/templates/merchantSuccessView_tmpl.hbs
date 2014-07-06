@@ -11,7 +11,7 @@
             <button class="btn btn-lg" type="submit">{{w.merchant.success.button}}</button>
             <div class="alert alert-danger alert-dismissable fade">
               <button type="button" class="close" aria-hidden="true">&times;</button>
-              {{{w.merchant.success.error.prompt}}} <a href="/{{l}}/contact" class="alert-link">{{w.merchant.success.error.label}}</a>.
+              <strong>{{w.basic.err}}</strong>&nbsp;{{{link w.basic.support href="/contact" class="alert-link"}}}
             </div>
         </form>
         <div id="instructions">{{w.merchant.success.instructions}}</div>

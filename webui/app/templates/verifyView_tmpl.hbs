@@ -1,17 +1,17 @@
 <div class="row">
-<div id="valFrm" class="col-md-12">
-  <h2>{{w.form.gwSetup.ver.titleH2}}</h2>
-  <form>
-      <div class="form-group">
-          <label for="inputTel">{{w.form.gwSetup.ver.inputTel}}</label>
-          <input type="tel" name="tel" class="form-control" id="inputTel" placeholder="{{w.form.gwSetup.ver.inputTel.placeholder}}">
-          <span class="help-block">{{w.form.gwSetup.ver.inputTel.help-block}}</span>
-      </div>
-      <button class="btn btn-lg btn-primary" type="submit">{{w.form.gwSetup.ver.verBtn}}</button>
-  </form>
-  <div class="alert alert-danger alert-dismissable fade">
-    <button type="button" class="close" aria-hidden="true">&times;</button>
-    <strong>{{w.form.gwSetup.ver.inputTel.sad}}</strong> {{w.form.gwSetup.ver.inputTel.sadExpln}}
+  <div id="valFrm" class="col-md-12">
+    <h2>{{w.verV.tit}}</h2>
+    <form>
+        <div class="form-group">
+            <label for="inputTel">{{w.verV.lbl}}</label>
+            <input type="tel" name="tel" class="form-control" id="inputTel" placeholder="{{w.verV.ph}}">
+            <span class="help-block">{{w.verV.inst}}</span>
+        </div>
+        <button class="btn btn-lg btn-primary" type="submit">{{w.verV.btn}}</button>
+    </form>
+    <div class="alert alert-danger alert-dismissable fade">
+      <button type="button" class="close" aria-hidden="true">&times;</button>
+      <strong>{{w.basic.err}}</strong>&nbsp;{{w.basic.comErr}}
+    </div>
   </div>
-</div>
 </div>

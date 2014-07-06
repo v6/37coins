@@ -1,12 +1,9 @@
 <div class="row">
     <div class="col-sm-12">
-        <h1>{{w.siteNav.notFound.h1}} <span>{{w.siteNav.notFound.face}}</span></h1>
-        <p>{{w.siteNav.notFound.sorry}}</p>
-        <p>{{w.siteNav.notFound.cause.expln}}</p>
-        <ul>
-            <li>{{w.siteNav.notFound.cause.link}}</li>
-            <li>{{w.siteNav.notFound.cause.addr}}</li>
-        </ul>
-        <a href="/{{l}}/" class="alert-link">{{w.siteNav.notFound.cause.backToHome}}</a>
+        <h1>{{w.basic.notf}}&nbsp;&nbsp;<span>{{w.notFoundV.face}}</span></h1>
+        <p>{{w.notFoundV.sorry}}</p>
+        <p>{{w.notFoundV.expln}}</p>
+        <ul>{{#each w.notFoundV.cause}}<li>{{this}}</li>{{/each}}</ul>
+        {{{link w.basic.goIndex href="/"}}}
     </div>
 </div>

@@ -48,15 +48,25 @@ function ( Backbone, App, PageController, Handlebars ) {
                 }
             },
             link : function(text, options) {
+                var holder;
+                if (text instanceof Array && text.length === 2){
+                    holder = text[0];
+                    text = text[1];
+                }
                 var attrs = [];
                 for(var prop in options.hash) {
-                    if (prop==='href'){
+                    if (prop==='href' && options.hash[prop].charAt(0)==='/'){
                         attrs.push(prop + '="/' + window.getLocale() + options.hash[prop] + '"');
                     }else{
                         attrs.push(prop + '="' + options.hash[prop] + '"');
                     }
                 }
-                return '<a ' + attrs.join(' ') + '>' + text + '</a>';
+                var rv = '<a ' + attrs.join(' ') + '>' + text + '</a>';
+                if (holder){
+                    return window.helpers().printf(holder,rv,{});
+                }else{
+                    return rv;
+                }
             },
             sms: function(format){
                 var args = Array.prototype.slice.call(arguments, 1);
@@ -83,7 +93,7 @@ function ( Backbone, App, PageController, Handlebars ) {
             printf: function(){
                 var options = arguments[arguments.length-1];
                 var arg = arguments[1];
-                if (arg && arg !== options && typeof arg === 'string' && arg.indexOf('.')!==-1){
+                if (arg && arg !== options && typeof arg === 'string' && arg.indexOf('.')!==-1 && arg.indexOf(':')===-1){
                     var obj = webLabels;
                     var tokens = arg.split('.');
                     for (var i = 0; i < tokens.length; i++){

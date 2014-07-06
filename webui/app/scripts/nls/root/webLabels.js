@@ -1,38 +1,38 @@
 define({
-    "siteNav" : {
-        "root" : {
-            "products" : "products",
-            "help" : "help",
-            "about" : "about",
-            "terms" : "terms",
-            "privacy" : "privacy",
-            "bf" : "Bitfinger [coming soon]",
-            "signIn" : "sign in",
-            "signUp" : "sign up"
-        },
-        "notFound" : {
-            "h1" : "Not found",
-            "face" : ":(",
-            "sorry" : "Sorry, but the page you were trying to view does not exist.",
-            "cause" : {
-                "expln" :"It looks like this was the result of either:",
-                "addr" : "a mistyped address",
-                "link" : "an out-of-date link"
-            },
-            "backToHome" : "Continue to Index"
-        },
+    "basic" : {
+        "err" : "Error!",
+        "succ" : "Success!",
+        "notf" : "Not found",
+        "comErr" : "Communication Error!",
+        "done" : "Done!",
+        "support" : [" Please {0}.", "contact support"],
+        "goIndex" : ["Continue to {0}.", "index"]
+    },
+    "iV" : {
+        "products" : "products",
+        "help" : "help",
+        "about" : "about",
+        "lTerms" : "terms",
+        "lPrivacy" : "privacy",
+        "bf" : "Bitfinger [coming soon]",
+        "signIn" : "sign in",
+        "signUp" : "sign up",
         "terms" : "Terms of Use",
         "termsH1" : "37coins Terms of Service",
-        "privTerms" : "Privacy Policy"
+        "privTerms" : "Privacy Policy",
+        "social" : "follow us on"
+    },
+    "notFoundV" : {
+        "face" : ":(",
+        "sorry" : "Sorry, but the page you were trying to view does not exist.",
+        "expln" :"It looks like this was the result of either:",
+        "cause" : ["a mistyped address","an out-of-date link"]
     },
     "privacy" : {
         "h1" : "Privacy Policy",
         "h2" : "Personal Information"
     },
-    "social" : {
-        "heading" : "follow us on"
-    },
-    "aboutView" : {
+    "aboutV" : {
         "about" : "About 37coins",
         "desc" : "We are committed to making Bitcoin easy, secure to use, and accessible to everyone. With a global focus on social equity, we develop down-teched, secure, scalable solutions that are as appropriate for emerging economies as they are for developed ones.",
         "team" : "Team",
@@ -49,7 +49,7 @@ define({
     },
     "configView" : {
         "dlH2" : "Download App",
-        "dlInstP1" : "To operate the gateway, download  <a href=\"https://play.google.com/store/apps/details?id=org.envaya.sms\">EnvayaSMS</a> and configure it with the following parameters.",
+        "dlInstP1" : ["To operate the gateway, download the {0} and configure it with the following parameters.", "SMSgateway app"],
         "cfgH2" : "Configure App",
         "fieldHeader" : "Field",
         "valueHeader" : "Value"
@@ -62,14 +62,12 @@ define({
         "addressLbl" : "Withdrawal address:",
         "addressPh" : "Enter withdrawal address",
         "withdrawalBtn" : "Withdrawal",
-        "error" : "Communication Error!",
         "success" : "Request Submitted."
     },
     "captchaView" : {
         "loading" : "loading captcha ...",
         "captchaH2" : "Verify Captcha!",
         "captcha" : "Your IP has made multiple requests. Please type both words displayed by the captcha to verify that you are not a bot.",
-        "sad" : "Error!",
         "error" : "Incorrect Solution! Try again.",
         "captchaBtn" : "Done!"
     },
@@ -220,42 +218,30 @@ define({
         "gwInv" : "Become an SMSgateway partner",
         "gwBtn" : "Open a Gateway"
     },
-    "loginView" : {
+    "loginV" : {
         "gwCallToAction" : "Do you have a spare Android phone and want to run an SMSgateway in your country?",
         "signUpLinkLabel" : "Sign Up",
-        "registrationExplanation" : "<ul>The registration process will take you through:<li>Setting up an android phone</li><li>Choosing a transaction fee</li><li>Testing your gateway</li></ul>",
+        "reg" : "The registration process will take you through:",
+        "regL" : ["Setting up an android phone","Choosing a transaction fee","Testing your gateway"],
         "walletBtn" : "Open a Wallet",
-        "commands" : "Commands are not case-sensitve and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet",
-        "link" : "help page",
-        "gw1" : "A decentralized, open-source Android app that bridges between SMS and Bitcoin. Designed for low-end Android phones. In other words, you can connect your country to the global economy via Bitcoin (and earn a little for your time and effort, too. ;-).",
-        "gw2" : "Gateways are operated by partners who earn transaction fees. To become an SMSgateway partner, the following are required:",
-        "gwLi" : ["Dedicated Android phone","Text messaging plan","Internet connection"],
-        "gwInv" : "Become an SMSgateway partner",
         "inputEmail" : {
-            "label" : "Email Address",
+            "label" : "Email Address:",
             "placeholder" : "Enter email"
         },
         "inputPassword" : {
             "label" : "Password:",
             "placeholder" : "Enter password"
         },
-        "form-signin-heading" : "Please Login:",
+        "login" : "Please Login:",
         "loginBtn" : "Login",
-        "gwBtn" : "Open a Gateway",
         "newGwPrompt" : "New Gateway?",
-        "reset" : {
-            "prompt" : "Forgot password?",
-            "linkTitle" : "Reset"
-        },
-        "error" : {
-            "badPass" : "<strong>Error!</strong> Incorrect Email or Password!"
-        },
+        "reset" : ["Forgot password? {0}", "Reset"],
+        "err" : "Incorrect Email or Password!",
         "wallet" : {
             "login" : {
                 "title2" : "wallet Sign in",
                 "label" : "Enter the phone number for your existing account.",
-                "gwPrompt" : "Wanted to sign in to your SMSgateway account?",
-                "gwLink" : "Click here."
+                "gw" : ["Wanted to sign in to your SMSgateway account? {0}.", "Click here"]
             },
             "signUp" : {
                 "SMS" : "SMS",
@@ -265,18 +251,14 @@ define({
                 "happy" : "You have successfully submitted a registration request.",
                 "alert" : "Attention!",
                 "alertMsg" : "To complete registration please check your email inbox and validate you email address.",
-                "gw" : "Wanted to start an SMSgateway?",
-                "gwLnk" : "Click here."
+                "gw" : ["Wanted to start an SMSgateway? {0}.", "Click here"]
             },
             "signUpConf" : {
                 "signUpH2" : "Sign Up",
-                "success" : "Success",
                 "created" : "Account created.",
                 "linkLabel" : "Get started",
                 "linkLabelPunct" : "!",
-                "sad" : "Error!",
-                "sadMsg" : "Account creation failed. Please",
-                "contactSupport" : "contact support"
+                "errMsg" : ["Account creation failed. Please {0}.","contact support"]
             }
         },
         "signup" : {
@@ -294,9 +276,7 @@ define({
                 "placeholder" : "Repeat password"
             },
             "signUpBtn" : "Sign up",
-            "sad" : "Error!",
-            "sadLinkPrompt" : "Please",
-            "sadLinkLabel" : "contact support"
+            "errLinkPrompt" : ["Please {0}.","contact support"]
         }
     },
     "brand" : {
@@ -305,102 +285,82 @@ define({
         "sms" : "SMS",
         "gateway" : "gateway"
     },
-    "faq" : {
-        "gw" : {
-            "titleH1" : "SMSgateway FAQ:",
-            "q1WhyGateway" : "What is ‘SMSgateway’? Why is it needed?",
-            "a1WhyGateway" : {
-                "p1" : "‘SMSgateway’ is an android app that is a mediator between any local SMS network and the internet. Each gateway has the power to connect a country’s SMS network to the Bitcoin network; and, thus, to the global economy. It can be operated by anyone willing to invest in an Android phone, install the app, and take care of its connectivity. This person is the SMSgateway partner. The partner’s efforts are rewarded with a small reward from any transaction that is initiated through their gateway. The more gateways that are set up, the bigger the reach of '37Coins network' and the more resilient it will be to hardware failure or a malicious attack. The SMSgateway is designed as a regular client to the mobile provider's network. No approval, co-operation, or agreement with the network provider, except a paid SIM-card, is necessary for set up.",
-                "p2" : "The SMSwallet users do NOT need a smart phone. They can open a wallet with an gateway by simply sending it an SMS from any feature-phone."
-            },
-            "q2WorkTogether" : "How do SMSgateway and SMSwallet work together?",
-            "a2WorkTogether" : {
-                "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a Bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The secret PIN is entered using dial tones via a voice call."
-            },
-            "q3WhatPhone" : "Can I run a gateway on my every-day phone?",
-            "a3WhatPhone" : {
-                "p1" : "No, that is not a good idea. The SMSgateway app consumes a lot of battery and forwards all arriving SMS —even your private ones— to the internet. Use a dedicated phone (best some obsolete 1st generation Android) to run the gateway in a secure place, connected to internet and electricity at all times. The users of your SMSgateway will thank you."
-            },
-            "q4Profit" : "I run an SMSgateway, what is the average payout per month?",
-            "a4Profit" : {
-                "p1" : "If you don't acquire customers and promote your SMSgateway’s number, you will not see any payout at all. Your gateway is like a small business, keep 100% uptime and spread the word."
-            },
-            "q5WhatNow" : "I opened a new SMSgateway, what now?",
-            "a5" : {
-                "p1" : "Promote your service! Once you have your SMSgateway fully operational, open an SMSwallet from a different phone. In other words, send a text from another phone to your SMSgateway’s number. This will create a new SMSwallet account. You will now have an SMSwallet phone and an SMSgateway phone. From your SMSwallet phone, request your Bitcoin address by sending the “ADDRESS” command. Send Bitcoins to this address. Once your wallet is charged, you can demonstrate the service and amaze your friends by inviting them by sending them tiny fractions of a Bitcoin."
-            },
-            "q6HowSecure" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
-            "a6HowSecure" : {
-                "p1" : "SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in spending-PIN protected transactions.",
-                "alert-warning1" : "However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted."
-            }
-        }
-    } ,
-    "form" : {
-        "gwSetup" : {
-            "ver" : {
-                "titleH2" : "Gateway Ownership Verification",
-                "inputCode" : {
-                    "label": "Verification Code:",
-                    "help-block" : "Type the 5-digit code you received during the verification call.",
-                    "confirmBtn" : "Confirm Ownership",
-                    "sad" : "Error!",
-                    "sadExpln" : "Submitted code not valid."
-                },
-                "inputTel" : {
-                    "label" : "Gateway Mobile Number:",
-                    "placeholder" : "+CCXXXXXX...",
-                    "help-block" : "Enter your gateway's number in international format. Avoid special signs and spaces. You will receive a call, telling your 5-digit confirmation code.",
-                    "startBtn" : "Start Verification",
-                    "sad" : "Error!",
-                    "sadExpln" : "Communication Error."
-                },
-                "verBtn" : "Start Verification"
-            }
+    "faqV" : {
+        "title" : "SMSgateway FAQ:",
+        "q1" : "What is ‘SMSgateway’? Why is it needed?",
+        "a1" : {
+            "p1" : "‘SMSgateway’ is an android app that is a mediator between any local SMS network and the internet. Each gateway has the power to connect a country’s SMS network to the Bitcoin network; and, thus, to the global economy. It can be operated by anyone willing to invest in an Android phone, install the app, and take care of its connectivity. This person is the SMSgateway partner. The partner’s efforts are rewarded with a small reward from any transaction that is initiated through their gateway. The more gateways that are set up, the bigger the reach of '37Coins network' and the more resilient it will be to hardware failure or a malicious attack. The SMSgateway is designed as a regular client to the mobile provider's network. No approval, co-operation, or agreement with the network provider, except a paid SIM-card, is necessary for set up.",
+            "p2" : "The SMSwallet users do NOT need a smart phone. They can open a wallet with an gateway by simply sending it an SMS from any feature-phone."
         },
-        "gwSet" : {
-            "h2" : "Gateway Settings",
-            "feeInput" : {
-                "label" : "Transaction Fee in ",
-                "labelDen" : "Bits:",
-                "labelDenExpl" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin.",
-                "placeholder" : "0.00xx",
-                "help-block" : "Choose a transaction fee paid in \"Bits\" of bitcoin to you by the user for each successful transaction.",
-                "help-block-tt" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin."
-            },
-            "msgInput" : {
-                "label" : "Welcome Message:",
-                "placeholder" : "37coins",
-                "help-block" : "Define the welcome message a new user receives."
-            },
-            "urlInput" : {
-                "label" : "Company Url:",
-                "placeholder" : "www.37coins.com",
-                "help-block" : "Set the name of your company."
-            },
-            "callbackInput" : {
-                "label" : "Signup Callback:",
-                "placeholder" : "https://",
-                "help-block" : "Notify your server about new Users."
-            },
-            "submitBtn" : "Update Settings",
-            "sad" : "Error!",
-            "commErr" : "Communication Error! Please try again later, from a different browser, or contact support.",
-            "happy" : "Success!",
-            "success" : "Settings updated."
+        "q2" : "How do SMSgateway and SMSwallet work together?",
+        "a2" : {
+            "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a Bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The secret PIN is entered using dial tones via a voice call."
+        },
+        "q3" : "Can I run a gateway on my every-day phone?",
+        "a3" : {
+            "p1" : "No, that is not a good idea. The SMSgateway app consumes a lot of battery and forwards all arriving SMS —even your private ones— to the internet. Use a dedicated phone (best some obsolete 1st generation Android) to run the gateway in a secure place, connected to internet and electricity at all times. The users of your SMSgateway will thank you."
+        },
+        "q4" : "I run an SMSgateway, what is the average payout per month?",
+        "a4" : {
+            "p1" : "If you don't acquire customers and promote your SMSgateway’s number, you will not see any payout at all. Your gateway is like a small business, keep 100% uptime and spread the word."
+        },
+        "q5" : "I opened a new SMSgateway, what now?",
+        "a5" : {
+            "p1" : "Promote your service! Once you have your SMSgateway fully operational, open an SMSwallet from a different phone. In other words, send a text from another phone to your SMSgateway’s number. This will create a new SMSwallet account. You will now have an SMSwallet phone and an SMSgateway phone. From your SMSwallet phone, request your Bitcoin address by sending the “ADDRESS” command. Send Bitcoins to this address. Once your wallet is charged, you can demonstrate the service and amaze your friends by inviting them by sending them tiny fractions of a Bitcoin."
+        },
+        "q6" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
+        "a6" : {
+            "p1" : "SMSwallet operates on a shared responsibility model and multi-factor authentication for security. To protect the SMSwallets from spoofing, the SMSgateways sends a challenge back to the phone to verify the request. Then a transaction is constructed and signed with the SMSgateway’s private key. The input(s) to this transaction is not spendable without the signature of both, the gateway and the web-service. For large value transactions, the web-service initiates a voice-call with the client to verify the client's spending PIN. Once successful, the web-service adds its part of the signature and the transaction can be spent. Throughout the process, the client is required to verify the possession of the phone as well as the knowledge of the spending PIN, giving him two factors for authentication. In other words, IMSI-catcher would be ineffective in spending-PIN protected transactions.",
+            "alert-warning1" : "However, in the current MVP implementation no shared responsibility model is implemented yet. The gateway is dumb and the web-service has to be fully trusted."
         }
+    },
+    "verV" : {
+        "title" : "Gateway Ownership Verification",
+        "label" : "Gateway Mobile Number:",
+        "ph" : "+CCXXXXXX...",
+        "inst" : "Enter your gateway's number in international format. Avoid special signs and spaces. You will receive a call, telling your 5-digit confirmation code.",
+        "btn" : "Start Verification"
+    },
+    "valV" : {
+        "title" : "Code Validation",
+        "label": "Verification Code:",
+        "inst" : "Type the 5-digit code you received during the verification call.",
+        "btn" : "Confirm Ownership",
+        "cause" : "Submitted code not valid."
+    },
+    "gwV" : {
+        "title" : "Gateway Settings",
+        "feeInput" : {
+            "label" : "Transaction Fee in ",
+            "labelDen" : "Bits:",
+            "labelDenExpl" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin.",
+            "placeholder" : "0.00xx",
+            "help-block" : "Choose a transaction fee paid in \"Bits\" of bitcoin to you by the user for each successful transaction.",
+            "help-block-tt" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin."
+        },
+        "msgInput" : {
+            "label" : "Welcome Message:",
+            "placeholder" : "37coins",
+            "help-block" : "Define the welcome message a new user receives."
+        },
+        "urlInput" : {
+            "label" : "Company Url:",
+            "placeholder" : "www.37coins.com",
+            "help-block" : "Set the name of your company."
+        },
+        "callbackInput" : {
+            "label" : "Signup Callback:",
+            "placeholder" : "https://",
+            "help-block" : "Notify your server about new Users."
+        },
+        "submitBtn" : "Update Settings",
+        "msg" : "Settings updated."
     } ,
     "gatewayColV" : {
         "numberTh1": "Number",
         "feeTh2": "Fee"
     },
-    "logoutView" : {
-        "success" : {
-            "happy" : "Success!",
-            "alert" :"Logout successful.",
-            "alert-link" :"Continue to Login"
-        }
-    },
+    "logoutV" : "Logout successful!",
     "merchant" : {
         "success" : {
             "alert" : "<strong>Success!</strong> Merchant account successfully verified.",
@@ -409,10 +369,6 @@ define({
                 "placeholder": "Enter display name."
             },
             "button" : "Set Name",
-            "error" : {
-                "prompt" : "<strong>Error!</strong> Please",
-                "label" : "contact support"
-            },
             "instructions" : "Try out your new account! Sign up some users and let us know what you think!"
         },
         "verify" : {
@@ -438,11 +394,8 @@ define({
     },
     "reset" : {
         "identifyH2" : "Identify Account for Reset",
-        "happy" : "Success!",
         "submitted" : "Password request submitted. Please check your email inbox and follow the provided instructions.",
-        "sad" : "Error!",
-        "failMsg" : "Passwords reset URL no longer valid. Please",
-        "supp" : "contact support",
+        "errMsg" : [" Passwords reset URL no longer valid. Please {0}.", "contact support"],
         "newPass" : {
             "h2" : "Please Choose a new Password",
             "form" : {
@@ -455,7 +408,6 @@ define({
                     "placeholder" : "Repeat password"
                 },
                 "saveBtn" : "Save",
-                "error" : "Error!",
                 "unMatched" : "Passwords have to match!"
             }
         },
@@ -467,12 +419,8 @@ define({
                 "help-block" : "Type your account's email address to receive a reset code.",
                 "resetBtn" : "Reset Password"
             },
-            "ohNoez" : "Error!",
             "notFound" : "Account not found. Try again."
         },
-        "succ" : {
-            "done" : "Passwords successfully reset.",
-            "login" : "Continue to Login"
-        }
+        "succ" : [" Passwords successfully reset. Continue to {0}.", "Gateway Login"]
     }
 });

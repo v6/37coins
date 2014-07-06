@@ -1,30 +1,30 @@
 <div class="row">
     <div class="col-sm-6">
-    	<h2 class="form-signin-heading">{{w.loginView.form-signin-heading}}</h2>
+    	<h2 class="form-signin-heading">{{w.loginV.login}}</h2>
 		<form>
 			<div class="alert alert-danger alert-dismissable fade">
 			  <button type="button" class="close" aria-hidden="true">&times;</button>
-                {{{w.loginView.error.badPass}}}
+              <strong>{{w.basic.err}}</strong>&nbsp;{{w.loginV.err}}
 			</div>
 			<div class="form-group">
-		    	<label for="InputEmail">{{w.loginView.inputEmail.label}}</label>
-			    <input type="text" name="email" class="form-control" id="InputEmail" placeholder="{{w.loginView.inputEmail.placeholder}}">
+		    	<label for="InputEmail">{{w.loginV.inputEmail.label}}</label>
+			    <input type="text" name="email" class="form-control" id="InputEmail" placeholder="{{w.loginV.inputEmail.placeholder}}">
 		    </div>
 		    <div class="form-group">
-                <label for="password">{{w.loginView.inputPassword.label}}</label>
-                <input type="password" name="password" class="form-control" id="password" placeholder="{{w.loginView.inputPassword.placeholder}}">
+                <label for="password">{{w.loginV.inputPassword.label}}</label>
+                <input type="password" name="password" class="form-control" id="password" placeholder="{{w.loginV.inputPassword.placeholder}}">
 		    </div>
-		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">{{w.loginView.loginBtn}}</button>
+		    <button id="loginBtn" class="btn btn-large btn-primary" type="submit">{{w.loginV.loginBtn}}</button>
 		</form>
-		<p class="pull-right"><br>{{w.loginView.reset.prompt}}<a href="/{{l}}/reset">{{w.loginView.reset.linkTitle}}</a></p>
+		<p class="pull-right"><br>{{{link w.loginV.reset href="/reset"}}}</a></p>
     </div>
 
     <div class="col-sm-6">
     	<div id="registerForm">
-	    	<h2 class="form-signin-heading">{{w.loginView.newGwPrompt}}</h2>
-			<p>{{w.loginView.gwCallToAction}}</p>
-			<a href="/{{l}}/signUp" id="regBtn" class="btn btn-primary">{{w.loginView.signUpLinkLabel}}</a>
-			{{{w.loginView.registrationExplanation}}}
+	    	<h2 class="form-signin-heading">{{w.loginV.newGwPrompt}}</h2>
+			<p>{{w.loginV.gwCallToAction}}</p>
+			{{{link w.loginV.signUpLinkLabel href="/signUp" id="regBtn" class="btn btn-primary"}}}<br><br>
+			{{w.loginV.reg}}<ul>{{#each w.loginV.regL}}<li>{{this}}</li>{{/each}}</ul>
 		</div>
    	</div>
 </div>

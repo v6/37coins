@@ -1,32 +1,32 @@
-<h2 class="form-fee-heading">{{w.form.gwSet.h2}}</h2>
+<h2 class="form-fee-heading">{{w.gwV.title}}</h2>
 <form>
   <div class="form-group">
-    <label for="feeInput">{{w.form.gwSet.feeInput.label}}&nbsp;<span title="{{w.form.gwSet.feeInput.labelDenExpl}}">{{w.form.gwSet.feeInput.labelDen}}</span></label>
-    <input id="feeInput" type="number" step="1" min="0" name="fee" class="form-control" placeholder="{{w.form.gwSet.feeInput.placeholder}}">
-    <span class="help-block" title="{{w.form.gwSet.feeInput.help-block-tt}}">{{w.form.gwSet.feeInput.help-block}}</span>
+    <label for="feeInput">{{w.gwV.feeInput.label}}&nbsp;<span title="{{w.gwV.feeInput.labelDenExpl}}">{{w.gwV.feeInput.labelDen}}</span></label>
+    <input id="feeInput" type="number" step="1" min="0" name="fee" class="form-control" placeholder="{{w.gwV.feeInput.placeholder}}">
+    <span class="help-block" title="{{w.gwV.feeInput.help-block-tt}}">{{w.gwV.feeInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="msgInput">{{w.form.gwSet.msgInput.label}}</label>
-    <textarea id="msgInput" name="msg" class="form-control" rows="3" placeholder="{{w.form.gwSet.msgInput.placeholder}}"></textarea>
-    <span class="help-block">{{w.form.gwSet.msgInput.help-block}}</span>
+    <label for="msgInput">{{w.gwV.msgInput.label}}</label>
+    <textarea id="msgInput" name="msg" class="form-control" rows="3" placeholder="{{w.gwV.msgInput.placeholder}}"></textarea>
+    <span class="help-block">{{w.gwV.msgInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="urlInput">{{w.form.gwSet.urlInput.label}}</label>
-    <input id="urlInput" type="text" name="url" class="form-control" placeholder="{{w.form.gwSet.urlInput.placeholder}}">
-    <span class="help-block">{{w.form.gwSet.urlInput.help-block}}</span>
+    <label for="urlInput">{{w.gwV.urlInput.label}}</label>
+    <input id="urlInput" type="text" name="url" class="form-control" placeholder="{{w.gwV.urlInput.placeholder}}">
+    <span class="help-block">{{w.gwV.urlInput.help-block}}</span>
   </div>
   <div class="form-group">
-    <label for="callbackInput">{{w.form.gwSet.callbackInput.label}}</label>
-    <input id="callbackInput" type="text" name="callback" class="form-control" placeholder="{{w.form.gwSet.callbackInput.placeholder}}">
-    <span class="help-block">{{w.form.gwSet.callbackInput.help-block}}</span>
+    <label for="callbackInput">{{w.gwV.callbackInput.label}}</label>
+    <input id="callbackInput" type="text" name="callback" class="form-control" placeholder="{{w.gwV.callbackInput.placeholder}}">
+    <span class="help-block">{{w.gwV.callbackInput.help-block}}</span>
   </div>
-  <button class="btn btn-inverse" type="submit">{{w.form.gwSet.submitBtn}}</button>
+  <button class="btn btn-inverse" type="submit">{{w.gwV.submitBtn}}</button>
 </form>
 <div id="errorAlert" class="alert alert-danger alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>{{w.form.gwSet.sad}}</strong>&nbsp;{{w.form.gwSet.commErr}}
+  <strong>{{w.basic.err}}</strong>&nbsp;{{{link w.basic.support href="/contact" class="alert-link"}}}
 </div>
 <div id="successAlert" class="alert alert-success alert-dismissable fade">
   <button type="button" class="close" aria-hidden="true">&times;</button>
-  <strong>{{w.form.gwSet.happy}}</strong>&nbsp;{{w.form.gwSet.success}}
+  <strong>{{w.basic.succ}}</strong>&nbsp;{{w.gwV.msg}}
 </div>

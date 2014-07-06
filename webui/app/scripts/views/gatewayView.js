@@ -1,6 +1,6 @@
 define([
     'backbone',
-    'hbs!tmpl/configView_tmpl',
+    'hbs!tmpl/gatewayView_tmpl',
     'i18n!nls/labels',
      'i18n!nls/webLabels'
 ],
