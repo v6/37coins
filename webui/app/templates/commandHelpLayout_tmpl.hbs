@@ -25,7 +25,8 @@
       <div id="help-ADDRESS" class="panel-collapse collapse in">
         <div class="panel-body">
           <p>{{w.cmdHelpL.addr.p1}}</p>
-          <p>{{{w.cmdHelpL.addr.p2}}}</p>
+          <p>{{{link w.cmdHelpL.addr.p21 href="https://localbitcoins.com/buy-bitcoins-online/?ch=1zol"}}}
+          {{{link w.cmdHelpL.addr.p22 href="https://coinbase.com/?r=5367c0e6c9f6f52297000082&utm_campaign=user-referral&src=referral-link"}}}</p>
           <div class="alert alert-warning">{{w.cmdHelpL.w}}{{#each s.commands.DepositReqCmd}}{{#if @index}}, {{/if}}{{this}}{{/each}}</div>
         </div>
       </div>
@@ -254,7 +255,7 @@
         <div id="help-SMSwalletFAQ4" class="panel-collapse collapse2 in">
           <div class="panel-body">
             <p>{{w.cmdHelpL.faq.answer4.p1}}</p>
-            <p>{{{w.cmdHelpL.faq.answer4.p2}}}</p>
+            <p>{{{link w.cmdHelpL.faq.answer4.p2 href="/gateways"}}}</p>
           </div>
         </div>
       </div>

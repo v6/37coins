@@ -42,8 +42,7 @@ define({
         "role4" : "Designer"
     },
     "accountLayout" : {
-        "expl" : "Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet {0}.",
-        "hlpPageL" : "help page",
+        "expl" : ["Commands are not case-sensitive and are sent to the gateways via SMS/text. To learn more, visit the SMSwallet {0}.", "help page"],
         "headerTagline" : "Most Recent Gateway",
         "acctHeadlineV" : "Account"
     },
@@ -54,7 +53,7 @@ define({
         "fieldHeader" : "Field",
         "valueHeader" : "Value"
     },
-    "balanceView" : {
+    "balanceV" : {
         "balH2" : "Account Balance",
         "bal" : "Your account balance is",
         "amountLbl" : "Withdrawal amount:",
@@ -62,7 +61,7 @@ define({
         "addressLbl" : "Withdrawal address:",
         "addressPh" : "Enter withdrawal address",
         "withdrawalBtn" : "Withdrawal",
-        "success" : "Request Submitted."
+        "succ" : "Request Submitted."
     },
     "captchaView" : {
         "loading" : "loading captcha ...",
@@ -97,7 +96,8 @@ define({
         "w" : "Recognized shorthand or misspellings: ",
         "addr" : {
             "p1" : "The ADDRESS command returns the most recent Bitcoin address associated to your SMSwallet account.",
-            "p2" : "With this Bitcoin address, you can deposit Bitcoins from another Bitcoin wallet. If you don’t have any Bitcoins, you can purchase them from  <a href=\"https://localbitcoins.com/buy-bitcoins-online/?ch=1zol\">Localbitcoins</a> or <a href=\"https://coinbase.com/?r=5367c0e6c9f6f52297000082&utm_campaign=user-referral&src=referral-link\">Coinbase</a>"
+            "p21" : ["With this Bitcoin address, you can deposit Bitcoins from another Bitcoin wallet. If you don’t have any Bitcoins, you can purchase them from  {0}", "Localbitcoins"],
+            "p22" : [" or {0}.", "Coinbase"]
         },
         "bal" : {
             "column1" : "System Response",
@@ -183,7 +183,7 @@ define({
             "question4" : "I want to open an SMSwallet, do I need to run an SMSgateway?",
             "answer4" : {
                 "p1" : "No, if you just want to open a wallet, just choose a gateway from your country and send a text message to it. Opening an SMSgateway will not give you an SMSwallet.",
-                "p2" : "If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or Bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or <a href=\"/{{l}}/gateways\">sign up</a>."
+                "p2" : ["If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or Bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or {0}.","sign up"]
             },
             "question5" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
             "answer5" : {
@@ -200,7 +200,7 @@ define({
             "tag" : "Send and receive Bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.",
             "walletInv" : "Sign-up to be an SMSwallet beta user.",
             "terms" : {
-                "prompt": "By clicking Go!, you agree to the",
+                "prompt" : "By clicking Go!, you agree to the",
                 "label": "terms of use"
             }
         },

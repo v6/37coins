@@ -112,7 +112,9 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
                 rules: {
                     fee: {
                         required: true,
-                        number: true
+                        number: true,
+                        min: 100,
+                        max: 5000
                     },
                     msg: {
                         required: false,

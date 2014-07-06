@@ -1,13 +1,12 @@
 require([
-	'backbone',
-	'application',
-	'routers/pageController',
-        'hbs/handlebars',
-	'basicauth',
-	'regionManager',
+    'backbone',
+    'application',
+    'routers/pageController',
+    'basicauth',
+    'regionManager',
     'isoCountries'
 ],
-function ( Backbone, App, PageController, Handlebars ) {
+function ( Backbone, App, PageController) {
     'use strict';
     window.transEvent = function(){
         var t;
@@ -55,7 +54,7 @@ function ( Backbone, App, PageController, Handlebars ) {
                 }
                 var attrs = [];
                 for(var prop in options.hash) {
-                    if (prop==='href' && options.hash[prop].charAt(0)==='/'){
+                    if (prop==='href' && options.hash[prop].indexOf('http') !== 0){
                         attrs.push(prop + '="/' + window.getLocale() + options.hash[prop] + '"');
                     }else{
                         attrs.push(prop + '="' + options.hash[prop] + '"');
@@ -116,5 +115,5 @@ function ( Backbone, App, PageController, Handlebars ) {
     var options = {
         pageController: PageController
     };
-	App.start(options);
+    App.start(options);
 });
