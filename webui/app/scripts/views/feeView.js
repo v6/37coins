@@ -17,6 +17,12 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
 
         initialize: function() {
             this.firstRun = true;
+
+            this.factor = window.opt.getUnitFactor();
+            console.log(this.factor);
+            //convert into display unit
+            this.min = this.factor * parseFloat(window.opt.minFee.replace(/,/g, ''),10);
+            this.max = this.factor * parseFloat(window.opt.maxFee.replace(/,/g, ''),10);
             this.model.on('error', this.onError, this);
             this.model.on('sync', this.onSuccess, this);
         },
@@ -33,11 +39,13 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
             }else{
                 this.$('#successAlert').css('display','');
                 this.$('#successAlert').addClass('in');
-        }
+            }
             this.$('button').button('reset');
             //update form
             var fee = this.model.get('fee') ;
             if (fee){
+                //convert into display unit
+                fee = Math.round(fee * this.factor);
                 this.$('#feeInput').val(fee);
             }
             var welcomeMsg = this.model.get('welcomeMsg');
@@ -72,6 +80,8 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
             this.handleClose({target:this.$('#successAlert:first-child')[0]});
             this.handleClose({target:this.$('#errorAlert:first-child')[0]});
             var fee = this.$('#feeInput').val();
+            //convert into backend representation
+            fee = fee / this.factor;
             var welcomeMsg = this.$('#msgInput').val();
             var companyName = this.$('#urlInput').val();
             var callbackUrl = this.$('#callbackInput').val();
@@ -113,8 +123,8 @@ function(Backbone, FeeTmpl, myLabels, myWebLabels) {
                     fee: {
                         required: true,
                         number: true,
-                        min: 100,
-                        max: 5000
+                        min: this.min,
+                        max: this.max
                     },
                     msg: {
                         required: false,
