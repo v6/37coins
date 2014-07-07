@@ -64,7 +64,9 @@ import com.rabbitmq.client.ConnectionFactory;
 public class GatewayResource {
 	public final static String PATH = "/api/gateway";
 	public static Logger log = LoggerFactory.getLogger(GatewayResource.class);
-	private static final BigDecimal FEE = new BigDecimal("0.0007").setScale(8);
+	private static final BigDecimal DEF_FEE = new BigDecimal("0.0001").setScale(8);
+	public static final BigDecimal MAX_FEE = new BigDecimal("0.001").setScale(8);
+	public static final BigDecimal MIN_FEE = new BigDecimal("0.0001").setScale(8);
 	
 	private final GenericRepository dao;
 	private final RNQuery q;
@@ -212,10 +214,10 @@ public class GatewayResource {
 			  .setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
 			  .setCountryCode(pn.getCountryCode())
 			  .setApiSecret(envayaToken);
-			existing.getSettings().setFee(FEE);
+			existing.getSettings().setFee(DEF_FEE);
 			rv = new GatewayUser()
 				.setLocale(gu.getLocale())
-				.setFee(FEE)
+				.setFee(DEF_FEE)
 				.setMobile(phoneUtil.format(pn, PhoneNumberFormat.E164))
 				.setEnvayaToken(envayaToken);
 		}else if (existing.getMobile().equalsIgnoreCase(gu.getMobile()) && gu.getFee()!=null) {
@@ -227,30 +229,6 @@ public class GatewayResource {
 			throw new WebApplicationException("unexpected state", Response.Status.BAD_REQUEST);
 		}
 		return rv;
-	}
-	
-	@POST
-	@Path("/fee")
-	@RolesAllowed({"gateway"})
-	public GatewayUser setFee(@Context SecurityContext context, GatewayUser gu){
-		GatewayUser rv = null;
-		if (gu.getFee().compareTo(new BigDecimal("0.001"))>0){
-			throw new WebApplicationException("fee too high", Response.Status.BAD_REQUEST);
-		}
-	    RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
-        Gateway existing = dao.queryEntity(q, Gateway.class);
-        if (null==existing.getSettings())
-            existing.setSettings(new GatewaySettings());
-        existing.getSettings().setFee(gu.getFee());
-        rv = new GatewayUser().setFee(gu.getFee());
-		return rv;
-	}
-	
-	@PUT
-	@Path("/fee")
-	@RolesAllowed({"gateway"})
-	public GatewayUser updateFee(@Context SecurityContext context, GatewayUser gu){
-		return setFee(context, gu);
 	}
 	
 	@GET
@@ -321,11 +299,19 @@ public class GatewayResource {
     @Path("/settings")
     @RolesAllowed({"gateway"})
     public SettingsRequest setConfig(SettingsRequest data, @Context SecurityContext context){
+        if (data.getFee().compareTo(MAX_FEE)>0 || data.getFee().compareTo(MIN_FEE)<0)
+            throw new WebApplicationException("fee not within boundaries of " + MIN_FEE + " to "+MAX_FEE, Response.Status.BAD_REQUEST);
         RNQuery q = new RNQuery().addFilter("cn", context.getUserPrincipal().getName());
         Gateway gw = dao.queryEntity(q, Gateway.class);
         if (gw.getSettings()==null){
             gw.setSettings(new GatewaySettings());
         }
+        String url = gw.getSettings().getCompanyName();
+        url = (data.getCompanyName()!=null)?data.getCompanyName():url;
+        String wm = gw.getSettings().getWelcomeMsg();
+        wm = (data.getWelcomeMsg()!=null)?data.getWelcomeMsg():wm;
+        if (wm.length()+url.length()+1>140)
+            throw new WebApplicationException("message + url to long",Response.Status.BAD_REQUEST);
         gw.getSettings()
             .setCompanyName(data.getCompanyName())
             .setSignupCallback(data.getCallbackUrl())

@@ -36,6 +36,8 @@ window.opt = {
 	<#if payload.unitName??>unitName: '${payload.unitName}',</#if>
 	<#if payload.unitFactor??>unitFactor: '${payload.unitFactor}',</#if>
 	<#if payload.unitFormat??>unitFormat: '${payload.unitFormat}',</#if>
+	<#if payload.minFee??>minFee: '${payload.minFee}',</#if>
+	<#if payload.maxFee??>maxFee: '${payload.maxFee}',</#if>
 	basePath: '${payload.basePath}'
 };
 </script>

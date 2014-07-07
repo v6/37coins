@@ -50,6 +50,8 @@ public class IndexResource {
     public final static String UNIT_NAME = "unitName";
     public final static String UNIT_FACTOR = "unitFactor";
     public final static String UNIT_FORMAT = "unitFormat";
+    public final static String MIN_FEE = "minFee";
+    public final static String MAX_FEE = "maxFee";
 	public final static String PATH = "/";
 	public static Logger log = LoggerFactory.getLogger(IndexResource.class);
 	
@@ -64,9 +66,11 @@ public class IndexResource {
         data.put(TRACK_ID, MessagingServletConfig.gaTrackingId);
         data.put(SRVC_PATH, MessagingServletConfig.srvcPath);
         data.put(CAPT_KEY, MessagingServletConfig.captchaPubKey);
-	data.put(UNIT_NAME, MessagingServletConfig.unitName);
-	data.put(UNIT_FACTOR, MessagingServletConfig.unitFactor);
-	data.put(UNIT_FORMAT, MessagingServletConfig.unitFormat);
+    	data.put(UNIT_NAME, MessagingServletConfig.unitName);
+    	data.put(UNIT_FACTOR, MessagingServletConfig.unitFactor);
+    	data.put(UNIT_FORMAT, MessagingServletConfig.unitFormat);
+    	data.put(MIN_FEE, GatewayResource.MIN_FEE);
+    	data.put(MAX_FEE, GatewayResource.MAX_FEE);
         data.put(ACT_LOC, rbf.getActiveLocales());
         
         //handle country
