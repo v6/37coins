@@ -75,17 +75,17 @@ define({
         "column2" : "Description",
         "SignupCmd" : "Signup",
         "HelpCmd" : "List available commands",
-        "DepositReqCmd" : "Get Bitcoin deposit address",
+        "DepositReqCmd" : "Get bitcoin deposit address",
         "BalanceCmd" : "Get balance in {0}",
         "TransactionsCmd" : "List the last 3 transactions",
-        "WithdrawalReqCmd" : "Send Bitcoins to phone number, Bitcoin address",
+        "WithdrawalReqCmd" : "Send bitcoins to phone number, bitcoin address",
         "VoiceCmd" : "Setup Secret PIN",
         "ChargeCmd" : "Charges",
         "ProductCmd" : "Lists products",
-        "PayCmd" : "Pays Bitcoin",
+        "PayCmd" : "Pays bitcoin",
         "PriceCmd" : "Gets the price",
-        "SellCmd" : "Sets up a sale of Bitcoin",
-        "BuyCmd" : "Sets up for buying Bitcoin"
+        "SellCmd" : "Sets up a sale of bitcoin",
+        "BuyCmd" : "Sets up for buying bitcoin"
     },
     "cmdHelpL" : {
         "h1" : "Help",
@@ -95,30 +95,30 @@ define({
         "cmd" : "Commands are not case-sensitve and are sent to the gateways via SMS/text.",
         "w" : "Recognized shorthand or misspellings: ",
         "addr" : {
-            "p1" : "The ADDRESS command returns the most recent Bitcoin address associated to your SMSwallet account.",
-            "p21" : ["With this Bitcoin address, you can deposit Bitcoins from another Bitcoin wallet. If you don’t have any Bitcoins, you can purchase them from  {0}", "Localbitcoins"],
+            "p1" : "The ADDRESS command returns the most recent bitcoin address associated to your SMSwallet account.",
+            "p21" : ["With this bitcoin address, you can deposit bitcoins from another bitcoin wallet. If you don’t have any bitcoins, you can purchase them from  {0}", "Localbitcoins"],
             "p22" : [" or {0}.", "Coinbase"]
         },
         "bal" : {
             "column1" : "System Response",
             "column2" : "Implication",
-            "implication1" : "You can SEND up to 0.012048 worth of Bitcoins to another phone number or Bitcoin address",
-            "p1" : "The BALANCE command returns the current Bitcoin value of your SMSwallet.",
-            "p2" : "The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of Bitcoins that you can transfer to another SMSwallet."
+            "implication1" : "You can SEND up to 12,048 bits worth of bitcoins to another phone number or bitcoin address",
+            "p1" : "The BALANCE command returns the current bitcoin value of your SMSwallet.",
+            "p2" : "The balance reported already reflects the potential transaction fee. Therefore it reflects the maximum amount of bitcoins that you can transfer to another SMSwallet."
         },
         "send": {
             "syntax" : "SEND command syntax",
             "caption" : "SEND <amount>; <address>; [comment]",
-            "p1": "The SEND command sends Bitcoins from your SMSwallet account to another SMSwallet or Bitcoin wallet.",
-            "p2": "The recipient does not need to have an account with us. If you send Bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notified.",
-            "p3": "<strong>Ensure that you typed the recipients phone number or Bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong>",
+            "p1": "The SEND command sends bitcoins from your SMSwallet account to another SMSwallet or bitcoin wallet.",
+            "p2": "The recipient does not need to have an account with us. If you send bitcoins to a phone number that does not have a SMSwallet account, one will be created for them and they will be notified.",
+            "p3": "<strong>Ensure that you typed the recipients phone number or bitcoin address correctly. Once sent, the transaction cannot be reversed.</strong>",
             "address" : {
                 "td1" : "<address>",
-                "td2" : "The destination address to send the Bitcoins. Can be either a phone number or a Bitcoin address. Phone numbers may not have spaces. If sending internationally, include the country code and the plus (+) sign. I.e. +63 for a Philippines number."
+                "td2" : "The destination address to send the bitcoins. Can be either a phone number or a bitcoin address. Phone numbers may not have spaces. If sending internationally, include the country code and the plus (+) sign. I.e. +63 for a Philippines number."
             },
             "amount" : {
                 "td1" : "<amount>",
-                "td2" : "The amount to send to the recipient. Use <em>1200</em> to indicate 12000BIT, or use <em>5USD</em> to indicate sending Bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)"
+                "td2" : "The amount to send to the recipient. Use <em>1200</em> to indicate 12000BIT, or use <em>5USD</em> to indicate sending bitcoins in the value of 5 US dollars. (You can use any of the 3 character currency code codes, such as PHP, EUR, …)"
             },
             "comment" : {
                 "td1": "[comment]",
@@ -129,25 +129,25 @@ define({
                 "column1" : "Example",
                 "column2" : "Command explanation",
                 "ex1" : {
-                    "caption" : "Sending Bitcoin domestically (from a US SMSwallet user)",
+                    "caption" : "Sending bitcoin domestically (from a US SMSwallet user)",
                     "td1" : "SEND 1USD 6165551234",
-                    "td2" : "This requests the system to send 1 US dollar worth of Bitcoin to the US phone number 6165551234."
+                    "td2" : "This requests the system to send 1 US dollar worth of bitcoin to the US phone number 6165551234."
                 },
                 "ex2" : {
                     "caption" : "Sending Bitcoin overseas (from a US SMSwallet user)",
                     "td1" : "SEND 44PHP +639125551234",
-                    "td2" : "This requests the system to send 44 Philippine Pesos worth of Bitcoin to the PH phone number +639125551234."
+                    "td2" : "This requests the system to send 44 Philippine Pesos worth of bitcoin to the PH phone number +639125551234."
                 },
                 "ex3" : {
                     "caption" : "Sending with shorthand (assuming a US SMSwallet user)",
                     "td1" : "6300 6165551234",
-                    "td2" : "This requests the system to send 6,300 BIT to the phone number 6165551234."
+                    "td2" : "This requests the system to send 6,300 bits to the phone number 6165551234."
                 },
 
                 "ex4" : {
-                    "caption" : "Sending to a Bitcoin address",
+                    "caption" : "Sending to a bitcoin address",
                     "td1" : "SEND 12USD 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh",
-                    "td2" : "This requests the system to send 12USD worth of Bitcoin to the Bitcoin address 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh."
+                    "td2" : "This requests the system to send 12USD worth of bitcoin to the bitcoin address 19xeDDxhahx4f32WtBbPwFMWBq28rrYVoh."
                 }
             }
         },
@@ -164,26 +164,26 @@ define({
         },
         "price": {
             "syntax" : "PRICE command syntax",
-            "p1" : "The PRICE command returns the current Bitcoin exchange rate for your region’s common fiat currency. The exchange rate is calculated from <a href=\"https://bitcoinaverage.com\">Bitcoinaverage.com</a>",
+            "p1" : "The PRICE command returns the current bitcoin exchange rate for your region’s common fiat currency. The exchange rate is calculated from <a href=\"https://bitcoinaverage.com\">Bitcoinaverage.com</a>",
             "p2" : "This may not reflect the price available locally, or through your country's merchants and gateways."
         },
         "faq" : {
             "question1" : "What is",
             "answer1" : {
-                "p1" : "is a simple way to send Bitcoin to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use Bitcoin! You can send your Bitcoin to anyone who has a phone number no matter where they are!"
+                "p1" : "is a simple way to send bitcoin to anyone's mobile phone number, even international phone numbers. Gateways connect a country's SMS-network to the Bitcoin network. This means that you do not need a smartphone or even a web-able phone to use Bitcoin! You can send your bitcoin to anyone who has a phone number no matter where they are!"
             },
             "question2" : "Is there a fee for using the SMSwallet system?",
             "answer2" : {
                 "title1" : "Sending between SMSwallet users",
                 "p1" : "Right now there is only a fee for transactions that are initiated with the SEND command. These fees are set by the SMSgateway operators and reflect the cost of operating in their country (and market competition). Currently there is no fee for use of the Security PIN feature.",
-                "p2" : "The sender always pays the transaction fee and is assessed from the sender's gateway operator. So, the fee is the same if you send Bitcoins to a domestic phone number or an international phone number.",
-                "title2" : "Sending to a Bitcoin address",
-                "p3" : "If sending to an external Bitcoin address, there will be an additional Blockchain transaction fee, in addition to the gateway fee. The Blockchain transaction fee depends on the size of the transaction."
+                "p2" : "The sender always pays the transaction fee and is assessed from the sender's gateway operator. So, the fee is the same if you send bitcoins to a domestic phone number or an international phone number.",
+                "title2" : "Sending to a bitcoin address",
+                "p3" : "If sending to an external bitcoin address, there will be an additional Blockchain transaction fee, in addition to the gateway fee. The Blockchain transaction fee depends on the size of the transaction."
             },
             "question4" : "I want to open an SMSwallet, do I need to run an SMSgateway?",
             "answer4" : {
                 "p1" : "No, if you just want to open a wallet, just choose a gateway from your country and send a text message to it. Opening an SMSgateway will not give you an SMSwallet.",
-                "p2" : ["If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or Bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or {0}.","sign up"]
+                "p2" : ["If no gateway exists in your country, think about opening one. It will allow people to use your gateway's phone number to open wallets and send to international phone number or bitcoin address. Also, you will earn the fees for transactions through your gateway. Once again, if you open a gateway, and you want to open an SMSwallet, you will need another phone. To find out more about gateways, check out the SMSgateway FAQ, or {0}.","sign up"]
             },
             "question5" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
             "answer5" : {
@@ -193,11 +193,11 @@ define({
         }
     },
     "indexLayout" : {
-        "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive Bitcoin anywhere in the World. No internet or smartphone required.",
+        "mobileTag" : "Money without borders or barriers, as easy as sending an SMS. Send and receive bitcoin anywhere in the World. No internet or smartphone required.",
         "header" : {
             "_comment" : "This may be deprecated.",
             "mobileTag" : "<br>Without borders or barriers,<br/> as easy as sending an SMS",
-            "tag" : "Send and receive Bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.",
+            "tag" : "Send and receive bitcoin<br/> anywhere in the world via SMS.<br/> No internet or smartphone required.",
             "walletInv" : "Sign-up to be an SMSwallet beta user.",
             "terms" : {
                 "prompt" : "By clicking Go!, you agree to the",
@@ -294,7 +294,7 @@ define({
         },
         "q2" : "How do SMSgateway and SMSwallet work together?",
         "a2" : {
-            "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a Bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The secret PIN is entered using dial tones via a voice call."
+            "p1" : "'SMSwallet' brings as much security as affordable to allow a client (the user with the simple feature phone) on an untrusted network to control a bitcoin wallet via SMS. The client sends simple text commands via SMS. The gateway verifies those commands, constructs a transaction and forwards it to the web-service. The web-service verifies, independently from the gateway, and then publishes the transaction to the Bitcoin network. It may seem complicated, but for the end-user it’s really as simple as sending an SMS. And it is secure because we use the phone’s SIM identification through the SMS channel; and, if necessary, we use a Secret PIN as another identifier. The secret PIN is entered using dial tones via a voice call."
         },
         "q3" : "Can I run a gateway on my every-day phone?",
         "a3" : {
@@ -306,7 +306,7 @@ define({
         },
         "q5" : "I opened a new SMSgateway, what now?",
         "a5" : {
-            "p1" : "Promote your service! Once you have your SMSgateway fully operational, open an SMSwallet from a different phone. In other words, send a text from another phone to your SMSgateway’s number. This will create a new SMSwallet account. You will now have an SMSwallet phone and an SMSgateway phone. From your SMSwallet phone, request your Bitcoin address by sending the “ADDRESS” command. Send Bitcoins to this address. Once your wallet is charged, you can demonstrate the service and amaze your friends by inviting them by sending them tiny fractions of a Bitcoin."
+            "p1" : "Promote your service! Once you have your SMSgateway fully operational, open an SMSwallet from a different phone. In other words, send a text from another phone to your SMSgateway’s number. This will create a new SMSwallet account. You will now have an SMSwallet phone and an SMSgateway phone. From your SMSwallet phone, request your bitcoin address by sending the “ADDRESS” command. Send bitcoins to this address. Once your wallet is charged, you can demonstrate the service and amaze your friends by inviting them by sending them tiny fractions of a bitcoin."
         },
         "q6" : "How is this secure? Haven’t you heard of IMSI-catcher? What if I get hacked?",
         "a6" : {
@@ -333,10 +333,10 @@ define({
         "feeInput" : {
             "label" : "Transaction Fee in ",
             "labelDen" : "Bits:",
-            "labelDenExpl" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin.",
+            "labelDenExpl" : "Bits are 0.000001 BTC, or one millionth of a bitcoin.",
             "placeholder" : "0.00xx",
-            "help-block" : "Choose a transaction fee paid in \"Bits\" of bitcoin to you by the user for each successful transaction.",
-            "help-block-tt" : "Bits are 0.000001 BTC, or one millionth of a Bitcoin."
+            "help-block" : "Choose a transaction fee paid in \"bits\" of bitcoin to you by the user for each successful transaction.",
+            "help-block-tt" : "Bits are 0.000001 BTC, or one millionth of a bitcoin."
         },
         "msgInput" : {
             "label" : "Welcome Message:",
