@@ -29,7 +29,7 @@
               de: true
           };
           window.opt = {
-              resPath: 'http://192.168.111.222:9000',
+              resPath: 'http://localhost:9000',
               lng: 'en',
               gaTrackingId: 'UA-29543456-1',
               ioPath: 'http://127.0.0.1:8081',
@@ -40,7 +40,8 @@
               maxFee: '0.001',
               srvcPath: 'http://127.0.0.1:9000',
               captchaPubKey: '6LcIKewSAAAAAPxoQ6LmPP1F443wEQ01lHFdqLyr',
-              basePath: 'https://qa.37coins.com'
+              basePath: 'https://qa.37coins.com',
+              getUnitFactor : function () { console.log (parseFloat(this.unitFactor.replace(/,/g, ''),10)); return parseFloat(this.unitFactor.replace(/,/g, ''),10); }
           };
         </script>
     </head>
